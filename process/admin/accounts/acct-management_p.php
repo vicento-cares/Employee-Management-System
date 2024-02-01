@@ -1,0 +1,198 @@
+<?php 
+include '../../conn.php';
+
+$method = $_POST['method'];
+
+// Account Management
+
+function count_account_list($search_arr, $conn) {
+	$query = "SELECT count(id) AS total FROM m_accounts WHERE";
+
+	if (!empty($search_arr['emp_no'])) {
+		$query = $query . " emp_no LIKE '".$search_arr['emp_no']."%'";
+	} else {
+		$query = $query . " emp_no != ''";
+	}
+
+	if (!empty($search_arr['full_name'])) {
+		$query = $query . " AND full_name LIKE '".$search_arr['full_name']."%'";
+	}
+
+	if (!empty($search_arr['role'])) {
+		$query = $query . " AND role = '".$search_arr['role']."'";
+	}
+	
+	$stmt = $conn->prepare($query);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $j){
+			$total = $j['total'];
+		}
+	}else{
+		$total = 0;
+	}
+	return $total;
+}
+
+if ($method == 'count_account_list') {
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
+	$role = addslashes($_POST['role']);
+	
+	$search_arr = array(
+		"emp_no" => $emp_no,
+		"full_name" => $full_name,
+		"role" => $role
+	);
+
+	echo count_account_list($search_arr, $conn);
+}
+
+if ($method == 'account_list_last_page') {
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
+	$role = addslashes($_POST['role']);
+
+	$search_arr = array(
+		"emp_no" => $emp_no,
+		"full_name" => $full_name,
+		"role" => $role
+	);
+
+	$results_per_page = 20;
+
+	$number_of_result = intval(count_account_list($search_arr, $conn));
+
+	//determine the total number of pages available  
+	$number_of_page = ceil($number_of_result / $results_per_page);
+
+	echo $number_of_page;
+}
+
+if ($method == 'account_list') {
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
+	$role = addslashes($_POST['role']);
+
+	$current_page = intval($_POST['current_page']);
+	$c = 0;
+
+	$results_per_page = 20;
+
+	//determine the sql LIMIT starting number for the results on the displaying page
+	$page_first_result = ($current_page-1) * $results_per_page;
+
+	$c = $page_first_result;
+
+	$query = "SELECT id, emp_no, full_name, dept, section, line_no, role FROM m_accounts WHERE";
+
+	if (!empty($emp_no)) {
+		$query = $query . " emp_no LIKE '$emp_no%'";
+	} else {
+		$query = $query . " emp_no != ''";
+	}
+
+	if (!empty($full_name)) {
+		$query = $query . " AND full_name LIKE '$full_name%'";
+	}
+
+	if (!empty($role)) {
+		$query = $query . " AND role = '$role'";
+	}
+
+	$query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $j){
+			$c++;
+			echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'&quot;)">';
+				echo '<td>'.$c.'</td>';
+				echo '<td>'.$j['emp_no'].'</td>';
+				echo '<td>'.$j['full_name'].'</td>';
+				echo '<td>'.$j['dept'].'</td>';
+				echo '<td>'.$j['section'].'</td>';
+				echo '<td>'.$j['line_no'].'</td>';
+				echo '<td>'.strtoupper($j['role']).'</td>';
+			echo '</tr>';
+		}
+	}else{
+		echo '<tr>';
+			echo '<td colspan="7" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
+	}
+}
+
+if ($method == 'register_account') {
+	$full_name = trim($_POST['full_name']);
+	$emp_no = addslashes(trim($_POST['emp_no']));
+	$dept = trim($_POST['dept']);
+	$section = trim($_POST['section']);
+	$line_no = trim($_POST['line_no']);
+	$role = trim($_POST['role']);
+
+	$check = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no'";
+	$stmt = $conn->prepare($check);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		echo 'Already Exist';
+	}else{
+		$stmt = NULL;
+		$query = "INSERT INTO m_accounts (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `role`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$role')";
+		$stmt = $conn->prepare($query);
+		if ($stmt->execute()) {
+			$stmt = NULL;
+			$query = "INSERT INTO t_notif_line_support (`emp_no`) VALUES ('$emp_no')";
+			$stmt = $conn->prepare($query);
+			if ($stmt->execute()) {
+				echo 'success';
+			} else {
+				echo 'error';
+			}
+		}else{
+			echo 'error';
+		}
+	}
+}
+
+if ($method == 'update_account') {
+	$id = $_POST['id'];
+	$emp_no = addslashes(trim($_POST['emp_no']));
+	$full_name = trim($_POST['full_name']);
+	$dept = trim($_POST['dept']);
+	$section = trim($_POST['section']);
+	$line_no = trim($_POST['line_no']);
+	$role = trim($_POST['role']);
+
+	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' AND full_name = '$full_name' AND dept = '$dept' AND section = '$section' AND line_no = '$line_no'";
+	$stmt = $conn->prepare($query);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		echo 'duplicate';
+	}else{
+		$stmt = NULL;
+		$query = "UPDATE m_accounts SET emp_no = '$emp_no', full_name = '$full_name', dept = '$dept', section = '$section', line_no = '$line_no', role = '$role' WHERE id = '$id'";
+		$stmt = $conn->prepare($query);
+		if ($stmt->execute()) {
+			echo 'success';
+		}else{
+			echo 'error';
+		}
+	}
+}
+
+if ($method == 'delete_account') {
+	$id = $_POST['id'];
+
+	$query = "DELETE FROM m_accounts WHERE id = '$id'";
+	$stmt = $conn->prepare($query);
+	if ($stmt->execute()) {
+		echo 'success';
+	}else{
+		echo 'error';
+	}
+}
+
+$conn = NULL;
+?>
