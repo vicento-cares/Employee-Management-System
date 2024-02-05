@@ -48,14 +48,44 @@
       </div>
       <div class="row">
         <div class="col-sm-12">
+          <div class="card card-gray-dark">
+            <div class="card-header">
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="small-box bg-white">
+                  <div class="inner mb-3">
+                    <h2 id="count_emp_dashboard_value_total"></h2>
+                    <h4><b>TOTAL MP</b></h4>
+                    <h4>Employees</h4>
+                  </div>
+                  <div class="icon">
+                    <i class="ion ion-person-stalker"></i>
+                  </div>
+                  <div class="small-box-footer"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-sm-12">
           <div class="card card-gray-dark card-tabs">
             <div class="card-header p-0 border-bottom-0">
               <ul class="nav nav-tabs" id="dashboards-tab" role="tablist">
                 <li class="nav-item">
-                  <a class="nav-link active" id="dashboards-1-tab" data-toggle="pill" href="#dashboards-1" role="tab" aria-controls="dashboards-1" aria-selected="true">Day Shift</a>
+                  <a class="nav-link active" id="dashboards-1-tab" data-toggle="pill" href="#dashboards-1" role="tab" aria-controls="dashboards-1" aria-selected="true">Shift Group A</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" id="dashboards-2-tab" data-toggle="pill" href="#dashboards-2" role="tab" aria-controls="dashboards-2" aria-selected="false">Night Shift</a>
+                  <a class="nav-link" id="dashboards-2-tab" data-toggle="pill" href="#dashboards-2" role="tab" aria-controls="dashboards-2" aria-selected="false">Shift Group B</a>
                 </li>
               </ul>
             </div>

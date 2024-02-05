@@ -52,7 +52,7 @@ const get_next_page = () => {
 
 const count_attendance_present = () => {
     var day = sessionStorage.getItem('attendance_date_search');
-    var shift = sessionStorage.getItem('shift_search');
+    var shift_group = sessionStorage.getItem('shift_group_search');
     var dept = sessionStorage.getItem('dept_search');
     var section = sessionStorage.getItem('section_search');
     var line_no = sessionStorage.getItem('line_no_search');
@@ -63,7 +63,7 @@ const count_attendance_present = () => {
         data:{
             method:'count_attendance_present',
             day:day,
-            shift:shift,
+            shift_group:shift_group,
             dept:dept,
             section:section,
             line_no:line_no
@@ -86,7 +86,7 @@ const count_attendance_present = () => {
 
 const count_attendance_list = () => {
     var day = sessionStorage.getItem('attendance_date_search');
-    var shift = sessionStorage.getItem('shift_search');
+    var shift_group = sessionStorage.getItem('shift_group_search');
     var dept = sessionStorage.getItem('dept_search');
     var section = sessionStorage.getItem('section_search');
     var line_no = sessionStorage.getItem('line_no_search');
@@ -97,7 +97,7 @@ const count_attendance_list = () => {
         data:{
             method:'count_attendance_list',
             day:day,
-            shift:shift,
+            shift_group:shift_group,
             dept:dept,
             section:section,
             line_no:line_no
@@ -120,7 +120,7 @@ const count_attendance_list = () => {
 
 const get_attendances_last_page = () =>{
     var day = sessionStorage.getItem('attendance_date_search');
-    var shift = sessionStorage.getItem('shift_search');
+    var shift_group = sessionStorage.getItem('shift_group_search');
     var dept = sessionStorage.getItem('dept_search');
     var section = sessionStorage.getItem('section_search');
     var line_no = sessionStorage.getItem('line_no_search');
@@ -132,7 +132,7 @@ const get_attendances_last_page = () =>{
         data:{
             method:'attendance_list_last_page',
             day:day,
-            shift:shift,
+            shift_group:shift_group,
             dept:dept,
             section:section,
             line_no:line_no
@@ -154,14 +154,14 @@ const get_attendances_last_page = () =>{
 
 const get_attendance_list = current_page =>{
     let day = document.getElementById('attendance_date_search').value;
-    let shift = document.getElementById('shift_search').value;
+    let shift_group = document.getElementById('shift_group_search').value;
 
     var dept = document.getElementById('dept_search').value;
     var section = document.getElementById('section_search').value;
     var line_no = document.getElementById('line_no_search').value;
 
     var day1 = sessionStorage.getItem('attendance_date_search');
-    var shift1 = sessionStorage.getItem('shift_search');
+    var shift_group1 = sessionStorage.getItem('shift_group_search');
 
     var dept1 = sessionStorage.getItem('dept_search');
     var section1 = sessionStorage.getItem('section_search');
@@ -170,12 +170,12 @@ const get_attendance_list = current_page =>{
     if (current_page > 1) {
         switch(true) {
             case day !== day1:
-            case shift !== shift1:
+            case shift_group !== shift_group1:
             case dept !== dept1:
             case section !== section1:
             case line_no !== line_no1:
                 day = day1;
-                shift = shift1;
+                shift_group = shift_group1;
                 dept = dept1;
                 section = section1;
                 line_no = line_no1;
@@ -184,7 +184,7 @@ const get_attendance_list = current_page =>{
         }
     } else {
         sessionStorage.setItem('attendance_date_search', day);
-        sessionStorage.setItem('shift_search', shift);
+        sessionStorage.setItem('shift_group_search', shift_group);
         sessionStorage.setItem('dept_search', dept);
         sessionStorage.setItem('section_search', section);
         sessionStorage.setItem('line_no_search', line_no);
@@ -197,14 +197,14 @@ const get_attendance_list = current_page =>{
         data:{
             method:'get_attendance_list',
             day:day,
-            shift:shift,
+            shift_group:shift_group,
             dept:dept,
             section:section,
             line_no:line_no,
             current_page:current_page
         },
         beforeSend: () => {
-            var loading = `<tr id="loading"><td colspan="11" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+            var loading = `<tr id="loading"><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
             if (current_page == 1) {
                 document.getElementById("attendanceData").innerHTML = loading;
             } else {
@@ -230,7 +230,7 @@ const get_absence_details =(param)=>{
     var emp_no = string[1];
     var full_name = string[2];
     var absent_day = string[3];
-    var absent_shift = string[4];
+    var absent_shift_group = string[4];
     var absent_type = string[5];
     var reason = string[6];
 
@@ -238,7 +238,7 @@ const get_absence_details =(param)=>{
     document.getElementById('emp_no_absence_update').innerHTML = emp_no;
     document.getElementById('full_name_absence_update').innerHTML = full_name;
     document.getElementById('absent_day_absence_update').innerHTML = absent_day;
-    document.getElementById('absent_shift_absence_update').innerHTML = absent_shift;
+    document.getElementById('absent_shift_group_absence_update').innerHTML = absent_shift_group;
     document.getElementById('absent_type_absence_update').value = absent_type;
     document.getElementById('reason_absence_update').value = reason;
 }
@@ -267,7 +267,7 @@ const save_absence_details =()=>{
     var id = document.getElementById('id_absence_update').value;
     var emp_no = document.getElementById('emp_no_absence_update').innerHTML;
     var absent_day = document.getElementById('absent_day_absence_update').innerHTML;
-    var absent_shift = document.getElementById('absent_shift_absence_update').innerHTML;
+    var absent_shift_group = document.getElementById('absent_shift_group_absence_update').innerHTML;
     var absent_type = document.getElementById('absent_type_absence_update').value;
     var reason = document.getElementById('reason_absence_update').value;
 
@@ -297,7 +297,7 @@ const save_absence_details =()=>{
                 id:id,
                 emp_no:emp_no,
                 absent_day:absent_day,
-                absent_shift:absent_shift,
+                absent_shift_group:absent_shift_group,
                 absent_type:absent_type,
                 reason:reason
             },success:function(response){
@@ -312,7 +312,7 @@ const save_absence_details =()=>{
                     $('#id_absence_update').val('');
                     $('#emp_no_absence_update').val('');
                     $('#absent_day_absence_update').val('');
-                    $('#absent_shift_absence_update').val('');
+                    $('#absent_shift_group_absence_update').val('');
                     $('#absent_type_absence_update').val('');
                     $('#reason_absence_update').val('');
                     get_attendance_list(1);
@@ -333,19 +333,19 @@ const save_absence_details =()=>{
 
 const export_attendances = () => {
     let day = sessionStorage.getItem('attendance_date_search');
-    let shift = sessionStorage.getItem('shift_search');
+    let shift_group = sessionStorage.getItem('shift_group_search');
     let dept = sessionStorage.getItem('dept_search');
     let section = sessionStorage.getItem('section_search');
     let line_no = sessionStorage.getItem('line_no_search');
-    window.open('../process/export/exp_attendances_hr.php?day='+day+"&shift="+shift+"&dept="+dept+"&section="+section+"&line_no="+line_no,'_blank');
+    window.open('../process/export/exp_attendances_hr.php?day='+day+"&shift_group="+shift_group+"&dept="+dept+"&section="+section+"&line_no="+line_no,'_blank');
 }
 
 const export_absences = () => {
     let day = sessionStorage.getItem('attendance_date_search');
-    let shift = sessionStorage.getItem('shift_search');
+    let shift_group = sessionStorage.getItem('shift_group_search');
     let dept = sessionStorage.getItem('dept_search');
     let section = sessionStorage.getItem('section_search');
     let line_no = sessionStorage.getItem('line_no_search');
-    window.open('../process/export/exp_absences_hr.php?day='+day+"&shift="+shift+"&dept="+dept+"&section="+section+"&line_no="+line_no,'_blank');
+    window.open('../process/export/exp_absences_hr.php?day='+day+"&shift_group="+shift_group+"&dept="+dept+"&section="+section+"&line_no="+line_no,'_blank');
 }
 </script>

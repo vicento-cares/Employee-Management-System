@@ -35,7 +35,17 @@
             <label>Line No:</label>
             <input type="text" id="line_no" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black;" disabled>
           </div>
-           <div class="col-4">
+          <div class="col-4">
+            <label>Shift Group:</label>
+            <select id="shift_group" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+              <option value="">Select Shift Group</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-4">
             <label>User Type:</label>
             <select id="role" class="form-control" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select User Type</option>

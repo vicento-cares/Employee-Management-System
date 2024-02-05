@@ -175,6 +175,7 @@ document.getElementById("emp_no").addEventListener("keyup", e => {
     document.getElementById("dept").value = '';
     document.getElementById("section").value = '';
     document.getElementById("line_no").value = '';
+    document.getElementById("shift_group").value = '';
     document.getElementById("role").value = '';
     document.getElementById('btnAddAccount').disabled = true;
   }
@@ -189,6 +190,7 @@ document.getElementById("emp_no_update").addEventListener("keyup", e => {
     document.getElementById("dept_update").value = '';
     document.getElementById("section_update").value = '';
     document.getElementById("line_no_update").value = '';
+    document.getElementById("shift_group_update").value = '';
     document.getElementById("role_update").value = '';
     document.getElementById('btnUpdateAccount').disabled = true;
     document.getElementById('btnDeleteAccount').disabled = true;
@@ -222,6 +224,7 @@ const get_employee_data = opt => {
                             document.getElementById('dept').value = response_array.dept;
                             document.getElementById('section').value = response_array.section;
                             document.getElementById('line_no').value = response_array.line_no;
+                            document.getElementById('shift_group').value = response_array.shift_group;
                             document.getElementById('role').value = response_array.role;
                             document.getElementById('btnAddAccount').disabled = false;
                         } else if (opt == 'update') {
@@ -229,6 +232,7 @@ const get_employee_data = opt => {
                             document.getElementById('dept_update').value = response_array.dept;
                             document.getElementById('section_update').value = response_array.section;
                             document.getElementById('line_no_update').value = response_array.line_no;
+                            document.getElementById('shift_group_update').value = response_array.shift_group;
                             document.getElementById('role_update').value = response_array.role;
                             document.getElementById('btnUpdateAccount').disabled = false;
                             document.getElementById('btnDeleteAccount').disabled = false;
@@ -283,6 +287,7 @@ const register_accounts =()=>{
     var dept = document.getElementById('dept').value;
     var section = document.getElementById('section').value;
     var line_no = document.getElementById('line_no').value;
+    var shift_group = document.getElementById('shift_group').value;
     var role = document.getElementById('role').value;
 
     if (emp_no == '') {
@@ -329,6 +334,7 @@ const register_accounts =()=>{
                 dept:dept,
                 section:section,
                 line_no:line_no,
+                shift_group:shift_group,
                 role:role
             },success:function(response){
                 if (response == 'success') {
@@ -344,6 +350,7 @@ const register_accounts =()=>{
                     $('#dept').val('').trigger('change');
                     $('#section').val('');
                     $('#line_no').val('');
+                    $('#shift_group').val('');
                     $('#role').val('').trigger('change');
                     load_accounts(1);
                     $('#new_account').modal('hide');
@@ -378,6 +385,7 @@ const get_accounts_details =(param)=>{
     var section = string[4];
     var line_no = string[5];
     var role = string[6];
+    var shift_group = string[7];
 
 	document.getElementById('id_account_update').value = id;
     document.getElementById('emp_no_update').value = emp_no;
@@ -385,6 +393,7 @@ const get_accounts_details =(param)=>{
     document.getElementById('dept_update').value = dept;
     document.getElementById('section_update').value = section;
     document.getElementById('line_no_update').value = line_no;
+    document.getElementById('shift_group_update').value = shift_group;
 	document.getElementById('role_update').value = role;
 }
 
@@ -395,6 +404,7 @@ const update_account =()=>{
     var dept = document.getElementById('dept_update').value;
     var section = document.getElementById('section_update').value;
     var line_no = document.getElementById('line_no_update').value;
+    var shift_group = document.getElementById('shift_group_update').value;
     var role = document.getElementById('role_update').value;
 
     $.ajax({
@@ -409,6 +419,7 @@ const update_account =()=>{
             dept:dept,
             section:section,
             line_no:line_no,
+            shift_group:shift_group,
             role:role
         },success:function(response){
             if (response == 'success') {
@@ -425,6 +436,7 @@ const update_account =()=>{
                 $('#dept_update').val('').trigger('change');
                 $('#section_update').val('');
                 $('#line_no_update').val('');
+                $('#shift_group_update').val('');
                 $('#role_update').val('').trigger('change');
                 document.getElementById('resigned_master_update').checked = false;
 				load_accounts(1);

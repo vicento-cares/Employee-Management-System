@@ -25,7 +25,7 @@ switch (true) {
 
 switch (true) {
     case !isset($_GET['day']):
-    case !isset($_GET['shift']):
+    case !isset($_GET['shift_group']):
     case !isset($_GET['dept']):
     case !isset($_GET['section']):
     case !isset($_GET['line_no']):
@@ -35,7 +35,7 @@ switch (true) {
 }
 
 $day = $_GET['day'];
-$shift = $_GET['shift'];
+$shift_group = $_GET['shift_group'];
 
 if (!empty($_GET['dept'])) {
 	$dept_label = $_GET['dept'];
@@ -70,7 +70,7 @@ if (!empty($section)) {
 if (!empty($line_no)) {
 	$filename = $filename . $line_no_label . "-";
 }
-$filename = $filename . $day."-".$shift.".csv";
+$filename = $filename . $day."-".$shift_group.".csv";
  
 // Create a file pointer 
 $f = fopen('php://memory', 'w'); 
@@ -95,7 +95,7 @@ $sql = "SELECT
 	FROM m_employees emp
 	LEFT JOIN 
 	t_absences absences ON absences.emp_no = emp.emp_no
-	WHERE absences.day = '$day' AND absences.shift = '$shift' AND absences.absent_type != '' AND absences.reason != ''";
+	WHERE absences.day = '$day' AND absences.shift_group = '$shift_group' AND absences.absent_type != '' AND absences.reason != ''";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept = '$dept'";
 } else {

@@ -448,6 +448,7 @@ $("#new_employee").on('hidden.bs.modal', e => {
     document.getElementById("emp_sv_master").value = '';
     document.getElementById("emp_approver_master").value = '';
     document.getElementById('gender_master').value = '';
+    document.getElementById('shift_group_master').value = '';
 });
 
 const register_employees =()=>{
@@ -464,6 +465,7 @@ const register_employees =()=>{
     var emp_status = document.getElementById('emp_status_master').value;
     var shuttle_route = document.getElementById('shuttle_route_master').value;
     var gender = document.getElementById('gender_master').value;
+    var shift_group = document.getElementById('shift_group_master').value;
 
     var emp_js_s_master = document.getElementById("emp_js_s_master");
     var emp_js_s_no = emp_js_s_master.value;
@@ -555,6 +557,14 @@ const register_employees =()=>{
             showConfirmButton: false,
             timer : 1000
         });  
+    }else if(shift_group == ''){
+        Swal.fire({
+            icon: 'info',
+            title: 'Please Select Shift Group !!!',
+            text: 'Information',
+            showConfirmButton: false,
+            timer : 1000
+        });  
     }else if(shuttle_route == ''){
         Swal.fire({
             icon: 'info',
@@ -602,6 +612,7 @@ const register_employees =()=>{
                 position:position,
                 date_hired:date_hired,
                 provider:provider,
+                shift_group:shift_group,
                 address:address,
                 contact_no:contact_no,
                 emp_status:emp_status,
@@ -630,6 +641,7 @@ const register_employees =()=>{
                     $('#position_master').val('');
                     $('#date_hired_master').val('');
                     $('#provider_master').val('');
+                    $('#shift_group_master').val('');
                     $('#address_master').val('');
                     $('#contact_no_master').val('');
                     $('#emp_status_master').val('');
@@ -684,6 +696,7 @@ const get_employees_details =(param)=>{
     var resigned = string[16];
     var resigned_date = string[17];
     var gender = string[18];
+    var shift_group = string[19];
 
     document.getElementById('id_employee_master_update').value = id;
     document.getElementById('emp_no_master_update').value = emp_no;
@@ -707,6 +720,7 @@ const get_employees_details =(param)=>{
 
     document.getElementById('resigned_date_master_update').value = resigned_date;
     document.getElementById('gender_master_update').value = gender;
+    document.getElementById('shift_group_master_update').value = shift_group;
 
     fetch_line_dropdown_details();
 
@@ -734,6 +748,7 @@ const update_employee =()=>{
     var emp_status = document.getElementById('emp_status_master_update').value;
     var shuttle_route = document.getElementById('shuttle_route_master_update').value;
     var gender = document.getElementById('gender_master_update').value;
+    var shift_group = document.getElementById('shift_group_master_update').value;
 
     var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
     var emp_js_s_no = emp_js_s_master_update.value;
@@ -800,6 +815,7 @@ const update_employee =()=>{
                 position:position,
                 date_hired:date_hired,
                 provider:provider,
+                shift_group:shift_group,
                 address:address,
                 contact_no:contact_no,
                 emp_status:emp_status,
@@ -831,6 +847,7 @@ const update_employee =()=>{
                     $('#position_master_update').val('');
                     $('#date_hired_master_update').val('');
                     $('#provider_master_update').val('');
+                    $('#shift_group_master_update').val('');
                     $('#address_master_update').val('');
                     $('#contact_no_master_update').val('');
                     $('#emp_status_master_update').val('');

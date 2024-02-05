@@ -46,7 +46,7 @@ if (isset($_POST['login_btn'])) {
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else if ($response_arr['can_access'] == true) {
-        $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
+        $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
         $stmt = $conn->prepare($check);
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
@@ -56,6 +56,7 @@ if (isset($_POST['login_btn'])) {
                 $dept = $x['dept'];
                 $section = $x['section'];
                 $line_no = $x['line_no'];
+                $shift_group = $x['shift_group'];
                 $role = $x['role'];
             }
 
@@ -65,6 +66,7 @@ if (isset($_POST['login_btn'])) {
                 $_SESSION['dept'] = $dept;
                 $_SESSION['section'] = $section;
                 $_SESSION['line_no'] = $line_no;
+                $_SESSION['shift_group'] = $shift_group;
                 $_SESSION['role'] = $role;
                 header('location: home.php');
             } else {
@@ -88,7 +90,7 @@ if (isset($_POST['login_btn'])) {
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else if ($response_arr['can_access'] == true) {
-        $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
+        $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
         $stmt = $conn->prepare($check);
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
@@ -98,6 +100,7 @@ if (isset($_POST['login_btn'])) {
                 $dept = $x['dept'];
                 $section = $x['section'];
                 $line_no = $x['line_no'];
+                $shift_group = $x['shift_group'];
                 $role = $x['role'];
             }
             if ($response_arr['line_no'] == $line_no) {
@@ -106,6 +109,7 @@ if (isset($_POST['login_btn'])) {
                 $_SESSION['dept'] = $dept;
                 $_SESSION['section'] = $section;
                 $_SESSION['line_no'] = $line_no;
+                $_SESSION['shift_group'] = $shift_group;
                 $_SESSION['role'] = $role;
                 header('location: home.php');
             } else {
@@ -123,7 +127,7 @@ if (isset($_POST['login_btn'])) {
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else {
-        $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
+        $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
         $stmt = $conn->prepare($check);
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
@@ -133,12 +137,14 @@ if (isset($_POST['login_btn'])) {
                 $dept = $x['dept'];
                 $section = $x['section'];
                 $line_no = $x['line_no'];
+                $shift_group = $x['shift_group'];
                 $role = $x['role'];
                 $_SESSION['emp_no'] = $emp_no;
                 $_SESSION['full_name'] = $full_name;
                 $_SESSION['dept'] = $dept;
                 $_SESSION['section'] = $section;
                 $_SESSION['line_no'] = $line_no;
+                $_SESSION['shift_group'] = $shift_group;
                 $_SESSION['role'] = $role;
                 header('location: home.php');
             }

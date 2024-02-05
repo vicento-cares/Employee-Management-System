@@ -19,6 +19,7 @@ function count_emp_by_provider($provider, $search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$query = $query . " AND line_no = '".$search_arr['line_no']."'";
 	}
+	$query = $query . " AND shift_group = '".$search_arr['shift_group']."'";
 	$stmt = $conn->prepare($query);
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -34,7 +35,7 @@ function count_emp_by_provider($provider, $search_arr, $conn) {
 function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 	$query = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE emp.provider = '$provider' AND emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND tio.shift = '".$search_arr['shift']."'";
+			WHERE emp.provider = '$provider' AND emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
 		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
 	}
@@ -59,7 +60,7 @@ function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 function count_emp_tio($search_arr, $conn) {
 	$query = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND tio.shift = '".$search_arr['shift']."'";
+			WHERE emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
 		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
 	}
@@ -121,6 +122,8 @@ if ($method == 'count_emp_dashboard') {
 	$shift = '';
 
 	$total = 0;
+	$total_shift_group_a = 0;
+	$total_shift_group_b = 0;
 
 	$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
 	if (!empty($dept)) {
@@ -138,6 +141,48 @@ if ($method == 'count_emp_dashboard') {
 		foreach($stmt->fetchALL() as $j){
 			$total = intval($j['total']);
 		}
+
+		$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
+		if (!empty($dept)) {
+			$query = $query . " AND dept = '$dept'";
+		}
+		if (!empty($section)) {
+			$query = $query . " AND section LIKE '$section%'";
+		}
+		if (!empty($line_no)) {
+			$query = $query . " AND line_no LIKE '$line_no%'";
+		}
+		$query = $query . " AND shift_group = 'A'";
+		$stmt = $conn->prepare($query);
+		$stmt->execute();
+		if ($stmt->rowCount() > 0) {
+			foreach($stmt->fetchALL() as $j){
+				$total_shift_group_a = intval($j['total']);
+			}
+		}else{
+			$total_shift_group_a = 0;
+		}
+
+		$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
+		if (!empty($dept)) {
+			$query = $query . " AND dept = '$dept'";
+		}
+		if (!empty($section)) {
+			$query = $query . " AND section LIKE '$section%'";
+		}
+		if (!empty($line_no)) {
+			$query = $query . " AND line_no LIKE '$line_no%'";
+		}
+		$query = $query . " AND shift_group = 'B'";
+		$stmt = $conn->prepare($query);
+		$stmt->execute();
+		if ($stmt->rowCount() > 0) {
+			foreach($stmt->fetchALL() as $j){
+				$total_shift_group_b = intval($j['total']);
+			}
+		}else{
+			$total_shift_group_b = 0;
+		}
 	}else{
 		$total = 0;
 	}
@@ -152,13 +197,14 @@ if ($method == 'count_emp_dashboard') {
 	$search_arr1 = array(
 	  "day" => $day,
 	  "shift" => $shift,
+	  "shift_group" => "A",
 	  "dept" => $dept,
 	  "section" => $section,
 	  "line_no" => $line_no
 	);
 
 	$total_present_ds = count_emp_tio($search_arr1, $conn);
-	$total_absent_ds = $total - $total_present_ds;
+	$total_absent_ds = $total_shift_group_a - $total_present_ds;
 	$total_support_ds = count_emp_lsh($search_arr1, $conn);
 
 	$shift = 'NS';
@@ -171,17 +217,20 @@ if ($method == 'count_emp_dashboard') {
 	$search_arr1 = array(
 	  "day" => $day,
 	  "shift" => $shift,
+	  "shift_group" => "B",
 	  "dept" => $dept,
 	  "section" => $section,
 	  "line_no" => $line_no
 	);
 
 	$total_present_ns = count_emp_tio($search_arr1, $conn);
-	$total_absent_ns = $total - $total_present_ns;
+	$total_absent_ns = $total_shift_group_b - $total_present_ns;
 	$total_support_ns = count_emp_lsh($search_arr1, $conn);
 
 	$response_arr = array(
 		'total' => $total,
+		'total_shift_group_a' => $total_shift_group_a,
+		'total_shift_group_b' => $total_shift_group_b,
 		'total_present_ds' => $total_present_ds,
 		'total_absent_ds' => $total_absent_ds,
 		'total_support_ds' => $total_support_ds,
@@ -200,6 +249,7 @@ if ($method == 'count_emp_provider_dashboard') {
 	$section = addslashes($_POST['section']);
 	$line_no = addslashes($_POST['line_no']);
 	$shift = $_POST['shift'];
+	$shift_group = $_POST['shift_group'];
 	$small_box_colors_arr = array('bg-primary', 'bg-navy', 'bg-info', 'bg-warning', 'bg-lightblue', 'bg-purple', 'bg-olive', 'bg-gray');
 	$small_box_color_count = count($small_box_colors_arr);
 	$provider_count = 0;
@@ -215,9 +265,10 @@ if ($method == 'count_emp_provider_dashboard') {
 			$day = '';
 
 			$search_arr = array(
-			  "dept" => $dept,
-			  "section" => $section,
-			  "line_no" => $line_no
+				"shift_group" => $shift_group,
+				"dept" => $dept,
+				"section" => $section,
+				"line_no" => $line_no
 			);
 
 			$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
@@ -239,6 +290,7 @@ if ($method == 'count_emp_provider_dashboard') {
 			$search_arr1 = array(
 			  "day" => $day,
 			  "shift" => $shift,
+			  "shift_group" => $shift_group,
 			  "dept" => $dept,
 			  "section" => $section,
 			  "line_no" => $line_no
