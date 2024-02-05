@@ -76,12 +76,13 @@
                       <th>Department</th>
                       <th>Section</th>
                       <th>Line No.</th>
+                      <th>Shift Group</th>
                       <th>User Type</th>
                     </tr>
                   </thead>
                   <tbody id="list_of_accounts" style="text-align: center;">
                     <tr>
-                      <td colspan="7" style="text-align:center;">
+                      <td colspan="8" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

@@ -84,7 +84,7 @@ if ($method == 'account_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, emp_no, full_name, dept, section, line_no, role FROM m_accounts WHERE";
+	$query = "SELECT id, emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE";
 
 	if (!empty($emp_no)) {
 		$query = $query . " emp_no LIKE '$emp_no%'";
@@ -107,13 +107,14 @@ if ($method == 'account_list') {
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
 			$c++;
-			echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'&quot;)">';
+			echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'~!~'.$j['shift_group'].'&quot;)">';
 				echo '<td>'.$c.'</td>';
 				echo '<td>'.$j['emp_no'].'</td>';
 				echo '<td>'.$j['full_name'].'</td>';
 				echo '<td>'.$j['dept'].'</td>';
 				echo '<td>'.$j['section'].'</td>';
 				echo '<td>'.$j['line_no'].'</td>';
+				echo '<td>'.$j['shift_group'].'</td>';
 				echo '<td>'.strtoupper($j['role']).'</td>';
 			echo '</tr>';
 		}
@@ -130,6 +131,7 @@ if ($method == 'register_account') {
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
+	$shift_group = trim($_POST['shift_group']);
 	$role = trim($_POST['role']);
 
 	$check = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no'";
@@ -139,7 +141,7 @@ if ($method == 'register_account') {
 		echo 'Already Exist';
 	}else{
 		$stmt = NULL;
-		$query = "INSERT INTO m_accounts (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `role`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$role')";
+		$query = "INSERT INTO m_accounts (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `shift_group`, `role`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
 			$stmt = NULL;
@@ -163,6 +165,7 @@ if ($method == 'update_account') {
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
+	$shift_group = trim($_POST['shift_group']);
 	$role = trim($_POST['role']);
 
 	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' AND full_name = '$full_name' AND dept = '$dept' AND section = '$section' AND line_no = '$line_no'";
@@ -172,7 +175,7 @@ if ($method == 'update_account') {
 		echo 'duplicate';
 	}else{
 		$stmt = NULL;
-		$query = "UPDATE m_accounts SET emp_no = '$emp_no', full_name = '$full_name', dept = '$dept', section = '$section', line_no = '$line_no', role = '$role' WHERE id = '$id'";
+		$query = "UPDATE m_accounts SET emp_no = '$emp_no', full_name = '$full_name', dept = '$dept', section = '$section', line_no = '$line_no', shift_group = '$shift_group', role = '$role' WHERE id = '$id'";
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
 			echo 'success';

@@ -25,7 +25,7 @@ switch (true) {
 
 switch (true) {
     case !isset($_GET['day']):
-    case !isset($_GET['shift']):
+    case !isset($_GET['shift_group']):
     case !isset($_GET['dept']):
     case !isset($_GET['section']):
     case !isset($_GET['line_no']):
@@ -35,7 +35,7 @@ switch (true) {
 }
 
 $day = $_GET['day'];
-$shift = $_GET['shift'];
+$shift_group = $_GET['shift_group'];
 
 if (!empty($_GET['dept'])) {
 	$dept_label = $_GET['dept'];
@@ -70,7 +70,7 @@ if (!empty($section)) {
 if (!empty($line_no)) {
 	$filename = $filename . $line_no_label . "-";
 }
-$filename = $filename . $day."-".$shift.".csv";
+$filename = $filename . $day."-".$shift_group.".csv";
  
 // Create a file pointer 
 $f = fopen('php://memory', 'w'); 
@@ -79,7 +79,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -92,13 +92,13 @@ fputcsv($f, $fields, $delimiter);
 		AND tio.shift = '$shift'
 	WHERE";*/
 $sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.resigned_date, 
+	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio 
 		ON emp.emp_no = tio.emp_no
 	WHERE tio.day = '$day' 
-	AND tio.shift = '$shift'";
+	AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept = '$dept'";
 } else {
@@ -144,7 +144,7 @@ if ($stmt -> rowCount() > 0) {
 			$row_status = 'Absent';
 		}
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
+        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
         fputcsv($f, $lineData, $delimiter); 
     }
 }

@@ -53,11 +53,12 @@ const count_emp_dashboard = () => {
         success:function(response){
             try {
                 let response_array = JSON.parse(response);
-                $('#count_emp_dashboard_value_ds').html(`<b>${response_array.total}</b>`);
+                $('#count_emp_dashboard_value_total').html(`<b>${response_array.total}</b>`);
+                $('#count_emp_dashboard_value_ds').html(`<b>${response_array.total_shift_group_a}</b>`);
                 $('#count_emp_dashboard_present_value_ds').html(`<b>${response_array.total_present_ds}</b>`);
                 $('#count_emp_dashboard_absent_value_ds').html(`<b>${response_array.total_absent_ds}</b>`);
                 $('#count_emp_dashboard_support_value_ds').html(`<b>${response_array.total_support_ds}</b>`);
-                $('#count_emp_dashboard_value_ns').html(`<b>${response_array.total}</b>`);
+                $('#count_emp_dashboard_value_ns').html(`<b>${response_array.total_shift_group_b}</b>`);
                 $('#count_emp_dashboard_present_value_ns').html(`<b>${response_array.total_present_ns}</b>`);
                 $('#count_emp_dashboard_absent_value_ns').html(`<b>${response_array.total_absent_ns}</b>`);
                 $('#count_emp_dashboard_support_value_ns').html(`<b>${response_array.total_support_ns}</b>`);
@@ -93,7 +94,8 @@ const count_emp_provider_dashboard_ds = () => {
             dept:dept,
             section:section,
             line_no:line_no,
-            shift: 'DS'
+            shift: 'DS',
+            shift_group: 'A'
         },
         success:function(response){
             $('#count_emp_provider_dashboard_ds').html(response);
@@ -114,7 +116,8 @@ const count_emp_provider_dashboard_ns = () => {
             dept:dept,
             section:section,
             line_no:line_no,
-            shift: 'NS'
+            shift: 'NS',
+            shift_group: 'B'
         },
         success:function(response){
             $('#count_emp_provider_dashboard_ns').html(response);

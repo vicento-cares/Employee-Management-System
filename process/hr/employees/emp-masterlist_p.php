@@ -440,7 +440,7 @@ if ($method == 'employee_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, emp_no, full_name, dept, section, line_no, position, provider, gender, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
+	$query = "SELECT id, emp_no, full_name, dept, section, line_no, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
 	if (!empty($emp_no)) {
 		$query = $query . " emp_no LIKE '".$emp_no."%'";
 	} else {
@@ -509,7 +509,7 @@ if ($method == 'employee_list') {
 			$c++;
 			
 			if (isset($_SESSION['emp_no'])) {
-				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
 			} else {
@@ -517,7 +517,7 @@ if ($method == 'employee_list') {
 
 				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" value="'.$j['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
 
-				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'&quot;)">'.$c.'</td>';
+				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'&quot;)">'.$c.'</td>';
 			}
 
 				echo '<td>'.$j['emp_no'].'</td>';
@@ -550,6 +550,7 @@ if ($method == 'get_employee_data') {
 	$section = '';
 	$line_no = '';
 	$position = '';
+	$shift_group = '';
 	$date_hired = '';
 	$address = '';
 	$contact_no = '';
@@ -558,7 +559,7 @@ if ($method == 'get_employee_data') {
 	$role = '';
 	$message = '';
 
-	$query = "SELECT emp_no, full_name, dept, section, line_no, position, date_hired, address, contact_no, emp_status, resigned FROM m_employees WHERE emp_no = '$emp_no'";
+	$query = "SELECT emp_no, full_name, dept, section, line_no, position, shift_group, date_hired, address, contact_no, emp_status, resigned FROM m_employees WHERE emp_no = '$emp_no'";
 	$stmt = $conn->prepare($query);
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -569,6 +570,7 @@ if ($method == 'get_employee_data') {
 			$section = $j['section'];
 			$line_no = $j['line_no'];
 			$position = $j['position'];
+			$shift_group = $j['shift_group'];
 			$date_hired = $j['date_hired'];
 			$address = $j['address'];
 			$contact_no = $j['contact_no'];
@@ -597,6 +599,7 @@ if ($method == 'get_employee_data') {
 		'section' => $section,
 		'line_no' => $line_no,
 		'position' => $position,
+		'shift_group' => $shift_group,
 		'date_hired' => $date_hired,
 		'address' => $address,
 		'contact_no' => $contact_no,
@@ -618,6 +621,7 @@ if ($method == 'register_employee') {
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
+	$shift_group = trim($_POST['shift_group']);
 	$address = addslashes(trim($_POST['address']));
 	$contact_no = addslashes(trim($_POST['contact_no']));
 	$emp_status = trim($_POST['emp_status']);
@@ -638,7 +642,7 @@ if ($method == 'register_employee') {
 	}else{
 		$stmt = NULL;
 
-		$query = "INSERT INTO m_employees (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `position`, `provider`, `gender`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_sv`, `emp_approver`, `emp_js_s_no`, `emp_sv_no`, `emp_approver_no`) VALUES ('$emp_no','$full_name'";
+		$query = "INSERT INTO m_employees (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_sv`, `emp_approver`, `emp_js_s_no`, `emp_sv_no`, `emp_approver_no`) VALUES ('$emp_no','$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";
@@ -656,7 +660,7 @@ if ($method == 'register_employee') {
 			$query = $query . ", NULL";
 		}
 
-		$query = $query . ",'$position','$provider','$gender','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
+		$query = $query . ",'$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
 
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
@@ -677,6 +681,7 @@ if ($method == 'update_employee') {
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
+	$shift_group = trim($_POST['shift_group']);
 	$address = addslashes(trim($_POST['address']));
 	$contact_no = addslashes(trim($_POST['contact_no']));
 	$emp_status = trim($_POST['emp_status']);
@@ -709,7 +714,7 @@ if ($method == 'update_employee') {
 		$query = $query . ", line_no = NULL";
 	}
 
-	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', date_hired = '$date_hired', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', resigned = '$resigned', resigned_date = '$resigned_date' WHERE id = '$id'";
+	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', date_hired = '$date_hired', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', resigned = '$resigned', resigned_date = '$resigned_date' WHERE id = '$id'";
 
 	$stmt = $conn->prepare($query);
 	if ($stmt->execute()) {
@@ -729,6 +734,11 @@ if ($method == 'update_employee') {
 			$query = $query . ", line_no = '$line_no'";
 		} else {
 			$query = $query . ", line_no = NULL";
+		}
+		if (!empty($shift_group)) {
+			$query = $query . ", shift_group = '$shift_group'";
+		} else {
+			$query = $query . ", shift_group = NULL";
 		}
 
 		$query = $query . " WHERE emp_no = '$emp_no'";

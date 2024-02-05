@@ -45,10 +45,10 @@
                   <input type="date" class="form-control" id="attendance_date_search">
                 </div>
                 <div class="col-sm-2">
-                  <label>Shift</label>
-                  <select class="form-control" id="shift_search" style="width: 100%;" required>
-                    <option selected value="DS">Day Shift - (DS)</option>
-                    <option value="NS">Night Shift - (NS)</option>
+                  <label>Shift Group</label>
+                  <select class="form-control" id="shift_group_search" style="width: 100%;" required>
+                    <option selected value="A">Shift A</option>
+                    <option value="B">Shift B</option>
                   </select>
                 </div>
                 <div class="col-sm-2">
@@ -114,6 +114,7 @@
                       <th>#</th>
                       <th>Day</th>
                       <th>Shift</th>
+                      <th>Shift Group</th>
                       <th>Provider</th>
                       <th>Employee No.</th>
                       <th>Full Name</th>
@@ -126,7 +127,7 @@
                   </thead>
                   <tbody id="attendanceData" style="text-align: center;">
                     <tr>
-                      <td colspan="11" style="text-align:center;">
+                      <td colspan="12" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

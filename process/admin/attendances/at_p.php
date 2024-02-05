@@ -11,11 +11,11 @@ $method = $_POST['method'];
 function count_attendance_list($search_arr, $conn) {
 	$sql = "SELECT count(emp_no) AS total 
 		FROM m_employees
-		WHERE";
+		WHERE shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " dept = '".$search_arr['dept']."'";
+		$sql = $sql . " AND dept = '".$search_arr['dept']."'";
 	} else {
-		$sql = $sql . " dept != ''";
+		$sql = $sql . " AND dept != ''";
 	}
 	if (!empty($search_arr['section'])) {
 		$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
@@ -40,7 +40,7 @@ function count_attendance_list($search_arr, $conn) {
 function count_emp_tio($search_arr, $conn) {
 	$sql = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE tio.day = '".$search_arr['day']."' AND tio.shift = '".$search_arr['shift']."'";
+			WHERE tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
 		$sql = $sql . " AND emp.dept = '".$search_arr['dept']."'";
 	} else {
@@ -67,7 +67,7 @@ function count_emp_tio($search_arr, $conn) {
 
 if ($method == 'count_attendance_present') {
 	$day = $_POST['day'];
-	$shift = $_POST['shift'];
+	$shift_group = $_POST['shift_group'];
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -87,13 +87,13 @@ if ($method == 'count_attendance_present') {
 		}
 	} else {
 		$dept = '';
-		$section = $_SESSION['section'];
+		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
 
 	$search_arr = array(
 		"day" => $day,
-		"shift" => $shift,
+		"shift_group" => $shift_group,
 		"dept" => $dept,
 		"section" => $section,
 		"line_no" => $line_no
@@ -104,7 +104,7 @@ if ($method == 'count_attendance_present') {
 
 if ($method == 'count_attendance_list') {
 	$day = $_POST['day'];
-	$shift = $_POST['shift'];
+	$shift_group = $_POST['shift_group'];
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -124,13 +124,13 @@ if ($method == 'count_attendance_list') {
 		}
 	} else {
 		$dept = '';
-		$section = $_SESSION['section'];
+		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
 	
 	$search_arr = array(
 		"day" => $day,
-		"shift" => $shift,
+		"shift_group" => $shift_group,
 		"dept" => $dept,
 		"section" => $section,
 		"line_no" => $line_no
@@ -141,7 +141,7 @@ if ($method == 'count_attendance_list') {
 
 if ($method == 'attendance_list_last_page') {
 	$day = $_POST['day'];
-	$shift = $_POST['shift'];
+	$shift_group = $_POST['shift_group'];
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -161,13 +161,13 @@ if ($method == 'attendance_list_last_page') {
 		}
 	} else {
 		$dept = '';
-		$section = $_SESSION['section'];
+		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
 	
 	$search_arr = array(
 		"day" => $day,
-		"shift" => $shift,
+		"shift_group" => $shift_group,
 		"dept" => $dept,
 		"section" => $section,
 		"line_no" => $line_no
@@ -185,7 +185,7 @@ if ($method == 'attendance_list_last_page') {
 
 if ($method == 'get_attendance_list') {
 	$day = $_POST['day'];
-	$shift = $_POST['shift'];
+	$shift_group = $_POST['shift_group'];
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -205,7 +205,7 @@ if ($method == 'get_attendance_list') {
 		}
 	} else {
 		$dept = '';
-		$section = $_SESSION['section'];
+		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
 
@@ -222,17 +222,17 @@ if ($method == 'get_attendance_list') {
 	$c = $page_first_result;
 
 	$sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.resigned_date,
+	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date,
 	tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
-	absences.id AS absent_id, absences.day AS absent_day, absences.shift AS absent_shift, absences.absent_type, absences.reason 
+	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason 
 		FROM m_employees emp
-		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day' AND tio.shift = '$shift'
+		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no
-		WHERE";
+		WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
-		$sql = $sql . " emp.dept = '$dept'";
+		$sql = $sql . " AND emp.dept = '$dept'";
 	} else {
-		$sql = $sql . " emp.dept != ''";
+		$sql = $sql . " AND emp.dept != ''";
 	}
 	if (!empty($section)) {
 		$sql = $sql . " AND emp.section LIKE '$section%'";
@@ -258,24 +258,26 @@ if ($method == 'get_attendance_list') {
 				$row_class = $row_class_arr[2];
 				$row_day = '';
 				$row_shift = '';
-				if (!empty($j['absent_day']) && !empty($j['absent_shift'])) {
+				if (!empty($j['absent_day']) && !empty($j['absent_shift_group'])) {
 					$row_day = $j['absent_day'];
-					$row_shift = $j['absent_shift'];
+					$row_shift_group = $j['absent_shift_group'];
 				} else {
 					$row_day = $day;
-					$row_shift = $shift;
+					$row_shift_group = $shift_group;
 				}
 				
-				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$j['absent_id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$row_day.'~!~'.$row_shift.'~!~'.$j['absent_type'].'~!~'.$j['reason'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$j['absent_id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$j['absent_type'].'~!~'.$j['reason'].'&quot;)">';
 			}
 
 			echo '<td>'.$c.'</td>';
 			if (!empty($j['time_in'])) {
 				echo '<td>'.$j['time_in_day'].'</td>';
 				echo '<td>'.$j['time_in_shift'].'</td>';
+				echo '<td>'.$j['shift_group'].'</td>';
 			} else {
 				echo '<td>'.$j['absent_day'].'</td>';
-				echo '<td>'.$j['absent_shift'].'</td>';
+				echo '<td></td>';
+				echo '<td>'.$j['absent_shift_group'].'</td>';
 			}
 			echo '<td>'.$j['provider'].'</td>';
 			echo '<td>'.$j['emp_no'].'</td>';
@@ -303,12 +305,12 @@ if ($method == 'save_absence_details') {
 	$id = $_POST['id'];
 	$emp_no = trim($_POST['emp_no']);
 	$absent_day = trim($_POST['absent_day']);
-	$absent_shift = trim($_POST['absent_shift']);
+	$absent_shift_group = trim($_POST['absent_shift_group']);
 	$absent_type = trim($_POST['absent_type']);
 	$reason = trim($_POST['reason']);
 
 	if (empty($id)) {
-		$sql = "INSERT INTO t_absences (`emp_no`, `day`, `shift`, `absent_type`, `reason`) VALUES ('$emp_no', '$absent_day', '$absent_shift', '$absent_type', '$reason')";
+		$sql = "INSERT INTO t_absences (`emp_no`, `day`, `shift_group`, `absent_type`, `reason`) VALUES ('$emp_no', '$absent_day', '$absent_shift_group', '$absent_type', '$reason')";
 		$stmt = $conn->prepare($sql);
 		if ($stmt->execute()) {
 			echo 'success';
@@ -316,7 +318,7 @@ if ($method == 'save_absence_details') {
 			echo 'error';
 		}
 	} else {
-		$sql = "UPDATE t_absences SET emp_no = '$emp_no', day = '$absent_day', shift = '$absent_shift', absent_type = '$absent_type', reason = '$reason' WHERE id = '$id'";
+		$sql = "UPDATE t_absences SET emp_no = '$emp_no', day = '$absent_day', shift_group = '$absent_shift_group', absent_type = '$absent_type', reason = '$reason' WHERE id = '$id'";
 		$stmt = $conn->prepare($sql);
 		if ($stmt->execute()) {
 			echo 'success';

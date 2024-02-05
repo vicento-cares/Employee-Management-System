@@ -121,13 +121,15 @@ if (!isset($_SESSION['emp_no'])) {
   $dept = '';
   $section = '';
   $line_no = '';
+  $shift_group = '';
   $unregistered = '';
   $wrong_scanning = '';
+  $wrong_shift_group = '';
   $no_time_in = '';
   $already_time_in = '';
   $allow_time_out = '';
 
-  $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `line_no` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
+  $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
   $stmt = $conn -> prepare($sql);
   $stmt -> execute();
 
@@ -138,6 +140,7 @@ if (!isset($_SESSION['emp_no'])) {
       $dept = $row['dept'];
       $section = $row['section'];
       $line_no = $row['line_no'];
+      $shift_group = $row['shift_group'];
       // Added Temporarily
       if(empty($full_name)) {
         $full_name = ' ';
@@ -159,29 +162,12 @@ if (!isset($_SESSION['emp_no'])) {
     }
 
     if ($wrong_scanning != true) {
-      $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-      $stmt = $conn -> prepare($sql);
-      $stmt -> execute();
-
-      if ($stmt -> rowCount() > 0) {
-        while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-          $day = $row['day'];
-          $shift = $row['shift'];
-        }
-
-        // Check Shuttle Allocation for Time Out
-        /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
-        if ($allow_time_out == true) {
-          set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-        }*/
-
-        // Temporary Allow Timeout W/O Shuttle Allocation
-        $allow_time_out = true;
-        set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-
+      if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+        $wrong_shift_group = true;
+      } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
+        $wrong_shift_group = true;
       } else {
-
-        $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+        $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
         $stmt = $conn -> prepare($sql);
         $stmt -> execute();
 
@@ -203,17 +189,40 @@ if (!isset($_SESSION['emp_no'])) {
 
         } else {
 
-          $shift = get_shift($server_time);
-
-          $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND shift = '$shift'";
+          $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
           $stmt = $conn -> prepare($sql);
           $stmt -> execute();
-          if ($stmt -> rowCount() < 1) {
-            $no_time_in = true;
+
+          if ($stmt -> rowCount() > 0) {
+            while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+              $day = $row['day'];
+              $shift = $row['shift'];
+            }
+
+            // Check Shuttle Allocation for Time Out
+            /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
+            if ($allow_time_out == true) {
+              set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
+            }*/
+
+            // Temporary Allow Timeout W/O Shuttle Allocation
+            $allow_time_out = true;
+            set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
+
           } else {
-            $already_time_out = true;
+
+            $shift = get_shift($server_time);
+
+            $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND shift = '$shift'";
+            $stmt = $conn -> prepare($sql);
+            $stmt -> execute();
+            if ($stmt -> rowCount() < 1) {
+              $no_time_in = true;
+            } else {
+              $already_time_out = true;
+            }
+            
           }
-          
         }
       }
     }
@@ -276,6 +285,14 @@ if (!isset($_SESSION['emp_no'])) {
       <div class="card mt-2">
         <div class="card-body">
           <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC</b></p>
+        </div>
+      </div>
+    <?php
+      } else if (!empty($wrong_shift_group)) {
+    ?>
+      <div class="card mt-2">
+        <div class="card-body">
+          <p class="login-box-msg"><b>WRONG or NO Shift Group</b></p>
         </div>
       </div>
     <?php

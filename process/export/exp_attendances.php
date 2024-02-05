@@ -11,14 +11,14 @@ require('../conn.php');
 
 switch (true) {
     case !isset($_GET['day']):
-    case !isset($_GET['shift']):
+    case !isset($_GET['shift_group']):
         echo 'Query Parameters Not Set';
         exit;
         break;
 }
 
 $day = $_GET['day'];
-$shift = $_GET['shift'];
+$shift_group = $_GET['shift_group'];
 //$dept = $_SESSION['dept'];
 $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
@@ -34,7 +34,7 @@ if (!empty($section)) {
 if (!empty($line_no)) {
 	$filename = $filename . $line_no . "-";
 }
-$filename = $filename . $day."-".$shift.".csv";
+$filename = $filename . $day."-".$shift_group.".csv";
  
 // Create a file pointer 
 $f = fopen('php://memory', 'w'); 
@@ -43,7 +43,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -56,13 +56,13 @@ fputcsv($f, $fields, $delimiter);
 		AND tio.shift = '$shift'
 	WHERE emp.dept = '$dept'";*/
 $sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.resigned_date, 
+	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.time_in
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio 
 		ON emp.emp_no = tio.emp_no
 	WHERE tio.day = '$day' 
-	AND tio.shift = '$shift'
+	AND emp.shift_group = '$shift_group'
 	AND emp.dept != ''";
 if (!empty($section)) {
 	$sql = $sql . " AND emp.section = '$section'";
@@ -99,7 +99,7 @@ if ($stmt -> rowCount() > 0) {
 			$row_status = 'Absent';
 		}
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row_status); 
+        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row_status); 
         fputcsv($f, $lineData, $delimiter);
     } 
 }

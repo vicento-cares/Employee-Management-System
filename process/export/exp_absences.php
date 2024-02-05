@@ -11,14 +11,14 @@ require('../conn.php');
 
 switch (true) {
     case !isset($_GET['day']):
-    case !isset($_GET['shift']):
+    case !isset($_GET['shift_group']):
         echo 'Query Parameters Not Set';
         exit;
         break;
 }
 
 $day = $_GET['day'];
-$shift = $_GET['shift'];
+$shift_group = $_GET['shift_group'];
 //$dept = $_SESSION['dept'];
 $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
@@ -34,7 +34,7 @@ if (!empty($section)) {
 if (!empty($line_no)) {
 	$filename = $filename . $line_no . "-";
 }
-$filename = $filename . $day."-".$shift.".csv";
+$filename = $filename . $day."-".$shift_group.".csv";
  
 // Create a file pointer 
 $f = fopen('php://memory', 'w'); 
@@ -59,7 +59,7 @@ $sql = "SELECT
 	FROM m_employees emp
 	LEFT JOIN 
 	t_absences absences ON absences.emp_no = emp.emp_no
-	WHERE absences.day = '$day' AND absences.shift = '$shift' AND absences.absent_type != '' AND absences.reason != '' 
+	WHERE absences.day = '$day' AND absences.shift_group = '$shift_group' AND absences.absent_type != '' AND absences.reason != '' 
 	AND emp.dept != ''";
 if (!empty($section)) {
 	$sql = $sql . " AND emp.section = '$section'";

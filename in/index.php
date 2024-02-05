@@ -48,11 +48,13 @@ if (!isset($_SESSION['emp_no'])) {
   $dept = '';
   $section = '';
   $line_no = '';
+  $shift_group = '';
   $unregistered = '';
   $wrong_scanning = '';
+  $wrong_shift_group = '';
   $already_time_in = '';
 
-  $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `line_no` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
+  $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
   $stmt = $conn -> prepare($sql);
   $stmt -> execute();
 
@@ -63,6 +65,7 @@ if (!isset($_SESSION['emp_no'])) {
       $dept = $row['dept'];
       $section = $row['section'];
       $line_no = $row['line_no'];
+      $shift_group = $row['shift_group'];
       // Added Temporarily
       if(empty($full_name)) {
         $full_name = ' ';
@@ -71,6 +74,10 @@ if (!isset($_SESSION['emp_no'])) {
 
     if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
       $wrong_scanning = true;
+    } else if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+      $wrong_shift_group = true;
+    } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
+      $wrong_shift_group = true;
     } else {
       // Set Day (Revised 2024-01-10)
       if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
@@ -148,6 +155,14 @@ if (!isset($_SESSION['emp_no'])) {
         <div class="card mt-2">
           <div class="card-body">
             <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC</b></p>
+          </div>
+        </div>
+    <?php
+      } else if (!empty($wrong_shift_group)) {
+    ?>
+        <div class="card mt-2">
+          <div class="card-body">
+            <p class="login-box-msg"><b>WRONG or NO Shift Group</b></p>
           </div>
         </div>
     <?php

@@ -2,9 +2,12 @@
 
 if (isset($_SESSION['emp_no'])) {
   if ($_SESSION['role'] == 'admin') {
-     header('location: home.php');
-     exit;
- }
+    header('location: home.php');
+    exit;
+  } else if ($_SESSION['role'] == 'user') {
+    header('location: home.php');
+    exit;
+  }
 }
 ?>
 <!DOCTYPE html>

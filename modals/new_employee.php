@@ -68,7 +68,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-6">
+          <div class="col-4">
             <label>Provider:</label>
             <select id="provider_master" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Provider</option>
@@ -78,6 +78,14 @@
               <option value="ONE SOURCE">ONE SOURCE</option>
               <option value="MEGATREND">MEGATREND</option>
               <option value="ADD EVEN">ADD EVEN</option>
+            </select>
+          </div>
+          <div class="col-2">
+            <label>Shift Group:</label>
+            <select id="shift_group_master" class="form-control" style="height:45px; border: 1px solid black;">
+              <option value="">Select Shift Group</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
             </select>
           </div>
           <div class="col-6">
@@ -94,7 +102,6 @@
               <option value="Lipa Malapit">Lipa Malapit</option>
               <option value="Malvar">Malvar</option>
               <option value="Sto. Tomas Malayo">Sto. Tomas Malayo</option>
-              <option value="San Lucas">San Lucas</option>
               <option value="San Pablo via Sto. Tomas">San Pablo via Sto. Tomas</option>
               <option value="San Pablo via Lipa">San Pablo via Lipa</option>
             </select>
