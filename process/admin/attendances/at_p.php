@@ -47,10 +47,10 @@ function count_emp_tio($search_arr, $conn) {
 		$sql = $sql . " AND emp.dept != ''";
 	}
 	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND emp.section = '".$search_arr['section']."'";
+		$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
 	}
 	if (!empty($search_arr['line_no'])) {
-		$sql = $sql . " AND emp.line_no = '".$search_arr['line_no']."'";
+		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
 	$stmt = $conn->prepare($sql);
