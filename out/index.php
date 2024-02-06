@@ -284,7 +284,7 @@ if (!isset($_SESSION['emp_no'])) {
     ?>
       <div class="card mt-2">
         <div class="card-body">
-          <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC</b></p>
+          <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC<br>Note: If this was your new Line, please submit transfer form to HR</b></p>
         </div>
       </div>
     <?php
