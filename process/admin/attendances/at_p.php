@@ -227,7 +227,7 @@ if ($method == 'get_attendance_list') {
 	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no
+		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept = '$dept'";

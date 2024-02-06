@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2024 at 04:09 AM
+-- Generation Time: Feb 06, 2024 at 01:00 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 7.4.25
 
@@ -63,6 +63,7 @@ CREATE TABLE `m_accounts` (
   `dept` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `section` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `line_no` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shift_group` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -71,17 +72,18 @@ CREATE TABLE `m_accounts` (
 -- Dumping data for table `m_accounts`
 --
 
-INSERT INTO `m_accounts` (`id`, `emp_no`, `full_name`, `dept`, `section`, `line_no`, `role`, `date_updated`) VALUES
-(1, '22-08675', 'Alcantara, Vince Dale D.', 'IT', NULL, NULL, 'admin', '2023-11-30 07:46:49'),
-(2, '13-0446', 'Ibana,  Gemlet D.', 'IT', NULL, NULL, 'admin', '2023-11-30 07:46:49'),
-(3, '14-01871', 'Jalla, John Bernard L.', 'IT', NULL, NULL, 'admin', '2023-11-30 07:46:49'),
-(4, '23-09881', 'Jonnel Guevarra M.', 'IT', NULL, NULL, 'admin', '2023-11-30 07:46:49'),
-(5, '14-01899', 'Bathan, Laurice A.', 'IT', NULL, NULL, 'admin', '2023-11-30 07:46:49'),
-(6, '15-03029', 'Fulo, Eduardo Jr. S.', 'IT', NULL, NULL, 'user', '2024-01-26 09:08:58'),
-(8, '1', '1', 'PD2', 'FSP', 'Battery Initial', 'user', '2024-01-19 14:39:44'),
-(9, '2', '2', 'PD2', 'FAP3', '3169', 'user', '2024-01-19 14:45:05'),
-(10, '3', '3', 'PD2', 'FAP1', '1008', 'user', '2024-01-19 14:48:55'),
-(11, '21-06347', 'Macatangay, Jake N.', 'IT', '', '', 'user', '2024-01-26 09:37:54');
+INSERT INTO `m_accounts` (`id`, `emp_no`, `full_name`, `dept`, `section`, `line_no`, `shift_group`, `role`, `date_updated`) VALUES
+(1, '22-08675', 'Alcantara, Vince Dale D.', 'IT', NULL, NULL, NULL, 'admin', '2023-11-30 07:46:49'),
+(2, '13-0446', 'Ibana,  Gemlet D.', 'IT', NULL, NULL, NULL, 'admin', '2023-11-30 07:46:49'),
+(3, '14-01871', 'Jalla, John Bernard L.', 'IT', NULL, NULL, NULL, 'admin', '2023-11-30 07:46:49'),
+(4, '23-09881', 'Jonnel Guevarra M.', 'IT', NULL, NULL, NULL, 'admin', '2023-11-30 07:46:49'),
+(5, '14-01899', 'Bathan, Laurice A.', 'IT', NULL, NULL, NULL, 'admin', '2023-11-30 07:46:49'),
+(6, '15-03029', 'Fulo, Eduardo Jr. S.', 'IT', NULL, NULL, NULL, 'user', '2024-01-26 09:08:58'),
+(8, '1', '1', 'PD2', 'FSP', 'Battery Initial', NULL, 'user', '2024-01-19 14:39:44'),
+(9, '2', '2', 'PD2', 'FAP3', '3169', NULL, 'user', '2024-01-19 14:45:05'),
+(10, '3', '3', 'PD2', 'FAP1', '1008', 'A', 'user', '2024-02-05 11:51:22'),
+(11, '21-06347', 'Macatangay, Jake N.', 'IT', '', '', NULL, 'user', '2024-01-26 09:37:54'),
+(12, '33', '33', 'QA', 'QA', '1008', 'B', 'user', '2024-02-05 11:51:27');
 
 -- --------------------------------------------------------
 
@@ -217,7 +219,14 @@ INSERT INTO `m_employees` (`id`, `emp_no`, `full_name`, `dept`, `section`, `line
 (29, '23-10525', 'Maranan, Allyssa Kate B.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-09-06', 'Alitagtag, Batangas', '09284692676', 'Probationary', 'Sta. Teresita', '', '', '', '', '', '', 0, '0000-00-00', '2024-01-26 09:08:21'),
 (41, '1', '1', 'PD2', 'FSP', 'Battery Initial', 'Associate', 'FAS', 'M', NULL, '2024-01-18', '1', '1', 'Probationary', 'Batangas', '', '', '', '', '', '', 0, NULL, '2024-01-19 14:39:24'),
 (42, '2', '2', 'PD2', 'FAP3', '3169', 'Jr. Staff', 'FAS', 'F', NULL, '2024-01-01', '2', '2', 'Regular', 'Ibaan', '', '', '', '', '', '', 0, NULL, '2024-01-19 14:44:37'),
-(43, '3', '3', 'PD2', 'FAP1', '1008', 'Jr. Staff', 'FAS', 'M', NULL, '2023-10-29', '3', '3', 'Regular', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, NULL, '2024-01-19 14:48:35');
+(43, '3', '3', 'PD2', 'FAP1', '1008', 'Jr. Staff', 'FAS', 'M', 'A', '2023-10-29', '3', '3', 'Regular', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, NULL, '2024-02-05 11:23:37'),
+(44, '3-1', '3-1', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Batangas', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:42'),
+(45, '3-2', '3-2', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Padre Garcia', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:44'),
+(46, '3-3', '3-3', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'San Pablo via Lipa', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:46'),
+(47, '3-4', '3-4', 'QA', 'QA', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:26:55'),
+(48, '3-5', '3-5', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:50'),
+(49, '3-6', '3-6', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:53'),
+(50, '33', '33', 'QA', 'QA', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:26:17');
 
 -- --------------------------------------------------------
 
@@ -334,7 +343,7 @@ CREATE TABLE `t_absences` (
   `id` int(10) UNSIGNED NOT NULL,
   `emp_no` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `day` date NOT NULL DEFAULT current_timestamp(),
-  `shift` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shift_group` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `absent_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `reason` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -344,9 +353,10 @@ CREATE TABLE `t_absences` (
 -- Dumping data for table `t_absences`
 --
 
-INSERT INTO `t_absences` (`id`, `emp_no`, `day`, `shift`, `absent_type`, `reason`, `date_updated`) VALUES
-(2, '14-01871', '2023-07-28', 'DS', 'SL', 'Flu', '2023-11-10 11:10:37'),
-(3, '14-01899', '2023-07-28', 'DS', 'VL', 'Family Gathering', '2023-11-10 11:10:55');
+INSERT INTO `t_absences` (`id`, `emp_no`, `day`, `shift_group`, `absent_type`, `reason`, `date_updated`) VALUES
+(2, '14-01871', '2023-07-28', NULL, 'SL', 'Flu', '2024-02-05 17:09:09'),
+(3, '14-01899', '2023-07-28', NULL, 'VL', 'Family Gathering', '2024-02-05 17:09:11'),
+(4, '3-1', '2024-02-05', 'A', 'VL', 'blah', '2024-02-05 17:25:31');
 
 -- --------------------------------------------------------
 
@@ -536,7 +546,8 @@ INSERT INTO `t_notif_line_support` (`id`, `emp_no`, `pending_ls`, `accepted_ls`,
 (7, '22-08675', 0, 0, 0),
 (8, '23-09881', 0, 0, 0),
 (9, '3', 0, 0, 0),
-(16, '21-06347', 0, 0, 0);
+(16, '21-06347', 0, 0, 0),
+(17, '33', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -644,7 +655,8 @@ INSERT INTO `t_time_in_out` (`id`, `emp_no`, `day`, `shift`, `time_in`, `time_ou
 (87, 'MWM00019291', '2024-01-22', 'DS', '2024-01-22 09:55:44', '2024-01-22 09:58:29', '172.25.112.131', '2024-01-22 09:58:29'),
 (88, '23-10284', '2024-01-22', 'DS', '2024-01-22 09:55:48', '2024-01-22 09:58:09', '172.25.112.131', '2024-01-22 09:58:09'),
 (90, '1', '2024-01-24', 'DS', '2024-01-24 13:04:34', NULL, '172.25.114.229', '2024-01-24 13:04:34'),
-(91, '3', '2024-01-26', 'DS', '2024-01-26 10:08:55', NULL, '172.25.112.131', '2024-01-26 10:08:55');
+(91, '3', '2024-01-26', 'DS', '2024-01-26 10:08:55', NULL, '172.25.112.131', '2024-01-26 10:08:55'),
+(92, '3', '2024-02-05', 'NS', '2024-02-05 17:22:57', NULL, '172.25.112.131', '2024-02-05 17:22:57');
 
 --
 -- Indexes for dumped tables
@@ -721,7 +733,7 @@ ALTER TABLE `t_absences`
   ADD PRIMARY KEY (`id`),
   ADD KEY `emp_no` (`emp_no`),
   ADD KEY `day` (`day`),
-  ADD KEY `shift` (`shift`);
+  ADD KEY `shift_group` (`shift_group`);
 
 --
 -- Indexes for table `t_leave_form`
@@ -799,7 +811,7 @@ ALTER TABLE `m_access_locations`
 -- AUTO_INCREMENT for table `m_accounts`
 --
 ALTER TABLE `m_accounts`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `m_clinic_accounts`
@@ -817,7 +829,7 @@ ALTER TABLE `m_dept`
 -- AUTO_INCREMENT for table `m_employees`
 --
 ALTER TABLE `m_employees`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `m_hr_accounts`
@@ -847,7 +859,7 @@ ALTER TABLE `m_shuttle_routes`
 -- AUTO_INCREMENT for table `t_absences`
 --
 ALTER TABLE `t_absences`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `t_leave_form`
@@ -877,7 +889,7 @@ ALTER TABLE `t_line_support_history`
 -- AUTO_INCREMENT for table `t_notif_line_support`
 --
 ALTER TABLE `t_notif_line_support`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `t_shuttle_allocation`
@@ -889,7 +901,7 @@ ALTER TABLE `t_shuttle_allocation`
 -- AUTO_INCREMENT for table `t_time_in_out`
 --
 ALTER TABLE `t_time_in_out`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

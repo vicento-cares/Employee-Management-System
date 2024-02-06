@@ -113,7 +113,7 @@ if (isset($_POST['login_btn'])) {
                 $_SESSION['role'] = $role;
                 header('location: home.php');
             } else {
-                echo '<script>alert("Sign In Failed. Login in WRONG Line")</script>';
+                echo '<script>alert("Sign In Failed. Login in WRONG Line \nNote: If this was your new Line, please submit transfer form to HR")</script>';
             }
         } else {
             echo '<script>alert("Sign In Failed. Maybe an incorrect credential or account not found")</script>';
