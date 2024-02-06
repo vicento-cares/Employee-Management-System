@@ -103,7 +103,16 @@ if (isset($_POST['login_btn'])) {
                 $shift_group = $x['shift_group'];
                 $role = $x['role'];
             }
-            if ($response_arr['line_no'] == $line_no) {
+            if ($role == 'admin') {
+                $_SESSION['emp_no'] = $emp_no;
+                $_SESSION['full_name'] = $full_name;
+                $_SESSION['dept'] = $dept;
+                $_SESSION['section'] = $section;
+                $_SESSION['line_no'] = $line_no;
+                $_SESSION['shift_group'] = $shift_group;
+                $_SESSION['role'] = $role;
+                header('location: home.php');
+            } else if ($response_arr['line_no'] == $line_no) {
                 $_SESSION['emp_no'] = $emp_no;
                 $_SESSION['full_name'] = $full_name;
                 $_SESSION['dept'] = $dept;
