@@ -86,10 +86,10 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.', 'Position', 'Provider', 'Gender', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Jr. Staff or Staff', 'Supervisor', 'Approver', 'Date Resigned'); 
+$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.', 'Process', 'Position', 'Provider', 'Gender', 'Shift Group', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Jr. Staff or Staff', 'Supervisor', 'Approver', 'Date Resigned'); 
 fputcsv($f, $fields, $delimiter); 
 
-$query = "SELECT emp_no, full_name, dept, section, line_no, position, provider, gender, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned_date FROM m_employees WHERE";
+$query = "SELECT emp_no, full_name, dept, section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned_date FROM m_employees WHERE";
 if (!empty($emp_no)) {
   $query = $query . " emp_no LIKE '".$emp_no."%'";
 } else {
@@ -130,7 +130,7 @@ if ($stmt -> rowCount() > 0) {
     // Output each row of the data, format line as csv and write to file pointer 
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
 
-        $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['position'], $row['provider'], $row['gender'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
+        $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['process'], $row['position'], $row['provider'], $row['gender'], $row['shift_group'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
         fputcsv($f, $lineData, $delimiter); 
 	    
     }
