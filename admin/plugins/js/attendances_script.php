@@ -1,4 +1,7 @@
 <script type="text/javascript">
+// AJAX IN PROGRESS GLOBAL VARS
+var get_attendance_list_ajax_in_process = false;
+
 // DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById('attendance_date_search').value = '<?=$server_date_only?>';
@@ -32,6 +35,32 @@ const get_next_page = () => {
     }
 }
 
+const get_attendance_list_counting = () => {
+    var day = sessionStorage.getItem('attendance_date_search');
+    var shift_group = sessionStorage.getItem('shift_group_search');
+    var dept = sessionStorage.getItem('dept_search');
+
+    $.ajax({
+        url:'../process/admin/attendances/at_p.php',
+        type:'POST',
+        cache:false,
+        data:{
+            method:'get_attendance_list_counting',
+            day:day,
+            shift_group:shift_group,
+            dept:dept
+        },
+        beforeSend: () => {
+            var loading = `<tr id="loading_counting"><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+            document.getElementById("attendanceCountData").innerHTML = loading;
+        }, 
+        success:function(response){
+            $('#loading_counting').remove();
+            $('#attendanceCountTable tbody').html(response);
+        }
+    });
+}
+
 const count_attendance_present = () => {
     var day = sessionStorage.getItem('attendance_date_search');
     var shift_group = sessionStorage.getItem('shift_group_search');
@@ -50,7 +79,9 @@ const count_attendance_present = () => {
             let present = parseInt(response);
             let absent = total - present;
             $('#count_view_present').html(present);
+            $('#counting_view_present').html(present);
             $('#count_view_absent').html(absent);
+            $('#counting_view_absent').html(absent);
 
             /*let present = $('#attendanceTable tbody tr.bg-success').length;
             let absent = $('#attendanceTable tbody tr.bg-danger').length;
@@ -63,6 +94,7 @@ const count_attendance_present = () => {
 const count_attendance_list = () => {
     var day = sessionStorage.getItem('attendance_date_search');
     var shift_group = sessionStorage.getItem('shift_group_search');
+    var dept = sessionStorage.getItem('dept_search');
     $.ajax({
         url:'../process/admin/attendances/at_p.php',
         type:'POST',
@@ -70,12 +102,14 @@ const count_attendance_list = () => {
         data:{
             method:'count_attendance_list',
             day:day,
-            shift_group:shift_group
+            shift_group:shift_group,
+            dept:dept
         }, 
         success:function(response){
             sessionStorage.setItem('count_rows', response);
             var count = `Total: ${response}`;
             $('#attendanceTableInfo').html(count);
+            $('#attendanceCountTableInfo').html(response);
 
             if (response > 0) {
                 count_attendance_present();
@@ -83,7 +117,13 @@ const count_attendance_list = () => {
             } else {
                 document.getElementById("btnNextPage").style.display = "none";
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
+                $('#count_view_present').html(0);
+                $('#counting_view_present').html(0);
+                $('#count_view_absent').html(0);
+                $('#counting_view_absent').html(0);
             }
+
+            get_attendance_list_counting();
         }
     });
 }
@@ -91,6 +131,7 @@ const count_attendance_list = () => {
 const get_attendances_last_page = () =>{
     var day = sessionStorage.getItem('attendance_date_search');
     var shift_group = sessionStorage.getItem('shift_group_search');
+    var dept = sessionStorage.getItem('dept_search');
     var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
     $.ajax({
         url:'../process/admin/attendances/at_p.php',
@@ -99,7 +140,8 @@ const get_attendances_last_page = () =>{
         data:{
             method:'attendance_list_last_page',
             day:day,
-            shift_group:shift_group
+            shift_group:shift_group,
+            dept:dept
         },
         success:function(response){
             sessionStorage.setItem('last_page', response);
@@ -117,25 +159,38 @@ const get_attendances_last_page = () =>{
 }
 
 const get_attendance_list = current_page =>{
+    // If an AJAX call is already in progress, return immediately
+    if (get_attendance_list_ajax_in_process) {
+        return;
+    }
+
     let day = document.getElementById('attendance_date_search').value;
     let shift_group = document.getElementById('shift_group_search').value;
+    let dept = document.getElementById('dept_search').value;
 
     var day1 = sessionStorage.getItem('attendance_date_search');
     var shift_group1 = sessionStorage.getItem('shift_group_search');
+    var dept1 = sessionStorage.getItem('dept_search');
 
     if (current_page > 1) {
         switch(true) {
             case day !== day1:
             case shift_group !== shift_group1:
+            case dept !== dept1:
                 day = day1;
                 shift_group = shift_group1;
+                dept = dept1;
                 break;
             default:
         }
     } else {
         sessionStorage.setItem('attendance_date_search', day);
         sessionStorage.setItem('shift_group_search', shift_group);
+        sessionStorage.setItem('dept_search', dept);
     }
+
+    // Set the flag to true as we're starting an AJAX call
+    get_attendance_list_ajax_in_process = true;
 
     $.ajax({
         url:'../process/admin/attendances/at_p.php',
@@ -145,18 +200,23 @@ const get_attendance_list = current_page =>{
             method:'get_attendance_list',
             day:day,
             shift_group:shift_group,
+            dept:dept,
             current_page:current_page
         },
-        beforeSend: () => {
+        beforeSend: (jqXHR, settings) => {
+            document.getElementById("btnNextPage").setAttribute('disabled', true);
             var loading = `<tr id="loading"><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
             if (current_page == 1) {
                 document.getElementById("attendanceData").innerHTML = loading;
             } else {
                 $('#attendanceTable tbody').append(loading);
             }
+            jqXHR.url = settings.url;
+            jqXHR.type = settings.type;
         }, 
         success:function(response){
             $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
             if (current_page == 1) {
                 $('#attendanceTable tbody').html(response);
             } else {
@@ -164,7 +224,16 @@ const get_attendance_list = current_page =>{
             }
             sessionStorage.setItem('attendanceTablePagination', current_page);
             count_attendance_list();
+            // Set the flag back to false as the AJAX call has completed
+            get_attendance_list_ajax_in_process = false;
         }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+        console.log(jqXHR);
+        console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+        $('#loading').remove();
+        document.getElementById("btnNextPage").removeAttribute('disabled');
+        // Set the flag back to false as the AJAX call has completed
+        get_attendance_list_ajax_in_process = false;
     });
 }
 
@@ -278,12 +347,21 @@ const save_absence_details =()=>{
 const export_attendances = () => {
     let day = sessionStorage.getItem('attendance_date_search');
     let shift_group = sessionStorage.getItem('shift_group_search');
-    window.open('../process/export/exp_attendances.php?day='+day+"&shift_group="+shift_group,'_blank');
+    let dept = sessionStorage.getItem('dept_search');
+    window.open('../process/export/exp_attendances.php?day='+day+"&shift_group="+shift_group+"&dept="+dept,'_blank');
 }
 
 const export_absences = () => {
     let day = sessionStorage.getItem('attendance_date_search');
     let shift_group = sessionStorage.getItem('shift_group_search');
-    window.open('../process/export/exp_absences.php?day='+day+"&shift_group="+shift_group,'_blank');
+    let dept = sessionStorage.getItem('dept_search');
+    window.open('../process/export/exp_absences.php?day='+day+"&shift_group="+shift_group+"&dept="+dept,'_blank');
+}
+
+const export_attendances_counting = () => {
+    let day = sessionStorage.getItem('attendance_date_search');
+    let shift_group = sessionStorage.getItem('shift_group_search');
+    let dept = sessionStorage.getItem('dept_search');
+    window.open('../process/export/exp_attendances_counting.php?day='+day+"&shift_group="+shift_group+"&dept="+dept,'_blank');
 }
 </script>

@@ -13,7 +13,7 @@ function count_attendance_list($search_arr, $conn) {
 		FROM m_employees
 		WHERE shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND dept = '".$search_arr['dept']."'";
+		$sql = $sql . " AND dept LIKE '".$search_arr['dept']."%'";
 	} else {
 		$sql = $sql . " AND dept != ''";
 	}
@@ -42,7 +42,7 @@ function count_emp_tio($search_arr, $conn) {
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
 			WHERE tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept = '".$search_arr['dept']."'";
+		$sql = $sql . " AND emp.dept LIKE '".$search_arr['dept']."%'";
 	} else {
 		$sql = $sql . " AND emp.dept != ''";
 	}
@@ -86,7 +86,11 @@ if ($method == 'count_attendance_present') {
 			$line_no = '';
 		}
 	} else {
-		$dept = '';
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
@@ -123,7 +127,11 @@ if ($method == 'count_attendance_list') {
 			$line_no = '';
 		}
 	} else {
-		$dept = '';
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
@@ -160,7 +168,11 @@ if ($method == 'attendance_list_last_page') {
 			$line_no = '';
 		}
 	} else {
-		$dept = '';
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
@@ -204,7 +216,11 @@ if ($method == 'get_attendance_list') {
 			$line_no = '';
 		}
 	} else {
-		$dept = '';
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
@@ -230,7 +246,7 @@ if ($method == 'get_attendance_list') {
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept = '$dept'";
+		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
 		$sql = $sql . " AND emp.dept != ''";
 	}
@@ -298,6 +314,94 @@ if ($method == 'get_attendance_list') {
 		echo '<tr>';
 			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
+	}
+}
+
+if ($method == 'get_attendance_list_counting') {
+	$day = $_POST['day'];
+	$shift_group = $_POST['shift_group'];
+
+	if (!empty($_SESSION['emp_no_hr'])) {
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
+		if (!empty($_POST['section'])) {
+			$section = addslashes($_POST['section']);
+		} else {
+			$section = '';
+		}
+		if (!empty($_POST['line_no'])) {
+			$line_no = addslashes($_POST['line_no']);
+		} else {
+			$line_no = '';
+		}
+	} else {
+		if (!empty($_POST['dept'])) {
+			$dept = addslashes($_POST['dept']);
+		} else {
+			$dept = '';
+		}
+		$section = '';
+		$line_no = $_SESSION['line_no'];
+	}
+
+	$c = 0;
+	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
+	$row_class = $row_class_arr[0];
+
+	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+			COUNT(tio.emp_no) AS total_present, 
+			COUNT(emp.emp_no) AS total 
+		FROM m_employees emp
+		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+		WHERE emp.shift_group = '$shift_group'";
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept LIKE '$dept%'";
+	} else {
+		$sql = $sql . " AND emp.dept != ''";
+	}
+	if (!empty($section)) {
+		$sql = $sql . " AND emp.section LIKE '$section%'";
+	}
+	if (!empty($line_no)) {
+		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+	}
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " GROUP BY emp.process";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $row){
+			$c++;
+
+			$total = intval($row['total']);
+			$total_present = intval($row['total_present']);
+			$total_absent = $total - $total_present;
+
+			if ($row['process'] == 'No Process') {
+				$row_class = $row_class_arr[4];
+			} else if ($total_present == $total) {
+				$row_class = $row_class_arr[1];
+			} else if ($total_present < $total && $total_present > 0) {
+				$row_class = $row_class_arr[2];
+			} else if ($total_present < 1) {
+				$row_class = $row_class_arr[3];
+			} else {
+				$row_class = $row_class_arr[0];
+			}
+			
+			echo '<tr class="'.$row_class.'">';
+			echo '<td>'.$c.'</td>';
+			echo '<td>'.$row['process'].'</td>';
+			echo '<td>'.$row['total_present'].'</td>';
+			echo '<td>'.$total_absent.'</td>';
+			echo '<td>'.$row['total'].'</td>';
+
+			echo '</tr>';
+		}
 	}
 }
 

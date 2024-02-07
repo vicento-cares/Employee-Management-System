@@ -12,6 +12,7 @@ require('../conn.php');
 switch (true) {
     case !isset($_GET['day']):
     case !isset($_GET['shift_group']):
+	case !isset($_GET['dept']):
         echo 'Query Parameters Not Set';
         exit;
         break;
@@ -19,7 +20,7 @@ switch (true) {
 
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
-//$dept = $_SESSION['dept'];
+$dept = $_GET['dept'];
 $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
 
@@ -28,6 +29,9 @@ $c = 0;
 $delimiter = ","; 
 
 $filename = "EmpMgtSys_AttendanceList_";
+if (!empty($dept)) {
+	$filename = $filename . $dept . "-";
+}
 if (!empty($section)) {
 	$filename = $filename . $section . "-";
 }
@@ -62,8 +66,12 @@ $sql = "SELECT
 	LEFT JOIN t_time_in_out AS tio 
 		ON emp.emp_no = tio.emp_no
 	WHERE tio.day = '$day' 
-	AND emp.shift_group = '$shift_group'
-	AND emp.dept != ''";
+	AND emp.shift_group = '$shift_group'";
+if (!empty($dept)) {
+	$sql = $sql . " AND emp.dept LIKE '$dept%'";
+} else {
+	$sql = $sql . " AND emp.dept != ''";
+}
 if (!empty($section)) {
 	$sql = $sql . " AND emp.section = '$section'";
 }

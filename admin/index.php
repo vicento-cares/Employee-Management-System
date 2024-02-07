@@ -36,11 +36,11 @@ if (isset($_SESSION['emp_no'])) {
     <!-- /.login-logo -->
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="login-box-msg"><b>Scan QR Code or Type your ID Number</b></p>
+        <p class="login-box-msg"><b>Scan QR Code</b></p>
 
         <form action="" method="POST" id="login_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" autocomplete="off" required>
+            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" oncopy="return false" onpaste="return false" autofocus autocomplete="off" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-lock"></span>

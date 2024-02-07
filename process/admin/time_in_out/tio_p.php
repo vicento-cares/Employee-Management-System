@@ -9,17 +9,27 @@ $method = $_POST['method'];
 // Home
 
 if ($method == 'get_attendance_date_ds') {
-	if ($server_time >= '03:00:00' && $server_time <= '23:59:59') {
+	// if ($server_time >= '03:00:00' && $server_time <= '23:59:59') {
+	// 	echo $server_date_only;
+	// } else if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+	// 	echo $server_date_only_yesterday;
+	// }
+	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
 		echo $server_date_only;
-	} else if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
 		echo $server_date_only_yesterday;
 	}
 }
 
 if ($method == 'get_attendance_date_ns') {
-	if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
+	// if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
+	// 	echo $server_date_only;
+	// } else if ($server_time >= '00:00:00' && $server_time < '15:00:00') {
+	// 	echo $server_date_only_yesterday;
+	// }
+	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
 		echo $server_date_only;
-	} else if ($server_time >= '00:00:00' && $server_time < '15:00:00') {
+	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
 		echo $server_date_only_yesterday;
 	}
 }
@@ -30,7 +40,7 @@ if ($method == 'get_recent_time_in_out_ds') {
 
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
-	$shift = 'DS';
+	$shift_group = 'A';
 	$c = 0;
 	/*$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
 		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
@@ -60,7 +70,7 @@ if ($method == 'get_recent_time_in_out_ds') {
 	} else {
 		$sql = $sql . " AND emp.line_no IS NULL";
 	}
-	$sql = $sql . " AND tio.shift = '$shift'";
+	$sql = $sql . " AND emp.shift_group = '$shift_group'";
 
 	// Search by IP
 	if ($ip != '172.25.112.131') {
@@ -69,9 +79,14 @@ if ($method == 'get_recent_time_in_out_ds') {
 		$sql = $sql . " AND tio.ip = '172.25.112.131'";
 	}
 
-	if ($server_time >= '03:00:00' && $server_time <= '23:59:59') {
+	// if ($server_time >= '03:00:00' && $server_time <= '23:59:59') {
+	// 	$sql = $sql . " AND tio.day = '$server_date_only'";
+	// } else if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+	// 	$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
+	// }
+	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
 		$sql = $sql . " AND tio.day = '$server_date_only'";
-	} else if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
 		$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
 	}
 	$sql = $sql . " ORDER BY tio.date_updated DESC";
@@ -132,7 +147,7 @@ if ($method == 'get_recent_time_in_out_ns') {
 
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
-	$shift = 'NS';
+	$shift_group = 'B';
 	$c = 0;
 	/*$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
 		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
@@ -162,7 +177,7 @@ if ($method == 'get_recent_time_in_out_ns') {
 	} else {
 		$sql = $sql . " AND emp.line_no IS NULL";
 	}
-	$sql = $sql . " AND tio.shift = '$shift'";
+	$sql = $sql . " AND emp.shift_group = '$shift_group'";
 
 	// Search by IP
 	if ($ip != '172.25.112.131') {
@@ -171,9 +186,14 @@ if ($method == 'get_recent_time_in_out_ns') {
 		$sql = $sql . " AND tio.ip = '172.25.112.131'";
 	}
 
-	if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
+	// if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
+	// 	$sql = $sql . " AND tio.day = '$server_date_only'";
+	// } else if ($server_time >= '00:00:00' && $server_time < '15:00:00') {
+	// 	$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
+	// }
+	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
 		$sql = $sql . " AND tio.day = '$server_date_only'";
-	} else if ($server_time >= '00:00:00' && $server_time < '15:00:00') {
+	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
 		$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
 	}
 	$sql = $sql . " ORDER BY tio.date_updated DESC";

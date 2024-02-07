@@ -1,4 +1,7 @@
 <script type="text/javascript">
+// AJAX IN PROGRESS GLOBAL VARS
+var get_attendance_list_ajax_in_process = false;
+
 // DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById('attendance_date_search').value = '<?=$server_date_only?>';
@@ -153,6 +156,11 @@ const get_attendances_last_page = () =>{
 }
 
 const get_attendance_list = current_page =>{
+    // If an AJAX call is already in progress, return immediately
+    if (get_attendance_list_ajax_in_process) {
+        return;
+    }
+
     let day = document.getElementById('attendance_date_search').value;
     let shift_group = document.getElementById('shift_group_search').value;
 
@@ -190,6 +198,9 @@ const get_attendance_list = current_page =>{
         sessionStorage.setItem('line_no_search', line_no);
     }
 
+    // Set the flag to true as we're starting an AJAX call
+    get_attendance_list_ajax_in_process = true;
+
 	$.ajax({
         url:'../process/admin/attendances/at_p.php',
         type:'POST',
@@ -203,16 +214,20 @@ const get_attendance_list = current_page =>{
             line_no:line_no,
             current_page:current_page
         },
-        beforeSend: () => {
+        beforeSend: (jqXHR, settings) => {
+            document.getElementById("btnNextPage").setAttribute('disabled', true);
             var loading = `<tr id="loading"><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
             if (current_page == 1) {
                 document.getElementById("attendanceData").innerHTML = loading;
             } else {
                 $('#attendanceTable tbody').append(loading);
             }
+            jqXHR.url = settings.url;
+            jqXHR.type = settings.type;
         }, 
         success:function(response){
             $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
             if (current_page == 1) {
                 $('#attendanceTable tbody').html(response);
             } else {
@@ -220,7 +235,16 @@ const get_attendance_list = current_page =>{
             }
             sessionStorage.setItem('attendanceTablePagination', current_page);
             count_attendance_list();
+            // Set the flag back to false as the AJAX call has completed
+            get_attendance_list_ajax_in_process = false;
         }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+        console.log(jqXHR);
+        console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+        $('#loading').remove();
+        document.getElementById("btnNextPage").removeAttribute('disabled');
+        // Set the flag back to false as the AJAX call has completed
+        get_attendance_list_ajax_in_process = false;
     });
 }
 

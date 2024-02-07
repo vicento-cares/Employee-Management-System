@@ -168,7 +168,7 @@ if ($method == 'get_added_line_support') {
 	$line_support_id = $_POST['line_support_id'];
 	$c = 0;
 	$sql = "SELECT 
-		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, ls.day, ls.shift, ls.line_no_to
+		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, ls.line_no_to
 		FROM t_line_support ls 
 		LEFT JOIN m_employees emp
 		ON ls.emp_no = emp.emp_no
@@ -184,6 +184,7 @@ if ($method == 'get_added_line_support') {
 			echo '<td>'.$row['emp_no'].'</td>';
 			echo '<td>'.$row['full_name'].'</td>';
 			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
 			echo '<td>'.$row['day'].'</td>';
 			echo '<td>'.$row['shift'].'</td>';
 			echo '<td>'.$row['line_no_to'].'</td>';
@@ -233,7 +234,7 @@ if ($method == 'get_pending_line_support') {
 	$row_class = $row_class_arr[0];
 
 	$sql = "SELECT 
-		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.date_updated
+		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.date_updated
 		FROM t_line_support ls 
 		LEFT JOIN m_employees emp
 		ON ls.emp_no = emp.emp_no
@@ -255,11 +256,12 @@ if ($method == 'get_pending_line_support') {
 			} else {
 				$row_class = $row_class_arr[0];
 			}
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#pending_line_support" onclick="get_pending_line_support_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$pending_status.'&quot;)">';
+			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#pending_line_support" onclick="get_pending_line_support_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$pending_status.'~!~'.$row['process'].'&quot;)">';
 			echo '<td>'.$c.'</td>';
 			echo '<td>'.$row['emp_no'].'</td>';
 			echo '<td>'.$row['full_name'].'</td>';
 			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
 			echo '<td>'.$row['day'].'</td>';
 			echo '<td>'.$row['shift'].'</td>';
 			echo '<td>'.$row['line_no_from'].'</td>';
@@ -376,7 +378,7 @@ if ($method == 'get_recent_line_support_history') {
 	$row_class = $row_class_arr[0];
 
 	$sql = "SELECT 
-		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
+		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
 		FROM t_line_support_history ls 
 		LEFT JOIN m_employees emp
 		ON ls.emp_no = emp.emp_no
@@ -405,11 +407,12 @@ if ($method == 'get_recent_line_support_history') {
 			} else {
 				$row_class = $row_class_arr[0];
 			}
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#line_support_history" onclick="get_recent_line_support_history_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$row['set_status_by'].'~!~'.$row['set_status_by_no'].'~!~'.$row['status'].'&quot;)">';
+			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#line_support_history" onclick="get_recent_line_support_history_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$row['set_status_by'].'~!~'.$row['set_status_by_no'].'~!~'.$row['status'].'~!~'.$row['process'].'&quot;)">';
 			echo '<td>'.$c.'</td>';
 			echo '<td>'.$row['emp_no'].'</td>';
 			echo '<td>'.$row['full_name'].'</td>';
 			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
 			echo '<td>'.$row['day'].'</td>';
 			echo '<td>'.$row['shift'].'</td>';
 			echo '<td>'.$row['line_no_from'].'</td>';
@@ -437,7 +440,7 @@ if ($method == 'get_line_support_history') {
 	$row_class = $row_class_arr[0];
 
 	$sql = "SELECT 
-		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
+		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
 		FROM t_line_support_history ls 
 		LEFT JOIN m_employees emp
 		ON ls.emp_no = emp.emp_no
@@ -509,11 +512,12 @@ if ($method == 'get_line_support_history') {
 			} else {
 				$row_class = $row_class_arr[0];
 			}
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#line_support_history" onclick="get_recent_line_support_history_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$row['set_status_by'].'~!~'.$row['set_status_by_no'].'~!~'.$row['status'].'&quot;)">';
+			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#line_support_history" onclick="get_recent_line_support_history_details(&quot;'.$row['id'].'~!~'.$row['line_support_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['day'].'~!~'.$row['shift'].'~!~'.$row['line_no_from'].'~!~'.$row['line_no_to'].'~!~'.$row['set_by'].'~!~'.$row['set_by_no'].'~!~'.$row['set_status_by'].'~!~'.$row['set_status_by_no'].'~!~'.$row['status'].'~!~'.$row['process'].'&quot;)">';
 			echo '<td>'.$c.'</td>';
 			echo '<td>'.$row['emp_no'].'</td>';
 			echo '<td>'.$row['full_name'].'</td>';
 			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
 			echo '<td>'.$row['day'].'</td>';
 			echo '<td>'.$row['shift'].'</td>';
 			echo '<td>'.$row['line_no_from'].'</td>';
