@@ -4,6 +4,7 @@ $( document ).ready(function() {
     fetch_section_dropdown();
     fetch_shuttle_route_dropdown();
     fetch_position_dropdown();
+    fetch_process_dropdown();
     fetch_provider_dropdown();
     load_employees(1);
     sessionStorage.setItem('notif_pending_ls', 0);
@@ -144,6 +145,21 @@ const fetch_position_dropdown =()=>{
         success:function(response){
             $('#position_master').html(response);
             $('#position_master_update').html(response);
+        }
+    });
+}
+
+const fetch_process_dropdown =()=>{
+    $.ajax({
+        url:'../process/hr/employees/emp-masterlist_p.php',
+        type:'POST',
+        cache:false,
+        data:{
+            method:'fetch_process_dropdown'
+        },
+        success:function(response){
+            $('#process_master').html(response);
+            $('#process_master_update').html(response);
         }
     });
 }
@@ -366,6 +382,7 @@ const get_employees_details =(param)=>{
     var resigned_date = string[17];
     var gender = string[18];
     var shift_group = string[19];
+    var line_process = string[20];
 
     document.getElementById('id_employee_master_update').value = id;
     document.getElementById('emp_no_master_update').value = emp_no;
@@ -390,6 +407,7 @@ const get_employees_details =(param)=>{
     document.getElementById('resigned_date_master_update').value = resigned_date;
     document.getElementById('gender_master_update').value = gender;
     document.getElementById('shift_group_master_update').value = shift_group;
+    document.getElementById('process_master_update').value = line_process;
 
     fetch_line_dropdown(2);
 
@@ -417,6 +435,7 @@ const update_employee =()=>{
     var shuttle_route = document.getElementById('shuttle_route_master_update').value;
     var gender = document.getElementById('gender_master_update').value;
     var shift_group = document.getElementById('shift_group_master_update').value;
+    var line_process = document.getElementById('process_master_update').value;
 
     var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
     var emp_js_s_no = emp_js_s_master_update.value;
@@ -480,6 +499,7 @@ const update_employee =()=>{
                 dept:dept,
                 section:section,
                 line_no:line_no,
+                line_process:line_process,
                 position:position,
                 date_hired:date_hired,
                 provider:provider,
@@ -513,6 +533,7 @@ const update_employee =()=>{
                     $('#section_master_update').val('');
                     $('#line_no_master_update').val('');
                     $('#position_master_update').val('');
+                    $('#process_master_update').val('');
                     $('#date_hired_master_update').val('');
                     $('#provider_master_update').val('');
                     $('#shift_group_master_update').val('');

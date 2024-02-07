@@ -4,6 +4,7 @@ $( document ).ready(function() {
     fetch_section_dropdown();
     fetch_shuttle_route_dropdown();
     fetch_position_dropdown();
+    fetch_process_dropdown();
     fetch_provider_dropdown();
     load_employees(1);
 });
@@ -162,6 +163,21 @@ const fetch_position_dropdown =()=>{
         },
         success:function(response){
             $('#position_master_update').html(response);
+        }
+    });
+}
+
+const fetch_process_dropdown =()=>{
+    $.ajax({
+        url:'../process/hr/employees/emp-masterlist_p.php',
+        type:'POST',
+        cache:false,
+        data:{
+            method:'fetch_process_dropdown'
+        },
+        success:function(response){
+            $('#process_master').html(response);
+            $('#process_master_update').html(response);
         }
     });
 }
@@ -438,6 +454,7 @@ $("#new_employee").on('hidden.bs.modal', e => {
     document.getElementById('section_master').value = '';
     document.getElementById('line_no_master').value = '';
     document.getElementById('position_master').value = '';
+    document.getElementById('process_master').value = '';
     document.getElementById('date_hired_master').value = '';
     document.getElementById('provider_master').value = '';
     document.getElementById('address_master').value = '';
@@ -466,6 +483,7 @@ const register_employees =()=>{
     var shuttle_route = document.getElementById('shuttle_route_master').value;
     var gender = document.getElementById('gender_master').value;
     var shift_group = document.getElementById('shift_group_master').value;
+    var line_process = document.getElementById('process_master').value;
 
     var emp_js_s_master = document.getElementById("emp_js_s_master");
     var emp_js_s_no = emp_js_s_master.value;
@@ -541,6 +559,14 @@ const register_employees =()=>{
             showConfirmButton: false,
             timer : 1000
         });  
+    }else if(line_process == ''){
+        Swal.fire({
+            icon: 'info',
+            title: 'Please Select Process !!!',
+            text: 'Information',
+            showConfirmButton: false,
+            timer : 1000
+        });  
     }else if(date_hired == ''){
         Swal.fire({
             icon: 'info',
@@ -609,6 +635,7 @@ const register_employees =()=>{
                 dept:dept,
                 section:section,
                 line_no:line_no,
+                line_process:line_process,
                 position:position,
                 date_hired:date_hired,
                 provider:provider,
@@ -639,6 +666,7 @@ const register_employees =()=>{
                     $('#section_master').val('');
                     $('#line_no_master').val('');
                     $('#position_master').val('');
+                    $('#process_master').val('');
                     $('#date_hired_master').val('');
                     $('#provider_master').val('');
                     $('#shift_group_master').val('');
@@ -697,6 +725,7 @@ const get_employees_details =(param)=>{
     var resigned_date = string[17];
     var gender = string[18];
     var shift_group = string[19];
+    var line_process = string[20];
 
     document.getElementById('id_employee_master_update').value = id;
     document.getElementById('emp_no_master_update').value = emp_no;
@@ -721,6 +750,7 @@ const get_employees_details =(param)=>{
     document.getElementById('resigned_date_master_update').value = resigned_date;
     document.getElementById('gender_master_update').value = gender;
     document.getElementById('shift_group_master_update').value = shift_group;
+    document.getElementById('shuttle_route_master_update').value = shuttle_route;
 
     fetch_line_dropdown_details();
 
@@ -749,6 +779,7 @@ const update_employee =()=>{
     var shuttle_route = document.getElementById('shuttle_route_master_update').value;
     var gender = document.getElementById('gender_master_update').value;
     var shift_group = document.getElementById('shift_group_master_update').value;
+    var line_process = document.getElementById('process_master_update').value;
 
     var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
     var emp_js_s_no = emp_js_s_master_update.value;
@@ -812,6 +843,7 @@ const update_employee =()=>{
                 dept:dept,
                 section:section,
                 line_no:line_no,
+                line_process:line_process,
                 position:position,
                 date_hired:date_hired,
                 provider:provider,
@@ -845,6 +877,7 @@ const update_employee =()=>{
                     $('#section_master_update').val('');
                     $('#line_no_master_update').val('');
                     $('#position_master_update').val('');
+                    $('#process_master_update').val('');
                     $('#date_hired_master_update').val('');
                     $('#provider_master_update').val('');
                     $('#shift_group_master_update').val('');
