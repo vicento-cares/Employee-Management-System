@@ -44,6 +44,7 @@
                 <th>Employee No.</th>
                 <th>Full Name</th>
                 <th>Dept</th>
+                <th>Process</th>
                 <th>Day</th>
                 <th>Shift</th>
                 <th>Supported Line No.</th>

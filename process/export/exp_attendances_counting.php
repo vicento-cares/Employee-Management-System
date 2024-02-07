@@ -1,0 +1,174 @@
+<?php
+session_name("emp_mgt");
+session_start();
+
+if (!isset($_SESSION['emp_no'])) {
+  header('location:/emp_mgt/admin');
+  exit;
+}
+
+require('../conn.php');
+
+function count_attendance_list($search_arr, $conn) {
+	$sql = "SELECT count(emp_no) AS total 
+		FROM m_employees
+		WHERE shift_group = '".$search_arr['shift_group']."'";
+	if (!empty($search_arr['dept'])) {
+		$sql = $sql . " AND dept LIKE '".$search_arr['dept']."%'";
+	} else {
+		$sql = $sql . " AND dept != ''";
+	}
+	if (!empty($search_arr['section'])) {
+		$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
+	}
+	if (!empty($search_arr['line_no'])) {
+		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
+	}
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
+	
+	$stmt = $conn->prepare($sql);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $j){
+			$total = $j['total'];
+		}
+	}else{
+		$total = 0;
+	}
+	return $total;
+}
+
+function count_emp_tio($search_arr, $conn) {
+	$sql = "SELECT count(emp.emp_no) AS total FROM m_employees emp
+			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
+			WHERE tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
+	if (!empty($search_arr['dept'])) {
+		$sql = $sql . " AND emp.dept LIKE '".$search_arr['dept']."%'";
+	} else {
+		$sql = $sql . " AND emp.dept != ''";
+	}
+	if (!empty($search_arr['section'])) {
+		$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
+	}
+	if (!empty($search_arr['line_no'])) {
+		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
+	}
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
+	$stmt = $conn->prepare($sql);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $j){
+			$total = intval($j['total']);
+		}
+	}else{
+		$total = 0;
+	}
+	return $total;
+}
+
+switch (true) {
+    case !isset($_GET['day']):
+    case !isset($_GET['shift_group']):
+    case !isset($_GET['dept']):
+        echo 'Query Parameters Not Set';
+        exit;
+        break;
+}
+
+$day = $_GET['day'];
+$shift_group = $_GET['shift_group'];
+$dept = $_GET['dept'];
+$section = $_SESSION['section'];
+$line_no = $_SESSION['line_no'];
+
+$search_arr = array(
+    "day" => $day,
+    "shift_group" => $shift_group,
+    "dept" => $dept,
+    "section" => $section,
+    "line_no" => $line_no
+);
+
+$total_mp = count_attendance_list($search_arr, $conn);
+$total_present_mp = count_emp_tio($search_arr, $conn);
+$total_absent_mp = $total_mp - $total_present_mp;
+
+$c = 0;
+
+$delimiter = ","; 
+
+$filename = "EmpMgtSys_AttendanceCounting_";
+if (!empty($dept)) {
+	$filename = $filename . $dept . "-";
+}
+if (!empty($section)) {
+	$filename = $filename . $section . "-";
+}
+if (!empty($line_no)) {
+	$filename = $filename . $line_no . "-";
+}
+$filename = $filename . $day."-".$shift_group.".csv";
+ 
+// Create a file pointer 
+$f = fopen('php://memory', 'w'); 
+
+// UTF-8 BOM for special character compatibility
+fputs($f, "\xEF\xBB\xBF");
+ 
+// Set column headers 
+$fields = array('#', 'Process', 'Present', 'Absent', 'Total MP'); 
+fputcsv($f, $fields, $delimiter); 
+
+$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+			COUNT(tio.emp_no) AS total_present, 
+			COUNT(emp.emp_no) AS total 
+		FROM m_employees emp
+		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+		WHERE emp.shift_group = '$shift_group'";
+if (!empty($dept)) {
+    $sql = $sql . " AND emp.dept LIKE '$dept%'";
+} else {
+    $sql = $sql . " AND emp.dept != ''";
+}
+if (!empty($section)) {
+    $sql = $sql . " AND emp.section LIKE '$section%'";
+}
+if (!empty($line_no)) {
+    $sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+}
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+$sql = $sql . " GROUP BY emp.process";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+if ($stmt->rowCount() > 0) {
+
+    // Output each row of the data, format line as csv and write to file pointer 
+    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
+    	$c++;
+
+        $total = intval($row['total']);
+        $total_present = intval($row['total_present']);
+        $total_absent = $total - $total_present;
+        
+        $lineData = array($c, $row['process'], $row['total_present'], $total_absent, $row['total']); 
+        fputcsv($f, $lineData, $delimiter);
+    }
+
+    $lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
+    fputcsv($f, $lineData, $delimiter);
+}
+
+// Move back to beginning of file 
+fseek($f, 0); 
+ 
+// Set headers to download file rather than displayed 
+header('Content-Type: text/csv'); 
+header('Content-Disposition: attachment; filename="' . $filename . '";'); 
+ 
+//output all remaining data on a file pointer 
+fpassthru($f); 
+
+$conn = null;
+
+?>

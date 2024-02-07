@@ -15,17 +15,23 @@
             <label>Line Support ID : </label>
             <span id="pending_line_support_id_ls" class="ml-2"></span>
           </div>
-          <div class="col-sm-3">
+          <div class="col-sm-4">
             <label>Day : </label>
             <span id="pending_day_ls" class="ml-2"></span>
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-3">
             <label>Shift : </label>
             <span id="pending_shift_ls" class="ml-2"></span>
           </div>
-          <div class="col-sm-2">
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-5">
             <label>Dept : </label>
             <span id="pending_dept_ls" class="ml-2"></span>
+          </div>
+          <div class="col-sm-7">
+            <label>Process : </label>
+            <span id="pending_process_ls" class="ml-2"></span>
           </div>
         </div>
         <div class="row mb-2">

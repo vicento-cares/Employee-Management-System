@@ -92,6 +92,7 @@
                                   <th>Employee No.</th>
                                   <th>Full Name</th>
                                   <th>Department</th>
+                                  <th>Process</th>
                                   <th>Day</th>
                                   <th>Shift</th>
                                   <th>From Line No.</th>
@@ -102,7 +103,7 @@
                               </thead>
                               <tbody id="pendingLineSupportData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="10" style="text-align:center;">
+                                  <td colspan="11" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -169,6 +170,7 @@
                                   <th>Employee No.</th>
                                   <th>Full Name</th>
                                   <th>Department</th>
+                                  <th>Process</th>
                                   <th>Day</th>
                                   <th>Shift</th>
                                   <th>From Line No.</th>
@@ -179,7 +181,7 @@
                               </thead>
                               <tbody id="recentLineSupportHistoryData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="10" style="text-align:center;">
+                                  <td colspan="11" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -281,6 +283,7 @@
                           <th>Employee No.</th>
                           <th>Full Name</th>
                           <th>Department</th>
+                          <th>Process</th>
                           <th>Day</th>
                           <th>Shift</th>
                           <th>From Line No.</th>
