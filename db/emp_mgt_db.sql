@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 06, 2024 at 01:00 AM
+-- Generation Time: Feb 07, 2024 at 10:33 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 7.4.25
 
@@ -162,6 +162,8 @@ CREATE TABLE `m_employees` (
   `full_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dept` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `section` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sub_section` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `process` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `line_no` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `position` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `provider` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -187,46 +189,46 @@ CREATE TABLE `m_employees` (
 -- Dumping data for table `m_employees`
 --
 
-INSERT INTO `m_employees` (`id`, `emp_no`, `full_name`, `dept`, `section`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`, `date_updated`) VALUES
-(1, '13-0446', 'Ibana,  Gemlet D.', 'IT', NULL, NULL, 'Supervisor', 'FAS', 'F', NULL, '2013-07-16', 'Lipa Malapit', '09124396688', 'Regular', 'Lipa Malapit', '', '', '', '', '', '', 0, '0000-00-00', '2023-12-07 11:40:33'),
-(2, '14-01871', 'Jalla, John Bernard L.', 'IT', NULL, NULL, 'Supervisor', 'FAS', 'M', NULL, '2014-04-29', 'Malvar', '09464651674', 'Regular', 'Malvar', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-12-02 07:12:56'),
-(3, '14-01899', 'Bathan, Laurice A.', 'IT', NULL, NULL, 'Staff', 'FAS', 'F', NULL, '2014-01-07', 'Ibaan', '09562565328', 'Regular', 'Ibaan', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-12-02 07:12:56'),
-(4, '15-03029', 'Fulo, Eduardo Jr. S.', 'IT', NULL, NULL, 'Jr. Staff', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-01-26 09:08:58'),
-(5, '15-02782', 'Gutierrez,Maricar V.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-08-23', '', '', 'Regular', 'Lipa Malapit', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-12-02 07:12:56'),
-(6, '15-02839', 'Mitra, Renelyn R.', 'IT', NULL, NULL, 'Jr. Staff', 'FAS', 'F', NULL, '2015-03-15', 'Lipa Malapit', '09453082127', 'Regular', 'Lipa Malapit', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 1, '2023-09-22', '2023-11-30 07:29:29'),
-(7, '17-03139', 'Magpantay, Regine C.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-08-23', '', '', 'Regular', 'Sto. Tomas Malayo', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-12-02 07:12:56'),
-(8, '17-03137', 'Marasigan, Gay B.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-08-23', '', '', 'Regular', 'Batangas', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 1, '2023-08-07', '2023-11-30 07:29:29'),
-(9, '21-06814', 'Sauro, Jhon Paulo M.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Sto. Tomas Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-12-02 07:12:56'),
-(10, '21-06993', 'Ballesteros, John Denver B.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'San Jose', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-11-30 07:29:29'),
-(11, '21-06733', 'Cena, Emanuel John R.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Batangas', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-11-30 07:29:29'),
-(12, '21-06347', 'Macatangay, Jake N.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2023-11-30 07:29:29'),
-(13, '22-08470', 'Fababaer, Cerijohn H.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(14, '23-09813', 'Herrera Ian Dave F.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(15, '23-09832', 'Martinez, Russel L.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Malvar', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(16, '23-09772', 'Bersabe John', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'Malvar', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(17, 'EN69-7325', 'Fernandez. Raphael Ian M.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Probationary', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(18, 'BF-45276', 'Coz Chris Matthew L.', 'IT', NULL, NULL, 'Associate', 'MAXIM', 'M', NULL, '2023-08-23', '', '', 'Probationary', 'Rosario', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(19, '22-07775', 'Kalaw, Joshua Clarence L.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Regular', 'San Lucas', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 1, '2023-07-11', '2023-11-30 07:29:29'),
-(20, 'EN69-8327', 'Dela Cruz, Leslie G.', 'IT', NULL, NULL, 'Associate', 'ONE SOURCE', 'F', NULL, '2023-08-23', '', '', 'Probationary', 'San Pablo via Lipa', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(21, '22-08675', 'Alcantara, Vince Dale D.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2022-09-07', 'Malvar', '09458822422', 'Regular', 'Malvar', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(22, 'MWM00018133', 'Javier, John Dave J.', 'IT', NULL, NULL, 'Associate', 'MEGATREND', 'M', NULL, '2023-08-23', 'Sto. Tomas Malayo', '0978174793', 'Probationary', 'Sto. Tomas Malayo', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(23, '23-09881', 'Jonnel Guevarra M.', 'IT', NULL, NULL, 'Assistant Manager', 'FAS', 'M', NULL, '2023-04-23', 'Sto. Tomas Malayo', '09569149949', 'Probationary', 'Sto. Tomas Malayo', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(24, 'MWM00019291', 'Fabul, John Benedict s.', 'IT', NULL, NULL, 'Associate', 'MEGATREND', 'M', NULL, '2023-08-23', '', '', 'Probationary', 'Malvar', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(25, 'MWM00019300', 'Saudan, Gilbert M.', 'IT', NULL, NULL, 'Associate', 'MEGATREND', 'M', NULL, '2023-08-23', '', '', 'Probationary', 'Ibaan', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(26, '23-10015', 'Montañano, Elaine Joyce S.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-08-23', '', '', 'Probationary', 'Batangas', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 1, '2023-10-28', '2023-11-30 07:29:29'),
-(27, 'MWM00016524', 'Maiquez, Jessabel C.', 'IT', NULL, NULL, 'Associate', 'MEGATREND', 'F', NULL, '2023-08-23', '', '', 'Probationary', 'Sto. Tomas Malayo', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(28, '23-10284', 'Vergara, Raymart A.', 'IT', NULL, NULL, 'Associate', 'FAS', 'M', NULL, '2023-08-23', '', '', 'Probationary', 'Padre Garcia', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2023-11-30 07:29:29'),
-(29, '23-10525', 'Maranan, Allyssa Kate B.', 'IT', NULL, NULL, 'Associate', 'FAS', 'F', NULL, '2023-09-06', 'Alitagtag, Batangas', '09284692676', 'Probationary', 'Sta. Teresita', '', '', '', '', '', '', 0, '0000-00-00', '2024-01-26 09:08:21'),
-(41, '1', '1', 'PD2', 'FSP', 'Battery Initial', 'Associate', 'FAS', 'M', NULL, '2024-01-18', '1', '1', 'Probationary', 'Batangas', '', '', '', '', '', '', 0, NULL, '2024-01-19 14:39:24'),
-(42, '2', '2', 'PD2', 'FAP3', '3169', 'Jr. Staff', 'FAS', 'F', NULL, '2024-01-01', '2', '2', 'Regular', 'Ibaan', '', '', '', '', '', '', 0, NULL, '2024-01-19 14:44:37'),
-(43, '3', '3', 'PD2', 'FAP1', '1008', 'Jr. Staff', 'FAS', 'M', 'A', '2023-10-29', '3', '3', 'Regular', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, NULL, '2024-02-05 11:23:37'),
-(44, '3-1', '3-1', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Batangas', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:42'),
-(45, '3-2', '3-2', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Padre Garcia', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:44'),
-(46, '3-3', '3-3', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'San Pablo via Lipa', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:46'),
-(47, '3-4', '3-4', 'QA', 'QA', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:26:55'),
-(48, '3-5', '3-5', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:50'),
-(49, '3-6', '3-6', 'PD2', 'FAP1', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:23:53'),
-(50, '33', '33', 'QA', 'QA', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-05 11:26:17');
+INSERT INTO `m_employees` (`id`, `emp_no`, `full_name`, `dept`, `section`, `sub_section`, `process`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`, `date_updated`) VALUES
+(1, '13-0446', 'Ibana,  Gemlet D.', 'IT', NULL, NULL, NULL, NULL, 'Supervisor', 'FAS', 'F', 'B', '2013-07-16', 'Lipa Malapit', '09124396688', 'Regular', 'Lipa Malapit', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 08:17:12'),
+(2, '14-01871', 'Jalla, John Bernard L.', 'IT', NULL, NULL, NULL, NULL, 'Supervisor', 'FAS', 'M', 'A', '2014-04-29', 'Malvar', '09464651674', 'Regular', 'Malvar', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:15'),
+(3, '14-01899', 'Bathan, Laurice A.', 'IT', NULL, NULL, NULL, NULL, 'Staff', 'FAS', 'F', 'B', '2014-01-07', 'Ibaan', '09562565328', 'Regular', 'Ibaan', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:18'),
+(4, '15-03029', 'Fulo, Eduardo Jr. S.', 'IT', NULL, NULL, NULL, NULL, 'Jr. Staff', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 08:17:21'),
+(5, '15-02782', 'Gutierrez,Maricar V.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'F', 'A', '2023-08-23', '', '', 'Regular', 'Lipa Malapit', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:23'),
+(6, '15-02839', 'Mitra, Renelyn R.', 'IT', NULL, NULL, NULL, NULL, 'Jr. Staff', 'FAS', 'F', 'B', '2015-03-15', 'Lipa Malapit', '09453082127', 'Regular', 'Lipa Malapit', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 1, '2023-09-22', '2024-02-07 08:17:26'),
+(7, '17-03139', 'Magpantay, Regine C.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'F', 'A', '2023-08-23', '', '', 'Regular', 'Sto. Tomas Malayo', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:30'),
+(8, '17-03137', 'Marasigan, Gay B.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'F', 'A', '2023-08-23', '', '', 'Regular', 'Batangas', '', '', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 1, '2023-08-07', '2024-02-07 08:17:32'),
+(9, '21-06814', 'Sauro, Jhon Paulo M.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'Sto. Tomas Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:35'),
+(10, '21-06993', 'Ballesteros, John Denver B.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'B', '2023-08-23', '', '', 'Regular', 'San Jose', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:39'),
+(11, '21-06733', 'Cena, Emanuel John R.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'Batangas', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:42'),
+(12, '21-06347', 'Macatangay, Jake N.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'B', '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, '0000-00-00', '2024-02-07 08:17:45'),
+(13, '22-08470', 'Fababaer, Cerijohn H.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:17:48'),
+(14, '23-09813', 'Herrera Ian Dave F.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:17:50'),
+(15, '23-09832', 'Martinez, Russel L.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'B', '2023-08-23', '', '', 'Regular', 'Malvar', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:17:53'),
+(16, '23-09772', 'Bersabe John', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'B', '2023-08-23', '', '', 'Regular', 'Malvar', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:17:56'),
+(17, 'EN69-7325', 'Fernandez. Raphael Ian M.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Probationary', 'Lipa Malayo', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:17:59'),
+(18, 'BF-45276', 'Coz Chris Matthew L.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'MAXIM', 'M', 'B', '2023-08-23', '', '', 'Probationary', 'Rosario', 'Fulo, Eduardo Jr. S.', '15-03029', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:18:02'),
+(19, '22-07775', 'Kalaw, Joshua Clarence L.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Regular', 'San Lucas', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 1, '2023-07-11', '2024-02-07 08:18:04'),
+(20, 'EN69-8327', 'Dela Cruz, Leslie G.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'ONE SOURCE', 'F', 'A', '2023-08-23', '', '', 'Probationary', 'San Pablo via Lipa', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:18:07'),
+(21, '22-08675', 'Alcantara, Vince Dale D.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'B', '2022-09-07', 'Malvar', '09458822422', 'Regular', 'Malvar', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:18:10'),
+(22, 'MWM00018133', 'Javier, John Dave J.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'MEGATREND', 'M', 'B', '2023-08-23', 'Sto. Tomas Malayo', '0978174793', 'Probationary', 'Sto. Tomas Malayo', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:18:13'),
+(23, '23-09881', 'Jonnel Guevarra M.', 'IT', NULL, NULL, NULL, NULL, 'Assistant Manager', 'FAS', 'M', 'A', '2023-04-23', 'Sto. Tomas Malayo', '09569149949', 'Probationary', 'Sto. Tomas Malayo', '', '', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:19:18'),
+(24, 'MWM00019291', 'Fabul, John Benedict s.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'MEGATREND', 'M', 'B', '2023-08-23', '', '', 'Probationary', 'Malvar', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:19:20'),
+(25, 'MWM00019300', 'Saudan, Gilbert M.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'MEGATREND', 'M', 'B', '2023-08-23', '', '', 'Probationary', 'Ibaan', 'Mitra, Renelyn R.', '15-02839', 'Ibana, Gemlet D.', '13-0446', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:19:24'),
+(26, '23-10015', 'Montañano, Elaine Joyce S.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'F', 'A', '2023-08-23', '', '', 'Probationary', 'Batangas', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 1, '2023-10-28', '2024-02-07 08:19:32'),
+(27, 'MWM00016524', 'Maiquez, Jessabel C.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'MEGATREND', 'F', 'B', '2023-08-23', '', '', 'Probationary', 'Sto. Tomas Malayo', 'Bathan, Laurice A.', '14-01899', '', '', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:19:38'),
+(28, '23-10284', 'Vergara, Raymart A.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'M', 'A', '2023-08-23', '', '', 'Probationary', 'Padre Garcia', '', '', 'Jalla, John Bernard L.', '14-01871', 'Jonnel Guevarra M.', '23-09881', 0, NULL, '2024-02-07 08:19:35'),
+(29, '23-10525', 'Maranan, Allyssa Kate B.', 'IT', NULL, NULL, NULL, NULL, 'Associate', 'FAS', 'F', 'B', '2023-09-06', 'Alitagtag, Batangas', '09284692676', 'Probationary', 'Sta. Teresita', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 08:19:41'),
+(41, '1', '1', 'PD2', 'FSP', NULL, NULL, 'Battery Initial', 'Associate', 'FAS', 'M', 'A', '2024-01-18', '1', '1', 'Probationary', 'Batangas', '', '', '', '', '', '', 0, NULL, '2024-02-07 08:19:46'),
+(42, '2', '2', 'PD2', 'FAP3', NULL, NULL, '3169', 'Jr. Staff', 'FAS', 'F', 'B', '2024-01-01', '2', '2', 'Regular', 'Ibaan', '', '', '', '', '', '', 0, NULL, '2024-02-07 08:19:48'),
+(43, '3', '3', 'PD2', 'FAP1', NULL, 'Assembly', '1008', 'Jr. Staff', 'FAS', 'M', 'A', '2023-10-29', '3', '3', 'Regular', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, NULL, '2024-02-07 10:30:11'),
+(44, '3-1', '3-1', 'PD2', 'FAP1', NULL, 'Sub Assembly', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Batangas', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:21'),
+(45, '3-2', '3-2', 'PD2', 'FAP1', NULL, 'Assembly', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'Padre Garcia', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:29'),
+(46, '3-3', '3-3', 'PD2', 'FAP1', NULL, 'Assembly', '1008', '', 'FAS', '', 'A', '0000-00-00', '', '', '', 'San Pablo via Lipa', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:34'),
+(47, '3-4', '3-4', 'QA', 'QA', NULL, 'Inspection', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:39'),
+(48, '3-5', '3-5', 'PD2', 'FAP1', NULL, 'Sub Assembly', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:57'),
+(49, '3-6', '3-6', 'PD2', 'FAP1', NULL, 'Assembly', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:51'),
+(50, '33', '33', 'QA', 'QA', NULL, 'Inspection', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:44');
 
 -- --------------------------------------------------------
 
@@ -277,6 +279,26 @@ INSERT INTO `m_positions` (`id`, `position`, `date_updated`) VALUES
 (5, 'Assistant Manager', '2023-11-17 17:48:18'),
 (6, 'Section Manager', '2023-11-17 17:48:18'),
 (7, 'Manager', '2023-11-17 17:48:18');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `m_process`
+--
+
+CREATE TABLE `m_process` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `process` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `m_process`
+--
+
+INSERT INTO `m_process` (`id`, `process`) VALUES
+(2, 'Assembly'),
+(3, 'Inspection'),
+(1, 'Sub Assembly');
 
 -- --------------------------------------------------------
 
@@ -580,7 +602,8 @@ INSERT INTO `t_shuttle_allocation` (`id`, `emp_no`, `dept`, `section`, `line_no`
 (10, '13-0446', 'IT', '', '', '2023-07-28', 'DS', 'Lipa Malapit', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-09-12 09:18:26'),
 (12, '22-08675', 'IT', '', '', '2023-07-28', 'DS', 'Malvar', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-09-12 09:17:50'),
 (13, '22-08675', 'IT', '', '', '2023-11-11', 'DS', 'Malvar', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-11-11 12:40:54'),
-(14, '13-0446', 'IT', '', '', '2023-11-21', 'DS', 'Lipa Malapit', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-11-21 17:32:14');
+(14, '13-0446', 'IT', '', '', '2023-11-21', 'DS', 'Lipa Malapit', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-11-21 17:32:14'),
+(15, '3', 'PD2', 'FAP1', '1008', '2024-02-07', 'DS', 'Malvar', 0, 0, 0, 1, '3', '2024-02-07 17:29:48');
 
 -- --------------------------------------------------------
 
@@ -656,7 +679,9 @@ INSERT INTO `t_time_in_out` (`id`, `emp_no`, `day`, `shift`, `time_in`, `time_ou
 (88, '23-10284', '2024-01-22', 'DS', '2024-01-22 09:55:48', '2024-01-22 09:58:09', '172.25.112.131', '2024-01-22 09:58:09'),
 (90, '1', '2024-01-24', 'DS', '2024-01-24 13:04:34', NULL, '172.25.114.229', '2024-01-24 13:04:34'),
 (91, '3', '2024-01-26', 'DS', '2024-01-26 10:08:55', NULL, '172.25.112.131', '2024-01-26 10:08:55'),
-(92, '3', '2024-02-05', 'NS', '2024-02-05 17:22:57', NULL, '172.25.112.131', '2024-02-05 17:22:57');
+(92, '3', '2024-02-05', 'NS', '2024-02-05 17:22:57', NULL, '172.25.112.131', '2024-02-05 17:22:57'),
+(93, '3', '2024-02-06', 'DS', '2024-02-06 08:03:07', NULL, '172.25.112.131', '2024-02-06 08:03:07'),
+(94, '3', '2024-02-07', 'DS', '2024-02-07 09:56:06', NULL, '172.25.112.131', '2024-02-07 09:56:06');
 
 --
 -- Indexes for dumped tables
@@ -711,6 +736,13 @@ ALTER TABLE `m_positions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `provider` (`position`),
   ADD UNIQUE KEY `position` (`position`);
+
+--
+-- Indexes for table `m_process`
+--
+ALTER TABLE `m_process`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `process` (`process`);
 
 --
 -- Indexes for table `m_providers`
@@ -844,6 +876,12 @@ ALTER TABLE `m_positions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT for table `m_process`
+--
+ALTER TABLE `m_process`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `m_providers`
 --
 ALTER TABLE `m_providers`
@@ -895,13 +933,13 @@ ALTER TABLE `t_notif_line_support`
 -- AUTO_INCREMENT for table `t_shuttle_allocation`
 --
 ALTER TABLE `t_shuttle_allocation`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `t_time_in_out`
 --
 ALTER TABLE `t_time_in_out`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
