@@ -73,11 +73,11 @@ if ($method == 'get_recent_time_in_out_ds') {
 	$sql = $sql . " AND emp.shift_group = '$shift_group'";
 
 	// Search by IP
-	if ($ip != '172.25.112.131') {
-		$sql = $sql . " AND tio.ip = '$ip'";
-	} else {
-		$sql = $sql . " AND tio.ip = '172.25.112.131'";
-	}
+	// if ($ip != '172.25.112.131') {
+	// 	$sql = $sql . " AND tio.ip = '$ip'";
+	// } else {
+	// 	$sql = $sql . " AND tio.ip = '172.25.112.131'";
+	// }
 
 	// if ($server_time >= '03:00:00' && $server_time <= '23:59:59') {
 	// 	$sql = $sql . " AND tio.day = '$server_date_only'";
@@ -180,11 +180,11 @@ if ($method == 'get_recent_time_in_out_ns') {
 	$sql = $sql . " AND emp.shift_group = '$shift_group'";
 
 	// Search by IP
-	if ($ip != '172.25.112.131') {
-		$sql = $sql . " AND tio.ip = '$ip'";
-	} else {
-		$sql = $sql . " AND tio.ip = '172.25.112.131'";
-	}
+	// if ($ip != '172.25.112.131') {
+	// 	$sql = $sql . " AND tio.ip = '$ip'";
+	// } else {
+	// 	$sql = $sql . " AND tio.ip = '172.25.112.131'";
+	// }
 
 	// if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
 	// 	$sql = $sql . " AND tio.day = '$server_date_only'";
