@@ -189,6 +189,14 @@ document.getElementById("emp_no_verify").addEventListener("keyup", e => {
                 showConfirmButton: false,
                 timer : 2000
             });
+        } else if (message == "unmatched") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Admin Verification Error',
+                text: 'Cannot proceed using different account! Only account that was currently logged in is allowed',
+                showConfirmButton: false,
+                timer : 2000
+            });
         } else {
             Swal.fire({
                 icon: 'error',

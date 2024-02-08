@@ -1,4 +1,7 @@
 <?php 
+session_name("emp_mgt");
+session_start();
+
 include '../../conn.php';
 
 $method = $_POST['method'];
@@ -204,7 +207,11 @@ if ($method == 'admin_verification') {
 	$stmt = $conn->prepare($query);
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		echo 'success';
+		if ($_SESSION['emp_no'] == $emp_no) {
+			echo 'success';
+		} else {
+			echo 'unmatched';
+		}
 	} else {
 		echo 'failed';
 	}
