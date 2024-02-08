@@ -62,7 +62,7 @@
               <button type="button" class="btn bg-dark" data-dismiss="modal" data-toggle="modal">Close</button>
             </div>
             <div class="float-right">
-              <button type="button" class="btn bg-success" id="btnSaveLineSupport" onclick="save_line_support()" disabled>Save</button>
+              <button type="button" class="btn bg-success" id="btnSaveLineSupport" onclick="verify_save_line_support()" disabled>Save</button>
             </div>
           </div>
         </div>
