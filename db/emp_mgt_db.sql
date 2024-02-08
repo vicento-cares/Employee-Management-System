@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 07, 2024 at 10:33 AM
+-- Generation Time: Feb 08, 2024 at 08:25 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 7.4.25
 
@@ -585,6 +585,7 @@ CREATE TABLE `t_shuttle_allocation` (
   `line_no` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `day` date NOT NULL,
   `shift` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shift_group` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `shuttle_route` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `out_5` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `out_6` int(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -598,12 +599,13 @@ CREATE TABLE `t_shuttle_allocation` (
 -- Dumping data for table `t_shuttle_allocation`
 --
 
-INSERT INTO `t_shuttle_allocation` (`id`, `emp_no`, `dept`, `section`, `line_no`, `day`, `shift`, `shuttle_route`, `out_5`, `out_6`, `out_7`, `out_8`, `set_by`, `date_updated`) VALUES
-(10, '13-0446', 'IT', '', '', '2023-07-28', 'DS', 'Lipa Malapit', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-09-12 09:18:26'),
-(12, '22-08675', 'IT', '', '', '2023-07-28', 'DS', 'Malvar', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-09-12 09:17:50'),
-(13, '22-08675', 'IT', '', '', '2023-11-11', 'DS', 'Malvar', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-11-11 12:40:54'),
-(14, '13-0446', 'IT', '', '', '2023-11-21', 'DS', 'Lipa Malapit', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-11-21 17:32:14'),
-(15, '3', 'PD2', 'FAP1', '1008', '2024-02-07', 'DS', 'Malvar', 0, 0, 0, 1, '3', '2024-02-07 17:29:48');
+INSERT INTO `t_shuttle_allocation` (`id`, `emp_no`, `dept`, `section`, `line_no`, `day`, `shift`, `shift_group`, `shuttle_route`, `out_5`, `out_6`, `out_7`, `out_8`, `set_by`, `date_updated`) VALUES
+(10, '13-0446', 'IT', '', '', '2023-07-28', 'DS', NULL, 'Lipa Malapit', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-09-12 09:18:26'),
+(12, '22-08675', 'IT', '', '', '2023-07-28', 'DS', NULL, 'Malvar', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-09-12 09:17:50'),
+(13, '22-08675', 'IT', '', '', '2023-11-11', 'DS', NULL, 'Malvar', 0, 0, 0, 1, 'Alcantara, Vince Dale D.', '2023-11-11 12:40:54'),
+(14, '13-0446', 'IT', '', '', '2023-11-21', 'DS', NULL, 'Lipa Malapit', 1, 0, 0, 0, 'Alcantara, Vince Dale D.', '2023-11-21 17:32:14'),
+(15, '3', 'PD2', 'FAP1', '1008', '2024-02-07', 'DS', 'A', 'Malvar', 0, 0, 0, 1, '3', '2024-02-08 10:16:40'),
+(16, '3', 'PD2', 'FAP1', '1008', '2024-02-08', 'DS', 'A', 'Sto. Tomas Malayo', 0, 0, 0, 1, '3', '2024-02-08 14:54:40');
 
 -- --------------------------------------------------------
 
@@ -681,7 +683,8 @@ INSERT INTO `t_time_in_out` (`id`, `emp_no`, `day`, `shift`, `time_in`, `time_ou
 (91, '3', '2024-01-26', 'DS', '2024-01-26 10:08:55', NULL, '172.25.112.131', '2024-01-26 10:08:55'),
 (92, '3', '2024-02-05', 'NS', '2024-02-05 17:22:57', NULL, '172.25.112.131', '2024-02-05 17:22:57'),
 (93, '3', '2024-02-06', 'DS', '2024-02-06 08:03:07', NULL, '172.25.112.131', '2024-02-06 08:03:07'),
-(94, '3', '2024-02-07', 'DS', '2024-02-07 09:56:06', NULL, '172.25.112.131', '2024-02-07 09:56:06');
+(94, '3', '2024-02-07', 'DS', '2024-02-07 09:56:06', NULL, '172.25.112.131', '2024-02-07 09:56:06'),
+(95, '3', '2024-02-08', 'DS', '2024-02-08 07:48:54', NULL, '172.25.112.131', '2024-02-08 07:48:54');
 
 --
 -- Indexes for dumped tables
@@ -817,7 +820,8 @@ ALTER TABLE `t_shuttle_allocation`
   ADD PRIMARY KEY (`id`),
   ADD KEY `emp_no` (`emp_no`),
   ADD KEY `day` (`day`),
-  ADD KEY `shift` (`shift`);
+  ADD KEY `shift` (`shift`),
+  ADD KEY `shift_group` (`shift_group`);
 
 --
 -- Indexes for table `t_time_in_out`
@@ -933,13 +937,13 @@ ALTER TABLE `t_notif_line_support`
 -- AUTO_INCREMENT for table `t_shuttle_allocation`
 --
 ALTER TABLE `t_shuttle_allocation`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `t_time_in_out`
 --
 ALTER TABLE `t_time_in_out`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

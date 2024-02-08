@@ -33,9 +33,12 @@ const admin_verification = (callback) => {
                     callback("success");
                 } else if (response == "failed") {
                     callback("failed");
+                } else if (response == "unmatched") {
+                    callback("unmatched");
                 } else {
                     callback(response);
                 }
+                document.getElementById('emp_no_verify').value = '';
             }
         });
     } else {
