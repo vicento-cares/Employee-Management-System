@@ -96,6 +96,22 @@ if ($method == 'fetch_dept_dropdown') {
 	}
 }
 
+// Get Group Dropdown
+if ($method == 'fetch_group_dropdown') {
+	$sql = "SELECT `group` FROM `m_falp_groups` ORDER BY group ASC";
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute();
+	if ($stmt -> rowCount() > 0) {
+		echo '<option selected value="">Select Group</option>';
+		foreach($stmt -> fetchAll() as $row) {
+			echo '<option value="'.htmlspecialchars($row['group']).'">'.htmlspecialchars($row['group']).'</option>';
+		}
+		echo '<option value="QA">QA</option>';
+	} else {
+		echo '<option disabled selected value="">Select Group</option>';
+	}
+}
+
 // Get Section Dropdown
 if ($method == 'fetch_section_dropdown') {
 	$sql = "SELECT `section` FROM `m_access_locations` GROUP BY section ORDER BY section ASC";
@@ -109,6 +125,21 @@ if ($method == 'fetch_section_dropdown') {
 		echo '<option value="QA">QA</option>';
 	} else {
 		echo '<option disabled selected value="">Select Section</option>';
+	}
+}
+
+// Get Sub Section Dropdown
+if ($method == 'fetch_sub_section_dropdown') {
+	$sql = "SELECT `sub_section` FROM `m_sub_sections` ORDER BY sub_section ASC";
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute();
+	if ($stmt -> rowCount() > 0) {
+		echo '<option selected value="">Select Sub Section</option>';
+		foreach($stmt -> fetchAll() as $row) {
+			echo '<option value="'.htmlspecialchars($row['sub_section']).'">'.htmlspecialchars($row['sub_section']).'</option>';
+		}
+	} else {
+		echo '<option disabled selected value="">Select Sub Section</option>';
 	}
 }
 
@@ -631,7 +662,9 @@ if ($method == 'register_employee') {
 	$full_name = addslashes(trim($_POST['full_name']));
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$dept = trim($_POST['dept']);
+	// $group = trim($_POST['group']);
 	$section = trim($_POST['section']);
+	// $sub_section = trim($_POST['sub_section']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
@@ -691,7 +724,9 @@ if ($method == 'update_employee') {
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$full_name = addslashes(trim($_POST['full_name']));
 	$dept = trim($_POST['dept']);
+	// $group = trim($_POST['group']);
 	$section = trim($_POST['section']);
+	// $sub_section = trim($_POST['sub_section']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);

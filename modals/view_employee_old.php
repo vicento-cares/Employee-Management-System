@@ -37,9 +37,23 @@
             </select>
           </div>
           <div class="col-4">
+            <label>Group:</label>
+            <select id="group_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;" disabled>
+              <option value="">Select Group</option>
+            </select>
+          </div>
+          <div class="col-4">
             <label>Section:</label>
             <select id="section_master_update" class="form-control" onchange="fetch_line_dropdown(2)" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Section</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <label>Sub Section:</label>
+            <select id="sub_section_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;" disabled>
+              <option value="">Select Sub Section</option>
             </select>
           </div>
           <div class="col-4">

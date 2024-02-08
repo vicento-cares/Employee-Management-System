@@ -1,7 +1,9 @@
 <script type="text/javascript">
 $( document ).ready(function() {
     fetch_dept_dropdown();
+    // fetch_group_dropdown();
     fetch_section_dropdown();
+    // fetch_sub_section_dropdown();
     fetch_shuttle_route_dropdown();
     fetch_position_dropdown();
     fetch_process_dropdown();
@@ -59,6 +61,21 @@ const fetch_dept_dropdown =()=>{
     });
 }
 
+const fetch_group_dropdown =()=>{
+    $.ajax({
+        url:'../process/hr/employees/emp-masterlist_p.php',
+        type:'POST',
+        cache:false,
+        data:{
+            method:'fetch_group_dropdown'
+        },
+        success:function(response){
+            $('#group_master').html(response);
+            $('#group_master_update').html(response);
+        }
+    });
+}
+
 const fetch_section_dropdown =()=>{
     $.ajax({
         url:'../process/hr/employees/emp-masterlist_p.php',
@@ -70,6 +87,21 @@ const fetch_section_dropdown =()=>{
         success:function(response){
             $('#section_master').html(response);
             $('#section_master_update').html(response);
+        }
+    });
+}
+
+const fetch_sub_section_dropdown =()=>{
+    $.ajax({
+        url:'../process/hr/employees/emp-masterlist_p.php',
+        type:'POST',
+        cache:false,
+        data:{
+            method:'fetch_sub_section_dropdown'
+        },
+        success:function(response){
+            $('#sub_section_master').html(response);
+            $('#sub_section_master_update').html(response);
         }
     });
 }
@@ -383,6 +415,8 @@ const get_employees_details =(param)=>{
     var gender = string[18];
     var shift_group = string[19];
     var line_process = string[20];
+    // var group = string[21];
+    // var sub_section = string[22];
 
     document.getElementById('id_employee_master_update').value = id;
     document.getElementById('emp_no_master_update').value = emp_no;
@@ -408,6 +442,8 @@ const get_employees_details =(param)=>{
     document.getElementById('gender_master_update').value = gender;
     document.getElementById('shift_group_master_update').value = shift_group;
     document.getElementById('process_master_update').value = line_process;
+    // document.getElementById('group_master_update').value = group;
+    // document.getElementById('sub_section_master_update').value = sub_section;
 
     fetch_line_dropdown(2);
 
@@ -436,6 +472,8 @@ const update_employee =()=>{
     var gender = document.getElementById('gender_master_update').value;
     var shift_group = document.getElementById('shift_group_master_update').value;
     var line_process = document.getElementById('process_master_update').value;
+    // var group = document.getElementById('group_master_update').value;
+    // var sub_section = document.getElementById('sub_section_master_update').value;
 
     var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
     var emp_js_s_no = emp_js_s_master_update.value;
@@ -530,7 +568,9 @@ const update_employee =()=>{
                     $('#emp_no_master_update').val('');
                     $('#full_name_master_update').val('');
                     $('#dept_master_update').val('');
+                    $('#group_master_update').val('');
                     $('#section_master_update').val('');
+                    $('#sub_section_master_update').val('');
                     $('#line_no_master_update').val('');
                     $('#position_master_update').val('');
                     $('#process_master_update').val('');

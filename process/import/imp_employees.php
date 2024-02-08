@@ -39,6 +39,22 @@ function get_dept($conn) {
     return $data;
 }
 
+function get_falp_groups($conn) {
+    $data = array();
+
+    $sql = "SELECT `group` FROM `m_falp_groups` ORDER BY group ASC";
+    $stmt = $conn -> prepare($sql);
+    $stmt -> execute();
+    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+        array_push($data, $row['group']);
+    }
+
+    //QA
+    array_push($data, "QA");
+    
+    return $data;
+}
+
 function get_sections($conn) {
     $data = array();
 
@@ -51,6 +67,19 @@ function get_sections($conn) {
 
     //QA
     array_push($data, "QA");
+    
+    return $data;
+}
+
+function get_sub_sections($conn) {
+    $data = array();
+
+    $sql = "SELECT `sub_section` FROM `m_sub_sections` ORDER BY sub_section ASC";
+    $stmt = $conn -> prepare($sql);
+    $stmt -> execute();
+    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+        array_push($data, $row['sub_section']);
+    }
     
     return $data;
 }
@@ -187,7 +216,9 @@ function check_csv ($file, $conn) {
     fgets($csvFile);
 
     $dept_arr = get_dept($conn);
+    // $group_arr = get_falp_groups($conn);
     $section_arr = get_sections($conn);
+    // $sub_section_arr = get_sub_sections($conn);
     $line_arr = get_lines($conn);
     $process_arr = get_processes($conn);
     $position_arr = get_positions($conn);
@@ -208,7 +239,9 @@ function check_csv ($file, $conn) {
     $row_valid_arr = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
     $notExistsDeptArr = array();
+    // $notExistsGroupArr = array();
     $notExistsSectionArr = array();
+    // $notExistsSubSectionArr = array();
     $notExistsLineNoArr = array();
     $notExistsProcessArr = array();
     $notExistsPositionArr = array();
@@ -228,7 +261,9 @@ function check_csv ($file, $conn) {
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
+    // $valid_first_line = "Employee No.,Full Name,Department,Group,Section,Sub Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
     $valid_first_line = "Employee No.,Full Name,Department,Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
+    // $valid_first_line2 = '"Employee No.","Full Name",Department,Group,Section,"Sub Section","Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
     $valid_first_line2 = '"Employee No.","Full Name",Department,Section,"Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
         while (($line = fgetcsv($csvFile)) !== false) {
@@ -242,7 +277,9 @@ function check_csv ($file, $conn) {
             $emp_no = custom_trim($line[0]);
             $full_name = custom_trim($line[1]);
             $dept = custom_trim($line[2]);
+            // $group = custom_trim($line[0]);
             $section = custom_trim($line[3]);
+            // $sub_section = custom_trim($line[0]);
             $line_no = custom_trim($line[4]);
             $line_process = custom_trim($line[5]);
             $position = custom_trim($line[6]);
@@ -280,6 +317,13 @@ function check_csv ($file, $conn) {
                     array_push($notExistsDeptArr, $check_csv_row);
                 }
             }
+            // if (!empty($group)) {
+            //     if (!in_array($group, $group_arr)) {
+            //         $hasError = 1;
+            //         $row_valid_arr[0] = 1;
+            //         array_push($notExistsGroupArr, $check_csv_row);
+            //     }
+            // }
             if (!empty($section)) {
                 if (!in_array($section, $section_arr)) {
                     $hasError = 1;
@@ -287,6 +331,13 @@ function check_csv ($file, $conn) {
                     array_push($notExistsSectionArr, $check_csv_row);
                 }
             }
+            // if (!empty($sub_section)) {
+            //     if (!in_array($sub_section, $sub_section_arr)) {
+            //         $hasError = 1;
+            //         $row_valid_arr[0] = 1;
+            //         array_push($notExistsSubSectionArr, $check_csv_row);
+            //     }
+            // }
             if (!empty($line_no)) {
                 if (!in_array($line_no, $line_arr)) {
                     $hasError = 1;
@@ -394,9 +445,15 @@ function check_csv ($file, $conn) {
         if ($row_valid_arr[0] == 1) {
             $message = $message . 'Department doesn\'t exists on row/s ' . implode(", ", $notExistsDeptArr) . '. ';
         }
+        // if ($row_valid_arr[0] == 1) {
+        //     $message = $message . 'Group doesn\'t exists on row/s ' . implode(", ", $notExistsGroupArr) . '. ';
+        // }
         if ($row_valid_arr[1] == 1) {
             $message = $message . 'Section doesn\'t exists on row/s ' . implode(", ", $notExistsSectionArr) . '. ';
         }
+        // if ($row_valid_arr[0] == 1) {
+        //     $message = $message . 'Sub Section doesn\'t exists on row/s ' . implode(", ", $notExistsSubSectionArr) . '. ';
+        // }
         if ($row_valid_arr[2] == 1) {
             $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. ';
         }
@@ -478,7 +535,9 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                 $emp_no = addslashes(custom_trim($line[0]));
                 $full_name = addslashes(custom_trim($line[1]));
                 $dept = custom_trim($line[2]);
+                // $group = addslashes(custom_trim($line[0]));
                 $section = addslashes(custom_trim($line[3]));
+                // $sub_section = addslashes(custom_trim($line[0]));
                 $line_no = addslashes(custom_trim($line[4]));
                 $line_process = addslashes(custom_trim($line[5]));
                 $position = addslashes(custom_trim($line[6]));
