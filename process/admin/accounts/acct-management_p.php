@@ -197,5 +197,18 @@ if ($method == 'delete_account') {
 	}
 }
 
+if ($method == 'admin_verification') {
+	$emp_no = addslashes(trim($_POST['emp_no']));
+
+	$query = "SELECT id FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
+	$stmt = $conn->prepare($query);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		echo 'success';
+	} else {
+		echo 'failed';
+	}
+}
+
 $conn = NULL;
 ?>

@@ -261,6 +261,40 @@ const delete_single_added_line_support = el => {
     });
 }
 
+const verify_save_line_support = () => {
+    $('#admin_verification').modal('show');
+}
+
+document.getElementById("emp_no_verify").addEventListener("keyup", e => {
+  if (e.which === 13) {
+    e.preventDefault();
+    var emp_no = document.getElementById('emp_no_verify').value;
+
+    admin_verification((message) => {
+        if (message == "success") {
+            $('#admin_verification').modal('hide');
+            save_line_support();
+        } else if (message == "failed") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Admin Verification Error',
+                text: 'Failed to verify! Maybe incorrect credential or account not found...',
+                showConfirmButton: false,
+                timer : 2000
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Admin Verification Error',
+                text: `Error : ${message}`,
+                showConfirmButton: false,
+                timer : 2000
+            });
+        }
+    });
+  }
+});
+
 const save_line_support = () => {
     let line_support_id = document.getElementById("line_support_id_ls").value;
     $.ajax({

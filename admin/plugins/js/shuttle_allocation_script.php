@@ -36,7 +36,7 @@ const get_shuttle_allocation_date_shift =()=>{
             try {
                 let response_array = JSON.parse(response);
                 document.getElementById('shuttle_allocation_date').value = response_array.date;
-                document.getElementById('shuttle_allocation_shift').value = response_array.shift;
+                document.getElementById('shuttle_allocation_shift').innerHTML = response_array.shift;
                 get_shuttle_allocation();
             } catch(e) {
                 console.log(response);
@@ -54,7 +54,7 @@ const get_shuttle_allocation_date_shift =()=>{
 
 const get_shuttle_allocation =()=>{
    let day = document.getElementById('shuttle_allocation_date').value;
-   let shift = document.getElementById('shuttle_allocation_shift').value;
+   let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
 	$.ajax({
         url:'../process/admin/shuttle_allocation/sa_p.php',
         type:'POST',
@@ -62,7 +62,7 @@ const get_shuttle_allocation =()=>{
         data:{
             method:'get_shuttle_allocation',
             day:day,
-            shift:shift
+            shift_group:shift_group
         },
         beforeSend: () => {
             var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
@@ -84,7 +84,7 @@ const get_shuttle_allocation =()=>{
 
 const get_shuttle_allocation_total =()=>{
    let day = document.getElementById('shuttle_allocation_date').value;
-   let shift = document.getElementById('shuttle_allocation_shift').value;
+   let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
     $.ajax({
         url:'../process/admin/shuttle_allocation/sa_p.php',
         type:'POST',
@@ -92,7 +92,7 @@ const get_shuttle_allocation_total =()=>{
         data:{
             method:'get_shuttle_allocation_total',
             day:day,
-            shift:shift
+            shift_group:shift_group
         },
         success:function(response){
             try {
@@ -166,7 +166,44 @@ const get_checked_length_present = () => {
     }
 }
 
+const verify_set_out = time => {
+    sessionStorage.setItem('set_out', time);
+    $('#admin_verification').modal('show');
+}
+
+document.getElementById("emp_no_verify").addEventListener("keyup", e => {
+  if (e.which === 13) {
+    e.preventDefault();
+    var emp_no = document.getElementById('emp_no_verify').value;
+
+    admin_verification((message) => {
+        if (message == "success") {
+            $('#admin_verification').modal('hide');
+            set_out();
+            sessionStorage.setItem('set_out', "");
+        } else if (message == "failed") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Admin Verification Error',
+                text: 'Failed to verify! Maybe incorrect credential or account not found...',
+                showConfirmButton: false,
+                timer : 2000
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Admin Verification Error',
+                text: `Error : ${message}`,
+                showConfirmButton: false,
+                timer : 2000
+            });
+        }
+    });
+  }
+});
+
 const set_out = time => {
+    var time = sessionStorage.getItem('set_out');
     var arr = [];
     document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
         arr.push(el.value);
@@ -281,7 +318,7 @@ const update_shuttle_route =()=>{
 
 const get_shuttle_allocation_per_route =()=>{
    let day = document.getElementById('shuttle_allocation_date').value;
-   let shift = document.getElementById('shuttle_allocation_shift').value;
+   let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
     $.ajax({
         url:'../process/admin/shuttle_allocation/sa_p.php',
         type:'POST',
@@ -289,7 +326,7 @@ const get_shuttle_allocation_per_route =()=>{
         data:{
             method:'get_shuttle_allocation_per_route',
             day:day,
-            shift:shift
+            shift_group:shift_group
         },
         beforeSend: () => {
             var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;

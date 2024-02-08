@@ -18,6 +18,7 @@ include '../modals/leave_form_history.php';
 include '../modals/set_line_support.php';
 include '../modals/pending_line_support.php';
 include '../modals/line_support_history.php';
+include '../modals/admin_verification.php';
 ?>
 <!-- jQuery -->
 <script src="../plugins/jquery/dist/jquery.min.js"></script>
@@ -35,6 +36,9 @@ include '../modals/line_support_history.php';
 <script src="../plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
 <script src="../dist/js/adminlte.js"></script>
+
+<!-- Admin Verification Script -->
+<?php include 'plugins/js/admin_verification_script.php'; ?>
 
 <!-- Notification Script -->
 <?php include 'plugins/js/notification_script.php'; ?>
