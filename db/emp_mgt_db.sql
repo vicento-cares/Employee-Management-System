@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 08, 2024 at 08:25 AM
+-- Generation Time: Feb 13, 2024 at 09:50 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 7.4.25
 
@@ -229,6 +229,32 @@ INSERT INTO `m_employees` (`id`, `emp_no`, `full_name`, `dept`, `section`, `sub_
 (48, '3-5', '3-5', 'PD2', 'FAP1', NULL, 'Sub Assembly', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Lipa Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:57'),
 (49, '3-6', '3-6', 'PD2', 'FAP1', NULL, 'Assembly', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Malvar', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:51'),
 (50, '33', '33', 'QA', 'QA', NULL, 'Inspection', '1008', '', 'FAS', '', 'B', '0000-00-00', '', '', '', 'Sto. Tomas Malayo', '', '', '', '', '', '', 0, '0000-00-00', '2024-02-07 10:30:44');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `m_falp_groups`
+--
+
+CREATE TABLE `m_falp_groups` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `falp_group` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `m_falp_groups`
+--
+
+INSERT INTO `m_falp_groups` (`id`, `falp_group`) VALUES
+(1, 'Factory 2'),
+(2, 'FAP1'),
+(3, 'FAP2'),
+(4, 'FAP3'),
+(5, 'FAP4'),
+(6, 'First Process'),
+(9, 'QA'),
+(7, 'Secondary 1 Process'),
+(8, 'Secondary 2 Process');
 
 -- --------------------------------------------------------
 
@@ -726,6 +752,13 @@ ALTER TABLE `m_employees`
   ADD UNIQUE KEY `emp_no` (`emp_no`);
 
 --
+-- Indexes for table `m_falp_groups`
+--
+ALTER TABLE `m_falp_groups`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `falp_group` (`falp_group`);
+
+--
 -- Indexes for table `m_hr_accounts`
 --
 ALTER TABLE `m_hr_accounts`
@@ -866,6 +899,12 @@ ALTER TABLE `m_dept`
 --
 ALTER TABLE `m_employees`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+
+--
+-- AUTO_INCREMENT for table `m_falp_groups`
+--
+ALTER TABLE `m_falp_groups`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `m_hr_accounts`

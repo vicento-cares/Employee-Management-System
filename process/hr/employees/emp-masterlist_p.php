@@ -98,15 +98,14 @@ if ($method == 'fetch_dept_dropdown') {
 
 // Get Group Dropdown
 if ($method == 'fetch_group_dropdown') {
-	$sql = "SELECT `group` FROM `m_falp_groups` ORDER BY group ASC";
+	$sql = "SELECT `falp_group` FROM `m_falp_groups` ORDER BY falp_group ASC";
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Group</option>';
 		foreach($stmt -> fetchAll() as $row) {
-			echo '<option value="'.htmlspecialchars($row['group']).'">'.htmlspecialchars($row['group']).'</option>';
+			echo '<option value="'.htmlspecialchars($row['falp_group']).'">'.htmlspecialchars($row['falp_group']).'</option>';
 		}
-		echo '<option value="QA">QA</option>';
 	} else {
 		echo '<option disabled selected value="">Select Group</option>';
 	}
