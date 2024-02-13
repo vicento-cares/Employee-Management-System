@@ -42,15 +42,12 @@ function get_dept($conn) {
 function get_falp_groups($conn) {
     $data = array();
 
-    $sql = "SELECT `group` FROM `m_falp_groups` ORDER BY group ASC";
+    $sql = "SELECT `falp_group` FROM `m_falp_groups` ORDER BY falp_group ASC";
     $stmt = $conn -> prepare($sql);
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-        array_push($data, $row['group']);
+        array_push($data, $row['falp_group']);
     }
-
-    //QA
-    array_push($data, "QA");
     
     return $data;
 }
