@@ -3,7 +3,7 @@ $( document ).ready(function() {
     fetch_dept_dropdown();
     fetch_group_dropdown();
     fetch_section_dropdown();
-    // fetch_sub_section_dropdown();
+    fetch_sub_section_dropdown();
     fetch_shuttle_route_dropdown();
     fetch_position_dropdown();
     fetch_process_dropdown();
