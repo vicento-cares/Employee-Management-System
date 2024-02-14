@@ -374,6 +374,7 @@ const get_pending_line_support_details = param => {
     var set_by_no = string[10];
     var pending_status = string[11];
     var line_process = string[12];
+    var shift_group = string[13];
 
     document.getElementById("pending_id_ls").value = id;
     document.getElementById("pending_line_support_id_ls").innerHTML = line_support_id;
@@ -381,6 +382,7 @@ const get_pending_line_support_details = param => {
     document.getElementById("pending_full_name_ls").innerHTML = full_name;
     document.getElementById("pending_dept_ls").innerHTML = dept;
     document.getElementById("pending_process_ls").innerHTML = line_process;
+    document.getElementById("pending_shift_group_ls").innerHTML = shift_group;
 
     document.getElementById("pending_day_ls").innerHTML = day;
     document.getElementById("pending_shift_ls").innerHTML = shift;
@@ -515,6 +517,7 @@ const get_recent_line_support_history_details = param => {
     var set_by_no = string[12];
     var status = string[13];
     var line_process = string[14];
+    var shift_group = string[15];
 
     document.getElementById("history_id_ls").value = id;
     document.getElementById("history_line_support_id_ls").innerHTML = line_support_id;
@@ -522,6 +525,7 @@ const get_recent_line_support_history_details = param => {
     document.getElementById("history_full_name_ls").innerHTML = full_name;
     document.getElementById("history_dept_ls").innerHTML = dept;
     document.getElementById("history_process_ls").innerHTML = line_process;
+    document.getElementById("history_shift_group_ls").innerHTML = shift_group;
 
     document.getElementById("history_day_ls").innerHTML = day;
     document.getElementById("history_shift_ls").innerHTML = shift;
