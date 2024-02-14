@@ -26,12 +26,16 @@
         </div>
         <div class="row mb-2">
           <div class="col-sm-5">
+            <label>Process : </label>
+            <span id="history_process_ls" class="ml-2"></span>
+          </div>
+          <div class="col-sm-4">
             <label>Dept : </label>
             <span id="history_dept_ls" class="ml-2"></span>
           </div>
-          <div class="col-sm-7">
-            <label>Process : </label>
-            <span id="history_process_ls" class="ml-2"></span>
+          <div class="col-sm-3">
+            <label>Shift : </label>
+            <span id="history_shift_group_ls" class="ml-2"></span>
           </div>
         </div>
         <div class="row mb-2">

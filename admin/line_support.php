@@ -95,6 +95,7 @@
                                   <th>Process</th>
                                   <th>Day</th>
                                   <th>Shift</th>
+                                  <th>Shift Group</th>
                                   <th>From Line No.</th>
                                   <th>Supported Line No.</th>
                                   <th>Set By</th>
@@ -173,6 +174,7 @@
                                   <th>Process</th>
                                   <th>Day</th>
                                   <th>Shift</th>
+                                  <th>Shift Group</th>
                                   <th>From Line No.</th>
                                   <th>Supported Line No.</th>
                                   <th>Set By</th>
@@ -286,6 +288,7 @@
                           <th>Process</th>
                           <th>Day</th>
                           <th>Shift</th>
+                          <th>Shift Group</th>
                           <th>From Line No.</th>
                           <th>Supported Line No.</th>
                           <th>Set By</th>

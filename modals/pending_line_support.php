@@ -26,12 +26,16 @@
         </div>
         <div class="row mb-2">
           <div class="col-sm-5">
+            <label>Process : </label>
+            <span id="pending_process_ls" class="ml-2"></span>
+          </div>
+          <div class="col-sm-4">
             <label>Dept : </label>
             <span id="pending_dept_ls" class="ml-2"></span>
           </div>
-          <div class="col-sm-7">
-            <label>Process : </label>
-            <span id="pending_process_ls" class="ml-2"></span>
+          <div class="col-sm-3">
+            <label>Shift Group : </label>
+            <span id="pending_shift_group_ls" class="ml-2"></span>
           </div>
         </div>
         <div class="row mb-2">
