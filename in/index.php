@@ -74,6 +74,8 @@ if (!isset($_SESSION['emp_no'])) {
 
     if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
       $wrong_scanning = true;
+    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+      $wrong_scanning = true;
     } else if (empty($shift_group) || empty($_SESSION['shift_group'])) {
       $wrong_shift_group = true;
     } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {

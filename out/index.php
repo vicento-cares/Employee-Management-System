@@ -159,6 +159,8 @@ if (!isset($_SESSION['emp_no'])) {
       if ($stmt -> rowCount() < 1) {
         $wrong_scanning = true;
       }
+    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+      $wrong_scanning = true;
     }
 
     if ($wrong_scanning != true) {

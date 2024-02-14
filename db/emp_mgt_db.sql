@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 13, 2024 at 09:50 AM
+-- Generation Time: Feb 14, 2024 at 01:35 AM
 -- Server version: 10.4.21-MariaDB
 -- PHP Version: 7.4.25
 
@@ -238,23 +238,24 @@ INSERT INTO `m_employees` (`id`, `emp_no`, `full_name`, `dept`, `section`, `sub_
 
 CREATE TABLE `m_falp_groups` (
   `id` int(10) UNSIGNED NOT NULL,
-  `falp_group` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+  `falp_group` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `m_falp_groups`
 --
 
-INSERT INTO `m_falp_groups` (`id`, `falp_group`) VALUES
-(1, 'Factory 2'),
-(2, 'FAP1'),
-(3, 'FAP2'),
-(4, 'FAP3'),
-(5, 'FAP4'),
-(6, 'First Process'),
-(9, 'QA'),
-(7, 'Secondary 1 Process'),
-(8, 'Secondary 2 Process');
+INSERT INTO `m_falp_groups` (`id`, `falp_group`, `date_updated`) VALUES
+(1, 'Factory 2', '2024-02-14 08:27:31'),
+(2, 'FAP1', '2024-02-14 08:27:31'),
+(3, 'FAP2', '2024-02-14 08:27:31'),
+(4, 'FAP3', '2024-02-14 08:27:31'),
+(5, 'FAP4', '2024-02-14 08:27:31'),
+(6, 'First Process', '2024-02-14 08:27:31'),
+(7, 'Secondary 1 Process', '2024-02-14 08:27:31'),
+(8, 'Secondary 2 Process', '2024-02-14 08:27:31'),
+(9, 'QA', '2024-02-14 08:27:31');
 
 -- --------------------------------------------------------
 
@@ -380,6 +381,114 @@ INSERT INTO `m_shuttle_routes` (`id`, `shuttle_route`, `date_updated`) VALUES
 (11, 'San Pablo via Lipa', '2023-11-17 17:39:50'),
 (12, 'San Pablo via Sto. Tomas', '2023-11-17 17:39:50'),
 (13, 'Sta. Teresita', '2023-11-17 17:39:50');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `m_sub_sections`
+--
+
+CREATE TABLE `m_sub_sections` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `sub_section` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `m_sub_sections`
+--
+
+INSERT INTO `m_sub_sections` (`id`, `sub_section`, `date_updated`) VALUES
+(1, 'Suzuki Final', '2024-02-14 08:28:01'),
+(2, 'Suzuki YT3 & Y2R Final', '2024-02-14 08:28:01'),
+(3, 'Toyota Final', '2024-02-14 08:28:01'),
+(4, 'Mazda Final', '2024-02-14 08:28:01'),
+(5, 'Daihatsu D01L Final', '2024-02-14 08:28:01'),
+(6, 'Subaru Final', '2024-02-14 08:28:01'),
+(7, 'Honda T20A/3S5A Final', '2024-02-14 08:28:01'),
+(8, 'Section 6 Honda Final', '2024-02-14 08:28:01'),
+(9, 'Battery Final', '2024-02-14 08:28:01'),
+(10, 'Honda Final', '2024-02-14 08:28:01'),
+(11, 'Section 8 Final Process', '2024-02-14 08:28:01'),
+(12, 'Suzuki Initial (First Process)', '2024-02-14 08:28:01'),
+(13, 'Suzuki Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(14, 'Section 1 Initial-QA Mass Pro (First process)', '2024-02-14 08:28:01'),
+(15, 'Section 1 Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(16, 'Section 1 Distributor Initial', '2024-02-14 08:28:01'),
+(17, 'Section 1 Distributor Final', '2024-02-14 08:28:01'),
+(18, 'Suzuki YT3 & Y2R Initial (First Process)', '2024-02-14 08:28:01'),
+(19, 'Suzuki YT3 & Y2R Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(20, 'Toyota/Daihatsu  Initial (First Process)', '2024-02-14 08:28:01'),
+(21, 'Toyota/Daihatsu Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(22, 'Suzuki YT3 & Y2R Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(23, 'Suzuki YT3 & Y2R Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(24, 'Toyota/Daihatsu Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(25, 'Toyota/Daihatsu Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(26, 'Section 2 Distributor Initial', '2024-02-14 08:28:01'),
+(27, 'Section 2 Distributor Final', '2024-02-14 08:28:01'),
+(28, 'Mazda Initial (First Process)', '2024-02-14 08:28:01'),
+(29, 'Mazda Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(30, 'Section 3 Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(31, 'Section 3 Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(32, 'Section 3 Distributor Initial', '2024-02-14 08:28:01'),
+(33, 'Section 3 Distributor Final', '2024-02-14 08:28:01'),
+(34, 'Daihatsu D01L Initial (First Process)', '2024-02-14 08:28:01'),
+(35, 'Daihatsu D01L Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(36, 'Section 4 Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(37, 'Section 4 Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(38, 'Section 4 Distributor Initial', '2024-02-14 08:28:01'),
+(39, 'Section 4 Distributor Final', '2024-02-14 08:28:01'),
+(40, 'Honda T20A/3S5A Initial (First Process)', '2024-02-14 08:28:01'),
+(41, 'Honda T20A/3S5A Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(42, 'Honda T20 Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(43, 'Honda T20 Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(44, 'Section 5 Distributor Initial', '2024-02-14 08:28:01'),
+(45, 'Section 5 Distributor Final', '2024-02-14 08:28:01'),
+(46, 'Honda 3MOA/TKRA/32RA Initial (First Process)', '2024-02-14 08:28:01'),
+(47, 'Honda 3MOA/TKRA/32RA(Secondary Process)', '2024-02-14 08:28:01'),
+(48, 'Honda 3MOA/TKRA/32RA Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(49, 'Honda 3MOA/TKRA/32RA Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(50, 'Battery Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(51, 'Section 6 Distributor Initial', '2024-02-14 08:28:01'),
+(52, 'Section 6 Distributor Final', '2024-02-14 08:28:01'),
+(53, 'Honda 3TOA Initial (First Process)', '2024-02-14 08:28:01'),
+(54, 'Honda 3TOA Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(55, 'Honda Old Initial (First Process)', '2024-02-14 08:28:01'),
+(56, 'Honda Old Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(57, 'Honda 3T0A Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(58, 'Honda 3T0A Initial-QA Mass Pro (Secondary Process)\r\n', '2024-02-14 08:28:01'),
+(59, 'Honda OLD Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(60, 'Honda OLD Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(61, 'Section 7 Distributor Initial', '2024-02-14 08:28:01'),
+(62, 'Section 7 Distributor Final', '2024-02-14 08:28:01'),
+(63, 'Section 8 (Secondary Process)', '2024-02-14 08:28:01'),
+(64, 'Section 8 Distributor (Final/Tube Cutting and Making/VS Laminating)', '2024-02-14 08:28:01'),
+(65, 'Subaru Initial (First Process)', '2024-02-14 08:28:01'),
+(66, 'Subaru Initial (Secondary Process)', '2024-02-14 08:28:01'),
+(67, 'Subaru Initial-QA Mass Pro (First Process)', '2024-02-14 08:28:01'),
+(68, 'Subaru Initial-QA Mass Pro (Secondary Process)', '2024-02-14 08:28:01'),
+(69, 'Section 9 Distributor Initial', '2024-02-14 08:28:01'),
+(70, 'Section 9 Distributor Final', '2024-02-14 08:28:01'),
+(71, 'Section 1 Repair Person', '2024-02-14 08:28:01'),
+(72, 'Section 2 Repair Person', '2024-02-14 08:28:01'),
+(73, 'Section 3 Repair Person', '2024-02-14 08:28:01'),
+(74, 'Section 4 Repair Person', '2024-02-14 08:28:01'),
+(75, 'Section 5 Repair Person', '2024-02-14 08:28:01'),
+(76, 'Section 6 Repair Person', '2024-02-14 08:28:01'),
+(77, 'Section 7 Repair Person', '2024-02-14 08:28:01'),
+(78, 'Section 8 Repair Person', '2024-02-14 08:28:01'),
+(79, 'Section 9 Repair Person', '2024-02-14 08:28:01'),
+(80, 'Section 1 Clerk', '2024-02-14 08:28:01'),
+(81, 'Section 2 Clerk', '2024-02-14 08:28:01'),
+(82, 'Section 3 Clerk', '2024-02-14 08:28:01'),
+(83, 'Section 4 Clerk', '2024-02-14 08:28:01'),
+(84, 'Section 5 Clerk', '2024-02-14 08:28:01'),
+(85, 'Section 6 Clerk', '2024-02-14 08:28:01'),
+(86, 'Section 7 Clerk', '2024-02-14 08:28:01'),
+(87, 'Section 8 Clerk', '2024-02-14 08:28:01'),
+(88, 'Section 9 Clerk', '2024-02-14 08:28:01'),
+(89, 'Tube Cutting', '2024-02-14 08:28:01'),
+(90, 'SWAT Final', '2024-02-14 08:28:01');
 
 -- --------------------------------------------------------
 
@@ -795,6 +904,13 @@ ALTER TABLE `m_shuttle_routes`
   ADD UNIQUE KEY `shuttle_route` (`shuttle_route`);
 
 --
+-- Indexes for table `m_sub_sections`
+--
+ALTER TABLE `m_sub_sections`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `sub_section` (`sub_section`);
+
+--
 -- Indexes for table `t_absences`
 --
 ALTER TABLE `t_absences`
@@ -935,6 +1051,12 @@ ALTER TABLE `m_providers`
 --
 ALTER TABLE `m_shuttle_routes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `m_sub_sections`
+--
+ALTER TABLE `m_sub_sections`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `t_absences`
