@@ -351,12 +351,40 @@ if ($method == 'get_attendance_list_counting') {
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
 	$row_class = $row_class_arr[0];
 
+	$results = array();
+
+	$sql = "SELECT IFNULL(process, 'No Process') AS process1, 
+			COUNT(emp_no) AS total 
+		FROM `m_employees` 
+		WHERE shift_group = '$shift_group'";
+	if (!empty($dept)) {
+		$sql = $sql . " AND dept LIKE '$dept%'";
+	} else {
+		$sql = $sql . " AND dept != ''";
+	}
+	if (!empty($section)) {
+		$sql = $sql . " AND section LIKE '$section%'";
+	}
+	if (!empty($line_no)) {
+		$sql = $sql . " AND line_no LIKE '$line_no%'";
+	}
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+	$sql = $sql . " GROUP BY process1";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+			array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
+		}
+	}
+
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
-			COUNT(tio.emp_no) AS total_present, 
-			COUNT(emp.emp_no) AS total 
-		FROM m_employees emp
-		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-		WHERE emp.shift_group = '$shift_group'";
+			COUNT(tio.emp_no) AS total_present 
+		FROM `t_time_in_out` tio 
+		LEFT JOIN `m_employees` emp 
+		ON tio.emp_no = emp.emp_no 
+		WHERE tio.day = '$day' AND shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -374,35 +402,98 @@ if ($method == 'get_attendance_list_counting') {
 	$stmt = $conn->prepare($sql);
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
-
-			$total = intval($row['total']);
-			$total_present = intval($row['total_present']);
-			$total_absent = $total - $total_present;
-
-			if ($row['process'] == 'No Process') {
-				$row_class = $row_class_arr[4];
-			} else if ($total_present == $total) {
-				$row_class = $row_class_arr[1];
-			} else if ($total_present < $total && $total_present > 0) {
-				$row_class = $row_class_arr[2];
-			} else if ($total_present < 1) {
-				$row_class = $row_class_arr[3];
-			} else {
-				$row_class = $row_class_arr[0];
+		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+			foreach ($results as &$result) {
+				if ($result['process'] == $row['process']) {
+					$result['total_present'] = $row['total_present'];
+					break; // exit the loop once you've found and updated the process
+				}
 			}
-			
-			echo '<tr class="'.$row_class.'">';
-			echo '<td>'.$c.'</td>';
-			echo '<td>'.$row['process'].'</td>';
-			echo '<td>'.$row['total_present'].'</td>';
-			echo '<td>'.$total_absent.'</td>';
-			echo '<td>'.$row['total'].'</td>';
-
-			echo '</tr>';
+			unset($result); // unset reference to last element
 		}
 	}
+
+	foreach ($results as &$result) {
+		$c++;
+
+		$total = intval($result['total']);
+		$total_present = intval($result['total_present']);
+		$total_absent = $total - $total_present;
+
+		if ($result['process'] == 'No Process') {
+			$row_class = $row_class_arr[4];
+		} else if ($total_present == $total) {
+			$row_class = $row_class_arr[1];
+		} else if ($total_present < $total && $total_present > 0) {
+			$row_class = $row_class_arr[2];
+		} else if ($total_present < 1) {
+			$row_class = $row_class_arr[3];
+		} else {
+			$row_class = $row_class_arr[0];
+		}
+		
+		echo '<tr class="'.$row_class.'">';
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$result['process'].'</td>';
+		echo '<td>'.$result['total_present'].'</td>';
+		echo '<td>'.$total_absent.'</td>';
+		echo '<td>'.$result['total'].'</td>';
+
+		echo '</tr>';
+	}
+
+	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+	// 		COUNT(tio.emp_no) AS total_present, 
+	// 		COUNT(emp.emp_no) AS total 
+	// 	FROM m_employees emp
+	// 	LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	// 	WHERE emp.shift_group = '$shift_group'";
+	// if (!empty($dept)) {
+	// 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
+	// } else {
+	// 	$sql = $sql . " AND emp.dept != ''";
+	// }
+	// if (!empty($section)) {
+	// 	$sql = $sql . " AND emp.section LIKE '$section%'";
+	// }
+	// if (!empty($line_no)) {
+	// 	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+	// }
+	// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	// $sql = $sql . " GROUP BY emp.process";
+
+	// $stmt = $conn->prepare($sql);
+	// $stmt->execute();
+	// if ($stmt->rowCount() > 0) {
+	// 	foreach($stmt->fetchALL() as $row){
+	// 		$c++;
+
+	// 		$total = intval($row['total']);
+	// 		$total_present = intval($row['total_present']);
+	// 		$total_absent = $total - $total_present;
+
+	// 		if ($row['process'] == 'No Process') {
+	// 			$row_class = $row_class_arr[4];
+	// 		} else if ($total_present == $total) {
+	// 			$row_class = $row_class_arr[1];
+	// 		} else if ($total_present < $total && $total_present > 0) {
+	// 			$row_class = $row_class_arr[2];
+	// 		} else if ($total_present < 1) {
+	// 			$row_class = $row_class_arr[3];
+	// 		} else {
+	// 			$row_class = $row_class_arr[0];
+	// 		}
+			
+	// 		echo '<tr class="'.$row_class.'">';
+	// 		echo '<td>'.$c.'</td>';
+	// 		echo '<td>'.$row['process'].'</td>';
+	// 		echo '<td>'.$row['total_present'].'</td>';
+	// 		echo '<td>'.$total_absent.'</td>';
+	// 		echo '<td>'.$row['total'].'</td>';
+
+	// 		echo '</tr>';
+	// 	}
+	// }
 }
 
 if ($method == 'save_absence_details') {
