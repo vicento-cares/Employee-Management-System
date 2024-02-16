@@ -95,6 +95,7 @@ const count_attendance_list = () => {
     var day = sessionStorage.getItem('attendance_date_search');
     var shift_group = sessionStorage.getItem('shift_group_search');
     var dept = sessionStorage.getItem('dept_search');
+    var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
     $.ajax({
         url:'../process/admin/attendances/at_p.php',
         type:'POST',
@@ -123,7 +124,9 @@ const count_attendance_list = () => {
                 $('#counting_view_absent').html(0);
             }
 
-            get_attendance_list_counting();
+            if (current_page < 2) {
+                get_attendance_list_counting();
+            }
         }
     });
 }

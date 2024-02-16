@@ -18,9 +18,9 @@ function count_attendance_list($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND dept != ''";
 	}
-	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
-	}
+	// if (!empty($search_arr['section'])) {
+	// 	$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
+	// }
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
 	}
@@ -47,9 +47,9 @@ function count_emp_tio($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND emp.dept != ''";
 	}
-	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
-	}
+	// if (!empty($search_arr['section'])) {
+	// 	$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
+	// }
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
@@ -78,14 +78,13 @@ switch (true) {
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
 $dept = $_GET['dept'];
-$section = $_SESSION['section'];
+// $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
 
 $search_arr = array(
     "day" => $day,
     "shift_group" => $shift_group,
     "dept" => $dept,
-    "section" => $section,
     "line_no" => $line_no
 );
 
@@ -101,9 +100,9 @@ $filename = "EmpMgtSys_AttendanceCounting_";
 if (!empty($dept)) {
 	$filename = $filename . $dept . "-";
 }
-if (!empty($section)) {
-	$filename = $filename . $section . "-";
-}
+// if (!empty($section)) {
+// 	$filename = $filename . $section . "-";
+// }
 if (!empty($line_no)) {
 	$filename = $filename . $line_no . "-";
 }
@@ -119,22 +118,50 @@ fputs($f, "\xEF\xBB\xBF");
 $fields = array('#', 'Process', 'Present', 'Absent', 'Total MP'); 
 fputcsv($f, $fields, $delimiter); 
 
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
-			COUNT(tio.emp_no) AS total_present, 
-			COUNT(emp.emp_no) AS total 
-		FROM m_employees emp
-		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-		WHERE emp.shift_group = '$shift_group'";
+$results = array();
+
+$sql = "SELECT IFNULL(process, 'No Process') AS process1, 
+		COUNT(emp_no) AS total 
+	FROM `m_employees` 
+	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
-    $sql = $sql . " AND emp.dept LIKE '$dept%'";
+	$sql = $sql . " AND dept LIKE '$dept%'";
 } else {
-    $sql = $sql . " AND emp.dept != ''";
+	$sql = $sql . " AND dept != ''";
 }
-if (!empty($section)) {
-    $sql = $sql . " AND emp.section LIKE '$section%'";
-}
+// if (!empty($section)) {
+// 	$sql = $sql . " AND section LIKE '$section%'";
+// }
 if (!empty($line_no)) {
-    $sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+	$sql = $sql . " AND line_no LIKE '$line_no%'";
+}
+$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+$sql = $sql . " GROUP BY process1";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+if ($stmt->rowCount() > 0) {
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
+	}
+}
+
+$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+		COUNT(tio.emp_no) AS total_present 
+	FROM `t_time_in_out` tio 
+	LEFT JOIN `m_employees` emp 
+	ON tio.emp_no = emp.emp_no 
+	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+if (!empty($dept)) {
+	$sql = $sql . " AND emp.dept LIKE '$dept%'";
+} else {
+	$sql = $sql . " AND emp.dept != ''";
+}
+// if (!empty($section)) {
+// 	$sql = $sql . " AND emp.section LIKE '$section%'";
+// }
+if (!empty($line_no)) {
+	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 }
 $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 $sql = $sql . " GROUP BY emp.process";
@@ -142,22 +169,71 @@ $sql = $sql . " GROUP BY emp.process";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
-
-    // Output each row of the data, format line as csv and write to file pointer 
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
-    	$c++;
-
-        $total = intval($row['total']);
-        $total_present = intval($row['total_present']);
-        $total_absent = $total - $total_present;
-        
-        $lineData = array($c, $row['process'], $row['total_present'], $total_absent, $row['total']); 
-        fputcsv($f, $lineData, $delimiter);
-    }
-
-    $lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
-    fputcsv($f, $lineData, $delimiter);
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		foreach ($results as &$result) {
+			if ($result['process'] == $row['process']) {
+				$result['total_present'] = $row['total_present'];
+				break; // exit the loop once you've found and updated the process
+			}
+		}
+		unset($result); // unset reference to last element
+	}
 }
+
+// Output each row of the data, format line as csv and write to file pointer 
+foreach ($results as &$result) {
+	$c++;
+
+	$total = intval($result['total']);
+	$total_present = intval($result['total_present']);
+	$total_absent = $total - $total_present;
+        
+	$lineData = array($c, $result['process'], $result['total_present'], $total_absent, $result['total']); 
+	fputcsv($f, $lineData, $delimiter);
+}
+
+$lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
+fputcsv($f, $lineData, $delimiter);
+
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+// 			COUNT(tio.emp_no) AS total_present, 
+// 			COUNT(emp.emp_no) AS total 
+// 		FROM m_employees emp
+// 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+// 		WHERE emp.shift_group = '$shift_group'";
+// if (!empty($dept)) {
+//     $sql = $sql . " AND emp.dept LIKE '$dept%'";
+// } else {
+//     $sql = $sql . " AND emp.dept != ''";
+// }
+// if (!empty($section)) {
+//     $sql = $sql . " AND emp.section LIKE '$section%'";
+// }
+// if (!empty($line_no)) {
+//     $sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+// }
+// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+// $sql = $sql . " GROUP BY emp.process";
+
+// $stmt = $conn->prepare($sql);
+// $stmt->execute();
+// if ($stmt->rowCount() > 0) {
+
+//     // Output each row of the data, format line as csv and write to file pointer 
+//     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
+//     	$c++;
+
+//         $total = intval($row['total']);
+//         $total_present = intval($row['total_present']);
+//         $total_absent = $total - $total_present;
+        
+//         $lineData = array($c, $row['process'], $row['total_present'], $total_absent, $row['total']); 
+//         fputcsv($f, $lineData, $delimiter);
+//     }
+
+//     $lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
+//     fputcsv($f, $lineData, $delimiter);
+// }
 
 // Move back to beginning of file 
 fseek($f, 0); 
