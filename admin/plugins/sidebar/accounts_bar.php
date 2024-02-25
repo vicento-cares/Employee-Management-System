@@ -64,6 +64,16 @@
             </p>
           </a>
         </li> 
+        <?php if ($_SESSION['role'] == 'admin') {?>
+        <li class="nav-item">
+          <a href="attendance_summary_report.php" class="nav-link">
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              Attendance Report
+            </p>
+          </a>
+        </li> 
+        <?php } ?>
         <li class="nav-item">
           <a href="shuttle_allocation.php" class="nav-link">
             <i class="nav-icon fas fa-file-alt"></i>

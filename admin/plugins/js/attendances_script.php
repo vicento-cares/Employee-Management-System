@@ -64,6 +64,8 @@
     const count_attendance_present = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
+        var dept = sessionStorage.getItem('dept_search');
+
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
             type: 'POST',
@@ -71,17 +73,20 @@
             data: {
                 method: 'count_attendance_present',
                 day: day,
-                shift_group: shift_group
+                shift_group: shift_group,
+                dept: dept
             },
             success: function (response) {
                 let total = parseInt(sessionStorage.getItem('count_rows'));
 
                 let present = parseInt(response);
                 let absent = total - present;
+                let attendance_percentage = Math.round((present / total) * 100);
                 document.getElementById("count_view_present").innerHTML = present;
                 document.getElementById("counting_view_present").innerHTML = present;
                 document.getElementById("count_view_absent").innerHTML = absent;
                 document.getElementById("counting_view_absent").innerHTML = absent;
+                document.getElementById("count_view_attendance_percentage").innerHTML = `${attendance_percentage}%`;
 
                 /*let present = $('#attendanceTable tbody tr.bg-success').length;
                 let absent = $('#attendanceTable tbody tr.bg-danger').length;
@@ -122,6 +127,7 @@
                     document.getElementById("counting_view_present").innerHTML = 0;
                     document.getElementById("count_view_absent").innerHTML = 0;
                     document.getElementById("counting_view_absent").innerHTML = 0;
+                    document.getElementById("count_view_attendance_percentage").innerHTML = 0;
                 }
 
                 if (current_page < 2) {

@@ -49,6 +49,7 @@
                   <select class="form-control" id="shift_group_search" style="width: 100%;" onchange="get_attendance_list(1)" required>
                     <option selected value="A">Shift A</option>
                     <option value="B">Shift B</option>
+                    <option value="ADS">Shift ADS</option>
                   </select>
                 </div>
                 <div class="col-sm-2">
@@ -59,13 +60,17 @@
                     <option value="QA">QA</option>
                   </select>
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                   <label>Present MP</label><br>
                   <span id="count_view_present"></span>
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                   <label>Absent MP</label><br>
                   <span id="count_view_absent"></span>
+                </div>
+                <div class="col-sm-2">
+                  <label>Percentage</label><br>
+                  <span id="count_view_attendance_percentage"></span>
                 </div>
                 <div class="col-sm-2">
                   <label>&nbsp;</label>

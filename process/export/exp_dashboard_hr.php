@@ -416,6 +416,115 @@ if ($stmt -> rowCount() > 0) {
 	}
 }
 
+
+$fields = array(''); 
+fputcsv($f, $fields, $delimiter);
+
+
+$shift = 'DS';
+$shift_group = 'ADS';
+if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+	$day = $server_date_only;
+} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+	$day = $server_date_only_yesterday;
+}
+
+$search_arr = array(
+	"dept" => $dept,
+	"section" => $section,
+	"line_no" => $line_no,
+	"shift_group" => $shift_group
+);
+
+$total_emp_shift_group_ads = count_emp_dashboard($search_arr, $conn);
+
+$search_arr1 = array(
+  "day" => $day,
+  "shift" => $shift,
+  "shift_group" => $shift_group,
+  "dept" => $dept,
+  "section" => $section,
+  "line_no" => $line_no
+);
+
+$total_present_ads = count_emp_tio($search_arr1, $conn);
+$total_absent_ads = $total_emp_shift_group_ads - $total_present_ads;
+$total_support_ads = count_emp_lsh($search_arr1, $conn);
+
+$fields = array('Shift Group ADS'); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array(''); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Label', 'Total'); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Present MP', $total_present_ads); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Absent MP', $total_absent_ads); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Total Shift ADS MP', $total_emp_shift_group_ads); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Total MP', $total_emp); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array('Support MP', $total_support_ads); 
+fputcsv($f, $fields, $delimiter);
+
+$fields = array(''); 
+fputcsv($f, $fields, $delimiter);
+
+
+// Set column headers 
+$fields = array('#', 'Provider', 'Total', 'Present', 'Absent'); 
+fputcsv($f, $fields, $delimiter);
+
+$c = 0;
+
+$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
+$stmt = $conn -> prepare($sql);
+$stmt -> execute();
+if ($stmt -> rowCount() > 0) {
+	foreach($stmt -> fetchAll() as $row) {
+		$c++;
+		
+		$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
+
+		if ($shift == 'DS') {
+			if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+				$day = $server_date_only;
+			} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+				$day = $server_date_only_yesterday;
+			}
+		} else if ($shift == 'NS') {
+			if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+				$day = $server_date_only;
+			} else if ($server_time >= '00:00:00' && $server_time < '17:00:00') {
+				$day = $server_date_only_yesterday;
+			}
+		}
+
+		$search_arr1 = array(
+		  "day" => $day,
+		  "shift" => $shift,
+		  "shift_group" => $shift_group,
+		  "dept" => $dept,
+		  "section" => $section,
+		  "line_no" => $line_no
+		);
+
+		$total_present = count_emp_by_provider_tio($row['provider'], $search_arr1, $conn);
+		$total_absent = $total - $total_present;
+
+		$lineData = array($c, $row['provider'], $total, $total_present, $total_absent); 
+        fputcsv($f, $lineData, $delimiter);
+	}
+}
+
 // Move back to beginning of file 
 fseek($f, 0); 
 

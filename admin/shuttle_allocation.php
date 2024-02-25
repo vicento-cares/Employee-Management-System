@@ -49,6 +49,7 @@
                   <select class="form-control" id="shuttle_allocation_shift_group" onchange="get_shuttle_allocation()" style="width: 100%;">
                     <option selected value="A">Shift A</option>
                     <option value="B">Shift B</option>
+                    <option value="ADS">Shift ADS</option>
                   </select>
                 </div>
                 <div class="col-sm-2">
