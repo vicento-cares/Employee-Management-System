@@ -12,6 +12,8 @@ include '../modals/new_account.php';
 include '../modals/update_account.php';
 include '../modals/view_employee.php';
 include '../modals/absence_details.php';
+include '../modals/attendance_summary_report_details.php';
+include '../modals/absence_details2.php';
 include '../modals/update_shuttle_route.php';
 include '../modals/leave_form_pending.php';
 include '../modals/leave_form_history.php';

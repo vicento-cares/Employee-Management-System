@@ -124,6 +124,7 @@ if ($method == 'count_emp_dashboard') {
 	$total = 0;
 	$total_shift_group_a = 0;
 	$total_shift_group_b = 0;
+	$total_shift_group_ads = 0;
 
 	$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
 	if (!empty($dept)) {
@@ -183,6 +184,27 @@ if ($method == 'count_emp_dashboard') {
 		}else{
 			$total_shift_group_b = 0;
 		}
+
+		$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
+		if (!empty($dept)) {
+			$query = $query . " AND dept = '$dept'";
+		}
+		if (!empty($section)) {
+			$query = $query . " AND section LIKE '$section%'";
+		}
+		if (!empty($line_no)) {
+			$query = $query . " AND line_no LIKE '$line_no%'";
+		}
+		$query = $query . " AND shift_group = 'ADS'";
+		$stmt = $conn->prepare($query);
+		$stmt->execute();
+		if ($stmt->rowCount() > 0) {
+			foreach($stmt->fetchALL() as $j){
+				$total_shift_group_ads = intval($j['total']);
+			}
+		}else{
+			$total_shift_group_ads = 0;
+		}
 	}else{
 		$total = 0;
 	}
@@ -227,16 +249,40 @@ if ($method == 'count_emp_dashboard') {
 	$total_absent_ns = $total_shift_group_b - $total_present_ns;
 	$total_support_ns = count_emp_lsh($search_arr1, $conn);
 
+	$shift = 'DS';
+	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+		$day = $server_date_only;
+	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+		$day = $server_date_only_yesterday;
+	}
+
+	$search_arr1 = array(
+	  "day" => $day,
+	  "shift" => $shift,
+	  "shift_group" => "ADS",
+	  "dept" => $dept,
+	  "section" => $section,
+	  "line_no" => $line_no
+	);
+
+	$total_present_ads = count_emp_tio($search_arr1, $conn);
+	$total_absent_ads = $total_shift_group_ads - $total_present_ads;
+	$total_support_ads = count_emp_lsh($search_arr1, $conn);
+
 	$response_arr = array(
 		'total' => $total,
 		'total_shift_group_a' => $total_shift_group_a,
 		'total_shift_group_b' => $total_shift_group_b,
+		'total_shift_group_ads' => $total_shift_group_ads,
 		'total_present_ds' => $total_present_ds,
 		'total_absent_ds' => $total_absent_ds,
 		'total_support_ds' => $total_support_ds,
 		'total_present_ns' => $total_present_ns,
 		'total_absent_ns' => $total_absent_ns,
-		'total_support_ns' => $total_support_ns
+		'total_support_ns' => $total_support_ns,
+		'total_present_ads' => $total_present_ads,
+		'total_absent_ads' => $total_absent_ads,
+		'total_support_ads' => $total_support_ads
 	);
 
 	//header('Content-Type: application/json; charset=utf-8');

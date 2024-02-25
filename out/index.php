@@ -272,6 +272,7 @@ if (!isset($_SESSION['emp_no'])) {
 </head>
 
 <body class="hold-transition login-page">
+  <input type="hidden" id="server_time" value="<?=$server_time?>">
   <div class="login-box">
     <div class="login-logo">
       <img src="../dist/img/logo.webp" style="height:100px;">
@@ -384,6 +385,8 @@ if (!isset($_SESSION['emp_no'])) {
 <script src="../dist/js/adminlte.min.js"></script>
 
 <script>
+  var serverTime = document.getElementById("server_time").value;
+
   // DOMContentLoaded function
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("emp_no").focus();
@@ -407,18 +410,32 @@ if (!isset($_SESSION['emp_no'])) {
     }, 100);
   });
 
-  const realtime =()=>{
-    var realtime = "realtime";
-    $.ajax({
-      type: "GET",
-      url: "../process/admin/realtime/realtime_p.php",
-      cache:false,
-      data: {realtime:realtime},
-      success: (response)=>{
-        $('#realtime').html(response);
-      }
-    });
-  }
+  const realtime = () => {
+    // Create a Date object from the server time
+    var date = new Date("1970-01-01T" + serverTime + "Z");
+
+    // Increment the server time by one second
+    date.setSeconds(date.getSeconds() + 1);
+
+    // Update the serverTime variable
+    serverTime = date.toISOString().substr(11, 8);
+
+    // Display the time
+    $('#realtime').html(serverTime);
+  };
+
+  // const realtime =()=>{
+  //   var realtime = "realtime";
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "../process/admin/realtime/realtime_p.php",
+  //     cache:false,
+  //     data: {realtime:realtime},
+  //     success: (response)=>{
+  //       $('#realtime').html(response);
+  //     }
+  //   });
+  // }
 </script>
 
 </body>

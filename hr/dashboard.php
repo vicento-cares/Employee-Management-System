@@ -87,6 +87,9 @@
                 <li class="nav-item">
                   <a class="nav-link" id="dashboards-2-tab" data-toggle="pill" href="#dashboards-2" role="tab" aria-controls="dashboards-2" aria-selected="false">Shift Group B</a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="dashboards-3-tab" data-toggle="pill" href="#dashboards-3" role="tab" aria-controls="dashboards-3" aria-selected="false">Shift Group ADS</a>
+                </li>
               </ul>
             </div>
             <div class="card-body">
@@ -208,6 +211,66 @@
                     </div>
                   </div>
                   <div id="count_emp_provider_dashboard_ns" class="row mb-2">
+                  </div>
+
+                </div>
+                <div class="tab-pane fade" id="dashboards-3" role="tabpanel" aria-labelledby="dashboards-3-tab">
+                  
+                  <div id="count_emp_dashboard_ads" class="row mb-2">
+                    <div class="col-3">
+                      <div class="small-box bg-white">
+                      <div class="inner mb-3">
+                        <h2 id="count_emp_dashboard_value_ads"></h2>
+                        <h4><b>TOTAL MP</b></h4>
+                        <h4>Employees</h4>
+                      </div>
+                      <div class="icon">
+                        <i class="ion ion-person-stalker"></i>
+                      </div>
+                      <div class="small-box-footer"></div>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="small-box bg-success">
+                      <div class="inner mb-3">
+                        <h2 id="count_emp_dashboard_present_value_ads"></h2>
+                        <h4><b>PRESENT MP</b></h4>
+                        <h4>Employees</h4>
+                      </div>
+                      <div class="icon">
+                        <i class="ion ion-person-stalker"></i>
+                      </div>
+                      <div class="small-box-footer"></div>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="small-box bg-secondary">
+                      <div class="inner mb-3">
+                        <h2 id="count_emp_dashboard_support_value_ads"></h2>
+                        <h4><b>SUPPORT MP</b></h4>
+                        <h4>Employees</h4>
+                      </div>
+                      <div class="icon">
+                        <i class="ion ion-person-stalker"></i>
+                      </div>
+                      <div class="small-box-footer"></div>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="small-box bg-danger">
+                      <div class="inner mb-3">
+                        <h2 id="count_emp_dashboard_absent_value_ads"></h2>
+                        <h4><b>ABSENT MP</b></h4>
+                        <h4>Employees</h4>
+                      </div>
+                      <div class="icon">
+                        <i class="ion ion-person-stalker"></i>
+                      </div>
+                      <div class="small-box-footer"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="count_emp_provider_dashboard_ads" class="row mb-2">
                   </div>
 
                 </div>

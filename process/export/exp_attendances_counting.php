@@ -2,11 +2,6 @@
 session_name("emp_mgt");
 session_start();
 
-if (!isset($_SESSION['emp_no'])) {
-  header('location:/emp_mgt/admin');
-  exit;
-}
-
 require('../conn.php');
 
 function count_attendance_list($search_arr, $conn) {
@@ -18,9 +13,9 @@ function count_attendance_list($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND dept != ''";
 	}
-	// if (!empty($search_arr['section'])) {
-	// 	$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
-	// }
+	if (!empty($search_arr['section'])) {
+		$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
+	}
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
 	}
@@ -47,9 +42,9 @@ function count_emp_tio($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND emp.dept != ''";
 	}
-	// if (!empty($search_arr['section'])) {
-	// 	$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
-	// }
+	if (!empty($search_arr['section'])) {
+		$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
+	}
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
@@ -78,7 +73,7 @@ switch (true) {
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
 $dept = $_GET['dept'];
-// $section = $_SESSION['section'];
+$section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
 
 $search_arr = array(
