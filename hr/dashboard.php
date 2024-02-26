@@ -30,12 +30,20 @@
           </select>
         </div>
         <div class="col-sm-2">
+          <!-- <label>Group</label>
+          <select id="group_search" class="form-control" onchange="count_emp_dashboard()">
+            <option value="">Select Group</option>
+          </select> -->
           <label>Section</label>
-          <input type="text" class="form-control" id="section_master_search" placeholder="Search" autocomplete="off" maxlength="255">
+          <select id="section_master_search" class="form-control" onchange="count_emp_dashboard()">
+            <option value="">Select Section</option>
+          </select>
         </div>
         <div class="col-sm-2">
           <label>Line No.</label>
-          <input type="text" class="form-control" id="line_no_master_search" placeholder="Search" autocomplete="off" maxlength="255">
+          <select id="line_no_master_search" class="form-control" onchange="count_emp_dashboard()">
+            <option value="">Select Line No.</option>
+          </select>
         </div>
         <div class="col-sm-2 offset-sm-2">
           <label>&nbsp;</label>

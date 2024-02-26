@@ -4,6 +4,9 @@
 
     $(document).ready(function () {
         fetch_dept_dropdown();
+        // fetch_group_dropdown();
+        fetch_section_dropdown();
+        fetch_line_dropdown();
         count_emp_dashboard();
         realtime_count_emp_dashboard = setInterval(count_emp_dashboard, 30000);
         sessionStorage.setItem('notif_pending_ls', 0);
@@ -11,20 +14,6 @@
         sessionStorage.setItem('notif_rejected_ls', 0);
         load_notif_line_support();
         realtime_load_notif_line_support = setInterval(load_notif_line_support, 5000);
-    });
-
-    document.getElementById("section_master_search").addEventListener("keyup", e => {
-        if (e.which === 13) {
-            e.preventDefault();
-            count_emp_dashboard();
-        }
-    });
-
-    document.getElementById("line_no_master_search").addEventListener("keyup", e => {
-        if (e.which === 13) {
-            e.preventDefault();
-            count_emp_dashboard();
-        }
     });
 
     const fetch_dept_dropdown = () => {
@@ -37,6 +26,48 @@
             },
             success: function (response) {
                 $('#dept_master_search').html(response);
+            }
+        });
+    }
+
+    const fetch_group_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_group_dropdown'
+            },
+            success: function (response) {
+                $('#group_master_search').html(response);
+            }
+        });
+    }
+
+    const fetch_section_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_section_dropdown'
+            },
+            success: function (response) {
+                $('#section_master_search').html(response);
+            }
+        });
+    }
+
+    const fetch_line_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown'
+            },
+            success: function (response) {
+                $('#line_no_master_search').html(response);
             }
         });
     }
