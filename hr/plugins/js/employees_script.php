@@ -1,4 +1,7 @@
 <script type="text/javascript">
+    // AJAX IN PROGRESS GLOBAL VARS
+    var load_employees_ajax_in_process = false;
+
     $(document).ready(function () {
         fetch_dept_dropdown();
         fetch_group_dropdown();
@@ -72,9 +75,11 @@
         var scrollHeight = document.getElementById("list_of_employees_res").scrollHeight;
         var offsetHeight = document.getElementById("list_of_employees_res").offsetHeight;
 
-        //check if the scroll reached the bottom
-        if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
-            get_next_page();
+        if (load_employees_ajax_in_process == false) {
+            //check if the scroll reached the bottom
+            if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
+                get_next_page();
+            }
         }
     });
 
@@ -415,6 +420,11 @@
     }
 
     const load_employees = current_page => {
+        // If an AJAX call is already in progress, return immediately
+        if (load_employees_ajax_in_process) {
+            return;
+        }
+
         var emp_no = document.getElementById('emp_no_master_search').value;
         var full_name = document.getElementById('full_name_master_search').value;
         var provider = document.getElementById('provider_master_search').value;
@@ -479,6 +489,9 @@
                 sessionStorage.setItem('resigned_master_search', resigned);
             }
 
+            // Set the flag to true as we're starting an AJAX call
+            load_employees_ajax_in_process = true;
+
             $.ajax({
                 url: '../process/hr/employees/emp-masterlist_p.php',
                 type: 'POST',
@@ -496,16 +509,20 @@
                     resigned: resigned,
                     current_page: current_page
                 },
-                beforeSend: () => {
-                    var loading = `<tr id="loading"><td colspan="8" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                beforeSend: (jqXHR, settings) => {
+                    document.getElementById("btnNextPage").setAttribute('disabled', true);
+                    var loading = `<tr id="loading"><td colspan="9" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                     if (current_page == 1) {
                         document.getElementById("list_of_employees").innerHTML = loading;
                     } else {
                         $('#list_of_employees_table tbody').append(loading);
                     }
+                    jqXHR.url = settings.url;
+                    jqXHR.type = settings.type;
                 },
                 success: function (response) {
                     $('#loading').remove();
+                    document.getElementById("btnNextPage").removeAttribute('disabled');
                     if (current_page == 1) {
                         $('#list_of_employees_table tbody').html(response);
                     } else {
@@ -513,7 +530,16 @@
                     }
                     sessionStorage.setItem('list_of_employees_table_pagination', current_page);
                     count_employee_list();
+                    // Set the flag back to false as the AJAX call has completed
+                    load_employees_ajax_in_process = false;
                 }
+            }).fail((jqXHR, textStatus, errorThrown) => {
+                console.log(jqXHR);
+                console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+                $('#loading').remove();
+                document.getElementById("btnNextPage").removeAttribute('disabled');
+                // Set the flag back to false as the AJAX call has completed
+                load_employees_ajax_in_process = false;
             });
         }
     }

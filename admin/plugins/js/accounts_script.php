@@ -1,4 +1,7 @@
 <script type="text/javascript">
+    // AJAX IN PROGRESS GLOBAL VARS
+    var load_accounts_ajax_in_process = false;
+
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         fetch_dept_dropdown();
@@ -57,14 +60,16 @@
     }
 
     // Table Responsive Scroll Event for Load More
-    document.getElementById("list_of_accounts_res").addEventListener("scroll", function () {
+    document.getElementById("list_of_accounts_res").addEventListener("scroll", () => {
         var scrollTop = document.getElementById("list_of_accounts_res").scrollTop;
         var scrollHeight = document.getElementById("list_of_accounts_res").scrollHeight;
         var offsetHeight = document.getElementById("list_of_accounts_res").offsetHeight;
 
-        //check if the scroll reached the bottom
-        if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
-            get_next_page();
+        if (load_accounts_ajax_in_process == false) {
+            //check if the scroll reached the bottom
+            if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
+                get_next_page();
+            }
         }
     });
 
@@ -138,6 +143,11 @@
     }
 
     const load_accounts = current_page => {
+        // If an AJAX call is already in progress, return immediately
+        if (load_accounts_ajax_in_process) {
+            return;
+        }
+
         var emp_no = document.getElementById('emp_no_search').value;
         var full_name = document.getElementById('full_name_search').value;
         var role = document.getElementById('role_search').value;
@@ -163,6 +173,9 @@
             sessionStorage.setItem('role_search', role);
         }
 
+        // Set the flag to true as we're starting an AJAX call
+        load_accounts_ajax_in_process = true;
+
         $.ajax({
             url: '../process/admin/accounts/acct-management_p.php',
             type: 'POST',
@@ -174,16 +187,20 @@
                 role: role,
                 current_page: current_page
             },
-            beforeSend: () => {
+            beforeSend: (jqXHR, settings) => {
+                document.getElementById("btnNextPage").setAttribute('disabled', true);
                 var loading = `<tr id="loading"><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 if (current_page == 1) {
                     document.getElementById("list_of_accounts").innerHTML = loading;
                 } else {
                     $('#list_of_accounts_table tbody').append(loading);
                 }
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
             },
             success: function (response) {
                 $('#loading').remove();
+                document.getElementById("btnNextPage").removeAttribute('disabled');
                 if (current_page == 1) {
                     $('#list_of_accounts_table tbody').html(response);
                 } else {
@@ -191,7 +208,16 @@
                 }
                 sessionStorage.setItem('list_of_accounts_table_pagination', current_page);
                 count_account_list();
+                // Set the flag back to false as the AJAX call has completed
+                load_accounts_ajax_in_process = false;
             }
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+            $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
+            // Set the flag back to false as the AJAX call has completed
+            load_accounts_ajax_in_process = false;
         });
     }
 
@@ -467,7 +493,6 @@
                     document.getElementById('line_no_update').value = '';
                     document.getElementById('shift_group_update').value = '';
                     document.getElementById('role_update').value = '';
-                    document.getElementById('resigned_master_update').checked = false;
                     load_accounts(1);
                     $('#update_account').modal('hide');
                 } else if (response == 'duplicate') {

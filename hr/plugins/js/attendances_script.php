@@ -37,9 +37,11 @@
         var scrollHeight = document.getElementById("attendanceTableRes").scrollHeight;
         var offsetHeight = document.getElementById("attendanceTableRes").offsetHeight;
 
-        //check if the scroll reached the bottom
-        if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
-            get_next_page();
+        if (get_attendance_list_ajax_in_process == false) {
+            //check if the scroll reached the bottom
+            if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
+                get_next_page();
+            }
         }
     });
 
