@@ -1,5 +1,9 @@
 <script type="text/javascript">
-    $(document).ready(function () {
+    // AJAX IN PROGRESS GLOBAL VARS
+    var load_accounts_ajax_in_process = false;
+
+    // DOMContentLoaded function
+    document.addEventListener("DOMContentLoaded", () => {
         fetch_dept_dropdown();
         load_accounts(1);
     });
@@ -13,8 +17,8 @@
                 method: 'fetch_dept_dropdown'
             },
             success: function (response) {
-                $('#dept').html(response);
-                $('#dept_update').html(response);
+                document.getElementById("dept").innerHTML = response;
+                document.getElementById("dept_update").innerHTML = response;
             }
         });
     }
@@ -51,14 +55,16 @@
     }
 
     // Table Responsive Scroll Event for Load More
-    document.getElementById("list_of_accounts_res").addEventListener("scroll", function () {
+    document.getElementById("list_of_accounts_res").addEventListener("scroll", () => {
         var scrollTop = document.getElementById("list_of_accounts_res").scrollTop;
         var scrollHeight = document.getElementById("list_of_accounts_res").scrollHeight;
         var offsetHeight = document.getElementById("list_of_accounts_res").offsetHeight;
 
-        //check if the scroll reached the bottom
-        if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
-            get_next_page();
+        if (load_accounts_ajax_in_process == false) {
+            //check if the scroll reached the bottom
+            if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
+                get_next_page();
+            }
         }
     });
 
@@ -89,7 +95,7 @@
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
                 var count = `Total: ${response}`;
-                $('#list_of_accounts_info').html(count);
+                document.getElementById("list_of_accounts_info").innerHTML = count;
 
                 if (response > 0) {
                     load_accounts_last_page();
@@ -132,6 +138,11 @@
     }
 
     const load_accounts = current_page => {
+        // If an AJAX call is already in progress, return immediately
+        if (load_accounts_ajax_in_process) {
+            return;
+        }
+
         var emp_no = document.getElementById('emp_no_search').value;
         var full_name = document.getElementById('full_name_search').value;
         var role = document.getElementById('role_search').value;
@@ -157,6 +168,9 @@
             sessionStorage.setItem('role_search', role);
         }
 
+        // Set the flag to true as we're starting an AJAX call
+        load_accounts_ajax_in_process = true;
+
         $.ajax({
             url: '../process/admin/accounts/acct-management_p.php',
             type: 'POST',
@@ -168,16 +182,20 @@
                 role: role,
                 current_page: current_page
             },
-            beforeSend: () => {
+            beforeSend: (jqXHR, settings) => {
+                document.getElementById("btnNextPage").setAttribute('disabled', true);
                 var loading = `<tr id="loading"><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 if (current_page == 1) {
                     document.getElementById("list_of_accounts").innerHTML = loading;
                 } else {
                     $('#list_of_accounts_table tbody').append(loading);
                 }
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
             },
             success: function (response) {
                 $('#loading').remove();
+                document.getElementById("btnNextPage").removeAttribute('disabled');
                 if (current_page == 1) {
                     $('#list_of_accounts_table tbody').html(response);
                 } else {
@@ -185,7 +203,16 @@
                 }
                 sessionStorage.setItem('list_of_accounts_table_pagination', current_page);
                 count_account_list();
+                // Set the flag back to false as the AJAX call has completed
+                load_accounts_ajax_in_process = false;
             }
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+            $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
+            // Set the flag back to false as the AJAX call has completed
+            load_accounts_ajax_in_process = false;
         });
     }
 
@@ -266,7 +293,7 @@
                                 title: 'Error !!!',
                                 text: "Error: Employee Unregistered or Resigned",
                                 showConfirmButton: false,
-                                timer: 1000
+                                timer: 2000
                             });
                             if (opt == 'insert') {
                                 document.getElementById('btnAddAccount').disabled = true;
@@ -282,7 +309,7 @@
                             title: 'Error !!!',
                             text: `Error: ${response}`,
                             showConfirmButton: false,
-                            timer: 1000
+                            timer: 2000
                         });
                         if (opt == 'insert') {
                             document.getElementById('btnAddAccount').disabled = true;
@@ -299,7 +326,7 @@
                 title: 'Information !!!',
                 text: "Please type Employee No. Before Pressing Enter Key",
                 showConfirmButton: false,
-                timer: 1000
+                timer: 2000
             });
         }
     }
@@ -368,13 +395,13 @@
                             showConfirmButton: false,
                             timer: 1000
                         });
-                        $('#emp_no').val('');
-                        $('#full_name').val('');
-                        $('#dept').val('').trigger('change');
-                        $('#section').val('');
-                        $('#line_no').val('');
-                        $('#shift_group').val('');
-                        $('#role').val('').trigger('change');
+                        document.getElementById("emp_no").value = '';
+                        document.getElementById("full_name").value = '';
+                        document.getElementById("dept").value = '';
+                        document.getElementById("section").value = '';
+                        document.getElementById("line_no").value = '';
+                        document.getElementById("shift_group").value = '';
+                        document.getElementById("role").value = '';
                         load_accounts(1);
                         $('#new_account').modal('hide');
                     } else if (response == 'Already Exist') {
@@ -383,7 +410,7 @@
                             title: 'Duplicate Data !!!',
                             text: 'Information',
                             showConfirmButton: false,
-                            timer: 1000
+                            timer: 2000
                         });
                     } else {
                         Swal.fire({
@@ -391,7 +418,7 @@
                             title: 'Error !!!',
                             text: 'Error',
                             showConfirmButton: false,
-                            timer: 1000
+                            timer: 2000
                         });
                     }
                 }
@@ -453,14 +480,14 @@
                         showConfirmButton: false,
                         timer: 1000
                     });
-                    $('#id_account_update').val('');
-                    $('#emp_no_update').val('');
-                    $('#full_name_update').val('');
-                    $('#dept_update').val('').trigger('change');
-                    $('#section_update').val('');
-                    $('#line_no_update').val('');
-                    $('#shift_group_update').val('');
-                    $('#role_update').val('').trigger('change');
+                    document.getElementById('id_account_update').value = '';
+                    document.getElementById('emp_no_update').value = '';
+                    document.getElementById('full_name_update').value = '';
+                    document.getElementById('dept_update').value = '';
+                    document.getElementById('section_update').value = '';
+                    document.getElementById('line_no_update').value = '';
+                    document.getElementById('shift_group_update').value = '';
+                    document.getElementById('role_update').value = '';
                     document.getElementById('resigned_master_update').checked = false;
                     load_accounts(1);
                     $('#update_account').modal('hide');
@@ -470,7 +497,7 @@
                         title: 'Duplicate Data !!!',
                         text: 'Information',
                         showConfirmButton: false,
-                        timer: 1000
+                        timer: 2000
                     });
                 } else {
                     Swal.fire({
@@ -478,7 +505,7 @@
                         title: 'Error !!!',
                         text: 'Error',
                         showConfirmButton: false,
-                        timer: 1000
+                        timer: 2000
                     });
                 }
             }
@@ -503,6 +530,15 @@
                         showConfirmButton: false,
                         timer: 1000
                     });
+                    document.getElementById('id_account_update').value = '';
+                    document.getElementById('emp_no_update').value = '';
+                    document.getElementById('full_name_update').value = '';
+                    document.getElementById('dept_update').value = '';
+                    document.getElementById('section_update').value = '';
+                    document.getElementById('line_no_update').value = '';
+                    document.getElementById('shift_group_update').value = '';
+                    document.getElementById('role_update').value = '';
+                    document.getElementById('resigned_master_update').checked = false;
                     load_accounts(1);
                     $('#update_account').modal('hide');
                 } else {
@@ -511,7 +547,7 @@
                         title: 'Error !!!',
                         text: 'Error',
                         showConfirmButton: false,
-                        timer: 1000
+                        timer: 2000
                     });
                 }
             }
