@@ -187,6 +187,6 @@
         var dept = sessionStorage.getItem('dept_master_search');
         var section = sessionStorage.getItem('section_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
-        window.open('../process/export/exp_dashboard_hr.php?dept=' + dept + '&section=' + section + '&line_no=' + line_no, '_blank');
+        window.open('../process/export/exp_dashboard.php?dept=' + dept + '&section=' + section + '&line_no=' + line_no, '_blank');
     }
 </script>

@@ -34,7 +34,7 @@
             <span id="history_dept_ls" class="ml-2"></span>
           </div>
           <div class="col-sm-3">
-            <label>Shift : </label>
+            <label>Shift Group : </label>
             <span id="history_shift_group_ls" class="ml-2"></span>
           </div>
         </div>
