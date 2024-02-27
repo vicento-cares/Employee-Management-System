@@ -412,16 +412,34 @@ if (!isset($_SESSION['emp_no'])) {
 
   const realtime = () => {
     // Create a Date object from the server time
-    var date = new Date("1970-01-01T" + serverTime + "Z");
+    var serverDate = new Date("1970-01-01T" + serverTime + "Z");
 
     // Increment the server time by one second
-    date.setSeconds(date.getSeconds() + 1);
+    serverDate.setSeconds(serverDate.getSeconds() + 1);
 
     // Update the serverTime variable
-    serverTime = date.toISOString().substr(11, 8);
+    serverTime = serverDate.toISOString().substr(11, 8);
+
+    // Create a new Date object for the display time
+    var displayDate = new Date(serverDate.getTime());
+
+    // Adjust for the Philippine time zone (GMT+8)
+    // -8 instead of +8
+    displayDate.setHours(displayDate.getHours() - 8);
+
+    // Convert to 12-hour format
+    var hours = displayDate.getHours();
+    var minutes = displayDate.getMinutes();
+    var seconds = displayDate.getSeconds();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    seconds = seconds < 10 ? '0'+seconds : seconds;
+    var strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
 
     // Display the time
-    $('#realtime').html(serverTime);
+    $('#realtime').html(strTime);
   };
 
   // const realtime =()=>{
