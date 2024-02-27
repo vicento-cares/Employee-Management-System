@@ -190,13 +190,31 @@ if ($method == 'update_account') {
 
 if ($method == 'delete_account') {
 	$id = $_POST['id'];
+	$emp_no = '';
 
-	$query = "DELETE FROM m_accounts WHERE id = '$id'";
+	$query = "SELECT emp_no FROM m_accounts WHERE id = '$id'";
 	$stmt = $conn->prepare($query);
-	if ($stmt->execute()) {
-		echo 'success';
-	}else{
-		echo 'error';
+	$stmt->execute();
+	if ($stmt->rowCount() > 0) {
+		foreach($stmt->fetchALL() as $row){
+			$emp_no = $row['emp_no'];
+		}
+
+		$query = "DELETE FROM m_accounts WHERE id = '$id'";
+		$stmt = $conn->prepare($query);
+		if ($stmt->execute()) {
+			$query = "DELETE FROM t_notif_line_support WHERE emp_no = '$emp_no'";
+			$stmt = $conn->prepare($query);
+			if ($stmt->execute()) {
+				echo 'success';
+			}else{
+				echo 'error';
+			}
+		}else{
+			echo 'error';
+		}
+	} else {
+		echo 'not found';
 	}
 }
 

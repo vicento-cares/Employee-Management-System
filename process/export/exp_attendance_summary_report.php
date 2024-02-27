@@ -167,7 +167,7 @@ if (!empty($line_no)) {
     $sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 }
 $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
-$sql = $sql . " GROUP BY emp.emp_no, emp.dept, emp.section, line_no1";
+$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute();
