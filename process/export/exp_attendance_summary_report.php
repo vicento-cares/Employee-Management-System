@@ -154,7 +154,7 @@ $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
     FROM `t_time_in_out` tio 
     LEFT JOIN `m_employees` emp 
     ON tio.emp_no = emp.emp_no 
-    WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+    WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
