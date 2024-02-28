@@ -7,6 +7,7 @@
         // fetch_group_dropdown();
         fetch_section_dropdown();
         fetch_line_dropdown();
+        document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
         count_emp_dashboard();
         realtime_count_emp_dashboard = setInterval(count_emp_dashboard, 30000);
     });
@@ -68,6 +69,7 @@
     }
 
     const count_emp_dashboard = () => {
+        let day = document.getElementById('attendance_date_search').value;
         let dept = document.getElementById('dept_master_search').value;
         let section = document.getElementById('section_master_search').value;
         let line_no = document.getElementById('line_no_master_search').value;
@@ -77,6 +79,7 @@
             cache: false,
             data: {
                 method: 'count_emp_dashboard',
+                day: day,
                 dept: dept,
                 section: section,
                 line_no: line_no
@@ -85,18 +88,23 @@
                 try {
                     let response_array = JSON.parse(response);
                     $('#count_emp_dashboard_value_total').html(`<b>${response_array.total}</b>`);
+                    $('#count_emp_dashboard_value_total_percentage').html(`<b>${response_array.attendance_percentage_total}%</b>`);
                     $('#count_emp_dashboard_value_ds').html(`<b>${response_array.total_shift_group_a}</b>`);
+                    $('#count_emp_dashboard_value_ds_percentage').html(`<b>${response_array.attendance_percentage_ds}%</b>`);
                     $('#count_emp_dashboard_present_value_ds').html(`<b>${response_array.total_present_ds}</b>`);
                     $('#count_emp_dashboard_absent_value_ds').html(`<b>${response_array.total_absent_ds}</b>`);
                     $('#count_emp_dashboard_support_value_ds').html(`<b>${response_array.total_support_ds}</b>`);
                     $('#count_emp_dashboard_value_ns').html(`<b>${response_array.total_shift_group_b}</b>`);
+                    $('#count_emp_dashboard_value_ns_percentage').html(`<b>${response_array.attendance_percentage_ns}%</b>`);
                     $('#count_emp_dashboard_present_value_ns').html(`<b>${response_array.total_present_ns}</b>`);
                     $('#count_emp_dashboard_absent_value_ns').html(`<b>${response_array.total_absent_ns}</b>`);
                     $('#count_emp_dashboard_support_value_ns').html(`<b>${response_array.total_support_ns}</b>`);
                     $('#count_emp_dashboard_value_ads').html(`<b>${response_array.total_shift_group_ads}</b>`);
+                    $('#count_emp_dashboard_value_ads_percentage').html(`<b>${response_array.attendance_percentage_ads}%</b>`);
                     $('#count_emp_dashboard_present_value_ads').html(`<b>${response_array.total_present_ads}</b>`);
                     $('#count_emp_dashboard_absent_value_ads').html(`<b>${response_array.total_absent_ads}</b>`);
                     $('#count_emp_dashboard_support_value_ads').html(`<b>${response_array.total_support_ads}</b>`);
+                    sessionStorage.setItem('attendance_date_search', day);
                     sessionStorage.setItem('dept_master_search', dept);
                     sessionStorage.setItem('section_master_search', section);
                     sessionStorage.setItem('line_no_master_search', line_no);
@@ -118,6 +126,7 @@
     }
 
     const count_emp_provider_dashboard_ds = () => {
+        let day = sessionStorage.getItem('attendance_date_search');
         let dept = sessionStorage.getItem('dept_master_search');
         let section = sessionStorage.getItem('section_master_search');
         let line_no = sessionStorage.getItem('line_no_master_search');
@@ -127,10 +136,10 @@
             cache: false,
             data: {
                 method: 'count_emp_provider_dashboard',
+                day: day,
                 dept: dept,
                 section: section,
                 line_no: line_no,
-                shift: 'DS',
                 shift_group: 'A'
             },
             success: function (response) {
@@ -140,6 +149,7 @@
     }
 
     const count_emp_provider_dashboard_ns = () => {
+        let day = sessionStorage.getItem('attendance_date_search');
         let dept = sessionStorage.getItem('dept_master_search');
         let section = sessionStorage.getItem('section_master_search');
         let line_no = sessionStorage.getItem('line_no_master_search');
@@ -149,10 +159,10 @@
             cache: false,
             data: {
                 method: 'count_emp_provider_dashboard',
+                day: day,
                 dept: dept,
                 section: section,
                 line_no: line_no,
-                shift: 'NS',
                 shift_group: 'B'
             },
             success: function (response) {
@@ -162,6 +172,7 @@
     }
 
     const count_emp_provider_dashboard_ads = () => {
+        let day = sessionStorage.getItem('attendance_date_search');
         let dept = sessionStorage.getItem('dept_master_search');
         let section = sessionStorage.getItem('section_master_search');
         let line_no = sessionStorage.getItem('line_no_master_search');
@@ -171,10 +182,10 @@
             cache: false,
             data: {
                 method: 'count_emp_provider_dashboard',
+                day: day,
                 dept: dept,
                 section: section,
                 line_no: line_no,
-                shift: 'DS',
                 shift_group: 'ADS'
             },
             success: function (response) {
@@ -184,9 +195,10 @@
     }
 
     const export_dashboard = () => {
+        var day = sessionStorage.getItem('attendance_date_search');
         var dept = sessionStorage.getItem('dept_master_search');
         var section = sessionStorage.getItem('section_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
-        window.open('../process/export/exp_dashboard_hr.php?dept=' + dept + '&section=' + section + '&line_no=' + line_no, '_blank');
+        window.open('../process/export/exp_dashboard_hr.php?day=' + day + '&dept=' + dept + '&section=' + section + '&line_no=' + line_no, '_blank');
     }
 </script>

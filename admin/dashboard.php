@@ -24,6 +24,10 @@
     <div class="container-fluid">
       <div class="row mb-4">
         <div class="col-sm-2">
+          <label>Attendance Date</label>
+          <input type="date" class="form-control" id="attendance_date_search" onchange="count_emp_dashboard()">
+        </div>
+        <div class="col-sm-2">
           <label>Department</label>
           <select id="dept_master_search" class="form-control" onchange="count_emp_dashboard()">
             <option value="">Select Department</option>
@@ -45,7 +49,7 @@
             <option value="">Select Line No.</option>
           </select>
         </div>
-        <div class="col-sm-2 offset-sm-2">
+        <div class="col-sm-2">
           <label>&nbsp;</label>
           <button type="button" class="btn bg-gray-dark btn-block" onclick="count_emp_dashboard()"><i class="fas fa-search"></i> Search</button>
         </div>
@@ -62,17 +66,30 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row">
-                <div class="col-sm-12">
+                <div class="col-sm-6">
                   <div class="small-box bg-white">
-                  <div class="inner mb-3">
-                    <h2 id="count_emp_dashboard_value_total"></h2>
-                    <h4><b>TOTAL MP</b></h4>
-                    <h4>Employees</h4>
+                    <div class="inner mb-3">
+                      <h2 id="count_emp_dashboard_value_total"></h2>
+                      <h4><b>TOTAL MP</b></h4>
+                      <h4>Employees</h4>
+                    </div>
+                    <div class="icon">
+                      <i class="ion ion-person-stalker"></i>
+                    </div>
+                    <div class="small-box-footer"></div>
                   </div>
-                  <div class="icon">
-                    <i class="ion ion-person-stalker"></i>
-                  </div>
-                  <div class="small-box-footer"></div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="small-box bg-white">
+                    <div class="inner mb-3">
+                      <h2 id="count_emp_dashboard_value_total_percentage"></h2>
+                      <h4><b>Percentage</b></h4>
+                      <h4>&nbsp;</h4>
+                    </div>
+                    <div class="icon">
+                      <i class="ion ion-person-stalker"></i>
+                    </div>
+                    <div class="small-box-footer"></div>
                   </div>
                 </div>
               </div>
@@ -108,12 +125,17 @@
                     <div class="col-3">
                       <div class="small-box bg-white">
                       <div class="inner mb-3">
-                        <h2 id="count_emp_dashboard_value_ds"></h2>
-                        <h4><b>TOTAL MP</b></h4>
-                        <h4>Employees</h4>
-                      </div>
-                      <div class="icon">
-                        <i class="ion ion-person-stalker"></i>
+                        <div class="row">
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ds"></h2>
+                            <h4><b>TOTAL MP</b></h4>
+                            <h4>Employees</h4>
+                          </div>
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ds_percentage"></h2>
+                            <h4><b>Percentage</b></h4>
+                          </div>
+                        </div>
                       </div>
                       <div class="small-box-footer"></div>
                       </div>
@@ -168,12 +190,17 @@
                     <div class="col-3">
                       <div class="small-box bg-white">
                       <div class="inner mb-3">
-                        <h2 id="count_emp_dashboard_value_ns"></h2>
-                        <h4><b>TOTAL MP</b></h4>
-                        <h4>Employees</h4>
-                      </div>
-                      <div class="icon">
-                        <i class="ion ion-person-stalker"></i>
+                        <div class="row">
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ns"></h2>
+                            <h4><b>TOTAL MP</b></h4>
+                            <h4>Employees</h4>
+                          </div>
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ns_percentage"></h2>
+                            <h4><b>Percentage</b></h4>
+                          </div>
+                        </div>
                       </div>
                       <div class="small-box-footer"></div>
                       </div>
@@ -228,12 +255,17 @@
                     <div class="col-3">
                       <div class="small-box bg-white">
                       <div class="inner mb-3">
-                        <h2 id="count_emp_dashboard_value_ads"></h2>
-                        <h4><b>TOTAL MP</b></h4>
-                        <h4>Employees</h4>
-                      </div>
-                      <div class="icon">
-                        <i class="ion ion-person-stalker"></i>
+                        <div class="row">
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ads"></h2>
+                            <h4><b>TOTAL MP</b></h4>
+                            <h4>Employees</h4>
+                          </div>
+                          <div class="col-md-6 col-sm-12">
+                            <h2 id="count_emp_dashboard_value_ads_percentage"></h2>
+                            <h4><b>Percentage</b></h4>
+                          </div>
+                        </div>
                       </div>
                       <div class="small-box-footer"></div>
                       </div>

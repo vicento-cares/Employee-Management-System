@@ -550,9 +550,16 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                 $emp_sv_no = custom_trim($line[16]);
                 $emp_approver_no = custom_trim($line[17]);
                 $resigned_date = custom_trim($line[18]);
+                $resigned = '';
 
                 $dateh = str_replace('/', '-', $date_hired);
                 $date_hired = date("Y-m-d", strtotime($dateh));
+
+                if (!empty($resigned_date)) {
+                    $resigned = 1;
+                } else {
+                    $resigned = 0;
+                }
 
                 $rdate = str_replace('/', '-', $resigned_date);
                 $resigned_date = date("Y-m-d", strtotime($rdate));
@@ -567,14 +574,14 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                     foreach($stmt->fetchALL() as $x){
                         $id = $x['id'];
                     }
-                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name='$full_name',dept='$dept',section='$section',line_no='$line_no',process='$line_process',position='$position',provider='$provider',gender='$gender',shift_group='$shift_group',date_hired='$date_hired',address='$address',contact_no='$contact_no',emp_status='$emp_status',shuttle_route='$shuttle_route',emp_js_s='',emp_js_s_no='$emp_js_s_no',emp_sv='',emp_sv_no='$emp_sv_no',emp_approver='',emp_approver_no='$emp_approver_no',resigned='',resigned_date='$resigned_date' WHERE id = '$id'";
+                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name='$full_name',dept='$dept',section='$section',line_no='$line_no',process='$line_process',position='$position',provider='$provider',gender='$gender',shift_group='$shift_group',date_hired='$date_hired',address='$address',contact_no='$contact_no',emp_status='$emp_status',shuttle_route='$shuttle_route',emp_js_s='',emp_js_s_no='$emp_js_s_no',emp_sv='',emp_sv_no='$emp_sv_no',emp_approver='',emp_approver_no='$emp_approver_no',resigned='$resigned',resigned_date='$resigned_date' WHERE id = '$id'";
 
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {
                         $error++;
                     }
                 } else {
-                    $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','','$resigned_date')";
+                    $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
 
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {

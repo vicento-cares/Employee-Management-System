@@ -8,6 +8,16 @@ $method = $_POST['method'];
 
 // Dashboard
 
+function get_shift($server_time) {
+	if ($server_time >= '06:00:00' && $server_time < '18:00:00') {
+		return 'DS';
+	} else if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+		return 'NS';
+	} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+		return 'NS';
+	}
+}
+
 function count_emp_by_provider($provider, $search_arr, $conn) {
 	$query = "SELECT count(provider) AS total FROM m_employees WHERE provider = '$provider' AND resigned = 0";
 	if (!empty($search_arr['dept'])) {
@@ -116,10 +126,11 @@ function count_emp_lsh($search_arr, $conn) {
 }
 
 if ($method == 'count_emp_dashboard') {
+	$day = $_POST['day'];
 	$dept = $_POST['dept'];
 	$section = addslashes($_POST['section']);
 	$line_no = addslashes($_POST['line_no']);
-	$shift = '';
+	$shift = get_shift($server_time);
 
 	$total = 0;
 	$total_shift_group_a = 0;
@@ -209,12 +220,12 @@ if ($method == 'count_emp_dashboard') {
 		$total = 0;
 	}
 
-	$shift = 'DS';
-	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
-		$day = $server_date_only;
-	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-		$day = $server_date_only_yesterday;
-	}
+	// $shift = 'DS';
+	// if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+	// 	$day = $server_date_only;
+	// } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+	// 	$day = $server_date_only_yesterday;
+	// }
 
 	$search_arr1 = array(
 	  "day" => $day,
@@ -228,13 +239,18 @@ if ($method == 'count_emp_dashboard') {
 	$total_present_ds = count_emp_tio($search_arr1, $conn);
 	$total_absent_ds = $total_shift_group_a - $total_present_ds;
 	$total_support_ds = count_emp_lsh($search_arr1, $conn);
-
-	$shift = 'NS';
-	if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
-		$day = $server_date_only;
-	} else if ($server_time >= '00:00:00' && $server_time < '17:00:00') {
-		$day = $server_date_only_yesterday;
+	if ($total_shift_group_a != 0) {
+		$attendance_percentage_ds = round(($total_present_ds / $total_shift_group_a) * 100, 2);
+	} else {
+		$attendance_percentage_ds = 0;
 	}
+
+	// $shift = 'NS';
+	// if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+	// 	$day = $server_date_only;
+	// } else if ($server_time >= '00:00:00' && $server_time < '17:00:00') {
+	// 	$day = $server_date_only_yesterday;
+	// }
 
 	$search_arr1 = array(
 	  "day" => $day,
@@ -248,13 +264,18 @@ if ($method == 'count_emp_dashboard') {
 	$total_present_ns = count_emp_tio($search_arr1, $conn);
 	$total_absent_ns = $total_shift_group_b - $total_present_ns;
 	$total_support_ns = count_emp_lsh($search_arr1, $conn);
-
-	$shift = 'DS';
-	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
-		$day = $server_date_only;
-	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-		$day = $server_date_only_yesterday;
+	if ($total_shift_group_b != 0) {
+		$attendance_percentage_ns = round(($total_present_ns / $total_shift_group_b) * 100, 2);
+	} else {
+		$attendance_percentage_ns = 0;
 	}
+
+	// $shift = 'DS';
+	// if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+	// 	$day = $server_date_only;
+	// } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+	// 	$day = $server_date_only_yesterday;
+	// }
 
 	$search_arr1 = array(
 	  "day" => $day,
@@ -268,12 +289,34 @@ if ($method == 'count_emp_dashboard') {
 	$total_present_ads = count_emp_tio($search_arr1, $conn);
 	$total_absent_ads = $total_shift_group_ads - $total_present_ads;
 	$total_support_ads = count_emp_lsh($search_arr1, $conn);
+	if ($total_shift_group_ads != 0) {
+		$attendance_percentage_ads = round(($total_present_ads / $total_shift_group_ads) * 100, 2);
+	} else {
+		$attendance_percentage_ads = 0;
+	}
+
+	$total_present = $total_present_ds + $total_present_ns + $total_present_ads;
+	// $total_sum = $total_shift_group_a + $total_shift_group_b + $total_shift_group_ads;
+	// if ($total_sum != 0) {
+	// 	$attendance_percentage_total = round(($total_present / $total_sum) * 100, 2);
+	// } else {
+	// 	$attendance_percentage_total = 0;
+	// }
+	if ($total != 0) {
+		$attendance_percentage_total = round(($total_present / $total) * 100, 2);
+	} else {
+		$attendance_percentage_total = 0;
+	}
 
 	$response_arr = array(
 		'total' => $total,
+		'attendance_percentage_total' => $attendance_percentage_total,
 		'total_shift_group_a' => $total_shift_group_a,
 		'total_shift_group_b' => $total_shift_group_b,
 		'total_shift_group_ads' => $total_shift_group_ads,
+		'attendance_percentage_ds' => $attendance_percentage_ds,
+		'attendance_percentage_ns' => $attendance_percentage_ns,
+		'attendance_percentage_ads' => $attendance_percentage_ads,
 		'total_present_ds' => $total_present_ds,
 		'total_absent_ds' => $total_absent_ds,
 		'total_support_ds' => $total_support_ds,
@@ -291,10 +334,11 @@ if ($method == 'count_emp_dashboard') {
 
 // Get Count Employee By Provider Small Boxes
 if ($method == 'count_emp_provider_dashboard') {
+	$day = $_POST['day'];
 	$dept = $_POST['dept'];
 	$section = addslashes($_POST['section']);
 	$line_no = addslashes($_POST['line_no']);
-	$shift = $_POST['shift'];
+	$shift = get_shift($server_time);
 	$shift_group = $_POST['shift_group'];
 	$small_box_colors_arr = array('bg-primary', 'bg-navy', 'bg-info', 'bg-warning', 'bg-lightblue', 'bg-purple', 'bg-olive', 'bg-gray');
 	$small_box_color_count = count($small_box_colors_arr);
@@ -308,8 +352,6 @@ if ($method == 'count_emp_provider_dashboard') {
 				$provider_count = 0;
 			}
 
-			$day = '';
-
 			$search_arr = array(
 				"shift_group" => $shift_group,
 				"dept" => $dept,
@@ -319,23 +361,22 @@ if ($method == 'count_emp_provider_dashboard') {
 
 			$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
 
-			if ($shift == 'DS') {
-				if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
-					$day = $server_date_only;
-				} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-					$day = $server_date_only_yesterday;
-				}
-			} else if ($shift == 'NS') {
-				if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
-					$day = $server_date_only;
-				} else if ($server_time >= '00:00:00' && $server_time < '17:00:00') {
-					$day = $server_date_only_yesterday;
-				}
-			}
+			// if ($shift == 'DS') {
+			// 	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
+			// 		$day = $server_date_only;
+			// 	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+			// 		$day = $server_date_only_yesterday;
+			// 	}
+			// } else if ($shift == 'NS') {
+			// 	if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+			// 		$day = $server_date_only;
+			// 	} else if ($server_time >= '00:00:00' && $server_time < '17:00:00') {
+			// 		$day = $server_date_only_yesterday;
+			// 	}
+			// }
 
 			$search_arr1 = array(
 			  "day" => $day,
-			  "shift" => $shift,
 			  "shift_group" => $shift_group,
 			  "dept" => $dept,
 			  "section" => $section,
@@ -344,6 +385,11 @@ if ($method == 'count_emp_provider_dashboard') {
 
 			$total_present = count_emp_by_provider_tio($row['provider'], $search_arr1, $conn);
 			$total_absent = $total - $total_present;
+			if ($total != 0) {
+				$attendance_percentage = round(($total_present / $total) * 100, 2);
+			} else {
+				$attendance_percentage = 0;
+			}
 
 			echo '<div class="col-xl-3 col-lg-3 col-md-6 col-12">
 			<div class="small-box '.$small_box_colors_arr[$provider_count].'">
@@ -351,7 +397,7 @@ if ($method == 'count_emp_provider_dashboard') {
 			
 			<h4><b>'.htmlspecialchars($row['provider']).'</b></h4>
 			<h4 class="mb-3">Employees</h4>
-			<div class="bg-light p-2"><h4 class="ml-2">Total: </h4><h2 class="ml-2"><b>'.$total.'</b></h2><h4 class="ml-2">Present: </h4><h2 class="text-success ml-2"><b>'.$total_present.'</b></h2><h4 class="ml-2">Absent: </h4><h2 class="text-danger ml-2"><b>'.$total_absent.'</b></h2></div>
+			<div class="bg-light p-2"><div class="row"><div class="col-md-6 col-sm-12"><h4 class="ml-2">Total: </h4><h2 class="ml-2"><b>'.$total.'</b></h2></div><div class="col-md-6 col-sm-12"><h4 class="ml-2">Percentage: </h4><h2 class="ml-2"><b>'.$attendance_percentage.'%</b></h2></div></div><h4 class="ml-2">Present: </h4><h2 class="text-success ml-2"><b>'.$total_present.'</b></h2><h4 class="ml-2">Absent: </h4><h2 class="text-danger ml-2"><b>'.$total_absent.'</b></h2></div>
 			</div>
 			<div class="icon">
 			<i class="ion ion-person"></i>
