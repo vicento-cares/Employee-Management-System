@@ -83,12 +83,12 @@
 
                 let present = parseInt(response);
                 let absent = total - present;
-                let attendance_percentage = Math.round((present / total) * 100);
+                let attendance_percentage = (present / total) * 100;
                 document.getElementById("count_view_present").innerHTML = present;
                 document.getElementById("counting_view_present").innerHTML = present;
                 document.getElementById("count_view_absent").innerHTML = absent;
                 document.getElementById("counting_view_absent").innerHTML = absent;
-                document.getElementById("count_view_attendance_percentage").innerHTML = `${attendance_percentage}%`;
+                document.getElementById("count_view_attendance_percentage").innerHTML = `${attendance_percentage.toFixed(2)}%`;
 
                 /*let present = $('#attendanceTable tbody tr.bg-success').length;
                 let absent = $('#attendanceTable tbody tr.bg-danger').length;
