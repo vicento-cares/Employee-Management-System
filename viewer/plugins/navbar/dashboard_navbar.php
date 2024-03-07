@@ -25,8 +25,16 @@
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a id="dropdownSubMenu2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a id="dropdownSubMenu2" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle"><i class="fas fa-file"></i> Work Instruction</a>
                         <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                            <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 2(Production).xlsx" target="_blank" class="dropdown-item">EmpMgtSys Production WI</a></li>
+                            <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 2(Viewer).xlsx" target="_blank" class="dropdown-item">EmpMgtSys Viewer WI</a></li>
+                            <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 2(HR).xlsx" target="_blank" class="dropdown-item">EmpMgtSys HR WI</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a id="dropdownSubMenu3" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
                             <li><a href="/emp_mgt/admin/" target="_blank" class="dropdown-item">EmpMgtSys Admin Login</a></li>
                             <li><a href="/emp_mgt/user/" target="_blank" class="dropdown-item">EmpMgtSys User Login</a></li>
                             <li><a href="/emp_mgt/clinic/" target="_blank" class="dropdown-item">EmpMgtSys Clinic Login</a></li>
