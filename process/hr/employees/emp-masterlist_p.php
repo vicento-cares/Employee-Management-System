@@ -785,7 +785,7 @@ if ($method == 'update_employee') {
 
 	$stmt = $conn->prepare($query);
 	if ($stmt->execute()) {
-		$query = "UPDATE m_accounts SET";
+		$query = "UPDATE m_control_area_accounts SET";
 	
 		if (!empty($dept)) {
 			$query = $query . " dept = '$dept'";
@@ -812,7 +812,37 @@ if ($method == 'update_employee') {
 		$stmt = $conn->prepare($query);
 
 		if ($stmt->execute()) {
-			echo 'success';
+			$query = "UPDATE m_accounts SET";
+	
+			if (!empty($dept)) {
+				$query = $query . " dept = '$dept'";
+			} else {
+				$query = $query . " dept = ''";
+			}
+			if (!empty($section)) {
+				$query = $query . ", section = '$section'";
+			} else {
+				$query = $query . ", section = NULL";
+			}
+			if (!empty($line_no)) {
+				$query = $query . ", line_no = '$line_no'";
+			} else {
+				$query = $query . ", line_no = NULL";
+			}
+			if (!empty($shift_group)) {
+				$query = $query . ", shift_group = '$shift_group'";
+			} else {
+				$query = $query . ", shift_group = NULL";
+			}
+
+			$query = $query . " WHERE emp_no = '$emp_no'";
+			$stmt = $conn->prepare($query);
+
+			if ($stmt->execute()) {
+				echo 'success';
+			} else {
+				echo 'error';
+			}
 		} else {
 			echo 'error';
 		}

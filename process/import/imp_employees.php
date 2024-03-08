@@ -579,6 +579,66 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {
                         $error++;
+                    } else {
+                        $query = "UPDATE m_control_area_accounts SET";
+	
+                        if (!empty($dept)) {
+                            $query = $query . " dept = '$dept'";
+                        } else {
+                            $query = $query . " dept = ''";
+                        }
+                        if (!empty($section)) {
+                            $query = $query . ", section = '$section'";
+                        } else {
+                            $query = $query . ", section = NULL";
+                        }
+                        if (!empty($line_no)) {
+                            $query = $query . ", line_no = '$line_no'";
+                        } else {
+                            $query = $query . ", line_no = NULL";
+                        }
+                        if (!empty($shift_group)) {
+                            $query = $query . ", shift_group = '$shift_group'";
+                        } else {
+                            $query = $query . ", shift_group = NULL";
+                        }
+
+                        $query = $query . " WHERE emp_no = '$emp_no'";
+                        $stmt = $conn->prepare($query);
+
+                        if ($stmt->execute()) {
+                            $query = "UPDATE m_accounts SET";
+                    
+                            if (!empty($dept)) {
+                                $query = $query . " dept = '$dept'";
+                            } else {
+                                $query = $query . " dept = ''";
+                            }
+                            if (!empty($section)) {
+                                $query = $query . ", section = '$section'";
+                            } else {
+                                $query = $query . ", section = NULL";
+                            }
+                            if (!empty($line_no)) {
+                                $query = $query . ", line_no = '$line_no'";
+                            } else {
+                                $query = $query . ", line_no = NULL";
+                            }
+                            if (!empty($shift_group)) {
+                                $query = $query . ", shift_group = '$shift_group'";
+                            } else {
+                                $query = $query . ", shift_group = NULL";
+                            }
+
+                            $query = $query . " WHERE emp_no = '$emp_no'";
+                            $stmt = $conn->prepare($query);
+
+                            if (!$stmt->execute()) {
+                                $error++;
+                            }
+                        } else {
+                            $error++;
+                        }
                     }
                 } else {
                     $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
