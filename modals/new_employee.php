@@ -106,6 +106,7 @@
               <option value="">Select Shift Group</option>
               <option value="A">A</option>
               <option value="B">B</option>
+              <option value="ADS">ADS</option>
             </select>
           </div>
           <div class="col-6">

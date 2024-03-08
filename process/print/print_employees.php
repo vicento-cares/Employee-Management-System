@@ -44,25 +44,6 @@ function count_employee_list($search_arr, $conn) {
 }
 
 switch (true) {
-  case !isset($_SESSION['emp_no']):
-    header('location:/emp_mgt/admin');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_hr']):
-    header('location:/emp_mgt/hr');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_user']):
-    header('location:/emp_mgt/user');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_clinic']):
-    header('location:/emp_mgt/clinic');
-    exit;
-    break;
-}
-
-switch (true) {
   case !isset($_GET['emp_no']):
   case !isset($_GET['full_name']):
   case !isset($_GET['provider']):
@@ -102,7 +83,10 @@ if (!empty($full_name)) {
 if (!empty($provider)) {
   $query = $query . " AND provider = '$provider'";
 }
-$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";
+$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."'";
+if (!empty($_SESSION['line_no'])) {
+  $query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+}
 $stmt = $conn->prepare($query);
 $stmt->execute();
 ?>
@@ -111,7 +95,7 @@ $stmt->execute();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Print Employees (Admin)</title>
+  <title>Print Employees</title>
 
   <link rel="icon" href="../../dist/img/logo.ico" type="image/x-icon" />
   <!-- Google Font: Source Sans Pro -->
