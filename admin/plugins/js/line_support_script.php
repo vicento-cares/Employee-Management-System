@@ -14,6 +14,22 @@
         update_notif_line_support();
     });
 
+    var delay = (function(){
+        var timer = 0;
+        return function(callback, ms){
+            clearTimeout (timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
+
+    $("#emp_no_ls").on("input", function() {
+        delay(function(){
+        if ($("#emp_no_ls").val().length < 7) {
+            $("#emp_no_ls").val("");
+        }
+        }, 100);
+    });
+
     document.getElementById("emp_no_ls").addEventListener("keyup", e => {
         if (e.which === 13) {
             e.preventDefault();
@@ -82,6 +98,7 @@
                             let response_array = JSON.parse(response);
                             if (response_array.message == 'success') {
                                 document.getElementById("full_name_ls").innerHTML = response_array.full_name;
+                                sessionStorage.setItem('emp_no_ls', emp_no);
                             } else {
                                 Swal.fire({
                                     icon: 'error',
@@ -109,7 +126,7 @@
 
     const set_line_support = () => {
         let line_support_id = document.getElementById("line_support_id_ls").value;
-        let emp_no = document.getElementById("emp_no_ls").value;
+        let emp_no = sessionStorage.getItem('emp_no_ls');
         let full_name = document.getElementById("full_name_ls").innerHTML;
         let line_no = document.getElementById("line_no_ls").value;
 

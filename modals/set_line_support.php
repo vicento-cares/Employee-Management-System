@@ -1,6 +1,6 @@
 <!-- Data Info Modal -->
 <div class="modal fade" id="set_line_support" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header bg-dark">
         <h4 class="modal-title">Set Line Support Form</h4>
@@ -13,7 +13,7 @@
         <div class="row mb-2">
           <div class="col-sm-3">
             <label>Scan ID Number</label>
-            <input type="text" id="emp_no_ls" class="form-control" autocomplete="off">
+            <input type="text" id="emp_no_ls" class="form-control" oncopy="return false" onpaste="return false" autocomplete="off" required>
           </div>
           <div class="col-sm-5">
             <label class="mb-2">Full Name</label><br>
