@@ -79,7 +79,7 @@
           </div>
           <div class="col-4">
             <label>Process:</label>
-            <select id="process_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <select id="process_master_update" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Process</option>
             </select>
           </div>
@@ -103,7 +103,7 @@
           </div>
           <div class="col-2">
             <label>Shift Group:</label>
-            <select id="shift_group_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <select id="shift_group_master_update" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Shift Group</option>
               <option value="A">A</option>
               <option value="B">B</option>
@@ -186,6 +186,7 @@
           <div class="col-12">
             <div class="float-right">
               <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+              <a href="#" class="btn btn-success" onclick="update_employee()">Update Employee</a>
             </div>
           </div>
         </div>

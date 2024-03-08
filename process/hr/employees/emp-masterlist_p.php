@@ -321,12 +321,18 @@ if ($method == 'count_employee_list') {
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$dept = $_SESSION['dept'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 	}
 
 	if (!isset($_POST['section'])) {
 		$section = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$section = $_SESSION['section'];
+		}
 	} else {
 		$section = addslashes($_POST['section']);
 	}
@@ -383,12 +389,18 @@ if ($method == 'employee_list_last_page') {
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$dept = $_SESSION['dept'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 	}
 
 	if (!isset($_POST['section'])) {
 		$section = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$section = $_SESSION['section'];
+		}
 	} else {
 		$section = addslashes($_POST['section']);
 	}
@@ -453,12 +465,18 @@ if ($method == 'employee_list') {
 	
 	if (!isset($_POST['dept'])) {
 		$dept = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$dept = $_SESSION['dept'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 	}
 
 	if (!isset($_POST['section'])) {
 		$section = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$section = $_SESSION['section'];
+		}
 	} else {
 		$section = addslashes($_POST['section']);
 	}
@@ -553,7 +571,7 @@ if ($method == 'employee_list') {
 		foreach($stmt->fetchALL() as $j){
 			$c++;
 			
-			if (isset($_SESSION['emp_no'])) {
+			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
 				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
@@ -576,7 +594,7 @@ if ($method == 'employee_list') {
 		}
 	}else{
 		$colspan = 0;
-		if (isset($_SESSION['emp_no'])) {
+		if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
 			$colspan = 8;
 		} else {
 			$colspan = 9;
