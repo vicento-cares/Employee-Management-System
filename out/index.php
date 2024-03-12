@@ -5,11 +5,11 @@ session_start();
 include '../process/conn.php';
 
 function get_shift($server_time) {
-  if ($server_time >= '03:00:00' && $server_time < '15:00:00') {
+  if ($server_time >= '05:00:00' && $server_time < '17:00:00') {
     return 'DS';
-  } else if ($server_time >= '15:00:00' && $server_time <= '23:59:59') {
+  } else if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
     return 'NS';
-  } else if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+  } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
     return 'NS';
   }
 }

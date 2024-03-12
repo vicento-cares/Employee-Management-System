@@ -126,7 +126,7 @@ function count_emp_lsh($search_arr, $conn) {
 		$query = $query . " AND ls.line_no_to LIKE '".$search_arr['line_no']."%'";
 	}
 
-	$query = $query . " AND ls.status = 'accepted'";
+	$query = $query . " AND ls.status = 'accepted' AND emp.shift_group = '".$search_arr['shift_group']."'";
 
 	if (!empty($search_arr['dept'])) {
 		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
