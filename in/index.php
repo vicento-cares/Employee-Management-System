@@ -54,6 +54,7 @@ if (!isset($_SESSION['emp_no'])) {
       $shift_group = '';
       $unregistered = '';
       $wrong_scanning = '';
+      $is_ads = false;
       $wrong_shift_group = '';
       $already_time_in = '';
 
@@ -80,26 +81,38 @@ if (!isset($_SESSION['emp_no'])) {
             $wrong_scanning = true;
           } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
             $wrong_scanning = true;
-          } else if (empty($shift_group) || empty($_SESSION['shift_group'])) {
-            $wrong_shift_group = true;
-          } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
-            $wrong_shift_group = true;
-          } else {
-            // Set Day (Revised 2024-01-10)
-            if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
-              $day = $server_date_only_yesterday;
-            } else {
-              $day = $server_date_only;
+          }
+          
+          if ($wrong_scanning != true) {
+            if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+              $wrong_shift_group = true;
+            } else if ($_SESSION['shift_group'] != $shift_group) {
+              if ($_SESSION['shift_group'] == 'ADS' || $shift_group == 'ADS') {
+                $is_ads = true;
+              }
+
+              if ($is_ads != true) {
+                $wrong_shift_group = true;
+              }
             }
-            $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-            $stmt = $conn -> prepare($sql);
-            $stmt -> execute();
-            if ($stmt -> rowCount() < 1) {
-              $sql = "INSERT INTO `t_time_in_out` (`emp_no`, `day`, `shift`, `ip`) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+
+            if ($wrong_shift_group != true) {
+              // Set Day (Revised 2024-01-10)
+              if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+                $day = $server_date_only_yesterday;
+              } else {
+                $day = $server_date_only;
+              }
+              $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
               $stmt = $conn -> prepare($sql);
               $stmt -> execute();
-            } else {
-              $already_time_in = true;
+              if ($stmt -> rowCount() < 1) {
+                $sql = "INSERT INTO `t_time_in_out` (`emp_no`, `day`, `shift`, `ip`) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+                $stmt = $conn -> prepare($sql);
+                $stmt -> execute();
+              } else {
+                $already_time_in = true;
+              }
             }
           }
         } else {

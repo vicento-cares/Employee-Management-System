@@ -127,6 +127,7 @@ if (!isset($_SESSION['emp_no'])) {
       $shift_group = '';
       $unregistered = '';
       $wrong_scanning = '';
+      $is_ads = false;
       $wrong_shift_group = '';
       $no_time_in = '';
       $already_time_out = '';
@@ -170,9 +171,17 @@ if (!isset($_SESSION['emp_no'])) {
           if ($wrong_scanning != true) {
             if (empty($shift_group) || empty($_SESSION['shift_group'])) {
               $wrong_shift_group = true;
-            } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
-              $wrong_shift_group = true;
-            } else {
+            } else if ($_SESSION['shift_group'] != $shift_group) {
+              if ($_SESSION['shift_group'] == 'ADS' || $shift_group == 'ADS') {
+                $is_ads = true;
+              }
+
+              if ($is_ads != true) {
+                $wrong_shift_group = true;
+              }
+            }
+
+            if ($wrong_shift_group != true) {
               $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
               $stmt = $conn -> prepare($sql);
               $stmt -> execute();
