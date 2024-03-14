@@ -86,6 +86,7 @@
                             <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 2(Viewer).xlsx" target="_blank" class="dropdown-item">EmpMgtSys Viewer WI</a></li>
                             <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 2(HR).xlsx" target="_blank" class="dropdown-item">EmpMgtSys HR WI</a></li>
                             <li><a href="/emp_mgt/wi/Employee Management System Work Instruction rev. 1(Control Area).xlsx" target="_blank" class="dropdown-item">EmpMgtSys Control Area WI</a></li>
+                            <li><a href="/emp_mgt/wi/EMS How to Set Line Support.mp4" target="_blank" class="dropdown-item">EmpMgtSys Production How to Set Line Support</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
