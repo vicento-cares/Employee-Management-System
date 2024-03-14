@@ -503,7 +503,7 @@ if ($method == 'employee_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, emp_no, full_name, dept, section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
+	$query = "SELECT id, emp_no, full_name, dept, section, sub_section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
 	if (!empty($emp_no)) {
 		$query = $query . " emp_no LIKE '".$emp_no."%'";
 	} else {
@@ -572,7 +572,7 @@ if ($method == 'employee_list') {
 			$c++;
 			
 			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
-				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
 			} else {
@@ -580,7 +580,7 @@ if ($method == 'employee_list') {
 
 				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" value="'.$j['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
 
-				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'&quot;)">'.$c.'</td>';
+				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'&quot;)">'.$c.'</td>';
 			}
 
 				echo '<td>'.$j['emp_no'].'</td>';
@@ -679,9 +679,10 @@ if ($method == 'register_employee') {
 	$full_name = addslashes(trim($_POST['full_name']));
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$dept = trim($_POST['dept']);
-	// $group = trim($_POST['group']);
+	$group = trim($_POST['group']);
 	$section = trim($_POST['section']);
-	// $sub_section = trim($_POST['sub_section']);
+	$sub_section = trim($_POST['sub_section']);
+	$process = trim($_POST['line_process']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
@@ -707,22 +708,32 @@ if ($method == 'register_employee') {
 	}else{
 		$stmt = NULL;
 
-		$query = "INSERT INTO m_employees (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_sv`, `emp_approver`, `emp_js_s_no`, `emp_sv_no`, `emp_approver_no`) VALUES ('$emp_no','$full_name'";
+		$query = "INSERT INTO m_employees (`emp_no`, `full_name`, `dept`, `section`, `sub_section`, `process`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_sv`, `emp_approver`, `emp_js_s_no`, `emp_sv_no`, `emp_approver_no`) VALUES ('$emp_no','$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";
 		} else {
-			$query = $query . ", NULL";
+			$query = $query . ", 'Undefined'";
 		}
 		if (!empty($section)) {
 			$query = $query . ",'$section'";
 		} else {
-			$query = $query . ", NULL";
+			$query = $query . ", 'Undefined'";
+		}
+		if (!empty($sub_section)) {
+			$query = $query . ",'$sub_section'";
+		} else {
+			$query = $query . ", 'Undefined'";
+		}
+		if (!empty($process)) {
+			$query = $query . ",'$process'";
+		} else {
+			$query = $query . ", 'Undefined'";
 		}
 		if (!empty($line_no)) {
 			$query = $query . ",'$line_no'";
 		} else {
-			$query = $query . ", NULL";
+			$query = $query . ", 'Undefined'";
 		}
 
 		$query = $query . ",'$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
@@ -741,9 +752,10 @@ if ($method == 'update_employee') {
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$full_name = addslashes(trim($_POST['full_name']));
 	$dept = trim($_POST['dept']);
-	// $group = trim($_POST['group']);
+	$group = trim($_POST['group']);
 	$section = trim($_POST['section']);
-	// $sub_section = trim($_POST['sub_section']);
+	$sub_section = trim($_POST['sub_section']);
+	$process = trim($_POST['line_process']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
@@ -768,17 +780,27 @@ if ($method == 'update_employee') {
 	if (!empty($dept)) {
 		$query = $query . ", dept = '$dept'";
 	} else {
-		$query = $query . ", dept = NULL";
+		$query = $query . ", dept = 'Undefined'";
 	}
 	if (!empty($section)) {
 		$query = $query . ", section = '$section'";
 	} else {
-		$query = $query . ", section = NULL";
+		$query = $query . ", section = 'Undefined'";
+	}
+	if (!empty($sub_section)) {
+		$query = $query . ", sub_section = '$sub_section'";
+	} else {
+		$query = $query . ", sub_section = 'Undefined'";
+	}
+	if (!empty($process)) {
+		$query = $query . ", process = '$process'";
+	} else {
+		$query = $query . ", process = 'Undefined'";
 	}
 	if (!empty($line_no)) {
 		$query = $query . ", line_no = '$line_no'";
 	} else {
-		$query = $query . ", line_no = NULL";
+		$query = $query . ", line_no = 'Undefined'";
 	}
 
 	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', date_hired = '$date_hired', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', resigned = '$resigned', resigned_date = '$resigned_date' WHERE id = '$id'";

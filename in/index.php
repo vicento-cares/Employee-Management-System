@@ -50,8 +50,11 @@ if (!isset($_SESSION['emp_no'])) {
       $provider = '';
       $dept = '';
       $section = '';
+      $sub_section = '';
       $line_no = '';
+      $line_process = '';
       $shift_group = '';
+      $concat_details = '';
       $unregistered = '';
       $wrong_scanning = '';
       $is_ads = false;
@@ -59,7 +62,7 @@ if (!isset($_SESSION['emp_no'])) {
       $already_time_in = '';
 
       try {
-        $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
+        $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `sub_section`, `process`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
         $stmt = $conn -> prepare($sql);
         $stmt -> execute();
 
@@ -69,8 +72,11 @@ if (!isset($_SESSION['emp_no'])) {
             $provider = $row['provider'];
             $dept = $row['dept'];
             $section = $row['section'];
+            $sub_section = $row['sub_section'];
             $line_no = $row['line_no'];
+            $line_process = $row['process'];
             $shift_group = $row['shift_group'];
+            $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
             // Added Temporarily
             if(empty($full_name)) {
               $full_name = ' ';
@@ -212,11 +218,13 @@ if (!isset($_SESSION['emp_no'])) {
     ?>
         <div class="card mt-2">
           <div class="card-body">
-            <p class="m-0 p-2 text-center">Employee No: <b><?=$emp_no?></b></p>
-            <p class="m-0 p-2 text-center">Name: <b><?=$full_name?></b></p>
-            <p class="m-0 p-2 text-center">Provider: <b><?=$provider?></b></p>
-            <p class="m-0 p-2 text-center">Line No: <b><?=$line_no?></b></p>
-            <p class="m-0 p-2 text-center">Time In: <b><?=$server_time_a?></b></p>
+            <p class="m-0 p-1 text-center">Employee No: <b><?=$emp_no?></b></p>
+            <p class="m-0 p-1 text-center">Name: <b><?=$full_name?></b></p>
+            <p class="m-0 p-1 text-center">Provider: <b><?=$provider?></b></p>
+            <p class="m-0 p-1 text-center">Line No: <b><?=$line_no?></b></p>
+            <p class="m-0 p-1 text-center">Details: <b><?=$concat_details?></b></p>
+            <p class="m-0 p-1 text-center">Shift Group: <b><?=$shift_group?></b></p>
+            <p class="m-0 p-1 text-center">Time In: <b><?=$server_time_a?></b></p>
           </div>
         </div>
     <?php 
