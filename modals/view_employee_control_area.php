@@ -52,7 +52,7 @@
         <div class="row">
           <div class="col-8">
             <label>Sub Section:</label>
-            <select id="sub_section_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;" disabled>
+            <select id="sub_section_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;">
               <option value="">Select Sub Section</option>
             </select>
           </div>
