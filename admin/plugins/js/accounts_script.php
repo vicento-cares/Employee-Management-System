@@ -5,6 +5,8 @@
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         fetch_dept_dropdown();
+        fetch_section_dropdown();
+        fetch_line_dropdown();
         load_accounts(1);
         sessionStorage.setItem('notif_pending_ls', 0);
         sessionStorage.setItem('notif_accepted_ls', 0);
@@ -24,6 +26,36 @@
             success: function (response) {
                 document.getElementById("dept").innerHTML = response;
                 document.getElementById("dept_update").innerHTML = response;
+            }
+        });
+    }
+
+    const fetch_section_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_section_dropdown'
+            },
+            success: function (response) {
+                document.getElementById("section").innerHTML = response;
+                document.getElementById("section_update").innerHTML = response;
+            }
+        });
+    }
+
+    const fetch_line_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown'
+            },
+            success: function (response) {
+                document.getElementById("line_no").innerHTML = response;
+                document.getElementById("line_no_update").innerHTML = response;
             }
         });
     }
@@ -225,14 +257,6 @@
         if (e.which === 13) {
             e.preventDefault();
             get_employee_data('insert');
-        } else {
-            document.getElementById("full_name").value = '';
-            document.getElementById("dept").value = '';
-            document.getElementById("section").value = '';
-            document.getElementById("line_no").value = '';
-            document.getElementById("shift_group").value = '';
-            document.getElementById("role").value = '';
-            document.getElementById('btnAddAccount').disabled = true;
         }
     });
 
@@ -240,15 +264,6 @@
         if (e.which === 13) {
             e.preventDefault();
             get_employee_data('update');
-        } else {
-            document.getElementById("full_name_update").value = '';
-            document.getElementById("dept_update").value = '';
-            document.getElementById("section_update").value = '';
-            document.getElementById("line_no_update").value = '';
-            document.getElementById("shift_group_update").value = '';
-            document.getElementById("role_update").value = '';
-            document.getElementById('btnUpdateAccount').disabled = true;
-            document.getElementById('btnDeleteAccount').disabled = true;
         }
     });
 
@@ -281,7 +296,6 @@
                                 document.getElementById('line_no').value = response_array.line_no;
                                 document.getElementById('shift_group').value = response_array.shift_group;
                                 document.getElementById('role').value = response_array.role;
-                                document.getElementById('btnAddAccount').disabled = false;
                             } else if (opt == 'update') {
                                 document.getElementById('full_name_update').value = response_array.full_name;
                                 document.getElementById('dept_update').value = response_array.dept;
@@ -289,8 +303,6 @@
                                 document.getElementById('line_no_update').value = response_array.line_no;
                                 document.getElementById('shift_group_update').value = response_array.shift_group;
                                 document.getElementById('role_update').value = response_array.role;
-                                document.getElementById('btnUpdateAccount').disabled = false;
-                                document.getElementById('btnDeleteAccount').disabled = false;
                             }
                         } else if (response_array.message == 'Not Found') {
                             Swal.fire({
@@ -300,12 +312,6 @@
                                 showConfirmButton: false,
                                 timer: 2000
                             });
-                            if (opt == 'insert') {
-                                document.getElementById('btnAddAccount').disabled = true;
-                            } else if (opt == 'update') {
-                                document.getElementById('btnUpdateAccount').disabled = true;
-                                document.getElementById('btnDeleteAccount').disabled = true;
-                            }
                         }
                     } catch (e) {
                         console.log(response);
@@ -316,12 +322,6 @@
                             showConfirmButton: false,
                             timer: 2000
                         });
-                        if (opt == 'insert') {
-                            document.getElementById('btnAddAccount').disabled = true;
-                        } else if (opt == 'update') {
-                            document.getElementById('btnUpdateAccount').disabled = true;
-                            document.getElementById('btnDeleteAccount').disabled = true;
-                        }
                     }
                 }
             });
@@ -462,58 +462,92 @@
         var shift_group = document.getElementById('shift_group_update').value;
         var role = document.getElementById('role_update').value;
 
-        $.ajax({
-            url: '../process/admin/accounts/acct-management_p.php',
-            type: 'POST',
-            cache: false,
-            data: {
-                method: 'update_account',
-                id: id,
-                emp_no: emp_no,
-                full_name: full_name,
-                dept: dept,
-                section: section,
-                line_no: line_no,
-                shift_group: shift_group,
-                role: role
-            }, success: function (response) {
-                if (response == 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Succesfully Recorded!!!',
-                        text: 'Success',
-                        showConfirmButton: false,
-                        timer: 1000
-                    });
-                    document.getElementById('id_account_update').value = '';
-                    document.getElementById('emp_no_update').value = '';
-                    document.getElementById('full_name_update').value = '';
-                    document.getElementById('dept_update').value = '';
-                    document.getElementById('section_update').value = '';
-                    document.getElementById('line_no_update').value = '';
-                    document.getElementById('shift_group_update').value = '';
-                    document.getElementById('role_update').value = '';
-                    load_accounts(1);
-                    $('#update_account').modal('hide');
-                } else if (response == 'duplicate') {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Duplicate Data !!!',
-                        text: 'Information',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error !!!',
-                        text: 'Error',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
+        if (emp_no == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Employee No !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (full_name == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Full Name !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (dept == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Set Department !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (role == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Select User Type !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+            $.ajax({
+                url: '../process/admin/accounts/acct-management_p.php',
+                type: 'POST',
+                cache: false,
+                data: {
+                    method: 'update_account',
+                    id: id,
+                    emp_no: emp_no,
+                    full_name: full_name,
+                    dept: dept,
+                    section: section,
+                    line_no: line_no,
+                    shift_group: shift_group,
+                    role: role
+                }, success: function (response) {
+                    if (response == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succesfully Recorded!!!',
+                            text: 'Success',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                        document.getElementById('id_account_update').value = '';
+                        document.getElementById('emp_no_update').value = '';
+                        document.getElementById('full_name_update').value = '';
+                        document.getElementById('dept_update').value = '';
+                        document.getElementById('section_update').value = '';
+                        document.getElementById('line_no_update').value = '';
+                        document.getElementById('shift_group_update').value = '';
+                        document.getElementById('role_update').value = '';
+                        load_accounts(1);
+                        $('#update_account').modal('hide');
+                    } else if (response == 'duplicate') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Duplicate Data !!!',
+                            text: 'Information',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error !!!',
+                            text: 'Error',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     const delete_account = () => {

@@ -17,11 +17,11 @@
           </div>
           <div class="col-4">
             <label>Full Name:</label>
-            <input type="text" id="full_name" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black; font-size: 25px;" disabled>
+            <input type="text" id="full_name" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black; font-size: 25px;">
           </div>
           <div class="col-4">
             <label>Department:</label>
-            <select id="dept" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <select id="dept" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Department</option>
             </select>
           </div>
@@ -29,15 +29,19 @@
         <div class="row">
           <div class="col-4">
             <label>Section:</label>
-            <input type="text" id="section" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black;" disabled>
+            <select id="section" class="form-control" style="height:45px; border: 1px solid black;">
+              <option value="">Select Section</option>
+            </select>
           </div>
           <div class="col-4">
             <label>Line No:</label>
-            <input type="text" id="line_no" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black;" disabled>
+            <select id="line_no" class="form-control" style="height:45px; border: 1px solid black;">
+              <option value="">Select Line No.</option>
+            </select>
           </div>
           <div class="col-4">
             <label>Shift Group:</label>
-            <select id="shift_group" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <select id="shift_group" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Shift Group</option>
               <option value="A">A</option>
               <option value="B">B</option>
@@ -48,7 +52,7 @@
         <div class="row">
           <div class="col-4">
             <label>User Type:</label>
-            <select id="role" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <select id="role" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select User Type</option>
               <option value="admin">Admin</option>
               <option value="user">User</option>
@@ -60,7 +64,7 @@
         <div class="row">
           <div class="col-12">
             <div class="float-right">
-              <button id="btnAddAccount" class="btn btn-primary" onclick="register_accounts()" disabled>Register Account</button>
+              <button id="btnAddAccount" class="btn btn-primary" onclick="register_accounts()">Register Account</button>
             </div>
           </div>
         </div>
