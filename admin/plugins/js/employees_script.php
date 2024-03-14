@@ -464,8 +464,8 @@
         var gender = string[18];
         var shift_group = string[19];
         var line_process = string[20];
-        // var group = string[21];
-        // var sub_section = string[22];
+        var group = string[21];
+        var sub_section = string[22];
 
         document.getElementById('id_employee_master_update').value = id;
         document.getElementById('emp_no_master_update').value = emp_no;
@@ -491,8 +491,8 @@
         document.getElementById('gender_master_update').value = gender;
         document.getElementById('shift_group_master_update').value = shift_group;
         document.getElementById('process_master_update').value = line_process;
-        // document.getElementById('group_master_update').value = group;
-        // document.getElementById('sub_section_master_update').value = sub_section;
+        document.getElementById('group_master_update').value = group;
+        document.getElementById('sub_section_master_update').value = sub_section;
 
         fetch_line_dropdown(2);
 
@@ -521,8 +521,8 @@
         var gender = document.getElementById('gender_master_update').value;
         var shift_group = document.getElementById('shift_group_master_update').value;
         var line_process = document.getElementById('process_master_update').value;
-        // var group = document.getElementById('group_master_update').value;
-        // var sub_section = document.getElementById('sub_section_master_update').value;
+        var group = document.getElementById('group_master_update').value;
+        var sub_section = document.getElementById('sub_section_master_update').value;
 
         var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
         var emp_js_s_no = emp_js_s_master_update.value;
@@ -584,7 +584,9 @@
                     emp_no: emp_no,
                     full_name: full_name,
                     dept: dept,
+                    group: group,
                     section: section,
+                    sub_section: sub_section,
                     line_no: line_no,
                     line_process: line_process,
                     position: position,

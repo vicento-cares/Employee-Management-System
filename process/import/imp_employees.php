@@ -213,9 +213,9 @@ function check_csv ($file, $conn) {
     fgets($csvFile);
 
     $dept_arr = get_dept($conn);
-    // $group_arr = get_falp_groups($conn);
+    $group_arr = get_falp_groups($conn);
     $section_arr = get_sections($conn);
-    // $sub_section_arr = get_sub_sections($conn);
+    $sub_section_arr = get_sub_sections($conn);
     $line_arr = get_lines($conn);
     $process_arr = get_processes($conn);
     $position_arr = get_positions($conn);
@@ -236,9 +236,9 @@ function check_csv ($file, $conn) {
     $row_valid_arr = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
     $notExistsDeptArr = array();
-    // $notExistsGroupArr = array();
+    $notExistsGroupArr = array();
     $notExistsSectionArr = array();
-    // $notExistsSubSectionArr = array();
+    $notExistsSubSectionArr = array();
     $notExistsLineNoArr = array();
     $notExistsProcessArr = array();
     $notExistsPositionArr = array();
@@ -258,10 +258,10 @@ function check_csv ($file, $conn) {
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    // $valid_first_line = "Employee No.,Full Name,Department,Group,Section,Sub Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
-    $valid_first_line = "Employee No.,Full Name,Department,Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
-    // $valid_first_line2 = '"Employee No.","Full Name",Department,Group,Section,"Sub Section","Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
-    $valid_first_line2 = '"Employee No.","Full Name",Department,Section,"Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
+    $valid_first_line = "Employee No.,Full Name,Department,Group,Section,Sub Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
+    // $valid_first_line = "Employee No.,Full Name,Department,Section,Line No.,Process,Position,Provider,Gender,Shift Group,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
+    $valid_first_line2 = '"Employee No.","Full Name",Department,Group,Section,"Sub Section","Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
+    // $valid_first_line2 = '"Employee No.","Full Name",Department,Section,"Line No.",Process,Position,Provider,Gender,"Shift Group","Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
         while (($line = fgetcsv($csvFile)) !== false) {
             // Check if the row is blank or consists only of whitespace
@@ -274,24 +274,24 @@ function check_csv ($file, $conn) {
             $emp_no = custom_trim($line[0]);
             $full_name = custom_trim($line[1]);
             $dept = custom_trim($line[2]);
-            // $group = custom_trim($line[0]);
-            $section = custom_trim($line[3]);
-            // $sub_section = custom_trim($line[0]);
-            $line_no = custom_trim($line[4]);
-            $line_process = custom_trim($line[5]);
-            $position = custom_trim($line[6]);
-            $provider = custom_trim($line[7]);
-            $gender = custom_trim($line[8]);
-            $shift_group = custom_trim($line[9]);
-            $date_hired = custom_trim($line[10]);
-            $address = custom_trim($line[11]);
-            $contact_no = custom_trim($line[12]);
-            $emp_status = custom_trim($line[13]);
-            $shuttle_route = custom_trim($line[14]);
-            $emp_js_s_no = custom_trim($line[15]);
-            $emp_sv_no = custom_trim($line[16]);
-            $emp_approver_no = custom_trim($line[17]);
-            $resigned_date = custom_trim($line[18]);
+            $group = custom_trim($line[3]);
+            $section = custom_trim($line[4]);
+            $sub_section = custom_trim($line[5]);
+            $line_no = custom_trim($line[6]);
+            $line_process = custom_trim($line[7]);
+            $position = custom_trim($line[8]);
+            $provider = custom_trim($line[9]);
+            $gender = custom_trim($line[10]);
+            $shift_group = custom_trim($line[11]);
+            $date_hired = custom_trim($line[12]);
+            $address = custom_trim($line[13]);
+            $contact_no = custom_trim($line[14]);
+            $emp_status = custom_trim($line[15]);
+            $shuttle_route = custom_trim($line[16]);
+            $emp_js_s_no = custom_trim($line[17]);
+            $emp_sv_no = custom_trim($line[18]);
+            $emp_approver_no = custom_trim($line[19]);
+            $resigned_date = custom_trim($line[20]);
 
             $date_hired_valid = str_replace('/', '-', $date_hired);
             $is_valid_date_hired = validate_date($date_hired_valid);
@@ -314,107 +314,107 @@ function check_csv ($file, $conn) {
                     array_push($notExistsDeptArr, $check_csv_row);
                 }
             }
-            // if (!empty($group)) {
-            //     if (!in_array($group, $group_arr)) {
-            //         $hasError = 1;
-            //         $row_valid_arr[0] = 1;
-            //         array_push($notExistsGroupArr, $check_csv_row);
-            //     }
-            // }
+            if (!empty($group)) {
+                if (!in_array($group, $group_arr)) {
+                    $hasError = 1;
+                    $row_valid_arr[1] = 1;
+                    array_push($notExistsGroupArr, $check_csv_row);
+                }
+            }
             if (!empty($section)) {
                 if (!in_array($section, $section_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[1] = 1;
+                    $row_valid_arr[2] = 1;
                     array_push($notExistsSectionArr, $check_csv_row);
                 }
             }
-            // if (!empty($sub_section)) {
-            //     if (!in_array($sub_section, $sub_section_arr)) {
-            //         $hasError = 1;
-            //         $row_valid_arr[0] = 1;
-            //         array_push($notExistsSubSectionArr, $check_csv_row);
-            //     }
-            // }
+            if (!empty($sub_section)) {
+                if (!in_array($sub_section, $sub_section_arr)) {
+                    $hasError = 1;
+                    $row_valid_arr[3] = 1;
+                    array_push($notExistsSubSectionArr, $check_csv_row);
+                }
+            }
             if (!empty($line_no)) {
                 if (!in_array($line_no, $line_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[2] = 1;
+                    $row_valid_arr[4] = 1;
                     array_push($notExistsLineNoArr, $check_csv_row);
                 }
             }
             if (!empty($line_process)) {
                 if (!in_array($line_process, $process_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[3] = 1;
+                    $row_valid_arr[5] = 1;
                     array_push($notExistsProcessArr, $check_csv_row);
                 }
             }
             if (!empty($position)) {
                 if (!in_array($position, $position_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[4] = 1;
+                    $row_valid_arr[6] = 1;
                     array_push($notExistsPositionArr, $check_csv_row);
                 }
             }
             if (!empty($provider)) {
                 if (!in_array($provider, $provider_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[5] = 1;
+                    $row_valid_arr[7] = 1;
                     array_push($notExistsProviderArr, $check_csv_row);
                 }
             }
             if (!in_array($shift_group, $shift_group_arr)) {
                 $hasError = 1;
-                $row_valid_arr[6] = 1;
+                $row_valid_arr[8] = 1;
                 array_push($notExistsShiftGroupArr, $check_csv_row);
             }
             if (!in_array($shuttle_route, $shuttle_route_arr)) {
                 $hasError = 1;
-                $row_valid_arr[7] = 1;
+                $row_valid_arr[9] = 1;
                 array_push($notExistsShuttleRouteArr, $check_csv_row);
             }
             if (!in_array($gender, $gender_arr)) {
                 $hasError = 1;
-                $row_valid_arr[8] = 1;
+                $row_valid_arr[10] = 1;
                 array_push($notExistsGenderArr, $check_csv_row);
             }
             if (!in_array($emp_status, $emp_status_arr)) {
                 $hasError = 1;
-                $row_valid_arr[9] = 1;
+                $row_valid_arr[11] = 1;
                 array_push($notExistsEmpStatusArr, $check_csv_row);
             }
             if (!empty($date_hired)) {
                 if ($is_valid_date_hired == false) {
                     $hasError = 1;
-                    $row_valid_arr[10] = 1;
+                    $row_valid_arr[12] = 1;
                     array_push($notValidDateHiredArr, $check_csv_row);
                 }
             }
             if (!empty($resigned_date)) {
                 if ($is_valid_resigned_date == false) {
                     $hasError = 1;
-                    $row_valid_arr[11] = 1;
+                    $row_valid_arr[13] = 1;
                     array_push($notValidResignedDateArr, $check_csv_row);
                 }
             }
             if (!empty($emp_js_s_no)) {
                 if (!in_array($emp_js_s_no, $emp_js_s_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[12] = 1;
+                    $row_valid_arr[14] = 1;
                     array_push($notExistsEmpJsSNoArr, $check_csv_row);
                 }
             }
             if (!empty($emp_sv_no)) {
                 if (!in_array($emp_sv_no, $emp_sv_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[13] = 1;
+                    $row_valid_arr[15] = 1;
                     array_push($notExistsEmpSvNoArr, $check_csv_row);
                 }
             }
             if (!empty($emp_approver_no)) {
                 if (!in_array($emp_approver_no, $emp_approver_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[14] = 1;
+                    $row_valid_arr[16] = 1;
                     array_push($notExistsEmpAppNoArr, $check_csv_row);
                 }
             }
@@ -442,52 +442,52 @@ function check_csv ($file, $conn) {
         if ($row_valid_arr[0] == 1) {
             $message = $message . 'Department doesn\'t exists on row/s ' . implode(", ", $notExistsDeptArr) . '. ';
         }
-        // if ($row_valid_arr[0] == 1) {
-        //     $message = $message . 'Group doesn\'t exists on row/s ' . implode(", ", $notExistsGroupArr) . '. ';
-        // }
         if ($row_valid_arr[1] == 1) {
+            $message = $message . 'Group doesn\'t exists on row/s ' . implode(", ", $notExistsGroupArr) . '. ';
+        }
+        if ($row_valid_arr[2] == 1) {
             $message = $message . 'Section doesn\'t exists on row/s ' . implode(", ", $notExistsSectionArr) . '. ';
         }
-        // if ($row_valid_arr[0] == 1) {
-        //     $message = $message . 'Sub Section doesn\'t exists on row/s ' . implode(", ", $notExistsSubSectionArr) . '. ';
-        // }
-        if ($row_valid_arr[2] == 1) {
-            $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. ';
-        }
         if ($row_valid_arr[3] == 1) {
-            $message = $message . 'Process doesn\'t exists row/s ' . implode(", ", $notExistsProcessArr) . '. ';
+            $message = $message . 'Sub Section doesn\'t exists on row/s ' . implode(", ", $notExistsSubSectionArr) . '. ';
         }
         if ($row_valid_arr[4] == 1) {
-            $message = $message . 'Position doesn\'t exists on row/s ' . implode(", ", $notExistsPositionArr) . '. ';
+            $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. ';
         }
         if ($row_valid_arr[5] == 1) {
-            $message = $message . 'Provider doesn\'t exists on row/s ' . implode(", ", $notExistsProviderArr) . '. ';
+            $message = $message . 'Process doesn\'t exists row/s ' . implode(", ", $notExistsProcessArr) . '. ';
         }
         if ($row_valid_arr[6] == 1) {
-            $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
+            $message = $message . 'Position doesn\'t exists on row/s ' . implode(", ", $notExistsPositionArr) . '. ';
         }
         if ($row_valid_arr[7] == 1) {
-            $message = $message . 'Shuttle Route doesn\'t exists on row/s ' . implode(", ", $notExistsShuttleRouteArr) . '. ';
+            $message = $message . 'Provider doesn\'t exists on row/s ' . implode(", ", $notExistsProviderArr) . '. ';
         }
         if ($row_valid_arr[8] == 1) {
-            $message = $message . 'Gender doesn\'t exists on row/s ' . implode(", ", $notExistsGenderArr) . '. ';
+            $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
         }
         if ($row_valid_arr[9] == 1) {
-            $message = $message . 'Employment Status doesn\'t exists on row/s ' . implode(", ", $notExistsEmpStatusArr) . '. ';
+            $message = $message . 'Shuttle Route doesn\'t exists on row/s ' . implode(", ", $notExistsShuttleRouteArr) . '. ';
         }
         if ($row_valid_arr[10] == 1) {
-            $message = $message . 'Invalid Date Hired on row/s ' . implode(", ", $notValidDateHiredArr) . '. ';
+            $message = $message . 'Gender doesn\'t exists on row/s ' . implode(", ", $notExistsGenderArr) . '. ';
         }
         if ($row_valid_arr[11] == 1) {
-            $message = $message . 'Invalid Resigned Date on row/s ' . implode(", ", $notValidResignedDateArr) . '. ';
+            $message = $message . 'Employment Status doesn\'t exists on row/s ' . implode(", ", $notExistsEmpStatusArr) . '. ';
         }
         if ($row_valid_arr[12] == 1) {
-            $message = $message . 'Jr. Staff or Staff Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpJsSNoArr) . '. ';
+            $message = $message . 'Invalid Date Hired on row/s ' . implode(", ", $notValidDateHiredArr) . '. ';
         }
         if ($row_valid_arr[13] == 1) {
-            $message = $message . 'Supervisor Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpSvNoArr) . '. ';
+            $message = $message . 'Invalid Resigned Date on row/s ' . implode(", ", $notValidResignedDateArr) . '. ';
         }
         if ($row_valid_arr[14] == 1) {
+            $message = $message . 'Jr. Staff or Staff Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpJsSNoArr) . '. ';
+        }
+        if ($row_valid_arr[15] == 1) {
+            $message = $message . 'Supervisor Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpSvNoArr) . '. ';
+        }
+        if ($row_valid_arr[16] == 1) {
             $message = $message . 'Approver Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpAppNoArr) . '. ';
         }
         
@@ -532,24 +532,24 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                 $emp_no = addslashes(custom_trim($line[0]));
                 $full_name = addslashes(custom_trim($line[1]));
                 $dept = custom_trim($line[2]);
-                // $group = addslashes(custom_trim($line[0]));
-                $section = addslashes(custom_trim($line[3]));
-                // $sub_section = addslashes(custom_trim($line[0]));
-                $line_no = addslashes(custom_trim($line[4]));
-                $line_process = addslashes(custom_trim($line[5]));
-                $position = addslashes(custom_trim($line[6]));
-                $provider = addslashes(custom_trim($line[7]));
-                $gender = strtoupper(custom_trim($line[8]));
-                $shift_group = strtoupper(custom_trim($line[9]));
-                $date_hired = custom_trim($line[10]);
-                $address = custom_trim($line[11]);
-                $contact_no = custom_trim($line[12]);
-                $emp_status = custom_trim($line[13]);
-                $shuttle_route = addslashes(custom_trim($line[14]));
-                $emp_js_s_no = custom_trim($line[15]);
-                $emp_sv_no = custom_trim($line[16]);
-                $emp_approver_no = custom_trim($line[17]);
-                $resigned_date = custom_trim($line[18]);
+                $group = addslashes(custom_trim($line[3]));
+                $section = addslashes(custom_trim($line[4]));
+                $sub_section = addslashes(custom_trim($line[5]));
+                $line_no = addslashes(custom_trim($line[6]));
+                $line_process = addslashes(custom_trim($line[7]));
+                $position = addslashes(custom_trim($line[8]));
+                $provider = addslashes(custom_trim($line[9]));
+                $gender = strtoupper(custom_trim($line[10]));
+                $shift_group = strtoupper(custom_trim($line[11]));
+                $date_hired = custom_trim($line[12]);
+                $address = custom_trim($line[13]);
+                $contact_no = custom_trim($line[14]);
+                $emp_status = custom_trim($line[15]);
+                $shuttle_route = addslashes(custom_trim($line[16]));
+                $emp_js_s_no = custom_trim($line[17]);
+                $emp_sv_no = custom_trim($line[18]);
+                $emp_approver_no = custom_trim($line[19]);
+                $resigned_date = custom_trim($line[20]);
                 $resigned = '';
 
                 $dateh = str_replace('/', '-', $date_hired);
@@ -574,7 +574,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                     foreach($stmt->fetchALL() as $x){
                         $id = $x['id'];
                     }
-                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name='$full_name',dept='$dept',section='$section',line_no='$line_no',process='$line_process',position='$position',provider='$provider',gender='$gender',shift_group='$shift_group',date_hired='$date_hired',address='$address',contact_no='$contact_no',emp_status='$emp_status',shuttle_route='$shuttle_route',emp_js_s='',emp_js_s_no='$emp_js_s_no',emp_sv='',emp_sv_no='$emp_sv_no',emp_approver='',emp_approver_no='$emp_approver_no',resigned='$resigned',resigned_date='$resigned_date' WHERE id = '$id'";
+                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name='$full_name',dept='$dept',section='$section',sub_section='$sub_section',line_no='$line_no',process='$line_process',position='$position',provider='$provider',gender='$gender',shift_group='$shift_group',date_hired='$date_hired',address='$address',contact_no='$contact_no',emp_status='$emp_status',shuttle_route='$shuttle_route',emp_js_s='',emp_js_s_no='$emp_js_s_no',emp_sv='',emp_sv_no='$emp_sv_no',emp_approver='',emp_approver_no='$emp_approver_no',resigned='$resigned',resigned_date='$resigned_date' WHERE id = '$id'";
 
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {
@@ -641,7 +641,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                         }
                     }
                 } else {
-                    $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
+                    $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `sub_section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$sub_section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
 
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {
