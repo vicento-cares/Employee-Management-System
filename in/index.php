@@ -117,7 +117,10 @@ if (!isset($_SESSION['emp_no'])) {
                 $stmt = $conn -> prepare($sql);
                 $stmt -> execute();
               } else {
-                $already_time_in = true;
+                // $already_time_in = true;
+                $sql = "UPDATE `t_time_in_out` SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+                $stmt = $conn -> prepare($sql);
+                $stmt -> execute();
               }
             }
           }
