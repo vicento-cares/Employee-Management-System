@@ -507,7 +507,7 @@ if ($method == 'get_attendance_list2') {
 
 	$sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date,
-	tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
+	tio.time_in, tio.time_out, tio.day AS time_in_day, tio.shift AS time_in_shift, 
 	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
@@ -573,6 +573,8 @@ if ($method == 'get_attendance_list2') {
 			echo '<td>'.$j['dept'].'</td>';
 			echo '<td>'.$j['section'].'</td>';
 			echo '<td>'.$j['line_no'].'</td>';
+			echo '<td>'.$j['time_in'].'</td>';
+			echo '<td>'.$j['time_out'].'</td>';
 			echo '<td>'.$j['absent_type'].'</td>';
 			$reason = $j['reason'];
 			if (strlen($reason) > 12) {
