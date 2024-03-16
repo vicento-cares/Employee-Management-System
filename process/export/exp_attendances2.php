@@ -44,7 +44,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -58,7 +58,7 @@ fputcsv($f, $fields, $delimiter);
 	WHERE emp.dept = '$dept'";*/
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
-	tio.time_in
+	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio 
 		ON emp.emp_no = tio.emp_no
@@ -108,7 +108,7 @@ if ($stmt -> rowCount() > 0) {
 			$row_status = 'Absent';
 		}
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row_status); 
+        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
         fputcsv($f, $lineData, $delimiter);
     } 
 }

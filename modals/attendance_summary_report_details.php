@@ -146,6 +146,8 @@
                                 <th>Department</th>
                                 <th>Section</th>
                                 <th>Line No.</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
                                 <th>Type of Absent</th>
                                 <th>Reason</th>
                             </tr>
