@@ -2,7 +2,7 @@
 
 ## About Employee Management System
 
-Employee Management System is web application for managing employee information.
+A web application for managing employee information.
 
 Features:
 - time in and out
