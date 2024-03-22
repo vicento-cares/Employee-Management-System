@@ -224,6 +224,7 @@
                 method: 'fetch_shuttle_route_dropdown'
             },
             success: function (response) {
+                $('#shuttle_route_master').html(response);
                 $('#shuttle_route_master_update').html(response);
             }
         });
@@ -238,6 +239,7 @@
                 method: 'fetch_position_dropdown'
             },
             success: function (response) {
+                $('#position_master').html(response);
                 $('#position_master_update').html(response);
             }
         });
@@ -267,6 +269,7 @@
                 method: 'fetch_provider_dropdown'
             },
             success: function (response) {
+                $('#provider_master').html(response);
                 $('#provider_master_update').html(response);
                 $('#provider_master_search').html(response);
             }

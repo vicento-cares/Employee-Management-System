@@ -67,13 +67,13 @@
             <label>Position:</label>
             <select id="position_master" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Position</option>
+              <option value="Assistant Manager">Assistant Manager</option>
               <option value="Associate">Associate</option>
               <option value="Jr. Staff">Jr. Staff</option>
+              <option value="Manager">Manager</option>
+              <option value="Section Manager">Section Manager</option>
               <option value="Staff">Staff</option>
               <option value="Supervisor">Supervisor</option>
-              <option value="Assistant Manager">Assistant Manager</option>
-              <option value="Section Manager">Section Manager</option>
-              <option value="Manager">Manager</option>
             </select>
           </div>
           <div class="col-4">
@@ -92,12 +92,13 @@
             <label>Provider:</label>
             <select id="provider_master" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Provider</option>
-              <option value="FAS">FAS</option>
-              <option value="PKIMT">PKIMT</option>
-              <option value="MAXIM">MAXIM</option>
-              <option value="ONE SOURCE">ONE SOURCE</option>
-              <option value="MEGATREND">MEGATREND</option>
               <option value="ADD EVEN">ADD EVEN</option>
+              <option value="FAS">FAS</option>
+              <option value="GOLDENHAND">GOLDENHAND</option>
+              <option value="MAXIM">MAXIM</option>
+              <option value="MEGATREND">MEGATREND</option>
+              <option value="ONE SOURCE">ONE SOURCE</option>
+              <option value="PKIMT">PKIMT</option>
             </select>
           </div>
           <div class="col-2">
@@ -114,17 +115,17 @@
             <select id="shuttle_route_master" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Route</option>
               <option value="Batangas">Batangas</option>
-              <option value="San Jose">San Jose</option>
               <option value="Ibaan">Ibaan</option>
-              <option value="Rosario">Rosario</option>
-              <option value="Sta. Teresita">Sta. Teresita</option>
-              <option value="Padre Garcia">Padre Garcia</option>
-              <option value="Lipa Malayo">Lipa Malayo</option>
               <option value="Lipa Malapit">Lipa Malapit</option>
+              <option value="Lipa Malayo">Lipa Malayo</option>
               <option value="Malvar">Malvar</option>
-              <option value="Sto. Tomas Malayo">Sto. Tomas Malayo</option>
-              <option value="San Pablo via Sto. Tomas">San Pablo via Sto. Tomas</option>
+              <option value="Padre Garcia">Padre Garcia</option>
+              <option value="Rosario">Rosario</option>
+              <option value="San Jose">San Jose</option>
               <option value="San Pablo via Lipa">San Pablo via Lipa</option>
+              <option value="San Pablo via Sto. Tomas">San Pablo via Sto. Tomas</option>
+              <option value="Sta. Teresita">Sta. Teresita</option>
+              <option value="Sto. Tomas Malayo">Sto. Tomas Malayo</option>
             </select>
           </div>
         </div>
