@@ -156,6 +156,47 @@
             <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel" data-interval="10000" data-pause="false">
             <div class="carousel-inner">
                 <div class="carousel-item active">
+                <img class="d-block w-100" src="dist/img/HW_S/1.jpg"
+                alt="slide1">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/2.jpg"
+                alt="slide2">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/3.jpg"
+                alt="slide3">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/4.jpg"
+                alt="slide4">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/5.jpg"
+                alt="slide5">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/6.jpg"
+                alt="slide6">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/7.jpg"
+                alt="slide7">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/8.jpg"
+                alt="slide8">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/9.jpg"
+                alt="slide9">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/HW_S/10.jpg"
+                alt="slide10">
+                </div>
+                <!-- Valentines -->
+                <!-- <div class="carousel-item active">
                 <img class="d-block w-100" src="dist/img/feb/1.jpg"
                 alt="slide1">
                 </div>
@@ -194,7 +235,8 @@
                 <div class="carousel-item">
                 <img class="d-block w-100" src="dist/img/feb/11.jpg"
                 alt="slide11">
-                </div>
+                </div> -->
+                <!-- Christmas -->
                 <!-- <div class="carousel-item active">
                 <img class="d-block w-100" src="dist/img/1/christmas1.jpg"
                 alt="slide1">
