@@ -400,6 +400,7 @@
                 emp_no: emp_no,
                 full_name: full_name,
                 provider: provider,
+                resigned: 0,
                 current_page: current_page
             },
             beforeSend: (jqXHR, settings) => {
