@@ -77,6 +77,7 @@
                         <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                             <li><a href="viewer/dashboard.php" class="dropdown-item">Dashboard</a></li>
                             <li><a href="viewer/attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
+                            <li><a href="viewer/time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

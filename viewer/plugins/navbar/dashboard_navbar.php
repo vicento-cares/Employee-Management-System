@@ -22,6 +22,7 @@
                         <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                             <li><a href="dashboard.php" class="dropdown-item active">Dashboard</a></li>
                             <li><a href="attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
+                            <li><a href="time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
