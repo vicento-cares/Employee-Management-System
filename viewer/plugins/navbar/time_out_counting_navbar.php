@@ -21,8 +21,8 @@
                         <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle active"><i class="fas fa-bars"></i> Menu</a>
                         <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                             <li><a href="dashboard.php" class="dropdown-item">Dashboard</a></li>
-                            <li><a href="attendance_summary_report.php" class="dropdown-item active">Attendance Summary Report</a></li>
-                            <li><a href="time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
+                            <li><a href="attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
+                            <li><a href="time_out_counting.php" class="dropdown-item active">Time Out Counting</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
