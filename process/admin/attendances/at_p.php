@@ -529,7 +529,7 @@ if ($method == 'get_attendance_list2') {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
-	$sql = $sql . " ORDER BY emp.emp_no ASC";
+	$sql = $sql . " ORDER BY emp.full_name ASC";
 
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
 
