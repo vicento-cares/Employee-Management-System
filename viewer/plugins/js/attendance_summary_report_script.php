@@ -234,6 +234,11 @@
         });
     }
 
+    const export_attendances_all = () => {
+        let day = sessionStorage.getItem('attendance_date_search');
+        window.open('../process/export/exp_attendances_all.php?day=' + day, '_blank');
+    }
+
     const export_attendance_summary_report = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
