@@ -80,7 +80,10 @@ include 'plugins/navbar/attendance_summary_report_navbar.php';
                                     </div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-sm-3 offset-sm-6">
+                                    <div class="col-sm-2 offset-sm-4">
+                                    <button type="button" class="btn bg-teal btn-block" onclick="export_attendances_all()"><i class="fas fa-download"></i> All Attendances</button>
+                                    </div>
+                                    <div class="col-sm-3">
                                     <button type="button" class="btn bg-success btn-block" onclick="export_attendance_summary_report()"><i class="fas fa-download"></i> Attendance Summary Report</button>
                                     </div>
                                     <div class="col-sm-3">
