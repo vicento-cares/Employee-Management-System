@@ -88,6 +88,7 @@ if ($method == 'fetch_dept_dropdown') {
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Department</option>';
+		echo '<option value="">All</option>';
 		foreach($stmt -> fetchAll() as $row) {
 			echo '<option value="'.htmlspecialchars($row['dept']).'">'.htmlspecialchars($row['dept']).'</option>';
 		}
@@ -118,6 +119,7 @@ if ($method == 'fetch_section_dropdown') {
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Section</option>';
+		echo '<option value="">All</option>';
 		foreach($stmt -> fetchAll() as $row) {
 			echo '<option value="'.htmlspecialchars($row['section']).'">'.htmlspecialchars($row['section']).'</option>';
 		}
@@ -156,6 +158,7 @@ if ($method == 'fetch_line_dropdown') {
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Line No.</option>';
+		echo '<option value="">All</option>';
 		foreach($stmt -> fetchAll() as $row) {
 			echo '<option value="'.htmlspecialchars($row['line_no']).'">'.htmlspecialchars($row['line_no']).'</option>';
 		}
