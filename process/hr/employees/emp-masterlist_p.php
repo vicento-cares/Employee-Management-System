@@ -123,7 +123,6 @@ if ($method == 'fetch_section_dropdown') {
 		foreach($stmt -> fetchAll() as $row) {
 			echo '<option value="'.htmlspecialchars($row['section']).'">'.htmlspecialchars($row['section']).'</option>';
 		}
-		echo '<option value="QA">QA</option>';
 	} else {
 		echo '<option disabled selected value="">Select Section</option>';
 	}

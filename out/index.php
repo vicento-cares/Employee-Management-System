@@ -14,6 +14,16 @@ function get_shift($server_time) {
   }
 }
 
+function get_shift_line_support($server_time) {
+  if ($server_time >= '07:00:00' && $server_time < '19:00:00') {
+    return 'DS';
+  } else if ($server_time >= '19:00:00' && $server_time <= '23:59:59') {
+    return 'NS';
+  } else if ($server_time >= '00:00:00' && $server_time < '07:00:00') {
+    return 'NS';
+  }
+}
+
 function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
   if ($server_time >= '06:00:00' && $server_time <= '23:59:59') {
     return $server_date_only;
@@ -159,7 +169,7 @@ if (!isset($_SESSION['emp_no'])) {
           }
 
           if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-            $shift = get_shift($server_time);
+            $shift = get_shift_line_support($server_time);
             $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
             // Line Support Query
