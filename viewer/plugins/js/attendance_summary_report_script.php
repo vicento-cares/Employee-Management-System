@@ -192,7 +192,7 @@
             type: 'POST',
             cache: false,
             data: {
-                method: 'get_attendance_summary_report',
+                method: 'get_attendance_summary_report2',
                 day: day,
                 shift_group: shift_group,
                 dept: dept,
@@ -245,7 +245,7 @@
         let dept = sessionStorage.getItem('dept_search');
         let section = sessionStorage.getItem('section_search');
         let line_no = sessionStorage.getItem('line_no_search');
-        window.open('../process/export/exp_attendance_summary_report.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept + "&section=" + section + "&line_no=" + line_no, '_blank');
+        window.open('../process/export/exp_attendance_summary_report2.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept + "&section=" + section + "&line_no=" + line_no, '_blank');
     }
 
     // Table Responsive Scroll Event for Load More

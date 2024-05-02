@@ -119,10 +119,13 @@
                             data-parent="#accordion_attendance1_legend">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-sm-6 col-lg-6 p-1 bg-success">
+                                    <div class="col-sm-4 col-lg-4 p-1 bg-success">
                                         <center>Present</center>
                                     </div>
-                                    <div class="col-sm-6 col-lg-6 p-1 bg-danger">
+                                    <div class="col-sm-4 col-lg-4 p-1 bg-warning">
+                                        <center>Support</center>
+                                    </div>
+                                    <div class="col-sm-4 col-lg-4 p-1 bg-danger">
                                         <center>Absent</center>
                                     </div>
                                 </div>
@@ -155,7 +158,7 @@
                         </thead>
                         <tbody id="attendanceData" style="text-align: center;">
                             <tr>
-                                <td colspan="12" style="text-align:center;">
+                                <td colspan="15" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                         <span class="sr-only">Loading...</span>
                                     </div>
