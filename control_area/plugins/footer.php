@@ -2,7 +2,7 @@
     <strong>Copyright &copy; 2023. Developed by: Vince Dale Alcantara</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-      <b>Beta Version</b> 1.0.3
+      <b>Beta Version</b> 1.0.4
     </div>
   </footer>
 <?php
