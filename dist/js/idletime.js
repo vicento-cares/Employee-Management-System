@@ -1,7 +1,7 @@
 // IDLE TIME DETECT INACTIVITY
 var idleTime = 0;
 document.addEventListener("DOMContentLoaded", () => {
-  var idleInterval = setInterval(timerIncrement, 5000); //PER 1 MINUTE
+  var idleInterval = setInterval(timerIncrement, 60000); //PER 1 MINUTE
   document.addEventListener("mousemove", e => {idleTime = 0});
   document.addEventListener("keypress", e => {idleTime = 0});
   document.addEventListener("mousedown", e => {idleTime = 0});
