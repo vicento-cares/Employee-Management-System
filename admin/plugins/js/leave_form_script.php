@@ -1,10 +1,14 @@
 <script type="text/javascript">
+    // Global Variables for Realtime
+	var realtime_get_pending_leave_forms;
+	var realtime_get_recent_leave_forms_history;
+
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         get_pending_leave_forms();
         get_recent_leave_forms_history();
-        setInterval(get_pending_leave_forms, 10000);
-        setInterval(get_recent_leave_forms_history, 30000);
+        realtime_get_pending_leave_forms = setInterval(get_pending_leave_forms, 10000);
+        realtime_get_recent_leave_forms_history = setInterval(get_recent_leave_forms_history, 30000);
         sessionStorage.setItem('notif_pending_ls', 0);
         sessionStorage.setItem('notif_accepted_ls', 0);
         sessionStorage.setItem('notif_rejected_ls', 0);

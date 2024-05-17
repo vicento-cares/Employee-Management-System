@@ -1,11 +1,15 @@
 <script type="text/javascript">
+    // Global Variables for Realtime
+	var realtime_get_pending_line_support;
+	var realtime_get_recent_line_support_history;
+
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         fetch_line_dropdown();
         get_pending_line_support();
-        setInterval(get_pending_line_support, 15000);
+        realtime_get_pending_line_support = setInterval(get_pending_line_support, 15000);
         get_recent_line_support_history();
-        setInterval(get_recent_line_support_history, 30000);
+        realtime_get_recent_line_support_history = setInterval(get_recent_line_support_history, 30000);
         sessionStorage.setItem('notif_pending_ls', 0);
         sessionStorage.setItem('notif_accepted_ls', 0);
         sessionStorage.setItem('notif_rejected_ls', 0);

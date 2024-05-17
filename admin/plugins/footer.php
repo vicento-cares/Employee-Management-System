@@ -39,6 +39,9 @@ include '../modals/admin_verification.php';
 <!-- AdminLTE App -->
 <script src="../dist/js/adminlte.js"></script>
 
+<!-- Idletime Script -->
+<script src="../dist/js/idletime.js"></script>
+
 <!-- Admin Verification Script -->
 <?php include 'plugins/js/admin_verification_script.php'; ?>
 

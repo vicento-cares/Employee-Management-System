@@ -260,6 +260,9 @@ if (!isset($_SESSION['emp_no'])) {
 <!-- AdminLTE App -->
 <script src="../dist/js/adminlte.min.js"></script>
 
+<!-- Idletime Script -->
+<script src="../dist/js/idletime.js"></script>
+
 <script>
   var serverTime = document.getElementById("server_time").value;
 
