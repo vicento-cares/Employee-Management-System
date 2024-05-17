@@ -1,14 +1,20 @@
 <script type="text/javascript">
+	// Global Variables for Realtime
+	var realtime_get_attendance_date;
+	var realtime_get_recent_time_in_out_ds;
+	var realtime_get_recent_time_in_out_ns;
+	var realtime_get_recent_time_in_out_ads;
+
 	// DOMContentLoaded function
 	document.addEventListener("DOMContentLoaded", () => {
 		get_attendance_date();
 		get_recent_time_in_out_ds();
 		get_recent_time_in_out_ns();
 		get_recent_time_in_out_ads();
-		setInterval(get_attendance_date, 10000);
-		setInterval(get_recent_time_in_out_ds, 10000);
-		setInterval(get_recent_time_in_out_ns, 10000);
-		setInterval(get_recent_time_in_out_ads, 10000);
+		realtime_get_attendance_date = setInterval(get_attendance_date, 10000);
+		realtime_get_recent_time_in_out_ds = setInterval(get_recent_time_in_out_ds, 10000);
+		realtime_get_recent_time_in_out_ns = setInterval(get_recent_time_in_out_ns, 10000);
+		realtime_get_recent_time_in_out_ads = setInterval(get_recent_time_in_out_ads, 10000);
 		sessionStorage.setItem('notif_pending_ls', 0);
 		sessionStorage.setItem('notif_accepted_ls', 0);
 		sessionStorage.setItem('notif_rejected_ls', 0);
