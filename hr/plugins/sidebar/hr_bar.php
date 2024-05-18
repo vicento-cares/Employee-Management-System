@@ -2,7 +2,7 @@
   <!-- Brand Logo -->
   <a href="home.php" class="brand-link">
     <img src="../dist/img/logo.ico" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">EmpMgtSys | Admin</span>
+    <span class="brand-text font-weight-light">EmpMgtSys | HR</span>
   </a>
 
   <!-- Sidebar -->
@@ -13,7 +13,7 @@
         <img src="../dist/img/user.png" class="img-circle elevation-2" alt="User Image">
       </div>
       <div class="info">
-        <a href="home.php" class="d-block"><?=htmlspecialchars($_SESSION['full_name']);?></a>
+        <a href="home.php" class="d-block"><?= htmlspecialchars($_SESSION['full_name']); ?></a>
       </div>
     </div>
 
@@ -23,7 +23,11 @@
         <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/home.php") { ?>
+          <a href="home.php" class="nav-link active">
+          <?php } else { ?>
           <a href="home.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-home"></i>
             <p>
               Home
@@ -31,16 +35,23 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/dashboard.php") { ?>
+          <a href="dashboard.php" class="nav-link active">
+          <?php } else { ?>
           <a href="dashboard.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>
               Dashboard
             </p>
           </a>
         </li>
-        <?php if ($_SESSION['role'] == 'admin') {?>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/accounts.php") { ?>
+          <a href="accounts.php" class="nav-link active">
+          <?php } else { ?>
           <a href="accounts.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-user-cog"></i>
             <p>
               Account Management
@@ -48,57 +59,30 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/employees.php") { ?>
+          <a href="employees.php" class="nav-link active">
+          <?php } else { ?>
           <a href="employees.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-user"></i>
             <p>
               Employee Masterlist
             </p>
           </a>
-        </li> 
-        <?php } ?>
+        </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/attendances.php") { ?>
+          <a href="attendances.php" class="nav-link active">
+          <?php } else { ?>
           <a href="attendances.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-tasks"></i>
             <p>
               Attendances
             </p>
           </a>
-        </li> 
-        <?php if ($_SESSION['role'] == 'admin') {?>
-        <li class="nav-item">
-          <a href="attendance_summary_report.php" class="nav-link">
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>
-              Attendance Report
-            </p>
-          </a>
-        </li> 
-        <?php } ?>
-        <li class="nav-item">
-          <a href="shuttle_allocation.php" class="nav-link">
-            <i class="nav-icon fas fa-file-alt"></i>
-            <p>
-              Shuttle Allocation
-            </p>
-          </a>
-        </li> 
-        <li class="nav-item">
-          <a href="leave_form.php" class="nav-link active">
-            <i class="nav-icon fas fa-file-alt"></i>
-            <p>
-              Leave Forms
-            </p>
-          </a>
-        </li> 
-        <li class="nav-item">
-          <a href="line_support.php" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>
-              Line Support
-            </p>
-          </a>
-        </li> 
-        <?php include 'logout.php' ;?>
+        </li>
+        <?php include 'logout.php'; ?>
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

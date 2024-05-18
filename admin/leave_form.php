@@ -1,5 +1,5 @@
 <?php include 'plugins/navbar.php';?>
-<?php include 'plugins/sidebar/leave_form_bar.php';?>
+<?php include 'plugins/sidebar/admin_bar.php';?>
 
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->

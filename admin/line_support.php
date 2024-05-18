@@ -1,5 +1,5 @@
 <?php include 'plugins/line_support_navbar.php';?>
-<?php include 'plugins/sidebar/line_support_bar.php';?>
+<?php include 'plugins/sidebar/admin_bar.php';?>
 
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->
