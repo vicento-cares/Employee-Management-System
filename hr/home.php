@@ -1,5 +1,5 @@
 <?php include 'plugins/navbar.php';?>
-<?php include 'plugins/sidebar/home_bar.php';?>
+<?php include 'plugins/sidebar/hr_bar.php';?>
 
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->

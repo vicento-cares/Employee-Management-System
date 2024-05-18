@@ -2,7 +2,7 @@
   <!-- Brand Logo -->
   <a href="home.php" class="brand-link">
     <img src="../dist/img/logo.ico" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">EmpMgtSys | HR</span>
+    <span class="brand-text font-weight-light">EmpMgtSys | Clinic</span>
   </a>
 
   <!-- Sidebar -->
@@ -23,42 +23,14 @@
         <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/clinic/home.php") { ?>
+          <a href="home.php" class="nav-link active">
+          <?php } else { ?>
           <a href="home.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-home"></i>
             <p>
               Home
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="dashboard.php" class="nav-link active">
-            <i class="nav-icon fas fa-tachometer-alt"></i>
-            <p>
-              Dashboard
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="accounts.php" class="nav-link">
-            <i class="nav-icon fas fa-user-cog"></i>
-            <p>
-              Account Management
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="employees.php" class="nav-link">
-            <i class="nav-icon fas fa-user"></i>
-            <p>
-              Employee Masterlist
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="attendances.php" class="nav-link">
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>
-              Attendances
             </p>
           </a>
         </li>

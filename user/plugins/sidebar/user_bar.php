@@ -2,7 +2,7 @@
   <!-- Brand Logo -->
   <a href="home.php" class="brand-link">
     <img src="../dist/img/logo.ico" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-    <span class="brand-text font-weight-light">EmpMgtSys | Clinic</span>
+    <span class="brand-text font-weight-light">EmpMgtSys | User</span>
   </a>
 
   <!-- Sidebar -->
@@ -23,7 +23,11 @@
         <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/user/home.php") { ?>
           <a href="home.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="home.php" class="nav-link">
+          <?php } ?>
             <i class="nav-icon fas fa-home"></i>
             <p>
               Home
