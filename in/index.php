@@ -177,7 +177,7 @@ if (!isset($_SESSION['emp_no'])) {
 
         <form action="" method="POST" id="scan_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="Scan Here" oncopy="return false" onpaste="return false" autofocus autocomplete="off" required>
+            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="Scan Here" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="20" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-qrcode"></span>
@@ -283,7 +283,7 @@ if (!isset($_SESSION['emp_no'])) {
 
   $("#emp_no").on("input", function() {
     delay(function(){
-      if ($("#emp_no").val().length < 7) {
+      if ($("#emp_no").val().length < 21) {
         $("#emp_no").val("");
       }
     }, 100);
