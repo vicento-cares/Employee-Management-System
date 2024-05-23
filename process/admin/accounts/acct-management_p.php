@@ -110,8 +110,19 @@ if ($method == 'account_list') {
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
 			$c++;
-			echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'~!~'.$j['shift_group'].'&quot;)">';
+
+			if (isset($_SESSION['emp_no_hr'])) {
+				echo '<tr>';
+
+				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" value="'.$j['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
+
+				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'~!~'.$j['shift_group'].'&quot;)">'.$c.'</td>';
+			} else {
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_account" onclick="get_accounts_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['role'].'~!~'.$j['shift_group'].'&quot;)">';
+
 				echo '<td>'.$c.'</td>';
+			}
+
 				echo '<td>'.$j['emp_no'].'</td>';
 				echo '<td>'.$j['full_name'].'</td>';
 				echo '<td>'.$j['dept'].'</td>';
