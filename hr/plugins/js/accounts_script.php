@@ -216,7 +216,7 @@
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
-                var loading = `<tr id="loading"><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr id="loading"><td colspan="9" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 if (current_page == 1) {
                     document.getElementById("list_of_accounts").innerHTML = loading;
                 } else {
@@ -586,5 +586,75 @@
                 }
             }
         });
+    }
+
+    // uncheck all
+    const uncheck_all = () => {
+        var select_all = document.getElementById('check_all');
+        select_all.checked = false;
+        document.querySelectorAll(".singleCheck").forEach((el, i) => {
+            el.checked = false;
+        });
+        get_checked_length();
+    }
+    // check all
+    const select_all_func = () => {
+        var select_all = document.getElementById('check_all');
+        if (select_all.checked == true) {
+            console.log('check');
+            document.querySelectorAll(".singleCheck").forEach((el, i) => {
+                el.checked = true;
+            });
+        } else {
+            console.log('uncheck');
+            document.querySelectorAll(".singleCheck").forEach((el, i) => {
+                el.checked = false;
+            });
+        }
+        get_checked_length();
+    }
+    // GET THE LENGTH OF CHECKED CHECKBOXES
+    const get_checked_length = () => {
+        var arr = [];
+        document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
+            arr.push(el.value);
+        });
+        console.log(arr);
+        var numberOfChecked = arr.length;
+        console.log(numberOfChecked);
+        if (numberOfChecked > 0) {
+            document.getElementById("btnPrintSelectedQr").removeAttribute('disabled');
+        } else {
+            document.getElementById("btnPrintSelectedQr").setAttribute('disabled', true);
+        }
+    }
+
+    const print_accounts_selected_qr = () => {
+        var arr = [];
+        document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
+            arr.push(el.value);
+        });
+        console.log(arr);
+        var numberOfChecked = arr.length;
+        if (numberOfChecked > 0) {
+            id_arr = Object.values(arr);
+            window.open('../process/print/print_accounts_selected_qr.php?id_arr=' + id_arr, '_blank');
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Row Selected',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        }
+    }
+
+    const print_accounts_qr_all = () => {
+        var emp_no = sessionStorage.getItem('emp_no_search');
+        var full_name = sessionStorage.getItem('full_name_search');
+        var role = sessionStorage.getItem('role_search');
+
+        window.open('../process/print/print_accounts_qr_all.php?emp_no=' + emp_no + "&full_name=" + full_name + '&role=' + role, '_blank');
     }
 </script>

@@ -40,7 +40,7 @@ if (isset($_SESSION['emp_no'])) {
 
         <form action="" method="POST" id="login_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" oncopy="return false" onpaste="return false" autofocus autocomplete="off" required>
+            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="50" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-lock"></span>
@@ -71,7 +71,7 @@ if (isset($_SESSION['emp_no'])) {
     document.getElementById("emp_no").focus();
   });
 
-  /*var delay = (function(){
+  var delay = (function(){
     var timer = 0;
     return function(callback, ms){
       clearTimeout (timer);
@@ -81,11 +81,11 @@ if (isset($_SESSION['emp_no'])) {
 
   $("#emp_no").on("input", function() {
     delay(function(){
-      if ($("#emp_no").val().length < 7) {
+      if ($("#emp_no").val().length < 51) {
         $("#emp_no").val("");
       }
     }, 100);
-  });*/
+  });
 </script>
 
 </body>

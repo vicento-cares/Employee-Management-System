@@ -44,7 +44,7 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <div class="row mb-4">
+              <div class="row mb-2">
                 <div class="col-sm-2">
                   <label>Employee No.</label>
                   <input type="text" class="form-control" id="emp_no_search" placeholder="Search" autocomplete="off" maxlength="255">
@@ -66,10 +66,21 @@
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="load_accounts(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
               </div>
+              <div class="row mb-4">
+                <div class="col-sm-2">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn bg-gray-dark btn-block" onclick="print_accounts_selected_qr()" id="btnPrintSelectedQr" disabled><i class="fas fa-qrcode"></i> Print Selected QR</button>
+                </div>
+                <div class="col-sm-2">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn bg-gray-dark btn-block" onclick="print_accounts_qr_all()"><i class="fas fa-qrcode"></i> Print All QR</button>
+                </div>
+              </div>
               <div id="list_of_accounts_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
                 <table id="list_of_accounts_table" class="table table-sm table-head-fixed text-nowrap table-hover">
                   <thead style="text-align: center;">
                     <tr>
+                      <th><input type="checkbox" name="check_all" id="check_all" onclick="select_all_func()"></th>
                       <th>#</th>
                       <th>Employee No.</th>
                       <th>Full Name</th>
@@ -82,7 +93,7 @@
                   </thead>
                   <tbody id="list_of_accounts" style="text-align: center;">
                     <tr>
-                      <td colspan="8" style="text-align:center;">
+                      <td colspan="9" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>
