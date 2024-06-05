@@ -6,7 +6,7 @@ $servername = 'localhost'; $username = 'root'; $password = '';
 // $servername = '172.25.116.188'; $username = 'server_113.4'; $password = 'SystemGroup@2022';
 
 // MS SQL Server Connection
-// $servername = '172.25.116.188\SQLEXPRESS'; $username = 'SA'; $password = 'SystemGroup2018';
+// $servername = '172.25.116.188\SQLEXPRESS'; $username = 'SA'; $password = 'SystemGroup@2022';
 
 try {
     $conn = new PDO ("mysql:host=$servername;dbname=emp_mgt_db",$username,$password);
