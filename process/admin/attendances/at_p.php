@@ -474,7 +474,11 @@ if ($method == 'get_attendance_list') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " ORDER BY emp.emp_no ASC";
 
+	// MySQL Query
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
+
+	// MS SQL Server Query
+	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -731,7 +735,11 @@ if ($method == 'get_attendance_list2') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " ORDER BY emp.full_name ASC";
 
+	// MySQL Query
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
+
+	// MS SQL Server Query
+	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
