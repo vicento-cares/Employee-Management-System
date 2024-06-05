@@ -160,11 +160,11 @@ if ($method == 'register_account') {
 		echo 'Already Exist';
 	}else{
 		$stmt = NULL;
-		$query = "INSERT INTO m_accounts (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `shift_group`, `role`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
+		$query = "INSERT INTO m_accounts (emp_no, full_name, dept, section, line_no, shift_group, role) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
 			$stmt = NULL;
-			$query = "INSERT INTO t_notif_line_support (`emp_no`) VALUES ('$emp_no')";
+			$query = "INSERT INTO t_notif_line_support (emp_no) VALUES ('$emp_no')";
 			$stmt = $conn->prepare($query);
 			if ($stmt->execute()) {
 				echo 'success';

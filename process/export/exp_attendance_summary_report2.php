@@ -126,7 +126,7 @@ $results = array();
 // Get list of lines with total mp count based on Employee Masterlist
 $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
         COUNT(emp_no) AS total 
-    FROM `m_employees` 
+    FROM m_employees 
     WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND dept LIKE '$dept%'";
@@ -294,8 +294,8 @@ if ($stmt->rowCount() > 0) {
 // Update Total Present from list of lines based on t_time_in_out
 $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
         COUNT(tio.emp_no) AS total_present 
-    FROM `t_time_in_out` tio 
-    LEFT JOIN `m_employees` emp 
+    FROM t_time_in_out tio 
+    LEFT JOIN m_employees emp 
     ON tio.emp_no = emp.emp_no 
     WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
@@ -329,8 +329,8 @@ if ($stmt->rowCount() > 0) {
 // Update Total Present from list of lines based on t_time_in_out and Line Support To
 $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 	COUNT(tio.emp_no) AS total_present 
-	FROM `t_time_in_out` tio 
-	LEFT JOIN `m_employees` emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
@@ -377,8 +377,8 @@ if ($stmt->rowCount() > 0) {
 // Update Total Present from list of lines based on t_time_in_out and Line Support From Rejected
 $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 	COUNT(tio.emp_no) AS total_present 
-	FROM `t_time_in_out` tio 
-	LEFT JOIN `m_employees` emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
@@ -425,8 +425,8 @@ if ($stmt->rowCount() > 0) {
 // Update Total Present from list of lines based on t_time_in_out and Line Support From
 $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 	COUNT(tio.emp_no) AS total_present 
-	FROM `t_time_in_out` tio 
-	LEFT JOIN `m_employees` emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {

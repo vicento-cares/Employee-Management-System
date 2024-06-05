@@ -29,7 +29,7 @@ switch (true) {
 function get_dept($conn) {
     $data = array();
 
-    $sql = "SELECT `dept` FROM `m_dept` ORDER BY dept ASC";
+    $sql = "SELECT dept FROM m_dept ORDER BY dept ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -42,7 +42,7 @@ function get_dept($conn) {
 function get_falp_groups($conn) {
     $data = array();
 
-    $sql = "SELECT `falp_group` FROM `m_falp_groups` ORDER BY falp_group ASC";
+    $sql = "SELECT falp_group FROM m_falp_groups ORDER BY falp_group ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -55,7 +55,7 @@ function get_falp_groups($conn) {
 function get_sections($conn) {
     $data = array();
 
-    $sql = "SELECT `section` FROM `m_access_locations` GROUP BY section ORDER BY section ASC";
+    $sql = "SELECT section FROM m_access_locations GROUP BY section ORDER BY section ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -71,7 +71,7 @@ function get_sections($conn) {
 function get_sub_sections($conn) {
     $data = array();
 
-    $sql = "SELECT `sub_section` FROM `m_sub_sections` ORDER BY sub_section ASC";
+    $sql = "SELECT sub_section FROM m_sub_sections ORDER BY sub_section ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -84,7 +84,7 @@ function get_sub_sections($conn) {
 function get_lines($conn) {
     $data = array();
 
-    $sql = "SELECT `line_no` FROM `m_access_locations` GROUP BY line_no ORDER BY line_no ASC";
+    $sql = "SELECT line_no FROM m_access_locations GROUP BY line_no ORDER BY line_no ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -97,7 +97,7 @@ function get_lines($conn) {
 function get_processes($conn) {
     $data = array();
 
-    $sql = "SELECT `process` FROM `m_process` ORDER BY process ASC";
+    $sql = "SELECT process FROM m_process ORDER BY process ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -110,7 +110,7 @@ function get_processes($conn) {
 function get_positions($conn) {
     $data = array();
 
-    $sql = "SELECT `position` FROM `m_positions` ORDER BY position ASC";
+    $sql = "SELECT position FROM m_positions ORDER BY position ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -123,7 +123,7 @@ function get_positions($conn) {
 function get_providers($conn) {
     $data = array();
 
-    $sql = "SELECT `provider` FROM `m_providers` ORDER BY provider ASC";
+    $sql = "SELECT provider FROM m_providers ORDER BY provider ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -136,7 +136,7 @@ function get_providers($conn) {
 function get_shuttle_routes($conn) {
     $data = array();
 
-    $sql = "SELECT `shuttle_route` FROM `m_shuttle_routes` ORDER BY shuttle_route ASC";
+    $sql = "SELECT shuttle_route FROM m_shuttle_routes ORDER BY shuttle_route ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -149,7 +149,7 @@ function get_shuttle_routes($conn) {
 function get_employee_name_js_s($conn) {
     $data = array();
 
-    $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Jr. Staff', 'Staff') AND resigned = 0";
+    $sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Jr. Staff', 'Staff') AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
@@ -164,7 +164,7 @@ function get_employee_name_js_s($conn) {
 function get_employee_name_sv($conn) {
     $data = array();
 
-    $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` = 'Supervisor' AND resigned = 0";
+    $sql = "SELECT emp_no, full_name FROM m_employees WHERE position = 'Supervisor' AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
@@ -179,7 +179,7 @@ function get_employee_name_sv($conn) {
 function get_employee_name_approver($conn) {
     $data = array();
 
-    $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
+    $sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
     $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
@@ -641,7 +641,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                         }
                     }
                 } else {
-                    $sql = "INSERT INTO `m_employees`(`emp_no`, `full_name`, `dept`, `section`, `sub_section`, `line_no`, `process`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_js_s_no`, `emp_sv`, `emp_sv_no`, `emp_approver`, `emp_approver_no`, `resigned`, `resigned_date`) VALUES ('$emp_no','$full_name','$dept','$section','$sub_section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
+                    $sql = "INSERT INTO m_employees(emp_no, full_name, dept, section, sub_section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, resigned, resigned_date) VALUES ('$emp_no','$full_name','$dept','$section','$sub_section','$line_no','$line_process','$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned','$resigned_date')";
 
                     $stmt = $conn->prepare($sql);
                     if (!$stmt->execute()) {

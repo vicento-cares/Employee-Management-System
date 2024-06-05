@@ -125,7 +125,7 @@ $results = array();
 
 $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
         COUNT(emp_no) AS total 
-    FROM `m_employees` 
+    FROM m_employees 
     WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND dept LIKE '$dept%'";
@@ -151,8 +151,8 @@ if ($stmt->rowCount() > 0) {
 
 $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
         COUNT(tio.emp_no) AS total_present 
-    FROM `t_time_in_out` tio 
-    LEFT JOIN `m_employees` emp 
+    FROM t_time_in_out tio 
+    LEFT JOIN m_employees emp 
     ON tio.emp_no = emp.emp_no 
     WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {

@@ -10,7 +10,7 @@ $method = $_POST['method'];
 
 // Get Shuttle Route Dropdown
 if ($method == 'fetch_shuttle_route_dropdown') {
-	$sql = "SELECT `shuttle_route` FROM `m_shuttle_routes` ORDER BY shuttle_route ASC";
+	$sql = "SELECT shuttle_route FROM m_shuttle_routes ORDER BY shuttle_route ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -112,7 +112,7 @@ if ($method == 'get_shuttle_allocation_total') {
 	$line_no = $_SESSION['line_no'];
 	$response_arr = array();
 
-	$sql = "SELECT sum(out_5) AS total_out_5, sum(out_6) AS total_out_6, sum(out_7) AS total_out_7, sum(out_8) AS total_out_8 FROM `t_shuttle_allocation` WHERE `day` = '$day' AND `shift_group` = '$shift_group' AND dept = '$dept'";
+	$sql = "SELECT sum(out_5) AS total_out_5, sum(out_6) AS total_out_6, sum(out_7) AS total_out_7, sum(out_8) AS total_out_8 FROM t_shuttle_allocation WHERE day = '$day' AND shift_group = '$shift_group' AND dept = '$dept'";
 	if (!empty($section)) {
 		$sql = $sql . " AND section = '$section'";
 	}
@@ -193,7 +193,7 @@ if ($method == 'set_out') {
 			$stmt = $conn->prepare($sql);
 			$stmt->execute();
 		} else {
-			$sql = "INSERT INTO t_shuttle_allocation (`emp_no`, `dept`, `section`, `line_no`, `day`, `shift`, `shift_group`, `shuttle_route`, `out_".$time."`, `set_by`) VALUES ('$emp_no', '$dept', '$section', '$line_no', '$day', '$shift', '$shift_group', '$shuttle_route', 1, '".$_SESSION['full_name']."')";
+			$sql = "INSERT INTO t_shuttle_allocation (emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_".$time.", set_by) VALUES ('$emp_no', '$dept', '$section', '$line_no', '$day', '$shift', '$shift_group', '$shuttle_route', 1, '".$_SESSION['full_name']."')";
 			$stmt = $conn->prepare($sql);
 			$stmt->execute();
 		}

@@ -32,7 +32,7 @@ fputcsv($f, $fields, $delimiter);
 
 $results = array();
 
-$sql = "SELECT dept, section FROM `m_employees` GROUP BY dept, section";
+$sql = "SELECT dept, section FROM m_employees GROUP BY dept, section";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();

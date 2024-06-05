@@ -343,7 +343,7 @@ if ($method == 'count_emp_provider_dashboard') {
 	$small_box_colors_arr = array('bg-primary', 'bg-navy', 'bg-info', 'bg-warning', 'bg-lightblue', 'bg-purple', 'bg-olive', 'bg-gray');
 	$small_box_color_count = count($small_box_colors_arr);
 	$provider_count = 0;
-	$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
+	$sql = "SELECT provider FROM m_providers ORDER BY id ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {

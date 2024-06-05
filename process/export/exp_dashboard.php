@@ -267,7 +267,7 @@ fputcsv($f, $fields, $delimiter);
 
 $c = 0;
 
-$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
+$sql = "SELECT provider FROM m_providers ORDER BY id ASC";
 $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt -> execute();
 if ($stmt -> rowCount() > 0) {
@@ -391,7 +391,7 @@ fputcsv($f, $fields, $delimiter);
 
 $c = 0;
 
-$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
+$sql = "SELECT provider FROM m_providers ORDER BY id ASC";
 $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt -> execute();
 if ($stmt -> rowCount() > 0) {
@@ -515,7 +515,7 @@ fputcsv($f, $fields, $delimiter);
 
 $c = 0;
 
-$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
+$sql = "SELECT provider FROM m_providers ORDER BY id ASC";
 $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt -> execute();
 if ($stmt -> rowCount() > 0) {

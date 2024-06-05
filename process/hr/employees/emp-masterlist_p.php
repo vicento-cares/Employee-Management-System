@@ -83,7 +83,7 @@ function count_employee_list($search_arr, $conn) {
 
 // Get Dept Dropdown
 if ($method == 'fetch_dept_dropdown') {
-	$sql = "SELECT `dept` FROM `m_dept` ORDER BY dept ASC";
+	$sql = "SELECT dept FROM m_dept ORDER BY dept ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -99,7 +99,7 @@ if ($method == 'fetch_dept_dropdown') {
 
 // Get Group Dropdown
 if ($method == 'fetch_group_dropdown') {
-	$sql = "SELECT `falp_group` FROM `m_falp_groups` ORDER BY falp_group ASC";
+	$sql = "SELECT falp_group FROM m_falp_groups ORDER BY falp_group ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -114,7 +114,7 @@ if ($method == 'fetch_group_dropdown') {
 
 // Get Section Dropdown
 if ($method == 'fetch_section_dropdown') {
-	$sql = "SELECT `section` FROM `m_access_locations` GROUP BY section ORDER BY section ASC";
+	$sql = "SELECT section FROM m_access_locations GROUP BY section ORDER BY section ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -130,7 +130,7 @@ if ($method == 'fetch_section_dropdown') {
 
 // Get Sub Section Dropdown
 if ($method == 'fetch_sub_section_dropdown') {
-	$sql = "SELECT `sub_section` FROM `m_sub_sections` ORDER BY sub_section ASC";
+	$sql = "SELECT sub_section FROM m_sub_sections ORDER BY sub_section ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -146,7 +146,7 @@ if ($method == 'fetch_sub_section_dropdown') {
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
 	$section = addslashes($_POST['section']);
-	$sql = "SELECT `line_no` FROM `m_access_locations`";
+	$sql = "SELECT line_no FROM m_access_locations";
 	if (!empty($section)) {
 		if ($section != 'QA') {
 			$sql = $sql . " WHERE section = '$section'";
@@ -168,7 +168,7 @@ if ($method == 'fetch_line_dropdown') {
 
 // Get Position Dropdown
 if ($method == 'fetch_position_dropdown') {
-	$sql = "SELECT `position` FROM `m_positions` ORDER BY position ASC";
+	$sql = "SELECT position FROM m_positions ORDER BY position ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -183,7 +183,7 @@ if ($method == 'fetch_position_dropdown') {
 
 // Get Position Dropdown
 if ($method == 'fetch_process_dropdown') {
-	$sql = "SELECT `process` FROM `m_process` ORDER BY process ASC";
+	$sql = "SELECT process FROM m_process ORDER BY process ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -198,7 +198,7 @@ if ($method == 'fetch_process_dropdown') {
 
 // Get Provider Dropdown
 if ($method == 'fetch_provider_dropdown') {
-	$sql = "SELECT `provider` FROM `m_providers` ORDER BY provider ASC";
+	$sql = "SELECT provider FROM m_providers ORDER BY provider ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -217,7 +217,7 @@ if ($method == 'fetch_employee_name_js_s_dropdown') {
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 
-	$sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Jr. Staff', 'Staff') AND resigned = 0";
+	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Jr. Staff', 'Staff') AND resigned = 0";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept = '$dept'";
 	}
@@ -246,7 +246,7 @@ if ($method == 'fetch_employee_name_sv_dropdown') {
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 
-	$sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` = 'Supervisor' AND resigned = 0";
+	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position = 'Supervisor' AND resigned = 0";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept = '$dept'";
 	}
@@ -275,7 +275,7 @@ if ($method == 'fetch_employee_name_approver_dropdown') {
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 
-	$sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
+	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept = '$dept'";
 	}
@@ -715,7 +715,7 @@ if ($method == 'register_employee') {
 	}else{
 		$stmt = NULL;
 
-		$query = "INSERT INTO m_employees (`emp_no`, `full_name`, `dept`, `section`, `sub_section`, `process`, `line_no`, `position`, `provider`, `gender`, `shift_group`, `date_hired`, `address`, `contact_no`, `emp_status`, `shuttle_route`, `emp_js_s`, `emp_sv`, `emp_approver`, `emp_js_s_no`, `emp_sv_no`, `emp_approver_no`) VALUES ('$emp_no','$full_name'";
+		$query = "INSERT INTO m_employees (emp_no, full_name, dept, section, sub_section, process, line_no, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no','$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";

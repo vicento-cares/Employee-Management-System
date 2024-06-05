@@ -9,7 +9,7 @@ if (!isset($_SESSION['emp_no'])) {
 }
 
 function delete_recent_line_support_set($set_by_no, $conn) {
-  $sql = "DELETE FROM `t_line_support` WHERE set_by_no = '$set_by_no' AND status = 'added'";
+  $sql = "DELETE FROM t_line_support WHERE set_by_no = '$set_by_no' AND status = 'added'";
   $stmt = $conn -> prepare($sql);
   $stmt -> execute();
 }

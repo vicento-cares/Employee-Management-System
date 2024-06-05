@@ -61,7 +61,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$sql = "SELECT `line_no` FROM `m_access_locations` WHERE line_no != '".$_SESSION['line_no']."' GROUP BY line_no ORDER BY line_no ASC";
+	$sql = "SELECT line_no FROM m_access_locations WHERE line_no != '".$_SESSION['line_no']."' GROUP BY line_no ORDER BY line_no ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -141,7 +141,7 @@ if ($method == 'set_line_support') {
 				$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 				$stmt -> execute();
 				if ($stmt -> rowCount() > 0) {
-					$sql = "INSERT INTO `t_line_support`(`line_support_id`, `emp_no`, `day`, `shift`, `line_no_from`, `line_no_to`, `set_by`, `set_by_no`) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','".$_SESSION['full_name']."','".$_SESSION['emp_no']."')";
+					$sql = "INSERT INTO t_line_support(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','".$_SESSION['full_name']."','".$_SESSION['emp_no']."')";
 					$stmt = $conn -> prepare($sql);
 					$stmt -> execute();
 
