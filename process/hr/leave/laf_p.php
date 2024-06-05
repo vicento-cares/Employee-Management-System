@@ -47,7 +47,7 @@ if ($method == 'get_leave_forms_history') {
 
 	$sql = $sql . " ORDER BY id DESC";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){

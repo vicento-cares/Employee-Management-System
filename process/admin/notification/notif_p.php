@@ -25,7 +25,7 @@ if ($method == 'count_notif_line_support') {
 		$sql = $sql . " (acc.line_no IS NULL OR acc.line_no = '')";
 	}
 	$sql = $sql . " AND (nls.pending_ls > 0 OR nls.accepted_ls > 0 OR nls.rejected_ls > 0)";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {

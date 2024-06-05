@@ -35,7 +35,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 function check_ip_access_location($ip, $conn) {
   $line_no = '';
   $sql = "SELECT line_no FROM `m_access_locations` WHERE ip = '$ip'";
-  $stmt = $conn -> prepare($sql);
+  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt -> execute();
 
   if ($stmt -> rowCount() > 0) {
@@ -54,7 +54,7 @@ function check_time_out_sa($server_time, $emp_no, $day, $shift, $conn) {
   $allow_time_out = false;
 
   $sql = "SELECT `out_5`, `out_6`, `out_7`, `out_8` FROM `t_shuttle_allocation` WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-  $stmt = $conn -> prepare($sql);
+  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt -> execute();
 
   if ($stmt -> rowCount() > 0) {
@@ -148,7 +148,7 @@ if (!isset($_SESSION['emp_no'])) {
 
       try {
         $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `sub_section`, `process`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
-        $stmt = $conn -> prepare($sql);
+        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt -> execute();
 
         if ($stmt -> rowCount() > 0) {
@@ -174,7 +174,7 @@ if (!isset($_SESSION['emp_no'])) {
 
             // Line Support Query
             $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
-            $stmt = $conn -> prepare($sql);
+            $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
             $stmt -> execute();
 
             if ($stmt -> rowCount() < 1) {
@@ -199,7 +199,7 @@ if (!isset($_SESSION['emp_no'])) {
 
             if ($wrong_shift_group != true) {
               $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-              $stmt = $conn -> prepare($sql);
+              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
               $stmt -> execute();
 
               if ($stmt -> rowCount() > 0) {
@@ -221,7 +221,7 @@ if (!isset($_SESSION['emp_no'])) {
               } else {
 
                 $sql = "SELECT `day`, `shift` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-                $stmt = $conn -> prepare($sql);
+                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                 $stmt -> execute();
 
                 if ($stmt -> rowCount() > 0) {
@@ -245,7 +245,7 @@ if (!isset($_SESSION['emp_no'])) {
                   $shift = get_shift($server_time);
 
                   $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND shift = '$shift'";
-                  $stmt = $conn -> prepare($sql);
+                  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                   $stmt -> execute();
                   if ($stmt -> rowCount() < 1) {
                     $no_time_in = true;

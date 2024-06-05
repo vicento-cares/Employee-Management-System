@@ -11,7 +11,7 @@ $method = $_POST['method'];
 // Get Shuttle Route Dropdown
 if ($method == 'fetch_shuttle_route_dropdown') {
 	$sql = "SELECT `shuttle_route` FROM `m_shuttle_routes` ORDER BY shuttle_route ASC";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Shuttle Route</option>';
@@ -68,7 +68,7 @@ if ($method == 'get_shuttle_allocation') {
 		$sql = $sql . " AND emp.line_no = '$line_no'";
 	}
 	$sql = $sql . " AND tio.time_in != '' ORDER BY emp.emp_no ASC";
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -120,7 +120,7 @@ if ($method == 'get_shuttle_allocation_total') {
 		$sql = $sql . " AND line_no = '$line_no'";
 	}
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -150,7 +150,7 @@ if ($method == 'set_out') {
 			LEFT JOIN m_employees emp
 			ON emp.emp_no = tio.emp_no
 			WHERE tio.id = '$id'";
-		$stmt = $conn -> prepare($sql);
+		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt->rowCount() > 0) {
 			foreach($stmt->fetchALL() as $j){
@@ -166,7 +166,7 @@ if ($method == 'set_out') {
 		}
 
 		$sql = "SELECT id FROM t_shuttle_allocation WHERE emp_no = '$emp_no' AND day = '$day' AND shift_group = '$shift_group' AND (out_5 != 0 OR out_6 != 0 OR out_7 != 0 OR out_8 != 0)";
-		$stmt = $conn -> prepare($sql);
+		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt->rowCount() > 0) {
 			foreach($stmt->fetchALL() as $j){
@@ -238,7 +238,7 @@ if ($method == 'get_shuttle_allocation_per_route') {
 		$sql = $sql . " AND line_no = '$line_no'";
 	}
 	$sql = $sql . " GROUP BY shuttle_route ORDER BY shuttle_route ASC";
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){

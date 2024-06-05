@@ -34,7 +34,7 @@ $results = array();
 
 $sql = "SELECT dept, section FROM `m_employees` GROUP BY dept, section";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
     foreach($stmt->fetchALL() as $row) {
@@ -55,7 +55,7 @@ $sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_0 FROM t_time_in_ou
     OR tio.day = '$day' AND tio.time_out IS NULL
     GROUP BY emp.dept, emp.section";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -79,7 +79,7 @@ $sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_1 FROM t_time_in_ou
     WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 16:00:00' AND '$day 16:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 04:00:00' AND '$day_tomorrow 04:59:59')
     GROUP BY emp.dept, emp.section";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -103,7 +103,7 @@ $sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_2 FROM t_time_in_ou
     WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 17:00:00' AND '$day 17:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 05:00:00' AND '$day_tomorrow 05:59:59')
     GROUP BY emp.dept, emp.section";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -127,7 +127,7 @@ $sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_3 FROM t_time_in_ou
     WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 18:00:00' AND '$day 18:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 06:00:00' AND '$day_tomorrow 06:59:59')
     GROUP BY emp.dept, emp.section";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {

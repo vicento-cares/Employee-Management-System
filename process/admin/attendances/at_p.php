@@ -31,7 +31,7 @@ function count_line_support_to($search_arr, $conn) {
 		}
 	}
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -74,7 +74,7 @@ function count_line_support_from($search_arr, $conn) {
 	// 	$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	// }
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -109,7 +109,7 @@ function count_line_support_from_rejected($search_arr, $conn) {
 		}
 	}
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -144,7 +144,7 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 		AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')
 		ORDER BY emp.full_name ASC";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -202,7 +202,7 @@ function count_attendance_list($search_arr, $conn) {
 	}
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
 	
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -235,7 +235,7 @@ function count_attendance_list2($search_arr, $conn) {
 	}
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
 	
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -268,7 +268,7 @@ function count_emp_tio($search_arr, $conn) {
 		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -476,7 +476,7 @@ if ($method == 'get_attendance_list') {
 
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -733,7 +733,7 @@ if ($method == 'get_attendance_list2') {
 
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		if ($page_first_result == 0){
@@ -851,7 +851,7 @@ if ($method == 'get_attendance_list_counting') {
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -883,7 +883,7 @@ if ($method == 'get_attendance_list_counting') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -946,7 +946,7 @@ if ($method == 'get_attendance_list_counting') {
 	// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	// $sql = $sql . " GROUP BY emp.process";
 
-	// $stmt = $conn->prepare($sql);
+	// $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	// $stmt->execute();
 	// if ($stmt->rowCount() > 0) {
 	// 	foreach($stmt->fetchALL() as $row){
@@ -1049,7 +1049,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1080,7 +1080,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1118,7 +1118,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'rejected'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1156,7 +1156,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1202,7 +1202,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1236,7 +1236,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1269,7 +1269,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'rejected'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1302,7 +1302,7 @@ if ($method == 'get_attendance_list_counting2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY process1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1497,7 +1497,7 @@ if ($method == 'get_attendance_summary_report') {
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY dept, section, line_no1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1525,7 +1525,7 @@ if ($method == 'get_attendance_summary_report') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1632,7 +1632,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY dept, section, line_no1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1665,7 +1665,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1712,7 +1712,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'rejected'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1759,7 +1759,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1802,7 +1802,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1842,7 +1842,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1890,7 +1890,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'rejected'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -1938,7 +1938,7 @@ if ($method == 'get_attendance_summary_report2') {
 	$sql = $sql . " AND lsh.status = 'accepted'";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1, line_no2";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {

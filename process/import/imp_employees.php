@@ -30,7 +30,7 @@ function get_dept($conn) {
     $data = array();
 
     $sql = "SELECT `dept` FROM `m_dept` ORDER BY dept ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['dept']);
@@ -43,7 +43,7 @@ function get_falp_groups($conn) {
     $data = array();
 
     $sql = "SELECT `falp_group` FROM `m_falp_groups` ORDER BY falp_group ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['falp_group']);
@@ -56,7 +56,7 @@ function get_sections($conn) {
     $data = array();
 
     $sql = "SELECT `section` FROM `m_access_locations` GROUP BY section ORDER BY section ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['section']);
@@ -72,7 +72,7 @@ function get_sub_sections($conn) {
     $data = array();
 
     $sql = "SELECT `sub_section` FROM `m_sub_sections` ORDER BY sub_section ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['sub_section']);
@@ -85,7 +85,7 @@ function get_lines($conn) {
     $data = array();
 
     $sql = "SELECT `line_no` FROM `m_access_locations` GROUP BY line_no ORDER BY line_no ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['line_no']);
@@ -98,7 +98,7 @@ function get_processes($conn) {
     $data = array();
 
     $sql = "SELECT `process` FROM `m_process` ORDER BY process ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['process']);
@@ -111,7 +111,7 @@ function get_positions($conn) {
     $data = array();
 
     $sql = "SELECT `position` FROM `m_positions` ORDER BY position ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['position']);
@@ -124,7 +124,7 @@ function get_providers($conn) {
     $data = array();
 
     $sql = "SELECT `provider` FROM `m_providers` ORDER BY provider ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['provider']);
@@ -137,7 +137,7 @@ function get_shuttle_routes($conn) {
     $data = array();
 
     $sql = "SELECT `shuttle_route` FROM `m_shuttle_routes` ORDER BY shuttle_route ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['shuttle_route']);
@@ -151,7 +151,7 @@ function get_employee_name_js_s($conn) {
 
     $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Jr. Staff', 'Staff') AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['full_name']);
@@ -166,7 +166,7 @@ function get_employee_name_sv($conn) {
 
     $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` = 'Supervisor' AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['full_name']);
@@ -181,7 +181,7 @@ function get_employee_name_approver($conn) {
 
     $sql = "SELECT `emp_no`, `full_name` FROM `m_employees` WHERE `position` IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
     $sql = $sql . " ORDER BY full_name ASC";
-    $stmt = $conn -> prepare($sql);
+    $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt -> execute();
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         array_push($data, $row['full_name']);
@@ -568,7 +568,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
 
                 // CHECK DATA
                 $sql = "SELECT id FROM m_employees WHERE emp_no = '$emp_no'";
-                $stmt = $conn->prepare($sql);
+                $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                 $stmt->execute();
                 if ($stmt->rowCount() > 0) {
                     foreach($stmt->fetchALL() as $x){

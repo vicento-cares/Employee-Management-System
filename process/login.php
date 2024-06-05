@@ -13,7 +13,7 @@ function get_access_location_by_ip($ip, $conn) {
     $response_arr = array();
 
     $sql = "SELECT dept, section, line_no FROM m_access_locations WHERE ip = '$ip'";
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt->execute();
     if ($stmt->rowCount() > 0) {
         foreach($stmt->fetchALL() as $x){
@@ -47,7 +47,7 @@ if (isset($_POST['login_btn'])) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else if ($response_arr['can_access'] == true) {
         $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
-        $stmt = $conn->prepare($check);
+        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
             foreach($stmt->fetchALL() as $x){
@@ -91,7 +91,7 @@ if (isset($_POST['login_btn'])) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else if ($response_arr['can_access'] == true) {
         $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
-        $stmt = $conn->prepare($check);
+        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
             foreach($stmt->fetchALL() as $x){
@@ -137,7 +137,7 @@ if (isset($_POST['login_btn'])) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else {
         $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
-        $stmt = $conn->prepare($check);
+        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
             foreach($stmt->fetchALL() as $x){

@@ -76,7 +76,7 @@ $c = 0;
   <?php 
   foreach ($id_arr as $id) {
     $query = "SELECT id, emp_no, full_name, provider FROM m_employees WHERE id = '$id'";
-    $stmt = $conn->prepare($query);
+    $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
     $stmt->execute();
     foreach($stmt -> fetchAll() as $row) { 
     $c++;
