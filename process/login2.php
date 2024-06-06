@@ -10,7 +10,10 @@ if (isset($_POST['login_btn'])) {
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
     } else {
+        // MySQL
         $check = "SELECT emp_no, full_name, dept, section, line_no FROM m_employees WHERE BINARY emp_no = '$emp_no' AND resigned = 0";
+        // MS SQL Server
+        // $check = "SELECT emp_no, full_name, dept, section, line_no FROM m_employees WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS AND resigned = 0";
         $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt->execute();
         if ($stmt->rowCount() > 0) {
