@@ -840,10 +840,16 @@ if ($method == 'get_attendance_list_counting') {
 
 	$results = array();
 
+	//MySQL
 	$sql = "SELECT IFNULL(process, 'No Process') AS process1, 
 			COUNT(emp_no) AS total 
 		FROM m_employees 
 		WHERE shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+	// 		COUNT(emp_no) AS total 
+	// 	FROM m_employees 
+	// 	WHERE shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept LIKE '$dept%'";
 	} else {
@@ -870,13 +876,21 @@ if ($method == 'get_attendance_list_counting') {
 			}
 		}
 	}
-
+	
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp 
 		ON tio.emp_no = emp.emp_no 
 		WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 		COUNT(tio.emp_no) AS total_present 
+	// 	FROM t_time_in_out tio 
+	// 	LEFT JOIN m_employees emp 
+	// 	ON tio.emp_no = emp.emp_no 
+	// 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -934,7 +948,15 @@ if ($method == 'get_attendance_list_counting') {
 		echo '</tr>';
 	}
 
+	//MySQL
 	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+	// 		COUNT(tio.emp_no) AS total_present, 
+	// 		COUNT(emp.emp_no) AS total 
+	// 	FROM m_employees emp
+	// 	LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	// 	WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
 	// 		COUNT(tio.emp_no) AS total_present, 
 	// 		COUNT(emp.emp_no) AS total 
 	// 	FROM m_employees emp
@@ -1034,10 +1056,16 @@ if ($method == 'get_attendance_list_counting2') {
 
 	// Get list of processes with total mp based on Employee Masterlist
 
+	//MySQL
 	$sql = "SELECT IFNULL(process, 'No Process') AS process1, 
 			COUNT(emp_no) AS total 
 		FROM m_employees 
 		WHERE shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+	// 	COUNT(emp_no) AS total 
+	// FROM m_employees 
+	// WHERE shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept LIKE '$dept%'";
 	} else {
@@ -1072,11 +1100,18 @@ if ($method == 'get_attendance_list_counting2') {
 	// Get list of processes with total mp based on Line Support
 
 	// Update Total based on Line Support To
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1110,11 +1145,18 @@ if ($method == 'get_attendance_list_counting2') {
 	}
 
 	// Update Total based on Line Support From Rejected
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1148,11 +1190,18 @@ if ($method == 'get_attendance_list_counting2') {
 	}
 
 	// Update Total based on Line Support From
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1186,12 +1235,20 @@ if ($method == 'get_attendance_list_counting2') {
 
 	// Update total_present from list of processes based on t_time_in_out
 
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp 
 		ON tio.emp_no = emp.emp_no 
 		WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp 
+	// ON tio.emp_no = emp.emp_no 
+	// WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1227,12 +1284,20 @@ if ($method == 'get_attendance_list_counting2') {
 	// Update total_present from list of processes based on t_time_in_out and Line Support
 
 	// Update Total Present based on Line Support To
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1260,12 +1325,20 @@ if ($method == 'get_attendance_list_counting2') {
 	}
 
 	// Update Total Present based on Line Support From Rejected
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1293,12 +1366,20 @@ if ($method == 'get_attendance_list_counting2') {
 	}
 
 	// Update Total Present based on Line Support From
+	//MySQL
 	$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1487,10 +1568,16 @@ if ($method == 'get_attendance_summary_report') {
 
 	$results = array();
 
+	//MySQL
 	$sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
 			COUNT(emp_no) AS total 
 		FROM m_employees 
 		WHERE shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
+	// 	COUNT(emp_no) AS total 
+	// FROM m_employees 
+	// WHERE shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept LIKE '$dept%'";
 	} else {
@@ -1513,12 +1600,20 @@ if ($method == 'get_attendance_summary_report') {
 		}
 	}
 
+	//MySQL
 	$sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp 
 		ON tio.emp_no = emp.emp_no 
 		WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp 
+	// ON tio.emp_no = emp.emp_no 
+	// WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1622,10 +1717,16 @@ if ($method == 'get_attendance_summary_report2') {
 	$results = array();
 
 	// Get list of lines with total mp count based on Employee Masterlist
+	//MySQL
 	$sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
 			COUNT(emp_no) AS total 
 		FROM m_employees 
 		WHERE shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
+	// 	COUNT(emp_no) AS total 
+	// FROM m_employees 
+	// WHERE shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND dept LIKE '$dept%'";
 	} else {
@@ -1649,11 +1750,18 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total from list of lines based on Line Support To
+	//MySQL
 	$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1696,11 +1804,18 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total from list of lines based on Line Support From Rejected
+	//MySQL
 	$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1743,11 +1858,18 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total from list of lines based on Line Support From
+	//MySQL
 	$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 			COUNT(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	// 	COUNT(emp.emp_no) AS total 
+	// FROM m_employees emp 
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1790,12 +1912,20 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total Present from list of lines based on t_time_in_out
+	//MySQL
 	$sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp 
 		ON tio.emp_no = emp.emp_no 
 		WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp 
+	// ON tio.emp_no = emp.emp_no 
+	// WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1825,12 +1955,20 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total Present from list of lines based on t_time_in_out and Line Support To
+	//MySQL
 	$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1873,12 +2011,20 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total Present from list of lines based on t_time_in_out and Line Support From Rejected
+	//MySQL
 	$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -1921,12 +2067,20 @@ if ($method == 'get_attendance_summary_report2') {
 	}
 
 	// Update Total Present from list of lines based on t_time_in_out and Line Support From
+	//MySQL
 	$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 			COUNT(tio.emp_no) AS total_present 
 		FROM t_time_in_out tio 
 		LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 		WHERE emp.shift_group = '$shift_group'";
+	//MS SQL Server
+	// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	// 	COUNT(tio.emp_no) AS total_present 
+	// FROM t_time_in_out tio 
+	// LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	// LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	// WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {

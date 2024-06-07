@@ -115,10 +115,16 @@ fputcsv($f, $fields, $delimiter);
 
 $results = array();
 
+//MySQL
 $sql = "SELECT IFNULL(process, 'No Process') AS process1, 
 		COUNT(emp_no) AS total 
 	FROM m_employees 
 	WHERE shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+// 		COUNT(emp_no) AS total 
+// 	FROM m_employees 
+// 	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND dept LIKE '$dept%'";
 } else {
@@ -141,12 +147,20 @@ if ($stmt->rowCount() > 0) {
 	}
 }
 
+//MySQL
 $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
 		COUNT(tio.emp_no) AS total_present 
 	FROM t_time_in_out tio 
 	LEFT JOIN m_employees emp 
 	ON tio.emp_no = emp.emp_no 
 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
+// 	COUNT(tio.emp_no) AS total_present 
+// 	FROM t_time_in_out tio 
+// 	LEFT JOIN m_employees emp 
+// 	ON tio.emp_no = emp.emp_no 
+// 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -190,7 +204,15 @@ foreach ($results as &$result) {
 $lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
 fputcsv($f, $lineData, $delimiter);
 
+//MySQL
 // $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+// 			COUNT(tio.emp_no) AS total_present, 
+// 			COUNT(emp.emp_no) AS total 
+// 		FROM m_employees emp
+// 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+// 		WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
 // 			COUNT(tio.emp_no) AS total_present, 
 // 			COUNT(emp.emp_no) AS total 
 // 		FROM m_employees emp
