@@ -277,7 +277,7 @@ if ($line_no == 'No Line') {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
 $sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -311,7 +311,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'accepted'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -356,7 +356,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'rejected'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -401,7 +401,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'accepted'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -497,7 +497,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'accepted'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -538,7 +538,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'rejected'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
@@ -579,7 +579,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
 }
 $sql = $sql . " AND lsh.status = 'accepted'";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();

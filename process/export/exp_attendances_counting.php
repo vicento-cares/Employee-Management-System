@@ -137,7 +137,7 @@ if (!empty($line_no)) {
 	$sql = $sql . " AND line_no LIKE '$line_no%'";
 }
 $sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " GROUP BY process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
