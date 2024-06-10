@@ -716,8 +716,8 @@ if ($method == 'register_employee') {
 		$stmt = NULL;
 
 		$query = "INSERT INTO m_employees 
-				(emp_no, full_name, dept, section, sub_section, process, line_no, position, provider, gender, shift_group, 
-				date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
+				(emp_no, full_name, dept, section, sub_section, process, line_no, date_hired, position, provider, gender, shift_group, 
+				address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
 				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no','$full_name'";
 
 		if (!empty($dept)) {
@@ -746,7 +746,13 @@ if ($method == 'register_employee') {
 			$query = $query . ", 'Undefined'";
 		}
 
-		$query = $query . ",'$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status',
+		if (!empty($date_hired)) {
+			$query = $query . ",'$date_hired'";
+		} else {
+			$query = $query . ", NULL";
+		}
+
+		$query = $query . ",'$position','$provider','$gender','$shift_group','$address','$contact_no','$emp_status',
 						'$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
 
 		$stmt = $conn->prepare($query);
