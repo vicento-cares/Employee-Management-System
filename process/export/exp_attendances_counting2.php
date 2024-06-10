@@ -136,7 +136,7 @@ function count_attendance_list2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '".$search_arr['day']."')";
 	
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -174,7 +174,7 @@ function count_emp_tio2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')";
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -276,7 +276,7 @@ if ($line_no == 'No Line') {
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
 $sql = $sql . " GROUP BY process1";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -454,7 +454,7 @@ if ($line_no == 'No Line') {
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 $sql = $sql . " GROUP BY emp.process";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));

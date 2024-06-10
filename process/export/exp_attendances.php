@@ -78,7 +78,7 @@ if (!empty($section)) {
 if (!empty($line_no)) {
 	$sql = $sql . " AND emp.line_no = '$line_no'";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));

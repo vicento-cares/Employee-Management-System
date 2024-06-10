@@ -141,7 +141,7 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 	}
 
 	$sql = $sql . " AND lsh.line_no_to LIKE '".$search_arr['line_no']."%' AND lsh.status = 'accepted'
-		AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')
+		AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')
 		ORDER BY emp.full_name ASC";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -200,7 +200,7 @@ function count_attendance_list($search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '".$search_arr['day']."')";
 	
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -233,7 +233,7 @@ function count_attendance_list2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '".$search_arr['day']."')";
 	
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -267,7 +267,7 @@ function count_emp_tio($search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')";
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -471,7 +471,7 @@ if ($method == 'get_attendance_list') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " ORDER BY emp.emp_no ASC";
 
 	// MySQL Query
@@ -732,7 +732,7 @@ if ($method == 'get_attendance_list2') {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
 	$sql = $sql . ") AND (lsh.line_no_from IS NULL OR lsh.status != 'accepted'))";
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " ORDER BY emp.full_name ASC";
 
 	// MySQL Query
@@ -862,7 +862,7 @@ if ($method == 'get_attendance_list_counting') {
 		$sql = $sql . " AND line_no LIKE '$line_no%'";
 	}
 
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -902,7 +902,7 @@ if ($method == 'get_attendance_list_counting') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -973,7 +973,7 @@ if ($method == 'get_attendance_list_counting') {
 	// if (!empty($line_no)) {
 	// 	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 	// }
-	// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	// $sql = $sql . " GROUP BY emp.process";
 
 	// $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1082,7 +1082,7 @@ if ($method == 'get_attendance_list_counting2') {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
 
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1264,7 +1264,7 @@ if ($method == 'get_attendance_list_counting2') {
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY process1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1589,7 +1589,7 @@ if ($method == 'get_attendance_summary_report') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY dept, section, line_no1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1625,7 +1625,7 @@ if ($method == 'get_attendance_summary_report') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1738,7 +1738,7 @@ if ($method == 'get_attendance_summary_report2') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY dept, section, line_no1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -1937,7 +1937,7 @@ if ($method == 'get_attendance_summary_report2') {
 	if (!empty($line_no)) {
 		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " GROUP BY emp.dept, emp.section, line_no1";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
