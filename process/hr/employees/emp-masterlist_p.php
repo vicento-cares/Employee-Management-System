@@ -715,7 +715,10 @@ if ($method == 'register_employee') {
 	}else{
 		$stmt = NULL;
 
-		$query = "INSERT INTO m_employees (emp_no, full_name, dept, section, sub_section, process, line_no, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no','$full_name'";
+		$query = "INSERT INTO m_employees 
+				(emp_no, full_name, dept, section, sub_section, process, line_no, position, provider, gender, shift_group, 
+				date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
+				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no','$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";
@@ -743,7 +746,8 @@ if ($method == 'register_employee') {
 			$query = $query . ", 'Undefined'";
 		}
 
-		$query = $query . ",'$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status','$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
+		$query = $query . ",'$position','$provider','$gender','$shift_group','$date_hired','$address','$contact_no','$emp_status',
+						'$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
 
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
@@ -810,7 +814,23 @@ if ($method == 'update_employee') {
 		$query = $query . ", line_no = 'Undefined'";
 	}
 
-	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', date_hired = '$date_hired', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', resigned = '$resigned', resigned_date = '$resigned_date' WHERE id = '$id'";
+	if (!empty($date_hired)) {
+		$query = $query . ", date_hired = '$date_hired'";
+	} else {
+		$query = $query . ", date_hired = NULL";
+	}
+
+	if (!empty($resigned_date)) {
+		$query = $query . ", resigned_date = '$resigned_date'";
+	} else {
+		$query = $query . ", resigned_date = NULL";
+	}
+
+	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', 
+						address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', 
+						shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', 
+						emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', 
+						resigned = '$resigned' WHERE id = '$id'";
 
 	$stmt = $conn->prepare($query);
 	if ($stmt->execute()) {
