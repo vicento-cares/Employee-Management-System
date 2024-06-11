@@ -31,7 +31,7 @@ function count_employee_list($search_arr, $conn) {
     }
   }
 
-  $stmt = $conn->prepare($query);
+  $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt->execute();
   if ($stmt->rowCount() > 0) {
     foreach($stmt->fetchALL() as $j){
@@ -87,7 +87,7 @@ $query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSIO
 if (!empty($_SESSION['line_no'])) {
   $query = $query . " AND line_no = '".$_SESSION['line_no']."'";
 }
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 ?>
 <!DOCTYPE html>

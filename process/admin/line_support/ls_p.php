@@ -61,8 +61,8 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$sql = "SELECT `line_no` FROM `m_access_locations` WHERE line_no != '".$_SESSION['line_no']."' GROUP BY line_no ORDER BY line_no ASC";
-	$stmt = $conn -> prepare($sql);
+	$sql = "SELECT line_no FROM m_access_locations WHERE line_no != '".$_SESSION['line_no']."' GROUP BY line_no ORDER BY line_no ASC";
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		echo '<option selected value="">Select Line No.</option>';
@@ -95,7 +95,7 @@ if ($method == 'get_line_support_employee') {
 	} else {
 		$sql = $sql . " AND (emp.line_no IS NULL OR emp.line_no = '')";
 	}
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {
@@ -126,22 +126,22 @@ if ($method == 'set_line_support') {
 	$day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
 	$sql = "SELECT id FROM t_line_support WHERE day = '$day' AND shift = '$shift' AND emp_no = '$emp_no' AND status = 'added'";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() < 1) {
 		$sql = "SELECT id FROM t_line_support WHERE day = '$day' AND shift = '$shift' AND emp_no = '$emp_no' AND status = 'pending'";
-		$stmt = $conn -> prepare($sql);
+		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt -> rowCount() < 1) {
 			$sql = "SELECT id FROM t_line_support_history WHERE day = '$day' AND shift = '$shift' AND emp_no = '$emp_no' AND status = 'accepted'";
-			$stmt = $conn -> prepare($sql);
+			$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 			$stmt -> execute();
 			if ($stmt -> rowCount() < 1) {
 				$sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND time_out IS NULL";
-				$stmt = $conn -> prepare($sql);
+				$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 				$stmt -> execute();
 				if ($stmt -> rowCount() > 0) {
-					$sql = "INSERT INTO `t_line_support`(`line_support_id`, `emp_no`, `day`, `shift`, `line_no_from`, `line_no_to`, `set_by`, `set_by_no`) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','".$_SESSION['full_name']."','".$_SESSION['emp_no']."')";
+					$sql = "INSERT INTO t_line_support(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','".$_SESSION['full_name']."','".$_SESSION['emp_no']."')";
 					$stmt = $conn -> prepare($sql);
 					$stmt -> execute();
 
@@ -174,7 +174,7 @@ if ($method == 'get_added_line_support') {
 		ON ls.emp_no = emp.emp_no
 		WHERE ls.line_support_id = '$line_support_id' 
 		ORDER BY ls.id DESC";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {
@@ -214,7 +214,7 @@ if ($method == 'save_line_support') {
 	$stmt -> execute();
 
 	$sql = "SELECT line_no_to FROM t_line_support WHERE line_support_id = '$line_support_id' ORDER BY id DESC";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {
@@ -243,7 +243,7 @@ if ($method == 'get_pending_line_support') {
 		OR ls.line_no_to = '$line_no_to') 
 		AND ls.status = 'pending'
 		ORDER BY ls.date_updated DESC";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {
@@ -287,7 +287,7 @@ if ($method == 'reject_line_support') {
 	$set_by_no = '';
 
 	$sql = "SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no FROM t_line_support WHERE id = '$id'";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 
 	if ($stmt -> rowCount() > 0) {
@@ -328,7 +328,7 @@ if ($method == 'accept_line_support') {
 	$set_by_no = '';
 
 	$sql = "SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no FROM t_line_support WHERE id = '$id'";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 
 	if ($stmt -> rowCount() > 0) {
@@ -348,8 +348,11 @@ if ($method == 'accept_line_support') {
 	$latest_day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
 	if ($latest_day == $day && $latest_shift == $shift) {
+		// MySQL
 		$sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-		$stmt = $conn -> prepare($sql);
+		// MS SQL Server
+		// $sql = "SELECT TOP 1 id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND time_out IS NULL ORDER BY date_updated DESC";
+		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt -> rowCount() > 0) {
 			$sql = "INSERT INTO t_line_support_history(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no','".$_SESSION['full_name']."','".$_SESSION['emp_no']."','accepted')";
@@ -389,7 +392,7 @@ if ($method == 'get_recent_line_support_history') {
 		AND ls.status IN ('rejected','accepted')
 		ORDER BY ls.date_updated DESC
 		LIMIT 50";
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {
@@ -495,7 +498,7 @@ if ($method == 'get_line_support_history') {
 
 	$sql = $sql . " ORDER BY ls.date_updated DESC";
 
-	$stmt = $conn -> prepare($sql);
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {

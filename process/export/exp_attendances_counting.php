@@ -19,9 +19,9 @@ function count_attendance_list($search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '".$search_arr['day']."')";
 	
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -48,8 +48,8 @@ function count_emp_tio($search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')";
-	$stmt = $conn->prepare($sql);
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')";
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -115,10 +115,16 @@ fputcsv($f, $fields, $delimiter);
 
 $results = array();
 
+//MySQL
 $sql = "SELECT IFNULL(process, 'No Process') AS process1, 
 		COUNT(emp_no) AS total 
-	FROM `m_employees` 
+	FROM m_employees 
 	WHERE shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+// 		COUNT(emp_no) AS total 
+// 	FROM m_employees 
+// 	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND dept LIKE '$dept%'";
 } else {
@@ -130,10 +136,10 @@ if (!empty($dept)) {
 if (!empty($line_no)) {
 	$sql = $sql . " AND line_no LIKE '$line_no%'";
 }
-$sql = $sql . " AND (resigned_date IS NULL OR resigned_date = '0000-00-00' OR resigned_date >= '$day')";
-$sql = $sql . " GROUP BY process1";
+$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
+$sql = $sql . " GROUP BY process";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
 	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -141,12 +147,20 @@ if ($stmt->rowCount() > 0) {
 	}
 }
 
+//MySQL
 $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
 		COUNT(tio.emp_no) AS total_present 
-	FROM `t_time_in_out` tio 
-	LEFT JOIN `m_employees` emp 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp 
 	ON tio.emp_no = emp.emp_no 
 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
+// 	COUNT(tio.emp_no) AS total_present 
+// 	FROM t_time_in_out tio 
+// 	LEFT JOIN m_employees emp 
+// 	ON tio.emp_no = emp.emp_no 
+// 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -158,10 +172,10 @@ if (!empty($dept)) {
 if (!empty($line_no)) {
 	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 $sql = $sql . " GROUP BY emp.process";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
 	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -190,7 +204,15 @@ foreach ($results as &$result) {
 $lineData = array("Total MP :", "", $total_present_mp, $total_absent_mp, $total_mp); 
 fputcsv($f, $lineData, $delimiter);
 
+//MySQL
 // $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
+// 			COUNT(tio.emp_no) AS total_present, 
+// 			COUNT(emp.emp_no) AS total 
+// 		FROM m_employees emp
+// 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+// 		WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
 // 			COUNT(tio.emp_no) AS total_present, 
 // 			COUNT(emp.emp_no) AS total 
 // 		FROM m_employees emp
@@ -207,10 +229,10 @@ fputcsv($f, $lineData, $delimiter);
 // if (!empty($line_no)) {
 //     $sql = $sql . " AND emp.line_no LIKE '$line_no%'";
 // }
-// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 // $sql = $sql . " GROUP BY emp.process";
 
-// $stmt = $conn->prepare($sql);
+// $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 // $stmt->execute();
 // if ($stmt->rowCount() > 0) {
 

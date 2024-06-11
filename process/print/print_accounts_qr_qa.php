@@ -4,7 +4,7 @@ include '../conn.php';
 $c = 0;
 
 $query = "SELECT emp_no, full_name FROM m_accounts WHERE emp_no LIKE 'QA%'";
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 ?>
 <!DOCTYPE html>

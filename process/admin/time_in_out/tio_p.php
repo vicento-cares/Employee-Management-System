@@ -61,6 +61,7 @@ if ($method == 'get_recent_time_in_out') {
 		ON tio.emp_no = emp.emp_no
 		WHERE emp.section = '$section' AND emp.line_no = '$line_no' AND tio.shift = '$shift'";*/
 
+	// MySQL
 	$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
 		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
 		MINUTE(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as min_diff,
@@ -69,6 +70,16 @@ if ($method == 'get_recent_time_in_out') {
 		JOIN m_employees emp
 		ON tio.emp_no = emp.emp_no
 		WHERE";
+
+	// MS SQL Server
+	// $sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
+	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) as hr_diff,
+	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) % 60) as min_diff,
+	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) - 8 as hr_excess
+	// 	FROM t_time_in_out tio
+	// 	JOIN m_employees emp
+	// 	ON tio.emp_no = emp.emp_no
+	// 	WHERE";
 	
 	if (!empty($section)) {
 		$sql = $sql . " emp.section = '$section'";
@@ -111,7 +122,7 @@ if ($method == 'get_recent_time_in_out') {
 	//Temporary
 	//$sql = $sql . " LIMIT 0, 100";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -166,9 +177,9 @@ if ($method == 'get_time_out_counting') {
 
 	$results = array();
 
-	$sql = "SELECT dept, section FROM `m_employees` GROUP BY dept, section";
+	$sql = "SELECT dept, section FROM m_employees GROUP BY dept, section";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row) {
@@ -186,7 +197,7 @@ if ($method == 'get_time_out_counting') {
 	OR tio.day = '$day' AND tio.time_out IS NULL
 	GROUP BY emp.dept, emp.section";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -207,7 +218,7 @@ if ($method == 'get_time_out_counting') {
 	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 16:00:00' AND '$day 16:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 04:00:00' AND '$day_tomorrow 04:59:59')
 	GROUP BY emp.dept, emp.section";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -228,7 +239,7 @@ if ($method == 'get_time_out_counting') {
 	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 17:00:00' AND '$day 17:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 05:00:00' AND '$day_tomorrow 05:59:59')
 	GROUP BY emp.dept, emp.section";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
@@ -249,7 +260,7 @@ if ($method == 'get_time_out_counting') {
 	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 18:00:00' AND '$day 18:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 06:00:00' AND '$day_tomorrow 06:59:59')
 	GROUP BY emp.dept, emp.section";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {

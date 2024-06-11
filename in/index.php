@@ -16,8 +16,8 @@ function get_shift($server_time) {
 
 function check_ip_access_location($ip, $conn) {
   $line_no = '';
-  $sql = "SELECT line_no FROM `m_access_locations` WHERE ip = '$ip'";
-  $stmt = $conn -> prepare($sql);
+  $sql = "SELECT line_no FROM m_access_locations WHERE ip = '$ip'";
+  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt -> execute();
 
   if ($stmt -> rowCount() > 0) {
@@ -62,8 +62,8 @@ if (!isset($_SESSION['emp_no'])) {
       $already_time_in = '';
 
       try {
-        $sql = "SELECT `full_name`, `provider`, `dept`, `section`, `sub_section`, `process`, `line_no`, `shift_group` FROM `m_employees` WHERE emp_no = '$emp_no' AND resigned = 0";
-        $stmt = $conn -> prepare($sql);
+        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
+        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
         $stmt -> execute();
 
         if ($stmt -> rowCount() > 0) {
@@ -109,16 +109,16 @@ if (!isset($_SESSION['emp_no'])) {
               } else {
                 $day = $server_date_only;
               }
-              $sql = "SELECT `id` FROM `t_time_in_out` WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-              $stmt = $conn -> prepare($sql);
+              $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
               $stmt -> execute();
               if ($stmt -> rowCount() < 1) {
-                $sql = "INSERT INTO `t_time_in_out` (`emp_no`, `day`, `shift`, `ip`) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+                $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
                 $stmt = $conn -> prepare($sql);
                 $stmt -> execute();
               } else {
                 // $already_time_in = true;
-                $sql = "UPDATE `t_time_in_out` SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+                $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
                 $stmt = $conn -> prepare($sql);
                 $stmt -> execute();
               }

@@ -52,7 +52,7 @@ if (!empty($role)) {
   $query = $query . " AND role = '$role'";
 }
 
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 ?>
 <!DOCTYPE html>

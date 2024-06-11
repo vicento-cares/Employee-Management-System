@@ -25,7 +25,7 @@ function count_account_list($search_arr, $conn) {
 		$query = $query . " AND role = '".$search_arr['role']."'";
 	}
 	
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -103,9 +103,14 @@ if ($method == 'account_list') {
 		$query = $query . " AND role = '$role'";
 	}
 
+	// MySQL Query
 	$query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
 
-	$stmt = $conn->prepare($query);
+	// MS SQL Server Query
+	// $query = $query . " ORDER BY id ASC";
+	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -149,17 +154,17 @@ if ($method == 'register_account') {
 	$role = trim($_POST['role']);
 
 	$check = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no'";
-	$stmt = $conn->prepare($check);
+	$stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		echo 'Already Exist';
 	}else{
 		$stmt = NULL;
-		$query = "INSERT INTO m_accounts (`emp_no`, `full_name`, `dept`, `section`, `line_no`, `shift_group`, `role`) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
+		$query = "INSERT INTO m_accounts (emp_no, full_name, dept, section, line_no, shift_group, role) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
 		$stmt = $conn->prepare($query);
 		if ($stmt->execute()) {
 			$stmt = NULL;
-			$query = "INSERT INTO t_notif_line_support (`emp_no`) VALUES ('$emp_no')";
+			$query = "INSERT INTO t_notif_line_support (emp_no) VALUES ('$emp_no')";
 			$stmt = $conn->prepare($query);
 			if ($stmt->execute()) {
 				echo 'success';
@@ -183,7 +188,7 @@ if ($method == 'update_account') {
 	$role = trim($_POST['role']);
 
 	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' AND full_name = '$full_name' AND dept = '$dept' AND section = '$section' AND line_no = '$line_no'";
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		echo 'duplicate';
@@ -204,7 +209,7 @@ if ($method == 'delete_account') {
 	$emp_no = '';
 
 	$query = "SELECT emp_no FROM m_accounts WHERE id = '$id'";
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -233,7 +238,7 @@ if ($method == 'admin_verification') {
 	$emp_no = addslashes(trim($_POST['emp_no']));
 
 	$query = "SELECT id FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		if ($_SESSION['emp_no'] == $emp_no) {

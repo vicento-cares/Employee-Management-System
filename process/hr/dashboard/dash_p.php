@@ -30,7 +30,7 @@ function count_emp_by_provider($provider, $search_arr, $conn) {
 		$query = $query . " AND line_no = '".$search_arr['line_no']."'";
 	}
 	$query = $query . " AND shift_group = '".$search_arr['shift_group']."'";
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -55,7 +55,7 @@ function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$query = $query . " AND emp.line_no = '".$search_arr['line_no']."'";
 	}
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -80,7 +80,7 @@ function count_emp_tio($search_arr, $conn) {
 	if (!empty($search_arr['line_no'])) {
 		$query = $query . " AND emp.line_no = '".$search_arr['line_no']."'";
 	}
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -113,7 +113,7 @@ function count_emp_lsh($search_arr, $conn) {
 		$query = $query . " AND emp.section = '".$search_arr['section']."'";
 	}
 
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -147,7 +147,7 @@ if ($method == 'count_emp_dashboard') {
 	if (!empty($line_no)) {
 		$query = $query . " AND line_no LIKE '$line_no%'";
 	}
-	$stmt = $conn->prepare($query);
+	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $j){
@@ -165,7 +165,7 @@ if ($method == 'count_emp_dashboard') {
 			$query = $query . " AND line_no LIKE '$line_no%'";
 		}
 		$query = $query . " AND shift_group = 'A'";
-		$stmt = $conn->prepare($query);
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
 			foreach($stmt->fetchALL() as $j){
@@ -186,7 +186,7 @@ if ($method == 'count_emp_dashboard') {
 			$query = $query . " AND line_no LIKE '$line_no%'";
 		}
 		$query = $query . " AND shift_group = 'B'";
-		$stmt = $conn->prepare($query);
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
 			foreach($stmt->fetchALL() as $j){
@@ -207,7 +207,7 @@ if ($method == 'count_emp_dashboard') {
 			$query = $query . " AND line_no LIKE '$line_no%'";
 		}
 		$query = $query . " AND shift_group = 'ADS'";
-		$stmt = $conn->prepare($query);
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
 			foreach($stmt->fetchALL() as $j){
@@ -343,8 +343,8 @@ if ($method == 'count_emp_provider_dashboard') {
 	$small_box_colors_arr = array('bg-primary', 'bg-navy', 'bg-info', 'bg-warning', 'bg-lightblue', 'bg-purple', 'bg-olive', 'bg-gray');
 	$small_box_color_count = count($small_box_colors_arr);
 	$provider_count = 0;
-	$sql = "SELECT `provider` FROM `m_providers` ORDER BY id ASC";
-	$stmt = $conn -> prepare($sql);
+	$sql = "SELECT provider FROM m_providers ORDER BY id ASC";
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
 		foreach($stmt -> fetchAll() as $row) {

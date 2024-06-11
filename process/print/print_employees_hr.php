@@ -56,7 +56,7 @@ function count_employee_list($search_arr, $conn) {
     $query = $query . " AND resigned = '".$search_arr['resigned']."'";
   }
 
-  $stmt = $conn->prepare($query);
+  $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt->execute();
   if ($stmt->rowCount() > 0) {
     foreach($stmt->fetchALL() as $j){
@@ -177,7 +177,7 @@ if ($resigned != '') {
   }
 }
 
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 ?>
 <!DOCTYPE html>

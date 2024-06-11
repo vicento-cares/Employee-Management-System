@@ -76,7 +76,7 @@ if (!empty($leave_type)) {
 
 $sql = $sql . " ORDER BY lfh.id DESC";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt -> rowCount() > 0) {
 

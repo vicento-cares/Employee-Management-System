@@ -36,10 +36,10 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 	}
 
 	$sql = $sql . " AND lsh.line_no_to LIKE '".$search_arr['line_no']."%' AND lsh.status = 'accepted'
-		AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '".$search_arr['day']."')
+		AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')
 		ORDER BY emp.full_name ASC";
 
-	$stmt = $conn->prepare($sql);
+	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
 		foreach($stmt->fetchALL() as $row){
@@ -159,10 +159,10 @@ if ($line_no == 'No Line') {
     $sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 }
 $sql = $sql . ") AND (lsh.line_no_from IS NULL OR lsh.status != 'accepted'))";
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date = '0000-00-00' OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt -> rowCount() > 0) {
      
