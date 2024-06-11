@@ -348,7 +348,10 @@ if ($method == 'accept_line_support') {
 	$latest_day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
 	if ($latest_day == $day && $latest_shift == $shift) {
+		// MySQL
 		$sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+		// MS SQL Server
+		// $sql = "SELECT TOP 1 id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND time_out IS NULL ORDER BY date_updated DESC";
 		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt -> rowCount() > 0) {
