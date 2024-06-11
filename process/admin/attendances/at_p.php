@@ -478,7 +478,7 @@ if ($method == 'get_attendance_list') {
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
 
 	// MS SQL Server Query
-	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+	// $sql = $sql . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -739,7 +739,7 @@ if ($method == 'get_attendance_list2') {
 	$sql = $sql . " LIMIT ".$page_first_result.", ".$results_per_page;
 
 	// MS SQL Server Query
-	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+	// $sql = $sql . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();

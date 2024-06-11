@@ -76,8 +76,8 @@ if ($method == 'get_recent_time_in_out') {
 	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) as hr_diff,
 	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) % 60) as min_diff,
 	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) - 8 as hr_excess
-	// 	FROM emp_mgt_db.t_time_in_out tio
-	// 	JOIN emp_mgt_db.m_employees emp
+	// 	FROM t_time_in_out tio
+	// 	JOIN m_employees emp
 	// 	ON tio.emp_no = emp.emp_no
 	// 	WHERE";
 	
