@@ -113,7 +113,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'OT', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 $table_data = array();
@@ -140,9 +140,9 @@ $sql = "SELECT
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
-	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no 
+	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = '$day'
 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day'
-	WHERE tio.day = '$day' AND ((emp.shift_group = '$shift_group'";
+	WHERE ((emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -172,6 +172,8 @@ if ($stmt -> rowCount() > 0) {
     	$row_section = '';
     	$row_line_no = '';
     	$row_status = '';
+		$ot = 0;
+
         if (!empty($row['section'])) {
 			$row_section = $row['section'];
 		} else {
@@ -188,7 +190,29 @@ if ($stmt -> rowCount() > 0) {
 			$row_status = 'Absent';
 		}
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
+		// Count Number of OT Hours
+        if (!empty($row['time_out'])) {
+            $time_out_hr = date('H', strtotime($row['time_out']));
+
+            switch ($time_out_hr) {
+                case 4:
+                case 16:
+                    $ot = 1;
+                    break;
+                case 5:
+                case 17:
+                    $ot = 2;
+                    break;
+                case 6:
+                case 18:
+                    $ot = 3;
+                    break;
+                default:
+                    $ot = 0;
+            }
+        }
+
+        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
         fputcsv($f, $lineData, $delimiter);
     } 
 }

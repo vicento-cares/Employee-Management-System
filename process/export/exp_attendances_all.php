@@ -29,10 +29,9 @@ $sql = "SELECT
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
-	LEFT JOIN t_time_in_out AS tio 
-		ON emp.emp_no = tio.emp_no
-	WHERE tio.day = '$day'";
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
+	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = '$day'
+	WHERE";
+$sql = $sql . " (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
 $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
