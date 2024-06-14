@@ -14,6 +14,16 @@ function get_shift($server_time) {
   }
 }
 
+function get_shift_inverse($server_time) {
+  if ($server_time >= '05:00:00' && $server_time < '17:00:00') {
+    return 'NS';
+  } else if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+    return 'DS';
+  } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+    return 'DS';
+  }
+}
+
 function check_ip_access_location($ip, $conn) {
   $line_no = '';
   $sql = "SELECT line_no FROM m_access_locations WHERE ip = '$ip'";
@@ -104,23 +114,37 @@ if (!isset($_SESSION['emp_no'])) {
 
             if ($wrong_shift_group != true) {
               // Set Day (Revised 2024-01-10)
-              if ($server_time >= '00:00:00' && $server_time < '03:00:00') {
+              if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
                 $day = $server_date_only_yesterday;
               } else {
                 $day = $server_date_only;
               }
-              $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+              $sql = "SELECT id, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day'";
               $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
               $stmt -> execute();
               if ($stmt -> rowCount() < 1) {
-                $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
-                $stmt = $conn -> prepare($sql);
+                $shift_inverse = get_shift_inverse($server_time);
+                $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = '$shift_inverse'";
+                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                 $stmt -> execute();
+
+                if ($stmt -> rowCount() < 1) {
+                  $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+                  $stmt = $conn -> prepare($sql);
+                  $stmt -> execute();
+                } else {
+                  $already_time_in = true;
+                }
               } else {
-                // $already_time_in = true;
-                $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-                $stmt = $conn -> prepare($sql);
-                $stmt -> execute();
+                $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+                $shift_time_in = $row['shift'];
+                if ($shift == $shift_time_in) {
+                  $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+                  $stmt = $conn -> prepare($sql);
+                  $stmt -> execute();
+                } else {
+                  $already_time_in = true;
+                }
               }
             }
           }

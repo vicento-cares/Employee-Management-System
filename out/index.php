@@ -202,17 +202,32 @@ if (!isset($_SESSION['emp_no'])) {
 
             if ($wrong_shift_group != true) {
               // MySQL
-              $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+              $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
               // MS SQL Server
-              // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND time_out IS NULL ORDER BY date_updated DESC";
+              // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
               $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-              $stmt -> execute();
+              $params = array($emp_no, $server_date_only);
+              $stmt -> execute($params);
 
-              if ($stmt -> rowCount() > 0) {
-                while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-                  $day = $row['day'];
-                  $shift = $row['shift'];
-                }
+              $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+              // Check first query result
+              if (!$row) {
+                // MySQL
+                $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+                // MS SQL Server
+                // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+                $params = array($emp_no, $server_date_only_yesterday);
+                $stmt -> execute($params);
+
+                $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+              }
+
+              // Check first or second query result
+              if ($row) {
+                $day = $row['day'];
+                $shift = $row['shift'];
 
                 // Check Shuttle Allocation for Time Out
                 /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
@@ -223,45 +238,18 @@ if (!isset($_SESSION['emp_no'])) {
                 // Temporary Allow Timeout W/O Shuttle Allocation
                 $allow_time_out = true;
                 set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-
               } else {
+                $shift = get_shift($server_time);
 
-                // MySQL
-                $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-                // MS SQL Server
-                // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+                $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
                 $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-                $stmt -> execute();
+                $params = array($emp_no, $server_date_only, $shift);
+                $stmt -> execute($params);
 
-                if ($stmt -> rowCount() > 0) {
-                  while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-                    $day = $row['day'];
-                    $shift = $row['shift'];
-                  }
-
-                  // Check Shuttle Allocation for Time Out
-                  /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
-                  if ($allow_time_out == true) {
-                    set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-                  }*/
-
-                  // Temporary Allow Timeout W/O Shuttle Allocation
-                  $allow_time_out = true;
-                  set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-
+                if ($stmt -> rowCount() < 1) {
+                  $no_time_in = true;
                 } else {
-
-                  $shift = get_shift($server_time);
-
-                  $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only' AND shift = '$shift'";
-                  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-                  $stmt -> execute();
-                  if ($stmt -> rowCount() < 1) {
-                    $no_time_in = true;
-                  } else {
-                    $already_time_out = true;
-                  }
-                  
+                  $already_time_out = true;
                 }
               }
             }
