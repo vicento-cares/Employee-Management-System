@@ -294,12 +294,12 @@ if (!isset($_SESSION['emp_no'])) {
 </head>
 
 <body class="hold-transition login-page">
-  <input type="hidden" id="server_time" value="<?=$server_time?>">
+  <input type="hidden" id="server_date_time" value="<?=$server_date_time?>">
   <div class="login-box">
     <div class="login-logo">
       <img src="../dist/img/logo.webp" style="height:100px;">
       <h3>Employee Management System - Time Out</h3>
-      <h1><b id="realtime"></b></h1>
+      <h1><b id="realtime"><?=$server_time_a?></b></h1>
       <h4><?=$line_no_label?></h4>
     </div>
     <!-- /.login-logo -->
@@ -412,12 +412,16 @@ if (!isset($_SESSION['emp_no'])) {
 <script src="../dist/js/idletime.js"></script>
 
 <script>
-  var serverTime = document.getElementById("server_time").value;
+  // var serverTime = document.getElementById("server_time").value;
 
   // DOMContentLoaded function
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("emp_no").focus();
-    realtime();
+    
+    // var serverDateTimeObject = new Date().toISOString().split('T')[0];
+    var serverDateTimeObject = document.getElementById('server_date_time').value;
+    sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTimeObject);
+
     setInterval(realtime, 1000);
   });
 
@@ -437,50 +441,75 @@ if (!isset($_SESSION['emp_no'])) {
     }, 100);
   });
 
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // tab is active again
+      // restart timers
+      update_realtime();
+    }
+  });
+
   const realtime = () => {
     // Create a Date object from the server time
-    var serverDate = new Date("1970-01-01T" + serverTime + "Z");
+    // var serverDate = new Date("1970-01-01T" + serverTime + "Z");
+
+    var serverDateTimeObject = sessionStorage.getItem("empMgtServerDateTimeObject");
+    var serverDateTime = new Date(serverDateTimeObject);
+    serverDateTime.setSeconds(serverDateTime.getSeconds() + 1);
 
     // Increment the server time by one second
-    serverDate.setSeconds(serverDate.getSeconds() + 1);
+    // serverDate.setSeconds(serverDate.getSeconds() + 1);
 
     // Update the serverTime variable
-    serverTime = serverDate.toISOString().substr(11, 8);
+    // serverTime = serverDate.toISOString().substr(11, 8);
 
     // Create a new Date object for the display time
-    var displayDate = new Date(serverDate.getTime());
+    // var displayDate = new Date(serverDateTime.getTime());
 
     // Adjust for the Philippine time zone (GMT+8)
     // -8 instead of +8
-    displayDate.setHours(displayDate.getHours() - 8);
+    // displayDate.setHours(displayDate.getHours() - 8);
 
     // Convert to 12-hour format
-    var hours = displayDate.getHours();
-    var minutes = displayDate.getMinutes();
-    var seconds = displayDate.getSeconds();
+    var hours = serverDateTime.getHours();
+    var minutes = serverDateTime.getMinutes();
+    var seconds = serverDateTime.getSeconds();
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
+    hours = hours < 10 ? '0'+hours : hours;
     minutes = minutes < 10 ? '0'+minutes : minutes;
     seconds = seconds < 10 ? '0'+seconds : seconds;
     var strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
 
     // Display the time
     $('#realtime').html(strTime);
+    // $('#realtime').html(serverTime);
+
+    sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTime);
   };
 
-  // const realtime =()=>{
-  //   var realtime = "realtime";
-  //   $.ajax({
-  //     type: "GET",
-  //     url: "../process/admin/realtime/realtime_p.php",
-  //     cache:false,
-  //     data: {realtime:realtime},
-  //     success: (response)=>{
-  //       $('#realtime').html(response);
-  //     }
-  //   });
-  // }
+  const update_realtime = () => {
+    $.ajax({
+      type: "GET",
+      url: "../process/admin/realtime/realtime_p.php",
+      cache: false,
+      data: {realtime:"realtime"},
+      success: (response) => {
+        try {
+          let response_array = JSON.parse(response);
+          $('#server_date_time').val(response_array.server_date_time);
+          $('#realtime').html(response_array.server_time_a);
+
+          // var serverDateTimeObject = new Date().toISOString().split('T')[0];
+          var serverDateTimeObject = document.getElementById('date_time').value;
+          sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTimeObject);
+        } catch (e) {
+          console.log(response);
+        }
+      }
+    });
+  }
 </script>
 
 </body>
