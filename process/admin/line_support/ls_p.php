@@ -541,6 +541,7 @@ if ($method == 'get_line_support_history') {
 			echo '<td>'.$row['line_no_from'].'</td>';
 			echo '<td>'.$row['line_no_to'].'</td>';
 			echo '<td>'.$row['set_by'].'</td>';
+			echo '<td>'.$row['status'].'</td>';
 			echo '<td>'.$row['date_updated'].'</td>';
 			echo '</tr>';
 		}
