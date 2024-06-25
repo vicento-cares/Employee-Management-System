@@ -382,6 +382,7 @@ if ($method == 'get_recent_line_support_history') {
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-teal', 'modal-trigger bg-danger', 'modal-trigger bg-purple');
 	$row_class = $row_class_arr[0];
 
+	// MySQL
 	$sql = "SELECT 
 		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, emp.shift_group, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
 		FROM t_line_support_history ls 
@@ -392,6 +393,16 @@ if ($method == 'get_recent_line_support_history') {
 		AND ls.status IN ('rejected','accepted')
 		ORDER BY ls.date_updated DESC
 		LIMIT 50";
+	// MS SQL Server
+	// $sql = "SELECT TOP 50 
+	// 	ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, emp.shift_group, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
+	// 	FROM t_line_support_history ls 
+	// 	LEFT JOIN m_employees emp
+	// 	ON ls.emp_no = emp.emp_no
+	// 	WHERE (ls.line_no_from = '$line_no_from' 
+	// 	OR ls.line_no_to = '$line_no_to') 
+	// 	AND ls.status IN ('rejected','accepted')
+	// 	ORDER BY ls.date_updated DESC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
