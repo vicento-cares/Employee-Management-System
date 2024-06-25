@@ -20,9 +20,23 @@
                     <li class="nav-item dropdown">
                         <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle active"><i class="fas fa-bars"></i> Menu</a>
                         <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/dashboard.php") { ?>
+                            <li><a href="dashboard.php" class="dropdown-item active">Dashboard</a></li>
+                            <?php } else { ?>
                             <li><a href="dashboard.php" class="dropdown-item">Dashboard</a></li>
+                            <?php } ?>
+
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/attendance_summary_report.php") { ?>
                             <li><a href="attendance_summary_report.php" class="dropdown-item active">Attendance Summary Report</a></li>
+                            <?php } else { ?>
+                            <li><a href="attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
+                            <?php } ?>
+
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/time_out_counting.php") { ?>
+                            <li><a href="time_out_counting.php" class="dropdown-item active">Time Out Counting</a></li>
+                            <?php } else { ?>
                             <li><a href="time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
