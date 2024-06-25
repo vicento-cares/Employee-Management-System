@@ -16,6 +16,11 @@
         load_notif_line_support_req();
         realtime_load_notif_line_support_req = setInterval(load_notif_line_support_req, 30000);
         update_notif_line_support();
+
+        sessionStorage.setItem("emp_mgt_history_day_search", '');
+        sessionStorage.setItem("emp_mgt_history_shift_search", '');
+        sessionStorage.setItem("emp_mgt_history_line_no_from_search", '');
+        sessionStorage.setItem("emp_mgt_history_line_no_to_search", '');
     });
 
     var delay = (function(){
@@ -595,8 +600,62 @@
                     document.getElementById("lineSupportHistoryData").innerHTML = response;
                     let table_rows = parseInt(document.getElementById("lineSupportHistoryData").childNodes.length);
                     document.getElementById("count_view3").innerHTML = `Count: ${table_rows}`;
+                    sessionStorage.setItem("emp_mgt_history_day_search", day);
+                    sessionStorage.setItem("emp_mgt_history_shift_search", shift);
+                    sessionStorage.setItem("emp_mgt_history_line_no_from_search", line_no_from);
+                    sessionStorage.setItem("emp_mgt_history_line_no_to_search", line_no_to);
                 }
             });
+        }
+    }
+
+    const export_line_support_history = (table_id, separator = ',') => {
+        var day = sessionStorage.getItem("emp_mgt_history_day_search");
+        var shift = sessionStorage.getItem("emp_mgt_history_shift_search");
+        var line_no_from = sessionStorage.getItem("emp_mgt_history_line_no_from_search");
+        var line_no_to = sessionStorage.getItem("emp_mgt_history_line_no_to_search");
+
+        if (day == '' || day == null) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Fill Out Date Field',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+            // Select rows from table_id
+            var rows = document.querySelectorAll('table#' + table_id + ' tr');
+            // Construct csv
+            var csv = [];
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll('td, th');
+                for (var j = 0; j < cols.length; j++) {
+                    var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+                    data = data.replace(/"/g, '""');
+                    // Push escaped string
+                    row.push('"' + data + '"');
+                }
+                csv.push(row.join(separator));
+            }
+            var csv_string = csv.join('\n');
+            // Download it
+            var filename = 'EmpMgtSys_LineSupportHistory_' + day + '_' + shift;
+            if (line_no_from) {
+                filename += '_' + line_no_from;
+            }
+            if (line_no_to) {
+                filename += '_' + line_no_to;
+            }
+            filename += '_' + new Date().toLocaleDateString() + '.csv';
+            var link = document.createElement('a');
+            link.style.display = 'none';
+            link.setAttribute('target', '_blank');
+            link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv_string));
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     }
 </script>

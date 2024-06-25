@@ -104,7 +104,7 @@
                               </thead>
                               <tbody id="pendingLineSupportData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="11" style="text-align:center;">
+                                  <td colspan="12" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -183,7 +183,7 @@
                               </thead>
                               <tbody id="recentLineSupportHistoryData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="11" style="text-align:center;">
+                                  <td colspan="12" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -246,7 +246,11 @@
                         <option value="4">Rejected Support Set</option>
                       </select>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-2">
+                      <label>&nbsp;</label>
+                      <button type="button" class="btn bg-gray btn-block" onclick="export_line_support_history('lineSupportHistoryTable')"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                    <div class="col-sm-2">
                       <label>&nbsp;</label>
                       <button type="button" class="btn bg-gray-dark btn-block" onclick="get_line_support_history()"><i class="fas fa-search"></i> Search</button>
                     </div>
@@ -292,6 +296,7 @@
                           <th>From Line No.</th>
                           <th>Supported Line No.</th>
                           <th>Set By</th>
+                          <th>Status</th>
                           <th>Date Updated</th>
                         </tr>
                       </thead>
