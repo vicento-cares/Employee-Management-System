@@ -2,7 +2,7 @@
 include '../process/server_date_time.php';
 include 'plugins/header.php';
 include 'plugins/preloader.php';
-include 'plugins/navbar/attendance_summary_report_navbar.php';
+include 'plugins/navbar/viewer_navbar.php';
 ?>
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
