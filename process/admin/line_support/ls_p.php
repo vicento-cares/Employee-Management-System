@@ -61,7 +61,11 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$sql = "SELECT line_no FROM m_access_locations WHERE line_no != '".$_SESSION['line_no']."' GROUP BY line_no ORDER BY line_no ASC";
+	$sql = "SELECT line_no FROM m_access_locations";
+	if (isset($_SESSION['line_no'])) {
+		$sql .= " WHERE line_no != '".$_SESSION['line_no']."'";
+	}
+	$sql .= " GROUP BY line_no ORDER BY line_no ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt -> execute();
 	if ($stmt -> rowCount() > 0) {
@@ -541,6 +545,94 @@ if ($method == 'get_line_support_history') {
 			echo '<td>'.$row['line_no_from'].'</td>';
 			echo '<td>'.$row['line_no_to'].'</td>';
 			echo '<td>'.$row['set_by'].'</td>';
+			echo '<td>'.$row['status'].'</td>';
+			echo '<td>'.$row['date_updated'].'</td>';
+			echo '</tr>';
+		}
+	}
+}
+
+if ($method == 'get_line_support') {
+	$day = $_POST['day'];
+	$shift = $_POST['shift'];
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+	$line_no_from_search = $_POST['line_no_from'];
+	$line_no_to_search = $_POST['line_no_to'];
+	$status = $_POST['status'];
+
+	$c = 0;
+	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-teal', 'modal-trigger bg-danger', 'modal-trigger bg-purple', 'modal-trigger bg-orange');
+	$row_class = $row_class_arr[0];
+
+	$table = "t_line_support_history";
+	if ($status == "0") {
+		$table = "t_line_support";
+	}
+
+	$sql = "SELECT 
+		ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, ls.day, ls.shift, emp.shift_group, ls.line_no_from, ls.line_no_to, ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
+		FROM $table ls 
+		LEFT JOIN m_employees emp
+		ON ls.emp_no = emp.emp_no
+		WHERE ls.day = '$day' AND ls.shift = '$shift'";
+
+	if (!empty($emp_no)) {
+		$sql = $sql . " AND ls.emp_no LIKE '$emp_no%'";
+	}
+
+	if (!empty($full_name)) {
+		$sql = $sql . " AND ls.full_name LIKE '$full_name%'";
+	}
+
+	if (!empty($line_no_from_search) && !empty($line_no_to_search)) {
+		$sql = $sql . " AND (ls.line_no_from = '$line_no_to_search' OR ls.line_no_to = '$line_no_to_search')";
+	} else if (!empty($line_no_from_search)) {
+		$sql = $sql . " AND ls.line_no_from = '$line_no_from_search'";
+	} else if (!empty($line_no_to_search)) {
+		$sql = $sql . " AND ls.line_no_to = '$line_no_to_search'";
+	}
+
+	if ($status == "1") {
+		$sql = $sql . " AND ls.status = 'accepted'";
+	} else if ($status == "3") {
+		$sql = $sql . " AND ls.status = 'rejected'";
+	} else if ($status == "0") {
+		$sql = $sql . " AND ls.status = 'pending'";
+	}
+
+	$sql = $sql . " ORDER BY ls.date_updated DESC";
+
+	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+	$stmt -> execute();
+	if ($stmt -> rowCount() > 0) {
+		foreach($stmt -> fetchAll() as $row) {
+			$c++;
+			
+			if ($row['status'] == 'accepted') {
+				$row_class = $row_class_arr[1];
+			} else if ($row['status'] == 'rejected') {
+				$row_class = $row_class_arr[3];
+			} else if ($row['status'] == 'pending') {
+				$row_class = $row_class_arr[5];
+			} else {
+				$row_class = $row_class_arr[0];
+			}
+			echo '<tr class="'.$row_class.'">';
+			echo '<td>'.$c.'</td>';
+			echo '<td>'.$row['emp_no'].'</td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
+			echo '<td>'.$row['day'].'</td>';
+			echo '<td>'.$row['shift'].'</td>';
+			echo '<td>'.$row['shift_group'].'</td>';
+			echo '<td>'.$row['line_no_from'].'</td>';
+			echo '<td>'.$row['line_no_to'].'</td>';
+			echo '<td>'.$row['set_by'].'</td>';
+			echo '<td>'.$row['set_by_no'].'</td>';
+			echo '<td>'.$row['set_status_by'].'</td>';
+			echo '<td>'.$row['set_status_by_no'].'</td>';
 			echo '<td>'.$row['status'].'</td>';
 			echo '<td>'.$row['date_updated'].'</td>';
 			echo '</tr>';
