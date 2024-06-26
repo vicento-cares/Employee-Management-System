@@ -85,7 +85,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                     <div class="col-sm-2">
                                     <label>&nbsp;</label>
-                                    <button type="button" class="btn bg-gray btn-block" onclick="export_line_support('lineSupportTable')"><i class="fas fa-download"></i> Export</button>
+                                    <button type="button" class="btn bg-success btn-block" onclick="export_line_support('lineSupportTable')"><i class="fas fa-download"></i> Export Line Support</button>
                                     </div>
                                     <div class="col-sm-2">
                                     <label>&nbsp;</label>
