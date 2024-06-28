@@ -3,7 +3,7 @@
 include '../process/login.php';
 
 if (!isset($_SESSION['emp_no'])) {
-  header('location:/it_emp_mgt/admin');
+  header('location:/emp_mgt/admin');
   exit;
 }
 ?>
