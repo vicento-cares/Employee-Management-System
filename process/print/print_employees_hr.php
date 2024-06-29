@@ -20,17 +20,20 @@ function count_employee_list($search_arr, $conn) {
   }
   if (isset($_SESSION['emp_no'])) {
     if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
-      $query = $query . " AND dept = '".$_SESSION['dept']."'";
+      $dept = $_SESSION['dept'];
+      $query = $query . " AND dept = '$dept'";
     } else {
       $query = $query . " AND dept IS NULL";
     }
     if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
-      $query = $query . " AND section = '".$_SESSION['section']."'";
+      $section = $_SESSION['section'];
+      $query = $query . " AND section = '$section'";
     } else {
       $query = $query . " AND section IS NULL";
     }
     if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
-      $query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+      $line_no = $_SESSION['line_no'];
+      $query = $query . " AND line_no = '$line_no'";
     } else {
       $query = $query . " AND line_no IS NULL";
     }

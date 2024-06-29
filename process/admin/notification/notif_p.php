@@ -20,7 +20,8 @@ if ($method == 'count_notif_line_support') {
 			ON acc.emp_no = nls.emp_no
 			WHERE ";
 	if (!empty($_SESSION['line_no'])) {
-		$sql = $sql . " acc.line_no = '".$_SESSION['line_no']."'";
+		$line_no = $_SESSION['line_no'];
+		$sql = $sql . " acc.line_no = '$line_no'";
 	} else {
 		$sql = $sql . " (acc.line_no IS NULL OR acc.line_no = '')";
 	}
@@ -70,7 +71,8 @@ if ($method == 'update_notif_line_support') {
 			ON acc.emp_no = nls.emp_no 
 			SET nls.pending_ls = 0, nls.accepted_ls = 0, nls.rejected_ls = 0 WHERE ";
 	if (!empty($_SESSION['line_no'])) {
-		$sql = $sql . " acc.line_no = '".$_SESSION['line_no']."'";
+		$line_no = $_SESSION['line_no'];
+		$sql = $sql . " acc.line_no = '$line_no'";
 	} else {
 		$sql = $sql . " acc.line_no IS NULL OR acc.line_no = ''";
 	}
