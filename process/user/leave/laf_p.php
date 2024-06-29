@@ -60,7 +60,9 @@ if ($method == 'save_leave_form') {
 		$leave_form_id = 'LAF-'.$leave_form_id;
 		$leave_form_id = $leave_form_id.''.$rand;
 
-		$sql = "INSERT INTO t_leave_form(leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) VALUES ('$leave_form_id','$emp_no','$date_filed','$address','$contact_no','$leave_type','$leave_date_from','$leave_date_to','$total_leave_days','$irt_phone_call','$irt_letter','$irb','$reason','".$_SESSION['full_name']."', '$leave_form_status')";
+		$issued_by = $_SESSION['full_name'];
+
+		$sql = "INSERT INTO t_leave_form(leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) VALUES ('$leave_form_id','$emp_no','$date_filed','$address','$contact_no','$leave_type','$leave_date_from','$leave_date_to','$total_leave_days','$irt_phone_call','$irt_letter','$irb','$reason','$issued_by', '$leave_form_status')";
 		$stmt = $conn->prepare($sql);
 		$stmt->execute();
 
@@ -73,7 +75,9 @@ if ($method == 'get_pending_leave_forms') {
 	$row_class = $row_class_arr[0];
 	$c = 0;
 
-	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form WHERE emp_no = '".$_SESSION['emp_no_user']."' AND (leave_form_status = 'clinic' OR leave_form_status = 'pending') ORDER BY id DESC";
+	$emp_no = $_SESSION['emp_no_user'];
+
+	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form WHERE emp_no = '$emp_no' AND (leave_form_status = 'clinic' OR leave_form_status = 'pending') ORDER BY id DESC";
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -107,10 +111,12 @@ if ($method == 'get_recent_leave_forms_history') {
 	$row_class = $row_class_arr[0];
 	$c = 0;
 
+	$emp_no = $_SESSION['emp_no_user'];
+
 	// MySQL
-	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '".$_SESSION['emp_no_user']."' AND (leave_form_status = 'approved' OR leave_form_status = 'disapproved') ORDER BY id DESC LIMIT 25";
+	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '$emp_no' AND (leave_form_status = 'approved' OR leave_form_status = 'disapproved') ORDER BY id DESC LIMIT 25";
 	// MS SQL Server
-	// $sql = "SELECT TOP 25 leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '".$_SESSION['emp_no_user']."' AND (leave_form_status = 'approved' OR leave_form_status = 'disapproved') ORDER BY id DESC";
+	// $sql = "SELECT TOP 25 leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '$emp_no' AND (leave_form_status = 'approved' OR leave_form_status = 'disapproved') ORDER BY id DESC";
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
@@ -157,7 +163,9 @@ if ($method == 'get_leave_forms_history') {
 	$row_class = $row_class_arr[0];
 	$c = 0;
 
-	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '".$_SESSION['emp_no_user']."'";
+	$emp_no = $_SESSION['emp_no_user'];
+
+	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE emp_no = '$emp_no'";
 
 	if (!empty($leave_type)) {
 		$sql = $sql . " AND leave_type = '$leave_type'";

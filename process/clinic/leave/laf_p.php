@@ -26,8 +26,9 @@ if ($method == 'save_leave_form_clinic') {
 	$sl_rc_mgh = $_POST['sl_rc_mgh'];
 	$sl_r2 = $_POST['sl_r2'];
 	$sl_dr_date = $_POST['sl_dr_date'];
+	$sl_dr_name = $_SESSION['full_name'];
 
-	$sql = "UPDATE t_leave_form SET leave_form_status='pending',sl_r1_1_hrs='$sl_r1_1_hrs',sl_r1_1_date='$sl_r1_1_date',sl_r1_1_time_in='$sl_r1_1_time_in',sl_r1_1_time_out='$sl_r1_1_time_out',sl_r1_2_days='$sl_r1_2_days',sl_r1_3_date='$sl_r1_3_date',sl_rc_1_days='$sl_rc_1_days',sl_rc_2_from='$sl_rc_2_from',sl_rc_2_to='$sl_rc_2_to',sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='".$_SESSION['full_name']."',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
+	$sql = "UPDATE t_leave_form SET leave_form_status='pending',sl_r1_1_hrs='$sl_r1_1_hrs',sl_r1_1_date='$sl_r1_1_date',sl_r1_1_time_in='$sl_r1_1_time_in',sl_r1_1_time_out='$sl_r1_1_time_out',sl_r1_2_days='$sl_r1_2_days',sl_r1_3_date='$sl_r1_3_date',sl_rc_1_days='$sl_rc_1_days',sl_rc_2_from='$sl_rc_2_from',sl_rc_2_to='$sl_rc_2_to',sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='$sl_dr_name',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
 
 	$sql = "UPDATE t_leave_form SET leave_form_status='pending',sl_r1_1_hrs='$sl_r1_1_hrs',";
 
@@ -68,7 +69,7 @@ if ($method == 'save_leave_form_clinic') {
 		$sql = $sql . "sl_rc_2_to='$sl_rc_2_to',";
 	}
 
-	$sql = $sql . "sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='".$_SESSION['full_name']."',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
+	$sql = $sql . "sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='$sl_dr_name',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
 
 	$stmt = $conn->prepare($sql);
 	$stmt->execute();

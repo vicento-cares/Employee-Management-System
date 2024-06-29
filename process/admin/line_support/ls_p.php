@@ -61,9 +61,10 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
+	$line_no = $_SESSION['line_no'];
 	$sql = "SELECT line_no FROM m_access_locations";
 	if (isset($_SESSION['line_no'])) {
-		$sql .= " WHERE line_no != '".$_SESSION['line_no']."'";
+		$sql .= " WHERE line_no != '$line_no'";
 	}
 	$sql .= " GROUP BY line_no ORDER BY line_no ASC";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -145,7 +146,10 @@ if ($method == 'set_line_support') {
 				$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 				$stmt -> execute();
 				if ($stmt -> rowCount() > 0) {
-					$sql = "INSERT INTO t_line_support(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','".$_SESSION['full_name']."','".$_SESSION['emp_no']."')";
+					$set_by = $_SESSION['full_name'];
+					$set_by_no = $_SESSION['emp_no'];
+
+					$sql = "INSERT INTO t_line_support(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no')";
 					$stmt = $conn -> prepare($sql);
 					$stmt -> execute();
 
@@ -289,6 +293,8 @@ if ($method == 'reject_line_support') {
 	$line_no_to = '';
 	$set_by = '';
 	$set_by_no = '';
+	$set_status_by = $_SESSION['full_name'];
+	$set_status_by_no = $_SESSION['emp_no'];
 
 	$sql = "SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no FROM t_line_support WHERE id = '$id'";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -307,7 +313,7 @@ if ($method == 'reject_line_support') {
 		}
 	}
 
-	$sql = "INSERT INTO t_line_support_history(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no','".$_SESSION['full_name']."','".$_SESSION['emp_no']."','rejected')";
+	$sql = "INSERT INTO t_line_support_history(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no','$set_status_by','$set_status_by_no','rejected')";
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
 
@@ -330,6 +336,8 @@ if ($method == 'accept_line_support') {
 	$line_no_to = '';
 	$set_by = '';
 	$set_by_no = '';
+	$set_status_by = $_SESSION['full_name'];
+	$set_status_by_no = $_SESSION['emp_no'];
 
 	$sql = "SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no FROM t_line_support WHERE id = '$id'";
 	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
@@ -359,7 +367,7 @@ if ($method == 'accept_line_support') {
 		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt -> rowCount() > 0) {
-			$sql = "INSERT INTO t_line_support_history(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no','".$_SESSION['full_name']."','".$_SESSION['emp_no']."','accepted')";
+			$sql = "INSERT INTO t_line_support_history(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) VALUES ('$line_support_id','$emp_no','$day','$shift','$line_no_from','$line_no_to','$set_by','$set_by_no','$set_status_by','$set_status_by_no','accepted')";
 			$stmt = $conn -> prepare($sql);
 			$stmt -> execute();
 

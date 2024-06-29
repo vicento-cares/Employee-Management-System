@@ -18,7 +18,7 @@ function count_employee_list($search_arr, $conn) {
     $query = $query . " AND provider = '".$search_arr['provider']."'";
   }
   if (isset($_SESSION['emp_no'])) {
-    $query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";
+    $query = $query . " AND dept = '".$search_arr['dept']."' AND section = '".$search_arr['section']."' AND line_no = '".$search_arr['line_no']."'";
   } else {
     if (!empty($search_arr['dept'])) {
       $query = $query . " AND dept = '".$search_arr['dept']."'";
@@ -83,9 +83,9 @@ if (!empty($full_name)) {
 if (!empty($provider)) {
   $query = $query . " AND provider = '$provider'";
 }
-$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."'";
+$query = $query . " AND dept = '$dept' AND section = '$section'";
 if (!empty($_SESSION['line_no'])) {
-  $query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+  $query = $query . " AND line_no = '$line_no'";
 }
 $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();

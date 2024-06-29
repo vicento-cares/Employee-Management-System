@@ -193,7 +193,8 @@ if ($method == 'set_out') {
 			$stmt = $conn->prepare($sql);
 			$stmt->execute();
 		} else {
-			$sql = "INSERT INTO t_shuttle_allocation (emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_".$time.", set_by) VALUES ('$emp_no', '$dept', '$section', '$line_no', '$day', '$shift', '$shift_group', '$shuttle_route', 1, '".$_SESSION['full_name']."')";
+			$set_by = $_SESSION['full_name'];
+			$sql = "INSERT INTO t_shuttle_allocation (emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_".$time.", set_by) VALUES ('$emp_no', '$dept', '$section', '$line_no', '$day', '$shift', '$shift_group', '$shuttle_route', 1, '$set_by')";
 			$stmt = $conn->prepare($sql);
 			$stmt->execute();
 		}
