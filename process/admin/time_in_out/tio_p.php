@@ -63,24 +63,24 @@ if ($method == 'get_recent_time_in_out') {
 		WHERE emp.section = '$section' AND emp.line_no = '$line_no' AND tio.shift = '$shift'";*/
 
 	// MySQL
-	$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
-		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
-		MINUTE(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as min_diff,
-		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) - 8 as hr_excess
-		FROM t_time_in_out tio
-		JOIN m_employees emp
-		ON tio.emp_no = emp.emp_no
-		WHERE";
-
-	// MS SQL Server
 	// $sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
-	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) as hr_diff,
-	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) % 60) as min_diff,
-	// 	(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) - 8 as hr_excess
+	// 	HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
+	// 	MINUTE(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as min_diff,
+	// 	HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) - 8 as hr_excess
 	// 	FROM t_time_in_out tio
 	// 	JOIN m_employees emp
 	// 	ON tio.emp_no = emp.emp_no
 	// 	WHERE";
+
+	// MS SQL Server
+	$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
+		(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) as hr_diff,
+		(DATEDIFF(MINUTE, tio.time_in, tio.time_out) % 60) as min_diff,
+		(DATEDIFF(MINUTE, tio.time_in, tio.time_out) / 60) - 8 as hr_excess
+		FROM t_time_in_out tio
+		JOIN m_employees emp
+		ON tio.emp_no = emp.emp_no
+		WHERE";
 	
 	if (!empty($section)) {
 		$sql = $sql . " emp.section = '$section'";

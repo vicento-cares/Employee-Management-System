@@ -125,15 +125,15 @@ fputcsv($f, $fields, $delimiter);
 $results = array();
 
 //MySQL
-$sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
-        COUNT(emp_no) AS total 
-    FROM m_employees 
-    WHERE shift_group = '$shift_group'";
+// $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
+//         COUNT(emp_no) AS total 
+//     FROM m_employees 
+//     WHERE shift_group = '$shift_group'";
 //MS SQL Server
-// $sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
-// 	COUNT(emp_no) AS total 
-// 	FROM m_employees 
-// 	WHERE shift_group = '$shift_group'";
+$sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
+	COUNT(emp_no) AS total 
+	FROM m_employees 
+	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND dept LIKE '$dept%'";
 } else {
@@ -157,19 +157,19 @@ if ($stmt->rowCount() > 0) {
 }
 
 //MySQL
-$sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-        COUNT(tio.emp_no) AS total_present 
-    FROM t_time_in_out tio 
-    LEFT JOIN m_employees emp 
-    ON tio.emp_no = emp.emp_no 
-    WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+// $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+//         COUNT(tio.emp_no) AS total_present 
+//     FROM t_time_in_out tio 
+//     LEFT JOIN m_employees emp 
+//     ON tio.emp_no = emp.emp_no 
+//     WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 //MS SQL Server
-// $sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-// 	COUNT(tio.emp_no) AS total_present 
-// 	FROM t_time_in_out tio 
-// 	LEFT JOIN m_employees emp 
-// 	ON tio.emp_no = emp.emp_no 
-// 	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+$sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp 
+	ON tio.emp_no = emp.emp_no 
+	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {

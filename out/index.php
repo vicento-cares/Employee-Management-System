@@ -175,9 +175,9 @@ if (!isset($_SESSION['emp_no'])) {
 
             // Line Support Query
             // MySQL
-            $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
+            // $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
             // MS SQL Server
-            // $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC";
+            $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC";
             $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
             $stmt -> execute();
 
@@ -203,9 +203,9 @@ if (!isset($_SESSION['emp_no'])) {
 
             if ($wrong_shift_group != true) {
               // MySQL
-              $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+              // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
               // MS SQL Server
-              // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
+              $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
               $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
               $params = array($emp_no, $server_date_only);
               $stmt -> execute($params);
@@ -215,9 +215,9 @@ if (!isset($_SESSION['emp_no'])) {
               // Check first query result
               if (!$row) {
                 // MySQL
-                $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+                // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
                 // MS SQL Server
-                // $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+                $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
                 $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                 $params = array($emp_no, $server_date_only_yesterday);
                 $stmt -> execute($params);
