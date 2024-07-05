@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
@@ -125,15 +126,15 @@ $results = array();
 
 // Get list of lines with total mp count based on Employee Masterlist
 //MySQL
-$sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
-        COUNT(emp_no) AS total 
-    FROM m_employees 
-    WHERE shift_group = '$shift_group'";
+// $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
+//         COUNT(emp_no) AS total 
+//     FROM m_employees 
+//     WHERE shift_group = '$shift_group'";
 //MS SQL Server
-// $sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
-// 		COUNT(emp_no) AS total 
-// 	FROM m_employees 
-// 	WHERE shift_group = '$shift_group'";
+$sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
+		COUNT(emp_no) AS total 
+	FROM m_employees 
+	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND dept LIKE '$dept%'";
 } else {
@@ -158,17 +159,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total from list of lines based on Line Support To
 //MySQL
-$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 // 	COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -212,17 +213,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total from list of lines based on Line Support From Rejected
 //MySQL
-$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 // 	COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -266,17 +267,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total from list of lines based on Line Support From
 //MySQL
-$sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
 // 	COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
+	COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -320,19 +321,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present from list of lines based on t_time_in_out
 //MySQL
-$sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-        COUNT(tio.emp_no) AS total_present 
-    FROM t_time_in_out tio 
-    LEFT JOIN m_employees emp 
-    ON tio.emp_no = emp.emp_no 
-    WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+// $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+//         COUNT(tio.emp_no) AS total_present 
+//     FROM t_time_in_out tio 
+//     LEFT JOIN m_employees emp 
+//     ON tio.emp_no = emp.emp_no 
+//     WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 //MS SQL Server
-// $sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-// 		COUNT(tio.emp_no) AS total_present 
-// 	FROM t_time_in_out tio 
-// 	LEFT JOIN m_employees emp 
-// 	ON tio.emp_no = emp.emp_no 
-// 	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
+$sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+		COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp 
+	ON tio.emp_no = emp.emp_no 
+	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
     $sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -363,19 +364,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present from list of lines based on t_time_in_out and Line Support To
 //MySQL
-$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 // 	COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -419,19 +420,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present from list of lines based on t_time_in_out and Line Support From Rejected
 //MySQL
-$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 // 	COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -475,19 +476,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present from list of lines based on t_time_in_out and Line Support From
 //MySQL
-$sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
 // 	COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
+	COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {

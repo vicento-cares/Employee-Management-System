@@ -1,4 +1,5 @@
 <?php
+session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
@@ -252,15 +253,15 @@ $results = array();
 // Get list of processes with total mp based on Employee Masterlist
 
 //MySQL
-$sql = "SELECT IFNULL(process, 'No Process') AS process1, 
-		COUNT(emp_no) AS total 
-	FROM m_employees 
-	WHERE shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(process, 'No Process') AS process1, 
 // 		COUNT(emp_no) AS total 
 // 	FROM m_employees 
 // 	WHERE shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(process, 'No Process') AS process1, 
+		COUNT(emp_no) AS total 
+	FROM m_employees 
+	WHERE shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND dept LIKE '$dept%'";
 } else {
@@ -291,17 +292,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total based on Line Support To
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -336,17 +337,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total based on Line Support From Rejected
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -381,17 +382,17 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total based on Line Support From
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(emp.emp_no) AS total 
 // 	FROM m_employees emp 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(emp.emp_no) AS total 
+	FROM m_employees emp 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -426,19 +427,19 @@ if ($stmt->rowCount() > 0) {
 // Update total_present from list of processes based on t_time_in_out
 
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp 
-	ON tio.emp_no = emp.emp_no 
-	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
 // 		COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp 
 // 	ON tio.emp_no = emp.emp_no 
 // 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
+		COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp 
+	ON tio.emp_no = emp.emp_no 
+	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -475,19 +476,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present based on Line Support To
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -516,19 +517,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present based on Line Support From Rejected
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {
@@ -557,19 +558,19 @@ if ($stmt->rowCount() > 0) {
 
 // Update Total Present based on Line Support From
 //MySQL
-$sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-//MS SQL Server
-// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
 // 		COUNT(tio.emp_no) AS total_present 
 // 	FROM t_time_in_out tio 
 // 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
 // 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
 // 	WHERE emp.shift_group = '$shift_group'";
+//MS SQL Server
+$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
+		COUNT(tio.emp_no) AS total_present 
+	FROM t_time_in_out tio 
+	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
+	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
+	WHERE emp.shift_group = '$shift_group'";
 if (!empty($dept)) {
 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
 } else {

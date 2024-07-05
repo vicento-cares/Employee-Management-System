@@ -1,7 +1,6 @@
 <?php 
 //SESSION
 include '../process/login.php';
-include '../process/conn.php';
 
 if (!isset($_SESSION['emp_no'])) {
   header('location:/emp_mgt/admin');

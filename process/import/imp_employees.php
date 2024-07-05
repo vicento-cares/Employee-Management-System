@@ -583,7 +583,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                         $id = $x['id'];
                     }
 
-                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name='$full_name'";
+                    $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name=N'$full_name'";
 
                     if (!empty($dept)) {
                         $sql = $sql . ", dept = '$dept'";
@@ -699,7 +699,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
                             position, provider, gender, shift_group, address, contact_no, emp_status, shuttle_route, 
                             emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, resigned) 
                             VALUES 
-                            ('$emp_no','$full_name'";
+                            ('$emp_no',N'$full_name'";
                     
                     if (!empty($dept)) {
                         $sql = $sql . ",'$dept'";

@@ -1,4 +1,5 @@
 <?php 
+session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
@@ -566,11 +567,11 @@ if ($method == 'employee_list') {
 	}
 
 	// MySQL Query
-	$query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
+	// $query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
 
 	// MS SQL Server Query
-	// $query = $query . " ORDER BY id ASC";
-	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+	$query = $query . " ORDER BY id ASC";
+	$query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 	
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
@@ -718,7 +719,7 @@ if ($method == 'register_employee') {
 		$query = "INSERT INTO m_employees 
 				(emp_no, full_name, dept, section, sub_section, process, line_no, date_hired, position, provider, gender, shift_group, 
 				address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
-				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no','$full_name'";
+				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no',N'$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";
@@ -792,7 +793,7 @@ if ($method == 'update_employee') {
 	$resigned = intval($_POST['resigned']);
 	$resigned_date = trim($_POST['resigned_date']);
 
-	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = '$full_name'";
+	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = N'$full_name'";
 	
 	if (!empty($dept)) {
 		$query = $query . ", dept = '$dept'";

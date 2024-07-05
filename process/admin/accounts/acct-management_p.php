@@ -1,4 +1,5 @@
 <?php 
+session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
@@ -104,11 +105,11 @@ if ($method == 'account_list') {
 	}
 
 	// MySQL Query
-	$query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
+	// $query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
 
 	// MS SQL Server Query
-	// $query = $query . " ORDER BY id ASC";
-	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+	$query = $query . " ORDER BY id ASC";
+	$query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
