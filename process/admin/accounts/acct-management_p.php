@@ -238,7 +238,7 @@ if ($method == 'delete_account') {
 if ($method == 'admin_verification') {
 	$emp_no = addslashes(trim($_POST['emp_no']));
 
-	$query = "SELECT id FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
+	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS";
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
