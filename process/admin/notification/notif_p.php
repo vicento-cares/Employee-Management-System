@@ -67,10 +67,18 @@ if ($method == 'update_notif_accepted_rejected') {
 }*/
 
 if ($method == 'update_notif_line_support') {
-	$sql = "UPDATE t_notif_line_support nls
-			LEFT JOIN m_accounts acc
+	// MySQL
+	// $sql = "UPDATE t_notif_line_support nls
+	// 		LEFT JOIN m_accounts acc
+	// 		ON acc.emp_no = nls.emp_no 
+	// 		SET nls.pending_ls = 0, nls.accepted_ls = 0, nls.rejected_ls = 0 WHERE ";
+	// MS SQL Server
+	$sql = "UPDATE nls
+			SET nls.pending_ls = 0, nls.accepted_ls = 0, nls.rejected_ls = 0
+			FROM t_notif_line_support AS nls
+			LEFT JOIN m_accounts AS acc
 			ON acc.emp_no = nls.emp_no 
-			SET nls.pending_ls = 0, nls.accepted_ls = 0, nls.rejected_ls = 0 WHERE ";
+			WHERE ";
 	if (!empty($_SESSION['line_no'])) {
 		$line_no = $_SESSION['line_no'];
 		$sql = $sql . " acc.line_no = '$line_no'";

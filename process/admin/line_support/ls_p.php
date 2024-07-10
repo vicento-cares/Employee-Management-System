@@ -11,9 +11,19 @@ $method = $_POST['method'];
 
 function update_notif_line_support($line_no, $status, $conn) {
 	if ($status != 'Added' && $status != 'Saved') {
-		$sql = "UPDATE t_notif_line_support nls
-				LEFT JOIN m_accounts acc
-				ON acc.emp_no = nls.emp_no ";
+		// MySQL
+		// $sql = "UPDATE t_notif_line_support nls
+		// 		LEFT JOIN m_accounts acc
+		// 		ON acc.emp_no = nls.emp_no ";
+		// if ($status == 'pending') {
+		// 	$sql = $sql . " SET nls.pending_ls = nls.pending_ls + 1";
+		// } else if ($status == 'accepted') {
+		// 	$sql = $sql . " SET nls.accepted_ls = nls.accepted_ls + 1";
+		// } else if ($status == 'rejected') {
+		// 	$sql = $sql . " SET nls.rejected_ls = nls.rejected_ls + 1";
+		// }
+		// MS SQL Server
+		$sql = "UPDATE nls";
 		if ($status == 'pending') {
 			$sql = $sql . " SET nls.pending_ls = nls.pending_ls + 1";
 		} else if ($status == 'accepted') {
@@ -21,6 +31,9 @@ function update_notif_line_support($line_no, $status, $conn) {
 		} else if ($status == 'rejected') {
 			$sql = $sql . " SET nls.rejected_ls = nls.rejected_ls + 1";
 		}
+		$sql = $sql . " FROM t_notif_line_support AS nls 
+						LEFT JOIN m_accounts AS acc
+						ON acc.emp_no = nls.emp_no";
 		if (!empty($line_no)) {
 			$sql = $sql . " WHERE acc.line_no = '$line_no'";
 		} else {
