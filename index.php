@@ -157,7 +157,22 @@
             <!--  News and Updates Section  -->
             <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel" data-interval="10000" data-pause="false">
             <div class="carousel-inner">
-                <div class="carousel-item active">
+            <div class="carousel-item active">
+                <img class="d-block w-100" src="dist/img/ProperShutdown/1.png"
+                alt="slide1">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/ProperShutdown/2.png"
+                alt="slide2">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/ProperShutdown/3.png"
+                alt="slide3">
+                </div>
+                <div class="carousel-item">
+                <img class="d-block w-100" src="dist/img/ProperShutdown/4.jpg"
+                alt="slide4">
+                <!-- <div class="carousel-item active">
                 <img class="d-block w-100" src="dist/img/HW_S/1.jpg"
                 alt="slide1">
                 </div>
@@ -196,7 +211,7 @@
                 <div class="carousel-item">
                 <img class="d-block w-100" src="dist/img/HW_S/10.jpg"
                 alt="slide10">
-                </div>
+                </div> -->
                 <!-- Valentines -->
                 <!-- <div class="carousel-item active">
                 <img class="d-block w-100" src="dist/img/feb/1.jpg"
