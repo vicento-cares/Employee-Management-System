@@ -124,28 +124,13 @@ if (!isset($_SESSION['emp_no'])) {
               $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
               $stmt -> execute();
               if ($stmt -> rowCount() < 1) {
-                $shift_inverse = get_shift_inverse($server_time);
-                $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$server_date_only_yesterday' AND shift = '$shift_inverse'";
-                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+                $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+                $stmt = $conn -> prepare($sql);
                 $stmt -> execute();
-
-                if ($stmt -> rowCount() < 1) {
-                  $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
-                  $stmt = $conn -> prepare($sql);
-                  $stmt -> execute();
-                } else {
-                  $already_time_in = true;
-                }
               } else {
-                $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-                $shift_time_in = $row['shift'];
-                if ($shift == $shift_time_in) {
-                  $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-                  $stmt = $conn -> prepare($sql);
-                  $stmt -> execute();
-                } else {
-                  $already_time_in = true;
-                }
+                $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+                $stmt = $conn -> prepare($sql);
+                $stmt -> execute();
               }
             }
           }
