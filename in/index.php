@@ -183,8 +183,8 @@ if (!isset($_SESSION['emp_no'])) {
     <div class="login-logo">
       <img src="../dist/img/logo.webp" style="height:100px;">
       <h3>Employee Management System</h3>
-      <h1><b>TIME IN</b></h1>
-      <h1><b id="realtime"><?=$server_time_a?></b></h1>
+      <h1 class="m-0"><b>TIME IN</b></h1>
+      <h1 class="m-0"><b id="realtime"><?=$server_time_a?></b></h1>
       <h4><?=$line_no_label?></h4>
     </div>
     <!-- /.login-logo -->
