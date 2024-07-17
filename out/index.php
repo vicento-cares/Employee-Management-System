@@ -292,6 +292,13 @@ if (!isset($_SESSION['emp_no'])) {
   <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+
+  <style type="text/css">
+    .login-page {
+      background: linear-gradient(to bottom, #cc2b19, #e74c3c, #ee8377, #f7c1bb);
+      color: #fff;
+    }
+  </style>
 </head>
 
 <body class="hold-transition login-page">
@@ -299,7 +306,8 @@ if (!isset($_SESSION['emp_no'])) {
   <div class="login-box">
     <div class="login-logo">
       <img src="../dist/img/logo.webp" style="height:100px;">
-      <h3>Employee Management System - Time Out</h3>
+      <h3 class="m-0">Employee Management System</h3>
+      <h1 class="m-0"><b>TIME OUT</b></h1>
       <h1><b id="realtime"><?=$server_time_a?></b></h1>
       <h4><?=$line_no_label?></h4>
     </div>
@@ -310,7 +318,7 @@ if (!isset($_SESSION['emp_no'])) {
 
         <form action="" method="POST" id="scan_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="Scan Here" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="20" required>
+            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="TIME OUT" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="20" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-qrcode"></span>
