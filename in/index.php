@@ -183,7 +183,7 @@ if (!isset($_SESSION['emp_no'])) {
     <div class="login-logo">
       <img src="../dist/img/logo.webp" style="height:100px;">
       <h3>Employee Management System</h3>
-      <h1 class="m-0"><b>TIME IN</b></h1>
+      <h1 class="m-0"><b>TIME IN</b> - <b id="shift_label"><?=get_shift($server_time)?></b></h1>
       <h1 class="m-0"><b id="realtime"><?=$server_time_a?></b></h1>
       <h4><?=$line_no_label?></h4>
     </div>
@@ -344,6 +344,17 @@ if (!isset($_SESSION['emp_no'])) {
     var minutes = serverDateTime.getMinutes();
     var seconds = serverDateTime.getSeconds();
     var ampm = hours >= 12 ? 'PM' : 'AM';
+
+    var shift = document.getElementById('shift_label').innerHTML;
+
+    if (hours >= 5 && hours < 17) {
+      shift = 'DS';
+    } else if (hours >= 17 && hours <= 23) {
+      shift = 'NS';
+    } else if (hours >= 0 && hours < 5) {
+      shift = 'NS';
+    }
+
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
     hours = hours < 10 ? '0'+hours : hours;
@@ -354,6 +365,8 @@ if (!isset($_SESSION['emp_no'])) {
     // Display the time
     $('#realtime').html(strTime);
     // $('#realtime').html(serverTime);
+
+    $('#shift_label').html(shift);
 
     sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTime);
   };
