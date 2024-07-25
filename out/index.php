@@ -298,6 +298,9 @@ if (!isset($_SESSION['emp_no'])) {
       background: linear-gradient(to bottom, #cc2b19, #e74c3c, #ee8377, #f7c1bb);
       color: #fff;
     }
+    .timeout-label {
+      color: #343a40;
+    }
   </style>
 </head>
 
@@ -337,7 +340,7 @@ if (!isset($_SESSION['emp_no'])) {
       if (!empty($wrong_scanning)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC<br>Note: If this was your new Line, please submit transfer form to HR</b></p>
         </div>
       </div>
@@ -345,7 +348,7 @@ if (!isset($_SESSION['emp_no'])) {
       } else if (!empty($wrong_shift_group)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>WRONG or NO Shift Group</b></p>
         </div>
       </div>
@@ -353,7 +356,7 @@ if (!isset($_SESSION['emp_no'])) {
       } else if (!empty($no_time_in)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>No Time In</b></p>
         </div>
       </div>
@@ -361,7 +364,7 @@ if (!isset($_SESSION['emp_no'])) {
       } else if (!empty($already_time_out)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Already Time Out</b></p>
         </div>
       </div>
@@ -369,7 +372,7 @@ if (!isset($_SESSION['emp_no'])) {
       } else if (!empty($allow_time_out)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="m-0 p-1 text-center">Employee No: <b><?=$emp_no?></b></p>
           <p class="m-0 p-1 text-center">Name: <b><?=$full_name?></b></p>
           <p class="m-0 p-1 text-center">Provider: <b><?=$provider?></b></p>
@@ -383,7 +386,7 @@ if (!isset($_SESSION['emp_no'])) {
       } else {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Time Out Failed. Maybe No Shuttle Sched, Shuttle Sched Not Now or Forgot To Time Out on time</b></p>
         </div>
       </div>
@@ -392,7 +395,7 @@ if (!isset($_SESSION['emp_no'])) {
     } else if (!empty($unregistered)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Time Out Failed. Unregistered or Resigned</b></p>
         </div>
       </div>
@@ -400,7 +403,7 @@ if (!isset($_SESSION['emp_no'])) {
     } else if (!empty($error_message)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body">
+        <div class="card-body timeout-label">
           <p class="login-box-msg"><b><?=$error_message?></b></p>
         </div>
       </div>
