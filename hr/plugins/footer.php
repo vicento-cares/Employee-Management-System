@@ -14,6 +14,8 @@ include '../modals/absence_details.php';
 include '../modals/leave_form_history.php';
 include '../modals/new_employee.php';
 include '../modals/update_employee.php';
+include '../modals/new_access_location.php';
+include '../modals/update_access_location.php';
 ?>
 <!-- jQuery -->
 <script src="../plugins/jquery/dist/jquery.min.js"></script>

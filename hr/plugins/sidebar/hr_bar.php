@@ -82,6 +82,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/access_locations.php") { ?>
+          <a href="access_locations.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="access_locations.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-user-shield"></i>
+            <p>
+              Access Locations
+            </p>
+          </a>
+        </li>
         <?php include 'logout.php'; ?>
       </ul>
     </nav>
