@@ -46,12 +46,15 @@
     }
 
     const fetch_line_dropdown = () => {
+        let section = document.getElementById('section_search').value;
+        
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
             type: 'POST',
             cache: false,
             data: {
-                method: 'fetch_line_dropdown'
+                method: 'fetch_line_dropdown',
+                section: section
             },
             success: function (response) {
                 $('#line_no_search').html(response);
@@ -182,6 +185,10 @@
                 default:
             }
         } else {
+            // Check section to change line no dropdown options
+            if (section1 != section) {
+                fetch_line_dropdown();
+            }
             sessionStorage.setItem('attendance_date_search', day);
             sessionStorage.setItem('shift_group_search', shift_group);
             sessionStorage.setItem('dept_search', dept);
