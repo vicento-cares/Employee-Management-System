@@ -1,8 +1,4 @@
 <?php
-session_set_cookie_params(0, "/emp_mgt");
-session_name("emp_mgt");
-session_start();
-
 include '../process/conn.php';
 
 function get_shift($server_time) {
@@ -25,32 +21,27 @@ function get_shift_inverse($server_time) {
   }
 }
 
-function check_ip_access_location($ip, $conn) {
-  $line_no = '';
-  $sql = "SELECT line_no FROM m_access_locations WHERE ip = '$ip'";
+function get_line_no_office($conn) {
+  $data = array();
+
+  $sql = "SELECT line_no
+          FROM m_access_locations
+          WHERE dept NOT IN ('PD1','PD2') AND ip = '' 
+          ORDER BY line_no ASC";
   $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt -> execute();
-
-  if ($stmt -> rowCount() > 0) {
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      $line_no = $row['line_no'];
-    }
-  } else {
-    $line_no = 'Unregistered IP: '.$ip.'! Call IT Personnel Immediately!';
+  while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+      array_push($data, $row['line_no']);
   }
-
-  return $line_no;
+  
+  return $data;
 }
 
 // REMOTE IP ADDRESS
 $ip = $_SERVER['REMOTE_ADDR'];
-$line_no_label = check_ip_access_location($ip, $conn);
 $error_message = "";
 
-if (!isset($_SESSION['emp_no'])) {
-  header('location:../admin');
-  exit;
-} else if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (isset($_POST['emp_no'])) {
     if (!empty($_POST['emp_no'])) {
       // Time In Process
@@ -71,6 +62,8 @@ if (!isset($_SESSION['emp_no'])) {
       $is_ads = false;
       $wrong_shift_group = '';
       $already_time_in = '';
+      $line_no_office_arr = get_line_no_office($conn);
+      $not_office_employee = '';
 
       try {
         $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
@@ -94,46 +87,32 @@ if (!isset($_SESSION['emp_no'])) {
             }
           }
 
-          if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-            $wrong_scanning = true;
-          } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-            $wrong_scanning = true;
+          // Check Line No if listed as Support/Office Line No.
+          if (!in_array($line_no, $line_no_office_arr)) {
+            $not_office_employee = true;
           }
           
-          if ($wrong_scanning != true) {
-            if (empty($shift_group) || empty($_SESSION['shift_group'])) {
-              $wrong_shift_group = true;
-            } else if ($_SESSION['shift_group'] != $shift_group) {
-              if ($_SESSION['shift_group'] == 'ADS' || $shift_group == 'ADS') {
-                $is_ads = true;
-              }
-
-              if ($is_ads != true) {
-                $wrong_shift_group = true;
-              }
+          if ($not_office_employee != true) {
+            // Set Day (Revised 2024-01-10)
+            if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+              $day = $server_date_only_yesterday;
+            } else {
+              $day = $server_date_only;
             }
-
-            if ($wrong_shift_group != true) {
-              // Set Day (Revised 2024-01-10)
-              if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-                $day = $server_date_only_yesterday;
-              } else {
-                $day = $server_date_only;
-              }
-              $sql = "SELECT id, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day'";
-              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+            $sql = "SELECT id, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day'";
+            $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+            $stmt -> execute();
+            if ($stmt -> rowCount() < 1) {
+              $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+              $stmt = $conn -> prepare($sql);
               $stmt -> execute();
-              if ($stmt -> rowCount() < 1) {
-                $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
-                $stmt = $conn -> prepare($sql);
-                $stmt -> execute();
-              } else {
-                $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-                $stmt = $conn -> prepare($sql);
-                $stmt -> execute();
-              }
+            } else {
+              $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+              $stmt = $conn -> prepare($sql);
+              $stmt -> execute();
             }
           }
+
         } else {
           $unregistered = true;
         }
@@ -143,6 +122,7 @@ if (!isset($_SESSION['emp_no'])) {
         $wrong_scanning = '';
         $wrong_shift_group = '';
         $already_time_in = '';
+        $not_office_employee = '';
         $error_message .= "System Error: " . $e->getMessage() . " Call IT Personnel Immediately.";
       }
       $_POST['emp_no'] = NULL;
@@ -185,7 +165,7 @@ if (!isset($_SESSION['emp_no'])) {
       <h3 class="m-0">Employee Management System</h3>
       <h1 class="m-0"><b>TIME IN</b> - <b id="shift_label"><?=get_shift($server_time)?></b></h1>
       <h1><b id="realtime"><?=$server_time_a?></b></h1>
-      <h4><?=$line_no_label?></h4>
+      <h4>FAS Entrance</h4>
     </div>
     <!-- /.login-logo -->
     <div class="card">
@@ -202,10 +182,6 @@ if (!isset($_SESSION['emp_no'])) {
             </div>
           </div>
         </form>
-
-        <p class="mb-1">
-          <a href="../admin/home.php">Go back to homepage</a>
-        </p>
       </div>
     </div>
     <?php 
@@ -231,6 +207,14 @@ if (!isset($_SESSION['emp_no'])) {
         <div class="card mt-2">
           <div class="card-body">
             <p class="login-box-msg"><b>Already Time In</b></p>
+          </div>
+        </div>
+    <?php
+      } else if (!empty($not_office_employee)) {
+    ?>
+        <div class="card mt-2">
+          <div class="card-body">
+            <p class="login-box-msg"><b>Only Support and Office Employees are allowed</b></p>
           </div>
         </div>
     <?php 
@@ -276,9 +260,6 @@ if (!isset($_SESSION['emp_no'])) {
 <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="../dist/js/adminlte.min.js"></script>
-
-<!-- Idletime Script -->
-<script src="../dist/js/idletime.js"></script>
 
 <script>
   // var serverTime = document.getElementById("server_time").value;
