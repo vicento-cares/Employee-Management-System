@@ -77,9 +77,15 @@
             //calculate days difference by dividing total milliseconds in a day
             var days_difference = (time_difference / (1000 * 60 * 60 * 24)) + 1;
 
+            document.getElementById('total_leave_days_leave').setAttribute("max", days_difference);
             document.getElementById('total_leave_days_leave').innerHTML = days_difference;
         }
     }
+
+    document.getElementById('new_leave_form').addEventListener('submit', e => {
+        e.preventDefault();
+        save_leave_form();
+    });
 
     const save_leave_form = () => {
         let emp_no = document.getElementById('emp_no_leave').innerHTML;
