@@ -63,7 +63,14 @@ if ($method == 'save_leave_form') {
 
 		$issued_by = $_SESSION['full_name'];
 
-		$sql = "INSERT INTO t_leave_form(leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) VALUES ('$leave_form_id','$emp_no','$date_filed','$address','$contact_no','$leave_type','$leave_date_from','$leave_date_to','$total_leave_days','$irt_phone_call','$irt_letter','$irb','$reason','$issued_by', '$leave_form_status')";
+		$sql = "INSERT INTO t_leave_form 
+				(leave_form_id, emp_no, date_filed, address, contact_no, 
+				leave_type, leave_date_from, leave_date_to, total_leave_days, 
+				irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) 
+				VALUES 
+				('$leave_form_id','$emp_no','$date_filed','$address','$contact_no',
+				'$leave_type','$leave_date_from','$leave_date_to','$total_leave_days',
+				'$irt_phone_call','$irt_letter','$irb','$reason','$issued_by', '$leave_form_status')";
 		$stmt = $conn->prepare($sql);
 		$stmt->execute();
 
