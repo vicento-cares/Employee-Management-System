@@ -40,21 +40,6 @@ function get_shift($server_time) {
       <h4>FALP Server: <?=$_SERVER['SERVER_ADDR']?></h4>
     </div>
     <!-- /.login-logo -->
-    <div class="card">
-      <div class="card-body login-card-body">
-        <p class="login-box-msg"><b>Recent Request Count Confirmed</b></p>
-        <div class="row">
-          <div class="col-6">
-            <p class="login-box-msg"><b>Login</b></p>
-            <h1 class="login-box-msg"><b id="req_count">0</b></h1>
-          </div>
-          <div class="col-6">
-            <p class="login-box-msg"><b>Leave Form</b></p>
-            <h1 class="login-box-msg"><b id="req_count2">0</b></h1>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </body>
 
@@ -67,12 +52,12 @@ function get_shift($server_time) {
 
 <script>
   // AJAX IN PROGRESS GLOBAL VARS
-  var get_user_login_req_waiting_ajax_in_process = false;
-  var get_leave_form_req_waiting_ajax_in_process = false;
+  var check_user_login_req_waiting_ajax_in_process = false;
+  var check_leave_form_req_waiting_ajax_in_process = false;
 
   // Global Variables for Realtime Count
-  var realtime_get_user_login_req_waiting;
-  var realtime_get_leave_form_req_waiting;
+  var realtime_check_user_login_req_waiting;
+  var realtime_check_leave_form_req_waiting;
 
   // var serverTime = document.getElementById("server_time").value;
 
@@ -80,14 +65,14 @@ function get_shift($server_time) {
 		window.location.reload();
 	}, 1000 * 60 * 60);
 
-  const recursive_realtime_get_user_login_req_waiting = () => {
-    get_user_login_req_waiting();
-    realtime_get_user_login_req_waiting = setTimeout(recursive_realtime_get_user_login_req_waiting, 5000);
+  const recursive_realtime_check_user_login_req_waiting = () => {
+    check_user_login_req_waiting();
+    realtime_check_user_login_req_waiting = setTimeout(recursive_realtime_check_user_login_req_waiting, 5000);
   }
 
-  const recursive_realtime_get_leave_form_req_waiting = () => {
-    get_leave_form_req_waiting();
-    realtime_get_leave_form_req_waiting = setTimeout(recursive_realtime_get_leave_form_req_waiting, 10000);
+  const recursive_realtime_check_leave_form_req_waiting = () => {
+    check_leave_form_req_waiting();
+    realtime_check_leave_form_req_waiting = setTimeout(recursive_realtime_check_leave_form_req_waiting, 10000);
   }
 
   // DOMContentLoaded function
@@ -97,8 +82,8 @@ function get_shift($server_time) {
     sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTimeObject);
 
     setInterval(realtime, 1000);
-    recursive_realtime_get_user_login_req_waiting();
-    recursive_realtime_get_leave_form_req_waiting();
+    recursive_realtime_check_user_login_req_waiting();
+    recursive_realtime_check_leave_form_req_waiting();
   });
 
   document.addEventListener('visibilitychange', function() {
@@ -184,110 +169,50 @@ function get_shift($server_time) {
     });
   }
 
-  const get_user_login_req_waiting = () => {
+  const check_user_login_req_waiting = () => {
     // If an AJAX call is already in progress, return immediately
-    if (get_user_login_req_waiting_ajax_in_process) {
+    if (check_user_login_req_waiting_ajax_in_process) {
       return;
     }
 
     // Set the flag to true as we're starting an AJAX call
-    get_user_login_req_waiting_ajax_in_process = true;
+    check_user_login_req_waiting_ajax_in_process = true;
 
-    $.ajax({
-      url: 'http://172.25.112.131/emp_mgt_portal/process/user_login_req_g_p.php',
-      type: 'GET',
-      cache: false,
-      crossDomain: true,
-      data: {
-        method: 'get_user_login_req_waiting'
-      },
-      success: (response) => {
-        if (!response.empty) {
-          check_user_login_req_waiting(response);
-        } else {
-          document.getElementById('req_count').innerHTML = 0;
-          // Set the flag back to false as the AJAX call has completed
-          get_user_login_req_waiting_ajax_in_process = false;
-        }
-      }
-    });
-  }
-
-  const check_user_login_req_waiting = request_json => {
-    request_json = JSON.stringify(request_json);
     $.ajax({
       url: 'emsp_cron.php',
       type: 'POST',
       cache: false,
-      dataType: 'json',
       data: {
-        method: 'check_user_login_req_waiting',
-        request_json: request_json
+        method: 'check_user_login_req_waiting'
       },
       success: (response) => {
-        if (response.message = 'success') {
-          console.log(response.req_count);
-          document.getElementById('req_count').innerHTML = response.req_count;
-        } else {
-          console.log(response);
-          // document.getElementById('req_count').innerHTML = response;
-        }
+        console.log(response);
         // Set the flag back to false as the AJAX call has completed
-        get_user_login_req_waiting_ajax_in_process = false;
+        check_user_login_req_waiting_ajax_in_process = false;
       }
     });
   }
 
-  const get_leave_form_req_waiting = () => {
+  const check_leave_form_req_waiting = () => {
     // If an AJAX call is already in progress, return immediately
-    if (get_leave_form_req_waiting_ajax_in_process) {
+    if (check_leave_form_req_waiting_ajax_in_process) {
       return;
     }
 
     // Set the flag to true as we're starting an AJAX call
-    get_leave_form_req_waiting_ajax_in_process = true;
+    check_leave_form_req_waiting_ajax_in_process = true;
 
-    $.ajax({
-      url: 'http://172.25.112.131/emp_mgt_portal/process/user/leave/laf_g_p.php',
-      type: 'GET',
-      cache: false,
-      crossDomain: true,
-      data: {
-        method: 'get_leave_form_req_waiting'
-      },
-      success: (response) => {
-        if (!response.empty) {
-          check_leave_form_req_waiting(response);
-        } else {
-          document.getElementById('req_count2').innerHTML = 0;
-          // Set the flag back to false as the AJAX call has completed
-          get_leave_form_req_waiting_ajax_in_process = false;
-        }
-      }
-    });
-  }
-
-  const check_leave_form_req_waiting = request_json => {
-    request_json = JSON.stringify(request_json);
     $.ajax({
       url: 'emsp_cron.php',
       type: 'POST',
       cache: false,
-      dataType: 'json',
       data: {
-        method: 'check_leave_form_req_waiting',
-        request_json: request_json
+        method: 'check_leave_form_req_waiting'
       },
       success: (response) => {
-        if (response.message = 'success') {
-          console.log(response.req_count);
-          document.getElementById('req_count2').innerHTML = response.req_count;
-        } else {
-          console.log(response);
-          // document.getElementById('req_count2').innerHTML = response;
-        }
+        console.log(response);
         // Set the flag back to false as the AJAX call has completed
-        get_leave_form_req_waiting_ajax_in_process = false;
+        check_leave_form_req_waiting_ajax_in_process = false;
       }
     });
   }
