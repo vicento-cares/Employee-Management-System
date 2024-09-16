@@ -462,6 +462,7 @@
         var line_process = string[20];
         var group = string[21];
         var sub_section = string[22];
+        var skill_level = string[23];
 
         document.getElementById('id_employee_master_update').value = id;
         document.getElementById('emp_no_master_update').value = emp_no;
@@ -489,6 +490,7 @@
         document.getElementById('process_master_update').value = line_process;
         document.getElementById('group_master_update').value = group;
         document.getElementById('sub_section_master_update').value = sub_section;
+        document.getElementById('skill_level_master_update').value = skill_level;
 
         fetch_line_dropdown(2);
 
@@ -519,6 +521,7 @@
         var line_process = document.getElementById('process_master_update').value;
         var group = document.getElementById('group_master_update').value;
         var sub_section = document.getElementById('sub_section_master_update').value;
+        var skill_level = document.getElementById('skill_level_master_update').value;
 
         var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
         var emp_js_s_no = emp_js_s_master_update.value;
@@ -585,6 +588,7 @@
                     sub_section: sub_section,
                     line_no: line_no,
                     line_process: line_process,
+                    skill_level: skill_level,
                     position: position,
                     date_hired: date_hired,
                     provider: provider,

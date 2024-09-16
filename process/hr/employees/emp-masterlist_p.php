@@ -506,7 +506,7 @@ if ($method == 'employee_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, emp_no, full_name, dept, section, sub_section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
+	$query = "SELECT id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
 	if (!empty($emp_no)) {
 		$query = $query . " emp_no LIKE '".$emp_no."%'";
 	} else {
@@ -580,7 +580,7 @@ if ($method == 'employee_list') {
 			$c++;
 			
 			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
-				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'~!~'.$j['skill_level'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
 			} else {
@@ -774,6 +774,7 @@ if ($method == 'update_employee') {
 	$section = trim($_POST['section']);
 	$sub_section = trim($_POST['sub_section']);
 	$process = trim($_POST['line_process']);
+	$skill_level = trim($_POST['skill_level']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
@@ -819,6 +820,12 @@ if ($method == 'update_employee') {
 		$query = $query . ", line_no = '$line_no'";
 	} else {
 		$query = $query . ", line_no = 'Undefined'";
+	}
+
+	if (!empty($skill_level)) {
+		$query = $query . ", skill_level = '$skill_level'";
+	} else {
+		$query = $query . ", skill_level = NULL";
 	}
 
 	if (!empty($date_hired)) {
