@@ -150,6 +150,7 @@
                                 <th>Section</th>
                                 <th>Line No.</th>
                                 <th>Process</th>
+                                <th>Skill Level</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
                                 <th>Type of Absent</th>
