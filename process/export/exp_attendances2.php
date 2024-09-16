@@ -22,7 +22,7 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 	$c = 0;
 
 	$sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
+	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.skill_level, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
@@ -47,6 +47,7 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 			$c++;
 			$row_section = '';
 			$row_line_no = '';
+			$row_skill_level = '';
 			$row_status = '';
 
 			if (!empty($row['section'])) {
@@ -59,13 +60,16 @@ function get_attendance_list_line_support_to($search_arr, $conn) {
 			} else {
 				$row_line_no = 'N/A';
 			}
+			if (!empty($row['skill_level'])) {
+				$row_skill_level = 'Level ' . $row['skill_level'];
+			}
 			if (!empty($row['time_in'])) {
 				$row_status = 'Present';
 			} else {
 				$row_status = 'Absent';
 			}
 
-			$table_data[] = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status);
+			$table_data[] = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row_skill_level, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status);
 		}
 	}
 
@@ -114,7 +118,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'OT', 'IP', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Skill Level', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'OT', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 $table_data = array();
@@ -138,7 +142,7 @@ foreach ($table_data as $table_row) {
 		AND tio.shift = '$shift'
 	WHERE emp.dept = '$dept'";*/
 $sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
+	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.skill_level, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = '$day'
@@ -172,6 +176,7 @@ if ($stmt -> rowCount() > 0) {
     	$c++;
     	$row_section = '';
     	$row_line_no = '';
+		$row_skill_level = '';
     	$row_status = '';
 		$ot = 0;
 
@@ -184,6 +189,9 @@ if ($stmt -> rowCount() > 0) {
 			$row_line_no = $row['line_no'];
 		} else {
 			$row_line_no = 'N/A';
+		}
+		if (!empty($row['skill_level'])) {
+			$row_skill_level = 'Level ' . $row['skill_level'];
 		}
 		if (!empty($row['time_in'])) {
 			$row_status = 'Present';
@@ -213,7 +221,7 @@ if ($stmt -> rowCount() > 0) {
             }
         }
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
+        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row_skill_level, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
         fputcsv($f, $lineData, $delimiter);
     } 
 }
