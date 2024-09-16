@@ -77,19 +77,25 @@
               <option value="Supervisor">Supervisor</option>
             </select>
           </div>
-          <div class="col-4">
+          <div class="col-5">
             <label>Process:</label>
             <select id="process_master_update" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Process</option>
             </select>
           </div>
-          <div class="col-4">
-            <label>Date Hired:</label>
-            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+          <div class="col-3">
+            <label>Skill Level:</label>
+            <select id="skill_level_master_update" class="form-control" style="height:45px; border: 1px solid black;">
+              <option value="">Select Skill Level</option>
+              <option value="1">Level 1</option>
+              <option value="2">Level 2</option>
+              <option value="3">Level 3</option>
+              <option value="4">Level 4</option>
+            </select>
           </div>
         </div>
         <div class="row">
-          <div class="col-4">
+          <div class="col-3">
             <label>Provider:</label>
             <select id="provider_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Provider</option>
@@ -111,7 +117,7 @@
               <option value="ADS">ADS</option>
             </select>
           </div>
-          <div class="col-6">
+          <div class="col-4">
             <label>Shuttle Route:</label>
             <select id="shuttle_route_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Route</option>
@@ -128,6 +134,10 @@
               <option value="Sta. Teresita">Sta. Teresita</option>
               <option value="Sto. Tomas Malayo">Sto. Tomas Malayo</option>
             </select>
+          </div>
+          <div class="col-3">
+            <label>Date Hired:</label>
+            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
           </div>
         </div>
         <div class="row">
