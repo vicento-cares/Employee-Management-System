@@ -43,6 +43,8 @@
                             <?php } else { ?>
                             <li><a href="time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                             <?php } ?>
+
+                            <li><a href="http://172.25.116.188:3000/erecord_v1/" target="_blank" class="dropdown-item">Employee Process Certification</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
