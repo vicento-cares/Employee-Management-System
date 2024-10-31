@@ -44,7 +44,11 @@
                             <li><a href="time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                             <?php } ?>
 
-                            <li><a href="http://172.25.116.188:3000/erecord_v1/" target="_blank" class="dropdown-item">Employee Process Certification</a></li>
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/certification.php") { ?>
+                            <li><a href="certification.php" class="dropdown-item active">Employee Process Certification</a></li>
+                            <?php } else { ?>
+                            <li><a href="certification.php" class="dropdown-item">Employee Process Certification</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
