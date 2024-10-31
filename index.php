@@ -79,7 +79,7 @@
                             <li><a href="viewer/attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
                             <li><a href="viewer/line_support.php" class="dropdown-item">Line Support</a></li>
                             <li><a href="viewer/time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
-                            <li><a href="http://172.25.116.188:3000/erecord_v1/" target="_blank" class="dropdown-item">Employee Process Certification</a></li>
+                            <li><a href="viewer/certification.php" class="dropdown-item">Employee Process Certification</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
