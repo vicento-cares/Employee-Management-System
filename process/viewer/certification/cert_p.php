@@ -244,3 +244,5 @@ if ($method == 'fetch_category') {
 		echo '<script>alert("Please select category and process");</script>';
 	}
 }
+
+$conn = NULL;
