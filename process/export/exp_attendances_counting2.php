@@ -179,8 +179,8 @@ function count_emp_tio2($search_arr, $conn) {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;

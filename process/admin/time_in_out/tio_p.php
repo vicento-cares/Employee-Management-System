@@ -126,19 +126,19 @@ if ($method == 'get_recent_time_in_out') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$c++;
-			$hr_diff = intval($j['hr_diff']);
-			$min_diff = intval($j['min_diff']);
-			$hr_excess = intval($j['hr_excess']);
+			$hr_diff = intval($row['hr_diff']);
+			$min_diff = intval($row['min_diff']);
+			$hr_excess = intval($row['hr_excess']);
 			$diff = "";
 			$excess = "";
 			echo '<tr>';
 				echo '<td>'.$c.'</td>';
-				echo '<td>'.$j['emp_no'].'</td>';
-				echo '<td>'.$j['full_name'].'</td>';
-				echo '<td>'.$j['time_in'].'</td>';
-				echo '<td>'.$j['time_out'].'</td>';
+				echo '<td>'.$row['emp_no'].'</td>';
+				echo '<td>'.$row['full_name'].'</td>';
+				echo '<td>'.$row['time_in'].'</td>';
+				echo '<td>'.$row['time_out'].'</td>';
 				// Time Diff
 				if ($hr_diff > 1) {
 					$diff = $hr_diff . " hrs";
