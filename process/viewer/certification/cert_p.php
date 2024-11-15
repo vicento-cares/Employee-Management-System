@@ -40,6 +40,7 @@ function count_category($search_arr, $conn)
 				ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn 
 				FROM $table_name a 
 				LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
+				LEFT JOIN m_employees emp ON a.emp_id=emp.emp_no 
 				JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
 				WHERE a.i_status = 'Approved' ";
 
@@ -58,6 +59,16 @@ function count_category($search_arr, $conn)
 	}
 	if (!empty($search_arr['date_authorized'])) {
 		$query = $query . " AND a.date_authorized = '" . $search_arr['date_authorized'] . "' ";
+	}
+
+	if (!empty($search_arr['dept'])) {
+		$query = $query . " AND emp.dept LIKE '" . $search_arr['dept'] . "%'";
+	}
+	if (!empty($search_arr['section'])) {
+		$query = $query . " AND emp.section LIKE '" . $search_arr['section'] . "%'";
+	}
+	if (!empty($search_arr['line_no'])) {
+		$query = $query . " AND emp.line_no LIKE '" . $search_arr['line_no'] . "%'";
 	}
 
 	$query .= ") SELECT COUNT(id) AS total
@@ -83,6 +94,9 @@ if ($method == 'count_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
 		"emp_id" => $emp_id,
@@ -90,7 +104,10 @@ if ($method == 'count_category') {
 		"category" => $category,
 		"date" => $date,
 		"date_authorized" => $date_authorized,
-		"fullname" => $fullname
+		"fullname" => $fullname,
+		"dept" => $dept,
+		"section" => $section,
+		"line_no" => $line_no
 	);
 
 	echo count_category($search_arr, $conn);
@@ -103,6 +120,9 @@ if ($method == 'fetch_category_pagination') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
 		"emp_id" => $emp_id,
@@ -110,7 +130,10 @@ if ($method == 'fetch_category_pagination') {
 		"category" => $category,
 		"date" => $date,
 		"date_authorized" => $date_authorized,
-		"fullname" => $fullname
+		"fullname" => $fullname,
+		"dept" => $dept,
+		"section" => $section,
+		"line_no" => $line_no
 	);
 
 	$results_per_page = 100;
@@ -132,6 +155,9 @@ if ($method == 'fetch_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
 
@@ -158,10 +184,10 @@ if ($method == 'fetch_category') {
 					),
 		
 				RankedAuth AS (
-					SELECT DISTINCT emp.line_no, emp.section, 
+					SELECT emp.dept, emp.line_no, emp.section, 
 						 a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
                          a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
-                         b.fullname, b.agency, a.dept, b.emp_id, 
+                         b.fullname, b.agency, b.emp_id, 
 						 ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn
 					FROM $table_name a 
 					LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
@@ -189,6 +215,18 @@ if ($method == 'fetch_category') {
 
 		if (!empty($date_authorized)) {
 			$query .= " AND a.date_authorized = '$date_authorized'";
+		}
+
+		if (!empty($dept)) {
+			$query .= " AND emp.dept LIKE '$dept%'";
+		}
+		
+		if (!empty($section)) {
+			$query .= " AND emp.section LIKE '$section%'";
+		}
+		
+		if (!empty($line_no)) {
+			$query .= " AND emp.line_no LIKE '$line_no%'";
 		}
 
 		$query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC 

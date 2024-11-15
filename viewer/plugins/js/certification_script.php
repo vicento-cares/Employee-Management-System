@@ -1,5 +1,9 @@
 <script type="text/javascript">
     $(document).ready(function () {
+        // fetch_group_dropdown();
+        fetch_section_dropdown();
+        fetch_line_dropdown();
+        
         $("#category").change(function () {
             var category = document.getElementById("category").value;
             $.ajax({
@@ -15,6 +19,51 @@
             });
         });
     });
+
+    const fetch_group_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_group_dropdown'
+            },
+            success: function (response) {
+                $('#group_search').html(response);
+            }
+        });
+    }
+
+    const fetch_section_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_section_dropdown'
+            },
+            success: function (response) {
+                $('#section_search').html(response);
+            }
+        });
+    }
+
+    const fetch_line_dropdown = () => {
+        let section = document.getElementById('section_search').value;
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#line_no_search').html(response);
+            }
+        });
+    }
 
     document.querySelectorAll('#emp_id_search, #fullname_search').forEach(input => {
         input.addEventListener("keyup", e => {
@@ -63,6 +112,9 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
 
         if (pro == 'Please select a process.....') {
             pro = '';
@@ -83,6 +135,9 @@
                 date: date,
                 date_authorized: date_authorized,
                 fullname: fullname,
+                dept: dept,
+                section: section,
+                line_no: line_no,
                 current_page: current_page
 
             }, success: function (response) {
@@ -100,6 +155,9 @@
         var pro = document.getElementById('pro').value;
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
 
         if (pro == 'Please select a process.....') {
             pro = '';
@@ -119,7 +177,10 @@
                 pro: pro,
                 date: date,
                 date_authorized: date_authorized,
-                fullname: fullname
+                fullname: fullname,
+                dept: dept,
+                section: section,
+                line_no: line_no
 
             }, success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -148,6 +209,9 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
         var current_page = sessionStorage.getItem('process_details_pagination');
 
         if (pro == 'Please select a process.....') {
@@ -168,7 +232,10 @@
                 pro: pro,
                 date: date,
                 date_authorized: date_authorized,
-                fullname: fullname
+                fullname: fullname,
+                dept: dept,
+                section: section,
+                line_no: line_no
             }, success: function (response) {
                 $('#process_details_paginations').html(response);
                 $('#process_details_pagination').val(current_page);
@@ -217,10 +284,21 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
 
         if (category) {
             var encodedPro = encodeURIComponent(pro);
-            window.open('../process/export/exp_certification.php?emp_id=' + emp_id + "&category=" + category + "&pro=" + encodedPro + "&date=" + date + "&date_authorized=" + date_authorized + "&fullname=" + fullname, '_blank');
+            window.open('../process/export/exp_certification.php?emp_id=' + emp_id 
+            + "&category=" + category 
+            + "&pro=" + encodedPro 
+            + "&date=" + date 
+            + "&date_authorized=" + date_authorized 
+            + "&fullname=" + fullname 
+            + "&dept=" + dept
+            + "&section=" + section
+            + "&line_no=" + line_no, '_blank');
         } else {
             alert('Please, select category.');
         }

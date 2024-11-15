@@ -7,6 +7,9 @@ $pro = $_GET['pro'] ?? '';
 $date = $_GET['date'] ?? '';
 $date_authorized = $_GET['date_authorized'] ?? '';
 $fullname = $_GET['fullname'] ?? '';
+$dept = $_GET['dept'] ?? '';
+$section = $_GET['section'] ?? '';
+$line_no = $_GET['line_no'] ?? '';
 
 if (empty($category)) {
     echo 'Please select a category.';
@@ -25,7 +28,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers
-$fields = array('#', 'Process Name', 'Authorization No.', 'Authorization Year', 'Date Authorized', 'Expire Date', 'Employee Name', 'Employee No.', 'Batch No.', 'Department', 'Remarks', 'Reason of Cancellation', 'Date of Cancellation');
+$fields = array('#', 'Process Name', 'Authorization No.', 'Authorization Year', 'Date Authorized', 'Expire Date', 'Employee Name', 'Employee No.', 'Batch No.', 'Department', 'Section', 'Line No.', 'Remarks', 'Reason of Cancellation', 'Date of Cancellation');
 fputcsv($f, $fields, $delimiter);
 
 $table_name = "";
@@ -44,10 +47,10 @@ $query = "WITH LatestAuth AS (
             ),
 		
 		RankedAuth AS (
-            SELECT emp.line_no, emp.section, 
+            SELECT emp.dept, emp.line_no, emp.section, 
                     a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
                     a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
-                    b.fullname, b.agency, a.dept, b.emp_id, 
+                    b.fullname, b.agency, b.emp_id, 
                     ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn 
             FROM $table_name a 
             LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
@@ -73,6 +76,18 @@ if (!empty($date)) {
 
 if (!empty($date_authorized)) {
     $query .= " AND a.date_authorized = '$date_authorized'";
+}
+
+if (!empty($dept)) {
+    $query .= " AND emp.dept LIKE '$dept%'";
+}
+
+if (!empty($section)) {
+    $query .= " AND emp.section LIKE '$section%'";
+}
+
+if (!empty($line_no)) {
+    $query .= " AND emp.line_no LIKE '$line_no%'";
 }
 
 $query .= ") SELECT *
@@ -107,6 +122,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $row['emp_id'],
         $row['batch'],
         $row['dept'],
+        $row['section'],
+        $row['line_no'],
         $row['remarks'],
         $row['r_of_cancellation'],
         $row['d_of_cancellation']

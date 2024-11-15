@@ -76,14 +76,34 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                     <br>
                                     <div class="row">
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-2">
+                                    <label>Department</label>
+                                    <select id="dept_search" class="form-control" onchange="search_data(1)">
+                                        <option selected value="">All</option>
+                                        <option value="PD">PD</option>
+                                        <option value="QA">QA</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                    <label>Section</label>
+                                    <select id="section_search" class="form-control" onchange="search_data(1)">
+                                        <option value="">Select Section</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                    <label>Line No.</label>
+                                    <select id="line_no_search" class="form-control" onchange="search_data(1)">
+                                        <option value="">Select Line No.</option>
+                                    </select>
                                     </div>
                                     <div class="col-sm-2">
+                                        <label>&nbsp;</label>
                                         <!-- search button -->
                                         <button class="btn btn-block btn-success d-flex justify-content-left" id="search_btn" onclick="search_data(1)" style="height:34px;border-radius:.25rem;background: var(--success);font-size:15px;font-weight:normal;">
                                             <i class="fas fa-search"></i>&nbsp;&nbsp;Search</button>
                                     </div>
                                     <div class="col-sm-2">
+                                        <label>&nbsp;</label>
                                         <!-- exportt button -->
                                         <a class="btn btn-block btn-secondary d-flex justify-content-left" onclick="export_data()" style="height:34px;border-radius:.25rem;font-size:15px;font-weight:normal;">
                                             <i class="fas fa-download"></i>&nbsp;&nbsp;Export</a>
