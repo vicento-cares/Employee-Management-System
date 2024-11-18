@@ -1,4 +1,8 @@
 <?php
+session_set_cookie_params(0, "/emp_mgt");
+session_name("emp_mgt");
+session_start();
+
 include '../../conn.php';
 
 $method = $_POST['method'];
@@ -94,8 +98,18 @@ if ($method == 'count_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
-	$dept = $_POST['dept'];
-	$section = $_POST['section'];
+
+	$dept = '';
+	$section = '';
+
+	if (isset($_SESSION['emp_no_control_area'])) {
+		$dept = $_SESSION['dept'];
+		$section = $_SESSION['section'];
+	} else {
+		$dept = $_POST['dept'];
+		$section = $_POST['section'];
+	}
+
 	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
@@ -120,8 +134,18 @@ if ($method == 'fetch_category_pagination') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
-	$dept = $_POST['dept'];
-	$section = $_POST['section'];
+
+	$dept = '';
+	$section = '';
+
+	if (isset($_SESSION['emp_no_control_area'])) {
+		$dept = $_SESSION['dept'];
+		$section = $_SESSION['section'];
+	} else {
+		$dept = $_POST['dept'];
+		$section = $_POST['section'];
+	}
+
 	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
@@ -155,9 +179,20 @@ if ($method == 'fetch_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
-	$dept = $_POST['dept'];
-	$section = $_POST['section'];
+
+	$dept = '';
+	$section = '';
+
+	if (isset($_SESSION['emp_no_control_area'])) {
+		$dept = $_SESSION['dept'];
+		$section = $_SESSION['section'];
+	} else {
+		$dept = $_POST['dept'];
+		$section = $_POST['section'];
+	}
+
 	$line_no = $_POST['line_no'];
+
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
 
@@ -188,10 +223,12 @@ if ($method == 'fetch_category') {
 						 a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
                          a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
                          b.fullname, b.agency, b.emp_id, 
+						 sl.id AS skill_level_id, sl.skill_level, 
 						 ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn
 					FROM $table_name a 
 					LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
 					LEFT JOIN m_employees emp ON a.emp_id=emp.emp_no 
+					LEFT JOIN m_skill_level sl ON a.emp_id = sl.emp_no AND a.process = sl.process 
 					JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
                     WHERE a.i_status = 'Approved'";
 
@@ -248,9 +285,21 @@ if ($method == 'fetch_category') {
 		if ($stmt->rowCount() > 0) {
 			foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
 				$c++;
+
 				$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
 
-				echo '<tr>';
+				if (isset($_SESSION['emp_no_control_area'])) {
+					echo '<tr style="cursor:pointer;" class="modal-trigger" 
+							data-toggle="modal" data-target="#update_skill_level" 
+							onclick="get_skill_level_details(&quot;'.
+							$row['skill_level_id'].'~!~'.
+							$row['skill_level'].'~!~'.
+							$row['emp_id'].'~!~'.
+							$row['process'].'&quot;)">';
+				} else {
+					echo '<tr>';
+				}
+
 				echo '<td>' . $c . '</td>';
 				echo '<td>' . htmlspecialchars($row['process']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['auth_no']) . '</td>';
@@ -263,6 +312,11 @@ if ($method == 'fetch_category') {
 				echo '<td>' . htmlspecialchars($row['dept']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['section']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['line_no']) . '</td>';
+				if (!empty($row['skill_level'])) {
+					echo '<td>Level ' . htmlspecialchars($row['skill_level']) . '</td>';
+				} else {
+					echo '<td>' . htmlspecialchars($row['skill_level']) . '</td>';
+				}
 				echo '<td>' . htmlspecialchars($row['remarks']) . '</td>';
 				if ($row['r_status'] == 'Approved') {
 					echo '<td>' . htmlspecialchars($row['r_of_cancellation']) . '</td>';
@@ -280,6 +334,58 @@ if ($method == 'fetch_category') {
 		}
 	} else {
 		echo '<script>alert("Please select category and process");</script>';
+	}
+}
+
+if ($method == 'update_skill_level') {
+	$id = 0;
+
+	if (isset($_POST['id']) && !empty($_POST['id'])) {
+		$id = intval($_POST['id']);
+	}
+
+	$skill_level = $_POST['skill_level'];
+	$emp_no = $_POST['emp_no'];
+	$process = $_POST['process'];
+
+	$isTransactionActive = false;
+
+	try {
+		if (!$isTransactionActive) {
+			$conn->beginTransaction();
+			$isTransactionActive = true;
+		}
+
+		$query = "SELECT id FROM m_skill_level WHERE id = ?";
+		$stmt = $conn->prepare($query);
+		$params = array($id);
+		$stmt->execute($params);
+
+		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+		if ($row && $id < 1) {
+			$query = "UPDATE m_skill_level SET skill_level = ? WHERE id = ?";
+			$stmt = $conn->prepare($query);
+			$params = array($skill_level, $id);
+			$stmt->execute($params);
+		} else {
+			$query = "INSERT INTO m_skill_level (emp_no, process, skill_level) 
+								VALUES (?, ?, ?)";
+			$stmt = $conn -> prepare($query);
+			$params = array($emp_no, $process, $skill_level);
+			$stmt -> execute($params);
+		}
+
+		$conn->commit();
+		$isTransactionActive = false;
+		echo 'success';
+	} catch (Exception $e) {
+		if ($isTransactionActive) {
+			$conn->rollBack();
+			$isTransactionActive = false;
+		}
+		echo 'Failed. Please Try Again or Call IT Personnel Immediately!: ' . $e->getMessage();
+		exit();
 	}
 }
 

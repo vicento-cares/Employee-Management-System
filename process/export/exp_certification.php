@@ -1,4 +1,8 @@
 <?php
+session_set_cookie_params(0, "/emp_mgt");
+session_name("emp_mgt");
+session_start();
+
 require ('../conn.php');
 
 $emp_id = $_GET['emp_id'] ?? '';
@@ -7,8 +11,18 @@ $pro = $_GET['pro'] ?? '';
 $date = $_GET['date'] ?? '';
 $date_authorized = $_GET['date_authorized'] ?? '';
 $fullname = $_GET['fullname'] ?? '';
-$dept = $_GET['dept'] ?? '';
-$section = $_GET['section'] ?? '';
+
+$dept = '';
+$section = '';
+
+if (isset($_SESSION['emp_no_control_area'])) {
+    $dept = $_SESSION['dept'];
+    $section = $_SESSION['section'];
+} else {
+    $dept = $_GET['dept'] ?? '';
+    $section = $_GET['section'] ?? '';
+}
+
 $line_no = $_GET['line_no'] ?? '';
 
 if (empty($category)) {
@@ -19,7 +33,7 @@ if (empty($category)) {
 $c = 0;
 $delimiter = ",";
 $datenow = date('Y-m-d');
-$filename = "E-Record_Data_" . $datenow . ".csv";
+$filename = "EmpMgtSys_Certification_" . $datenow . ".csv";
 
 // Create a file pointer
 $f = fopen('php://memory', 'w');
@@ -28,7 +42,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers
-$fields = array('#', 'Process Name', 'Authorization No.', 'Authorization Year', 'Date Authorized', 'Expire Date', 'Employee Name', 'Employee No.', 'Batch No.', 'Department', 'Section', 'Line No.', 'Remarks', 'Reason of Cancellation', 'Date of Cancellation');
+$fields = array('#', 'Process Name', 'Authorization No.', 'Authorization Year', 'Date Authorized', 'Expire Date', 'Employee Name', 'Employee No.', 'Batch No.', 'Department', 'Section', 'Line No.', 'Skill Level',  'Remarks', 'Reason of Cancellation', 'Date of Cancellation');
 fputcsv($f, $fields, $delimiter);
 
 $table_name = "";
@@ -51,10 +65,12 @@ $query = "WITH LatestAuth AS (
                     a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
                     a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
                     b.fullname, b.agency, b.emp_id, 
+                    sl.id AS skill_level_id, sl.skill_level, 
                     ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn 
             FROM $table_name a 
             LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
             LEFT JOIN m_employees emp ON a.emp_id=emp.emp_no 
+            LEFT JOIN m_skill_level sl ON a.emp_id = sl.emp_no AND a.process = sl.process 
             JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
             WHERE a.i_status = 'Approved'";
 
@@ -110,6 +126,12 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $row[$key] = str_replace(["\r", "\n"], " ", $value);
     }
 
+    $row_skill_level = '';
+
+    if (!empty($row['skill_level'])) {
+        $row_skill_level = 'Level ' . $row['skill_level'];
+    }
+
     // Prepare data for CSV
     $lineData = array(
         $c,
@@ -124,6 +146,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $row['dept'],
         $row['section'],
         $row['line_no'],
+        $row_skill_level,
         $row['remarks'],
         $row['r_of_cancellation'],
         $row['d_of_cancellation']

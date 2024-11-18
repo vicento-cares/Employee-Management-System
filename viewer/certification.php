@@ -127,6 +127,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                             <th>Department</th>
                                             <th>Section</th>
                                             <th>Line No.</th>
+                                            <th>Skill Level</th>
                                             <th>Remarks</th>
                                             <th>Reason of Cancellation</th>
                                             <th>Date of Cancellation</th>
