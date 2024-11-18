@@ -32,8 +32,8 @@ function count_emp_dashboard($search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -56,8 +56,8 @@ function count_emp_by_provider($provider, $search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -81,8 +81,8 @@ function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -106,8 +106,8 @@ function count_emp_tio($search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;

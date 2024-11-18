@@ -73,8 +73,8 @@ function count_employee_list($search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = $j['total'];
+		foreach($stmt->fetchALL() as $row){
+			$total = $row['total'];
 		}
 	}else{
 		$total = 0;
@@ -576,28 +576,28 @@ if ($method == 'employee_list') {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$c++;
 			
 			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
-				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'~!~'.$j['skill_level'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$row['id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['section'].'~!~'.$row['line_no'].'~!~'.$row['position'].'~!~'.$row['provider'].'~!~'.$row['date_hired'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['emp_status'].'~!~'.$row['shuttle_route'].'~!~'.$row['emp_js_s_no'].'~!~'.$row['emp_sv_no'].'~!~'.$row['emp_approver_no'].'~!~'.$row['resigned'].'~!~'.$row['resigned_date'].'~!~'.$row['gender'].'~!~'.$row['shift_group'].'~!~'.$row['process'].'~!~'.$row['section'].'~!~'.$row['sub_section'].'~!~'.$row['skill_level'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
 			} else {
 				echo '<tr>';
 
-				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" value="'.$j['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
+				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" value="'.$row['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
 
-				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$j['id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$j['dept'].'~!~'.$j['section'].'~!~'.$j['line_no'].'~!~'.$j['position'].'~!~'.$j['provider'].'~!~'.$j['date_hired'].'~!~'.$j['address'].'~!~'.$j['contact_no'].'~!~'.$j['emp_status'].'~!~'.$j['shuttle_route'].'~!~'.$j['emp_js_s_no'].'~!~'.$j['emp_sv_no'].'~!~'.$j['emp_approver_no'].'~!~'.$j['resigned'].'~!~'.$j['resigned_date'].'~!~'.$j['gender'].'~!~'.$j['shift_group'].'~!~'.$j['process'].'~!~'.$j['section'].'~!~'.$j['sub_section'].'&quot;)">'.$c.'</td>';
+				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$row['id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['section'].'~!~'.$row['line_no'].'~!~'.$row['position'].'~!~'.$row['provider'].'~!~'.$row['date_hired'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['emp_status'].'~!~'.$row['shuttle_route'].'~!~'.$row['emp_js_s_no'].'~!~'.$row['emp_sv_no'].'~!~'.$row['emp_approver_no'].'~!~'.$row['resigned'].'~!~'.$row['resigned_date'].'~!~'.$row['gender'].'~!~'.$row['shift_group'].'~!~'.$row['process'].'~!~'.$row['section'].'~!~'.$row['sub_section'].'&quot;)">'.$c.'</td>';
 			}
 
-				echo '<td>'.$j['emp_no'].'</td>';
-				echo '<td>'.$j['full_name'].'</td>';
-				echo '<td>'.$j['dept'].'</td>';
-				echo '<td>'.$j['section'].'</td>';
-				echo '<td>'.$j['line_no'].'</td>';
-				echo '<td>'.$j['provider'].'</td>';
-				echo '<td>'.$j['shuttle_route'].'</td>';
+				echo '<td>'.$row['emp_no'].'</td>';
+				echo '<td>'.$row['full_name'].'</td>';
+				echo '<td>'.$row['dept'].'</td>';
+				echo '<td>'.$row['section'].'</td>';
+				echo '<td>'.$row['line_no'].'</td>';
+				echo '<td>'.$row['provider'].'</td>';
+				echo '<td>'.$row['shuttle_route'].'</td>';
 			echo '</tr>';
 		}
 	}else{
@@ -634,19 +634,19 @@ if ($method == 'get_employee_data') {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$emp_no = $j['emp_no'];
-			$full_name = $j['full_name'];
-			$dept = $j['dept'];
-			$section = $j['section'];
-			$line_no = $j['line_no'];
-			$position = $j['position'];
-			$shift_group = $j['shift_group'];
-			$date_hired = $j['date_hired'];
-			$address = $j['address'];
-			$contact_no = $j['contact_no'];
-			$emp_status = $j['emp_status'];
-			$resigned = intval($j['resigned']);
+		foreach($stmt->fetchALL() as $row){
+			$emp_no = $row['emp_no'];
+			$full_name = $row['full_name'];
+			$dept = $row['dept'];
+			$section = $row['section'];
+			$line_no = $row['line_no'];
+			$position = $row['position'];
+			$shift_group = $row['shift_group'];
+			$date_hired = $row['date_hired'];
+			$address = $row['address'];
+			$contact_no = $row['contact_no'];
+			$emp_status = $row['emp_status'];
+			$resigned = intval($row['resigned']);
 		}
 		if ($resigned == 0) {
 			$message = 'success';

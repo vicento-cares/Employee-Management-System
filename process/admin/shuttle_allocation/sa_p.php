@@ -72,31 +72,31 @@ if ($method == 'get_shuttle_allocation') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$c++;
 
 			echo '<tr>';
 
 			echo '<td><p class="mb-0"><label class="mb-0">
-                  <input type="checkbox" class="singleCheck" value="'.$j['tio_id'].'" onclick="get_checked_length_present()" /><span></span>
+                  <input type="checkbox" class="singleCheck" value="'.$row['tio_id'].'" onclick="get_checked_length_present()" /><span></span>
                   </label></p></td>';
             echo '<td>'.$c.'</td>';
-			echo '<td>'.$j['provider'].'</td>';
-			echo '<td>'.$j['emp_no'].'</td>';
-			echo '<td>'.$j['full_name'].'</td>';
-			echo '<td>'.$j['dept'].'</td>';
-			echo '<td>'.$j['section'].'</td>';
-			echo '<td>'.$j['line_no'].'</td>';
-			if (empty($j['out_5']) && empty($j['out_6']) && empty($j['out_7']) && empty($j['out_8'])) {
-            	echo '<td>'.$j['emp_shuttle_route'].'</td>';
+			echo '<td>'.$row['provider'].'</td>';
+			echo '<td>'.$row['emp_no'].'</td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['section'].'</td>';
+			echo '<td>'.$row['line_no'].'</td>';
+			if (empty($row['out_5']) && empty($row['out_6']) && empty($row['out_7']) && empty($row['out_8'])) {
+            	echo '<td>'.$row['emp_shuttle_route'].'</td>';
             } else {
-            	echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" onclick="get_shuttle_allocation_details(&quot;'.$j['sa_id'].'~!~'.$j['sa_shuttle_route'].'&quot;)">'.$j['sa_shuttle_route'].'</td>';
+            	echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" onclick="get_shuttle_allocation_details(&quot;'.$row['sa_id'].'~!~'.$row['sa_shuttle_route'].'&quot;)">'.$row['sa_shuttle_route'].'</td>';
             }
 
-			echo '<td>'.$j['out_5'].'</td>';
-			echo '<td>'.$j['out_6'].'</td>';
-			echo '<td>'.$j['out_7'].'</td>';
-			echo '<td>'.$j['out_8'].'</td>';
+			echo '<td>'.$row['out_5'].'</td>';
+			echo '<td>'.$row['out_6'].'</td>';
+			echo '<td>'.$row['out_7'].'</td>';
+			echo '<td>'.$row['out_8'].'</td>';
 
 			echo '</tr>';
 		}
@@ -124,12 +124,12 @@ if ($method == 'get_shuttle_allocation_total') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$response_arr = array(
-				'total_out_5' => $j['total_out_5'],
-				'total_out_6' => $j['total_out_6'],
-				'total_out_7' => $j['total_out_7'],
-				'total_out_8' => $j['total_out_8']
+				'total_out_5' => $row['total_out_5'],
+				'total_out_6' => $row['total_out_6'],
+				'total_out_7' => $row['total_out_7'],
+				'total_out_8' => $row['total_out_8']
 			);
 		}
 	}
@@ -154,15 +154,15 @@ if ($method == 'set_out') {
 		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt->rowCount() > 0) {
-			foreach($stmt->fetchALL() as $j){
-				$emp_no = $j['emp_no'];
-				$dept = $j['dept'];
-				$section = $j['section'];
-				$line_no = $j['line_no'];
-				$shift_group = $j['shift_group'];
-				$day = $j['day'];
-				$shift = $j['shift'];
-				$shuttle_route = $j['shuttle_route'];
+			foreach($stmt->fetchALL() as $row){
+				$emp_no = $row['emp_no'];
+				$dept = $row['dept'];
+				$section = $row['section'];
+				$line_no = $row['line_no'];
+				$shift_group = $row['shift_group'];
+				$day = $row['day'];
+				$shift = $row['shift'];
+				$shuttle_route = $row['shuttle_route'];
 			}
 		}
 
@@ -170,8 +170,8 @@ if ($method == 'set_out') {
 		$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt -> execute();
 		if ($stmt->rowCount() > 0) {
-			foreach($stmt->fetchALL() as $j){
-				$sa_id = $j['id'];
+			foreach($stmt->fetchALL() as $row){
+				$sa_id = $row['id'];
 			}
 
 			$sql = "UPDATE t_shuttle_allocation SET out_".$time." = 1";
@@ -243,15 +243,15 @@ if ($method == 'get_shuttle_allocation_per_route') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 
 			echo '<tr>';
 
-            echo '<td>'.$j['shuttle_route'].'</td>';
-			echo '<td>'.$j['total_out_5'].'</td>';
-			echo '<td>'.$j['total_out_6'].'</td>';
-			echo '<td>'.$j['total_out_7'].'</td>';
-			echo '<td>'.$j['total_out_8'].'</td>';
+            echo '<td>'.$row['shuttle_route'].'</td>';
+			echo '<td>'.$row['total_out_5'].'</td>';
+			echo '<td>'.$row['total_out_6'].'</td>';
+			echo '<td>'.$row['total_out_7'].'</td>';
+			echo '<td>'.$row['total_out_8'].'</td>';
 
 			echo '</tr>';
 		}

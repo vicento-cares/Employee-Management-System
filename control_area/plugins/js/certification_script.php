@@ -1,9 +1,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
-        // fetch_group_dropdown();
-        fetch_section_dropdown();
         fetch_line_dropdown();
-        
+
         $("#category").change(function () {
             var category = document.getElementById("category").value;
             $.ajax({
@@ -20,36 +18,8 @@
         });
     });
 
-    const fetch_group_dropdown = () => {
-        $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
-            type: 'POST',
-            cache: false,
-            data: {
-                method: 'fetch_group_dropdown'
-            },
-            success: function (response) {
-                $('#group_search').html(response);
-            }
-        });
-    }
-
-    const fetch_section_dropdown = () => {
-        $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
-            type: 'POST',
-            cache: false,
-            data: {
-                method: 'fetch_section_dropdown'
-            },
-            success: function (response) {
-                $('#section_search').html(response);
-            }
-        });
-    }
-
     const fetch_line_dropdown = () => {
-        let section = document.getElementById('section_search').value;
+        var section = '<?= $_SESSION['section'] ?>';
 
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
@@ -112,8 +82,8 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
-        var dept = document.getElementById('dept_search').value;
-        var section = document.getElementById('section_search').value;
+        var dept = '<?= $_SESSION['dept'] ?>';
+        var section = '<?= $_SESSION['section'] ?>';
         var line_no = document.getElementById('line_no_search').value;
 
         if (pro == 'Please select a process.....') {
@@ -155,8 +125,8 @@
         var pro = document.getElementById('pro').value;
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
-        var dept = document.getElementById('dept_search').value;
-        var section = document.getElementById('section_search').value;
+        var dept = '<?= $_SESSION['dept'] ?>';
+        var section = '<?= $_SESSION['section'] ?>';
         var line_no = document.getElementById('line_no_search').value;
 
         if (pro == 'Please select a process.....') {
@@ -209,8 +179,8 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
-        var dept = document.getElementById('dept_search').value;
-        var section = document.getElementById('section_search').value;
+        var dept = '<?= $_SESSION['dept'] ?>';
+        var section = '<?= $_SESSION['section'] ?>';
         var line_no = document.getElementById('line_no_search').value;
         var current_page = sessionStorage.getItem('process_details_pagination');
 
@@ -220,7 +190,7 @@
         if (category == 'Category') {
             category = '';
         }
-        
+
         $.ajax({
             url: '../process/viewer/certification/cert_p.php',
             type: 'POST',
@@ -284,23 +254,85 @@
         var date = document.getElementById('expire_date_search').value;
         var date_authorized = document.getElementById('date_authorized_search').value;
         var fullname = document.getElementById('fullname_search').value;
-        var dept = document.getElementById('dept_search').value;
-        var section = document.getElementById('section_search').value;
+        var dept = '<?= $_SESSION['dept'] ?>';
+        var section = '<?= $_SESSION['section'] ?>';
         var line_no = document.getElementById('line_no_search').value;
 
         if (category) {
             var encodedPro = encodeURIComponent(pro);
-            window.open('../process/export/exp_certification.php?emp_id=' + emp_id 
-            + "&category=" + category 
-            + "&pro=" + encodedPro 
-            + "&date=" + date 
-            + "&date_authorized=" + date_authorized 
-            + "&fullname=" + fullname 
-            + "&dept=" + dept
-            + "&section=" + section
-            + "&line_no=" + line_no, '_blank');
+            window.open('../process/export/exp_certification.php?emp_id=' + emp_id
+                + "&category=" + category
+                + "&pro=" + encodedPro
+                + "&date=" + date
+                + "&date_authorized=" + date_authorized
+                + "&fullname=" + fullname
+                + "&dept=" + dept
+                + "&section=" + section
+                + "&line_no=" + line_no, '_blank');
         } else {
             alert('Please, select category.');
         }
+    }
+
+    const get_skill_level_details = (param) => {
+        var string = param.split('~!~');
+        var id = string[0];
+        var skill_level = string[1];
+        var emp_no = string[2];
+        var process = string[3];
+
+        document.getElementById('id_skill_level_update').value = id;
+        document.getElementById('skill_level_c_update').value = skill_level;
+        document.getElementById('emp_no_c_update').value = emp_no;
+        document.getElementById('process_c_update').value = process;
+    }
+
+    document.getElementById("update_skill_level_form").addEventListener("submit", e => {
+        e.preventDefault();
+        update_skill_level();
+    });
+
+    const update_skill_level = () => {
+        var id = document.getElementById('id_skill_level_update').value;
+        var skill_level = document.getElementById('skill_level_c_update').value;
+        var emp_no = document.getElementById('emp_no_c_update').value;
+        var process = document.getElementById('process_c_update').value;
+
+        $.ajax({
+            url: '../process/viewer/certification/cert_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'update_skill_level',
+                id: id,
+                skill_level: skill_level,
+                emp_no: emp_no,
+                process: process
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succesfully Recorded!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    $('#id_skill_level_update').val('');
+                    $('#skill_level_c_update').val('');
+                    $('#emp_no_c_update').val('');
+                    $('#process_c_update').val('');
+                    search_data(1);
+                    $('#update_skill_level').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: 'Error',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
     }
 </script>

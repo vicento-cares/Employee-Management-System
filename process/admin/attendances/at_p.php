@@ -206,8 +206,8 @@ function count_attendance_list($search_arr, $conn) {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = $j['total'];
+		foreach($stmt->fetchALL() as $row){
+			$total = $row['total'];
 		}
 	}else{
 		$total = 0;
@@ -272,8 +272,8 @@ function count_emp_tio($search_arr, $conn) {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -484,45 +484,45 @@ if ($method == 'get_attendance_list') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$c++;
 
-			if (!empty($j['time_in'])) {
+			if (!empty($row['time_in'])) {
 				$row_class = $row_class_arr[1];
 				echo '<tr class="'.$row_class.'">';
 			} else {
 				$row_class = $row_class_arr[2];
 				$row_day = '';
 				$row_shift = '';
-				if (!empty($j['absent_day']) && !empty($j['absent_shift_group'])) {
-					$row_day = $j['absent_day'];
-					$row_shift_group = $j['absent_shift_group'];
+				if (!empty($row['absent_day']) && !empty($row['absent_shift_group'])) {
+					$row_day = $row['absent_day'];
+					$row_shift_group = $row['absent_shift_group'];
 				} else {
 					$row_day = $day;
 					$row_shift_group = $shift_group;
 				}
 				
-				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$j['absent_id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$j['absent_type'].'~!~'.$j['reason'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
 			}
 
 			echo '<td>'.$c.'</td>';
-			if (!empty($j['time_in'])) {
-				echo '<td>'.$j['time_in_day'].'</td>';
-				echo '<td>'.$j['time_in_shift'].'</td>';
-				echo '<td>'.$j['shift_group'].'</td>';
+			if (!empty($row['time_in'])) {
+				echo '<td>'.$row['time_in_day'].'</td>';
+				echo '<td>'.$row['time_in_shift'].'</td>';
+				echo '<td>'.$row['shift_group'].'</td>';
 			} else {
-				echo '<td>'.$j['absent_day'].'</td>';
+				echo '<td>'.$row['absent_day'].'</td>';
 				echo '<td></td>';
-				echo '<td>'.$j['absent_shift_group'].'</td>';
+				echo '<td>'.$row['absent_shift_group'].'</td>';
 			}
-			echo '<td>'.$j['provider'].'</td>';
-			echo '<td>'.$j['emp_no'].'</td>';
-			echo '<td>'.$j['full_name'].'</td>';
-			echo '<td>'.$j['dept'].'</td>';
-			echo '<td>'.$j['section'].'</td>';
-			echo '<td>'.$j['line_no'].'</td>';
-			echo '<td>'.$j['absent_type'].'</td>';
-			$reason = $j['reason'];
+			echo '<td>'.$row['provider'].'</td>';
+			echo '<td>'.$row['emp_no'].'</td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['section'].'</td>';
+			echo '<td>'.$row['line_no'].'</td>';
+			echo '<td>'.$row['absent_type'].'</td>';
+			$reason = $row['reason'];
 			if (strlen($reason) > 12) {
 				$reason = substr($reason, 0, 12) . "...";
 			}
@@ -749,53 +749,53 @@ if ($method == 'get_attendance_list2') {
 			echo $attendance_list_line_support_to_arr["table_data"];
 		}
 
-		foreach($stmt->fetchALL() as $j){
+		foreach($stmt->fetchALL() as $row){
 			$c++;
 
-			if (!empty($j['time_in'])) {
+			if (!empty($row['time_in'])) {
 				$row_class = $row_class_arr[1];
 				echo '<tr class="'.$row_class.'">';
 			} else {
 				$row_class = $row_class_arr[2];
 				$row_day = '';
 				$row_shift = '';
-				if (!empty($j['absent_day']) && !empty($j['absent_shift_group'])) {
-					$row_day = $j['absent_day'];
-					$row_shift_group = $j['absent_shift_group'];
+				if (!empty($row['absent_day']) && !empty($row['absent_shift_group'])) {
+					$row_day = $row['absent_day'];
+					$row_shift_group = $row['absent_shift_group'];
 				} else {
 					$row_day = $day;
 					$row_shift_group = $shift_group;
 				}
 				
-				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-dismiss="modal" onclick="get_absence_details(&quot;'.$j['absent_id'].'~!~'.$j['emp_no'].'~!~'.$j['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$j['absent_type'].'~!~'.$j['reason'].'&quot;)">';
+				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-dismiss="modal" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
 			}
 
 			echo '<td>'.$c.'</td>';
-			if (!empty($j['time_in'])) {
-				echo '<td>'.$j['time_in_day'].'</td>';
-				echo '<td>'.$j['time_in_shift'].'</td>';
-				echo '<td>'.$j['shift_group'].'</td>';
+			if (!empty($row['time_in'])) {
+				echo '<td>'.$row['time_in_day'].'</td>';
+				echo '<td>'.$row['time_in_shift'].'</td>';
+				echo '<td>'.$row['shift_group'].'</td>';
 			} else {
-				echo '<td>'.$j['absent_day'].'</td>';
+				echo '<td>'.$row['absent_day'].'</td>';
 				echo '<td></td>';
-				echo '<td>'.$j['absent_shift_group'].'</td>';
+				echo '<td>'.$row['absent_shift_group'].'</td>';
 			}
-			echo '<td>'.$j['provider'].'</td>';
-			echo '<td>'.$j['emp_no'].'</td>';
-			echo '<td>'.$j['full_name'].'</td>';
-			echo '<td>'.$j['dept'].'</td>';
-			echo '<td>'.$j['section'].'</td>';
-			echo '<td>'.$j['line_no'].'</td>';
-			echo '<td>'.$j['process'].'</td>';
-			if (!empty($j['skill_level'])) {
-				echo '<td>Level '.$j['skill_level'].'</td>';
+			echo '<td>'.$row['provider'].'</td>';
+			echo '<td>'.$row['emp_no'].'</td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['dept'].'</td>';
+			echo '<td>'.$row['section'].'</td>';
+			echo '<td>'.$row['line_no'].'</td>';
+			echo '<td>'.$row['process'].'</td>';
+			if (!empty($row['skill_level'])) {
+				echo '<td>Level '.$row['skill_level'].'</td>';
 			} else {
-				echo '<td>'.$j['skill_level'].'</td>';
+				echo '<td>'.$row['skill_level'].'</td>';
 			}
-			echo '<td>'.$j['time_in'].'</td>';
-			echo '<td>'.$j['time_out'].'</td>';
-			echo '<td>'.$j['absent_type'].'</td>';
-			$reason = $j['reason'];
+			echo '<td>'.$row['time_in'].'</td>';
+			echo '<td>'.$row['time_out'].'</td>';
+			echo '<td>'.$row['absent_type'].'</td>';
+			$reason = $row['reason'];
 			if (strlen($reason) > 12) {
 				$reason = substr($reason, 0, 12) . "...";
 			}

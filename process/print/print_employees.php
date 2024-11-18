@@ -35,8 +35,8 @@ function count_employee_list($search_arr, $conn) {
   $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
   $stmt->execute();
   if ($stmt->rowCount() > 0) {
-    foreach($stmt->fetchALL() as $j){
-      $total = $j['total'];
+    foreach($stmt->fetchALL() as $row){
+      $total = $row['total'];
     }
   }else{
     $total = 0;
@@ -147,20 +147,20 @@ $stmt->execute();
                       <tbody id="list_of_employees" style="text-align: center;">
                         <?php
                           if ($stmt->rowCount() > 0) {
-                            foreach($stmt->fetchALL() as $j){
+                            foreach($stmt->fetchALL() as $row){
                               $c++;
                               echo '<tr>';
                                 echo '<td>'.$c.'</td>';
-                                echo '<td>'.$j['emp_no'].'</td>';
-                                echo '<td>'.$j['full_name'].'</td>';
-                                echo '<td>'.$j['dept'].'</td>';
-                                echo '<td>'.$j['section'].'</td>';
-                                echo '<td>'.$j['line_no'].'</td>';
-                                echo '<td>'.$j['provider'].'</td>';
-                                echo '<td>'.$j['shuttle_route'].'</td>';
-                                echo '<td>'.$j['position'].'</td>';
-                                echo '<td>'.$j['date_hired'].'</td>';
-                                echo '<td>'.$j['emp_status'].'</td>';
+                                echo '<td>'.$row['emp_no'].'</td>';
+                                echo '<td>'.$row['full_name'].'</td>';
+                                echo '<td>'.$row['dept'].'</td>';
+                                echo '<td>'.$row['section'].'</td>';
+                                echo '<td>'.$row['line_no'].'</td>';
+                                echo '<td>'.$row['provider'].'</td>';
+                                echo '<td>'.$row['shuttle_route'].'</td>';
+                                echo '<td>'.$row['position'].'</td>';
+                                echo '<td>'.$row['date_hired'].'</td>';
+                                echo '<td>'.$row['emp_status'].'</td>';
                               echo '</tr>';
                             }
                           }else{

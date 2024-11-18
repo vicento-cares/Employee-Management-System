@@ -34,8 +34,8 @@ function count_emp_by_provider($provider, $search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -59,8 +59,8 @@ function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -84,8 +84,8 @@ function count_emp_tio($search_arr, $conn) {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 	}else{
 		$total = 0;
@@ -151,8 +151,8 @@ if ($method == 'count_emp_dashboard') {
 	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $j){
-			$total = intval($j['total']);
+		foreach($stmt->fetchALL() as $row){
+			$total = intval($row['total']);
 		}
 
 		$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
@@ -169,8 +169,8 @@ if ($method == 'count_emp_dashboard') {
 		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
-			foreach($stmt->fetchALL() as $j){
-				$total_shift_group_a = intval($j['total']);
+			foreach($stmt->fetchALL() as $row){
+				$total_shift_group_a = intval($row['total']);
 			}
 		}else{
 			$total_shift_group_a = 0;
@@ -190,8 +190,8 @@ if ($method == 'count_emp_dashboard') {
 		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
-			foreach($stmt->fetchALL() as $j){
-				$total_shift_group_b = intval($j['total']);
+			foreach($stmt->fetchALL() as $row){
+				$total_shift_group_b = intval($row['total']);
 			}
 		}else{
 			$total_shift_group_b = 0;
@@ -211,8 +211,8 @@ if ($method == 'count_emp_dashboard') {
 		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 		$stmt->execute();
 		if ($stmt->rowCount() > 0) {
-			foreach($stmt->fetchALL() as $j){
-				$total_shift_group_ads = intval($j['total']);
+			foreach($stmt->fetchALL() as $row){
+				$total_shift_group_ads = intval($row['total']);
 			}
 		}else{
 			$total_shift_group_ads = 0;

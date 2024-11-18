@@ -9,6 +9,7 @@
 //MODALS
 include '../modals/logout_modal.php';
 include '../modals/view_employee_control_area.php';
+include '../modals/update_skill_level.php';
 ?>
 <!-- jQuery -->
 <script src="../plugins/jquery/dist/jquery.min.js"></script>
