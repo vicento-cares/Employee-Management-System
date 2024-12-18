@@ -5,12 +5,27 @@
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
+        fetch_dept_dropdown();
         // fetch_group_dropdown();
         fetch_section_dropdown();
         fetch_line_dropdown();
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
         get_attendance_summary_report(1);
     });
+
+    const fetch_dept_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_dept_dropdown'
+            },
+            success: function (response) {
+                $('#dept_search').html(response);
+            }
+        });
+    }
 
     const fetch_group_dropdown = () => {
         $.ajax({

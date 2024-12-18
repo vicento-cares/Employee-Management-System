@@ -58,8 +58,6 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <label>Department</label>
                                     <select id="dept_search" class="form-control" onchange="get_attendance_summary_report(1)">
                                         <option selected value="">All</option>
-                                        <option value="PD">PD</option>
-                                        <option value="QA">QA</option>
                                     </select>
                                     </div>
                                     <div class="col-sm-3">
