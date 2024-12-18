@@ -3,25 +3,22 @@ session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
+include '../server_date_time.php';
 include '../conn.php';
 
 switch (true) {
   case !isset($_SESSION['emp_no_hr']):
     header('location:/emp_mgt/hr');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no']):
     header('location:/emp_mgt/admin');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no_user']):
     header('location:/emp_mgt/user');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no_clinic']):
     header('location:/emp_mgt/clinic');
-    exit;
-    break;
+    exit();
 }
 
 switch (true) {
@@ -35,8 +32,7 @@ switch (true) {
   case !isset($_GET['date_updated_to']):
   case !isset($_GET['resigned']):
     echo 'Query Parameters Not Set';
-    exit;
-    break;
+    exit();
 }
 
 $emp_no = addslashes(trim($_GET['emp_no']));
@@ -66,18 +62,29 @@ if (!empty($date_updated_to)) {
 
 $resigned = trim($_GET['resigned']);
 
+$search_multiple_employee_arr = [];
+if (isset($_GET['search_multiple_employee_arr']) && !empty($_GET['search_multiple_employee_arr'])) {
+  $search_multiple_employee_arr = explode(",", $_GET['search_multiple_employee_arr']);
+}
+
 $delimiter = ","; 
 
 $filename = "EmpMgtSys_EmployeeMasterlist_";
-if (!empty($dept)) {
-	$filename = $filename . $dept . "-";
+
+if (!empty($search_multiple_employee_arr)) {
+  $filename = $filename . "MultipleSearch_" . $server_date_only;
+} else {
+  if (!empty($dept)) {
+    $filename = $filename . $dept . "-";
+  }
+  if (!empty($section)) {
+    $filename = $filename . $section . "-";
+  }
+  if (!empty($line_no)) {
+    $filename = $filename . $line_no;
+  }
 }
-if (!empty($section)) {
-	$filename = $filename . $section . "-";
-}
-if (!empty($line_no)) {
-	$filename = $filename . $line_no;
-}
+
 $filename = $filename . ".csv";
  
 // Create a file pointer 
@@ -91,45 +98,68 @@ $fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.'
 fputcsv($f, $fields, $delimiter); 
 
 $query = "SELECT emp_no, full_name, dept, section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned_date FROM m_employees WHERE";
-if (!empty($emp_no)) {
-  $query = $query . " emp_no LIKE '".$emp_no."%'";
+$params = [];
+
+if (!empty($search_multiple_employee_arr)) {
+  // Create a placeholder string for the IDs
+  $placeholders = implode(',', array_fill(0, count($search_multiple_employee_arr), '?'));
+  $query = $query . " emp_no IN ($placeholders)";
+  $params = array_merge($params, $search_multiple_employee_arr); // Flatten the array
 } else {
-  $query = $query . " emp_no != ''";
-}
-if (!empty($full_name)) {
-  $query = $query . " AND full_name LIKE '$full_name%'";
-}
-if (!empty($provider)) {
-  $query = $query . " AND provider = '$provider'";
-}
-if (!empty($dept)) {
-  $query = $query . " AND dept = '$dept'";
-}
-if (!empty($section)) {
-  $query = $query . " AND section LIKE '$section%'";
-}
-if (!empty($line_no)) {
-  $query = $query . " AND line_no LIKE '$line_no%'";
-}
-
-if (!empty($date_updated_from) && !empty($date_updated_to)) {
-  $query = $query . " AND date_updated BETWEEN '$date_updated_from' AND '$date_updated_to'";
-}
-
-if ($resigned != '') {
-  if ($resigned == 1 || $resigned == 0) {
-    $query = $query . " AND resigned = '$resigned'";
+  if (!empty($emp_no)) {
+    $query = $query . " emp_no LIKE ?";
+    $emp_no_search = $emp_no . "%";
+		$params[] = $emp_no_search;
+  } else {
+    $query = $query . " emp_no != ''";
+  }
+  if (!empty($full_name)) {
+    $query = $query . " AND full_name LIKE ?";
+    $full_name_search = $full_name . "%";
+    $params[] = $full_name_search;
+  }
+  if (!empty($provider)) {
+    $query = $query . " AND provider = ?";
+    $params[] = $provider;
+  }
+  if (!empty($dept)) {
+    $query = $query . " AND dept = ?";
+    $params[] = $dept;
+  }
+  if (!empty($section)) {
+    $query = $query . " AND section LIKE ?";
+    $section_search = $section . "%";
+    $params[] = $section_search;
+  }
+  if (!empty($line_no)) {
+    $query = $query . " AND line_no LIKE ?";
+    $line_no_search = $line_no . "%";
+    $params[] = $line_no_search;
+  }
+  
+  if (!empty($date_updated_from) && !empty($date_updated_to)) {
+    $query = $query . " AND date_updated BETWEEN ? AND ?";
+		$params[] = $date_updated_from;
+		$params[] = $date_updated_to;
+  }
+  
+  if ($resigned != '') {
+    if ($resigned == 1 || $resigned == 0) {
+      $query = $query . " AND resigned = ?";
+			$params[] = $resigned;
+    }
   }
 }
 
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
 
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($stmt -> rowCount() > 0) {
+if (count($results) > 0) {
 
     // Output each row of the data, format line as csv and write to file pointer 
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
+    foreach ($results as $row) {
 
         $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['process'], $row['position'], $row['provider'], $row['gender'], $row['shift_group'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
         fputcsv($f, $lineData, $delimiter); 
@@ -155,4 +185,3 @@ header('Content-Disposition: attachment; filename="' . $filename . '";');
 fpassthru($f); 
 
 $conn = null;
-?>

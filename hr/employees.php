@@ -71,7 +71,7 @@
                 </div>
                 <div class="col-sm-2">
                   <label>Provider:</label>
-                  <select id="provider_master_search" class="form-control" onchange="load_employees(1)">
+                  <select id="provider_master_search" class="form-control">
                     <option value="">Select Provider</option>
                     <option value="FAS">FAS</option>
                     <option value="PKIMT">PKIMT</option>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="col-sm-2">
                   <label>Department</label>
-                  <select id="dept_master_search" class="form-control" onchange="load_employees(1)">
+                  <select id="dept_master_search" class="form-control">
                     <option value="">Select Department</option>
                   </select>
                 </div>
@@ -107,15 +107,19 @@
                 </div>
                 <div class="col-sm-2">
                   <label>Active / Inactive</label>
-                  <select id="resigned_master_search" class="form-control" onchange="load_employees(1)">
+                  <select id="resigned_master_search" class="form-control">
                     <option value="">All</option>
                     <option value="0">Active</option>
                     <option value="1">Inactive</option>
                   </select>
                 </div>
-                <div class="col-sm-2 offset-sm-4">
+                <div class="col-sm-2 offset-sm-2">
                   <label>&nbsp;</label>
-                  <button type="button" class="btn bg-gray-dark btn-block" onclick="load_employees(1)"><i class="fas fa-search"></i> Search</button>
+                  <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#search_multiple_employee"><i class="fas fa-search"></i> Search Multiple 🔥</button>
+                </div>
+                <div class="col-sm-2">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn bg-gray-dark btn-block" id="btnSearchEmployee"><i class="fas fa-search"></i> Search</button>
                 </div>
               </div>
               <div class="row mb-4">
