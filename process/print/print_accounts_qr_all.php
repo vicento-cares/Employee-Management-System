@@ -8,52 +8,74 @@ include '../conn.php';
 switch (true) {
   case !isset($_SESSION['emp_no_hr']):
     header('location:/emp_mgt/hr');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no']):
     header('location:/emp_mgt/admin');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no_user']):
     header('location:/emp_mgt/user');
-    exit;
-    break;
+    exit();
   case isset($_SESSION['emp_no_clinic']):
     header('location:/emp_mgt/clinic');
-    exit;
-    break;
+    exit();
 }
 
 switch (true) {
   case !isset($_GET['emp_no']):
   case !isset($_GET['full_name']):
+  case !isset($_GET['dept']):
+  case !isset($_GET['section']):
+  case !isset($_GET['line_no']):
   case !isset($_GET['role']):
     echo 'Query Parameters Not Set';
-    exit;
-    break;
+    exit();
 }
 
-$emp_no = addslashes(trim($_GET['emp_no']));
-$full_name = addslashes(trim($_GET['full_name']));
+$emp_no = trim($_GET['emp_no']);
+$full_name = trim($_GET['full_name']);
+$dept = trim($_GET['dept']);
+$section = trim($_GET['section']);
+$line_no = trim($_GET['line_no']);
 $role = trim($_GET['role']);
 
 $c = 0;
 
 $query = "SELECT id, emp_no, full_name, role FROM m_accounts WHERE";
+$params = [];
+
 if (!empty($emp_no)) {
-  $query = $query . " emp_no LIKE '".$emp_no."%'";
+  $query = $query . " emp_no LIKE ?";
+	$emp_no_search = $search_arr['emp_no'] . "%";
+	$params[] = $emp_no_search;
 } else {
   $query = $query . " emp_no != ''";
 }
 if (!empty($full_name)) {
-  $query = $query . " AND full_name LIKE '$full_name%'";
+  $query = $query . " AND full_name LIKE ?";
+	$full_name_search = $search_arr['full_name'] . "%";
+	$params[] = $full_name_search;
+}
+if (!empty($dept)) {
+  $query = $query . " AND dept = ?";
+  $params[] = $dept;
+}
+if (!empty($section)) {
+  $query = $query . " AND section LIKE ?";
+  $section_search = $section . "%";
+  $params[] = $section_search;
+}
+if (!empty($line_no)) {
+  $query = $query . " AND line_no LIKE ?";
+  $line_no_search = $line_no . "%";
+  $params[] = $line_no_search;
 }
 if (!empty($role)) {
-  $query = $query . " AND role = '$role'";
+  $query = $query . " AND role = ?";
+	$params[] = $search_arr['role'];
 }
 
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -92,7 +114,7 @@ $stmt->execute();
   </noscript>
 
   <div class="row">
-  <?php foreach($stmt -> fetchAll() as $row) { $c++;?>
+  <?php while($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $c++;?>
   <div class="col-4">
     <table class="mx-0 my-0" style="height:100%;width:100%;table-layout:fixed;">
       <tbody>

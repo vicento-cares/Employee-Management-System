@@ -716,8 +716,16 @@
     const print_accounts_qr_all = () => {
         var emp_no = sessionStorage.getItem('emp_no_search');
         var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var role = sessionStorage.getItem('role_search');
 
-        window.open('../process/print/print_accounts_qr_all.php?emp_no=' + emp_no + "&full_name=" + full_name + '&role=' + role, '_blank');
+        window.open('../process/print/print_accounts_qr_all.php?emp_no=' + emp_no 
+                    + "&full_name=" + full_name 
+                    + "&dept=" + dept 
+                    + "&section=" + section 
+                    + "&line_no=" + line_no 
+                    + '&role=' + role, '_blank');
     }
 </script>
