@@ -49,21 +49,31 @@
                   <label>Employee No.</label>
                   <input type="text" class="form-control" id="emp_no_search" placeholder="Search" autocomplete="off" maxlength="255">
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                   <label>Full Name</label>
                   <input type="text" class="form-control" id="full_name_search" placeholder="Search" autocomplete="off" maxlength="255">
                 </div>
                 <div class="col-sm-2">
+                  <label>Department</label>
+                  <select id="dept_search" class="form-control">
+                    <option value="">Select Department</option>
+                  </select>
+                </div>
+                <div class="col-sm-2">
+                  <label>Section</label>
+                  <input type="text" class="form-control" id="section_search" placeholder="Search" autocomplete="off" maxlength="255">
+                </div>
+                <div class="col-sm-2">
+                  <label>Line No.</label>
+                  <input type="text" class="form-control" id="line_no_search" placeholder="Search" autocomplete="off" maxlength="255">
+                </div>
+                <div class="col-sm-2">
                   <label>User Type</label>
-                  <select id="role_search" class="form-control" onchange="load_accounts(1)">
+                  <select id="role_search" class="form-control">
                     <option value="">Select User Type</option>
                     <option value="admin">Admin</option>
                     <option value="user">User</option>
                   </select>
-                </div>
-                <div class="col-sm-2 offset-sm-2">
-                  <label>&nbsp;</label>
-                  <button type="button" class="btn bg-gray-dark btn-block" onclick="load_accounts(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
               </div>
               <div class="row mb-4">
@@ -74,6 +84,10 @@
                 <div class="col-sm-2">
                   <label>&nbsp;</label>
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="print_accounts_qr_all()"><i class="fas fa-qrcode"></i> Print All QR</button>
+                </div>
+                <div class="col-sm-2 offset-sm-6">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn bg-gray-dark btn-block" onclick="load_accounts(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
               </div>
               <div id="list_of_accounts_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">

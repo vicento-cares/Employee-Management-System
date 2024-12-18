@@ -336,8 +336,8 @@ if ($method == 'fetch_employee_name_approver_dropdown') {
 }
 
 if ($method == 'count_employee_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -373,13 +373,13 @@ if ($method == 'count_employee_list') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
@@ -410,8 +410,8 @@ if ($method == 'count_employee_list') {
 }
 
 if ($method == 'employee_list_last_page') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -447,13 +447,13 @@ if ($method == 'employee_list_last_page') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
@@ -492,8 +492,8 @@ if ($method == 'employee_list_last_page') {
 }
 
 if ($method == 'employee_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -529,13 +529,13 @@ if ($method == 'employee_list') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
