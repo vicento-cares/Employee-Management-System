@@ -45,14 +45,15 @@ WITH AttendanceData AS (
         emp.shift_group, 
         emp.dept, 
         emp.section, 
-        ISNULL(emp.line_no, 'No Line') AS line_no1, 
+        ISNULL(emp.line_no, 'No Line') AS line_no, 
         COUNT(emp.emp_no) AS total, 
         COUNT(tio.emp_no) AS total_present, 
         COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
         FORMAT(CASE 
             WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
             ELSE 0 
-        END, 'N2') AS attendance_percentage
+        END, 'N2') AS attendance_percentage,
+		0 AS table_order
     FROM 
         m_employees emp 
     LEFT JOIN 
@@ -71,19 +72,20 @@ SELECT
     'Total' AS shift_group, 
     NULL AS dept, 
     NULL AS section, 
-    NULL AS line_no1, 
+    NULL AS line_no, 
     SUM(total) AS total, 
     SUM(total_present) AS total_present, 
     SUM(total_absent) AS total_absent, 
     FORMAT(CASE 
         WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
         ELSE 0 
-    END, 'N2') AS attendance_percentage
+    END, 'N2') AS attendance_percentage,
+	1 AS table_order
 FROM 
     AttendanceData
 
 ORDER BY 
-    shift_group;
+    table_order ASC, shift_group ASC;
 
 DECLARE @day DATETIME = '2024-12-11';
 DECLARE @day_tomorrow DATETIME = DATEADD(DAY, 1, CAST(@day AS DATETIME2));

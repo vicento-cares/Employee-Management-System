@@ -55,27 +55,27 @@ fputs($f, "\xEF\xBB\xBF");
 $fields = array('#', 'Shift Group', 'Department', 'Section', 'Line No.', 'Total MP', 'Present', 'Absent', 'Percentage');
 fputcsv($f, $fields, $delimiter);
 
-$results = array();
-
 //MS SQL Server
-$sql = "SELECT 
-			emp.shift_group, 
-			emp.dept, 
-			emp.section, 
-			ISNULL(emp.line_no, 'No Line') AS line_no, 
-			COUNT(emp.emp_no) AS total, 
-			COUNT(tio.emp_no) AS total_present, 
-			COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
-			FORMAT(CASE 
-				WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
-				ELSE 0 
-			END, 'N2') AS attendance_percentage
-		FROM 
-			m_employees emp 
-		LEFT JOIN 
-			t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
-		WHERE 
-			dept != ''";
+$sql = "WITH AttendanceData AS (
+			SELECT 
+				emp.shift_group, 
+				emp.dept, 
+				emp.section, 
+				ISNULL(emp.line_no, 'No Line') AS line_no, 
+				COUNT(emp.emp_no) AS total, 
+				COUNT(tio.emp_no) AS total_present, 
+				COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+				FORMAT(CASE 
+					WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+					ELSE 0 
+				END, 'N2') AS attendance_percentage,
+				0 AS table_order
+			FROM 
+				m_employees emp 
+			LEFT JOIN 
+				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
+			WHERE 
+				dept != ''";
 
 $params = [];
 
@@ -102,11 +102,32 @@ if (!empty($line_no)) {
 }
 
 $sql = $sql . " AND 
-		(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
-	GROUP BY 
-		emp.dept, emp.section, emp.line_no, emp.shift_group 
-	ORDER BY 
-		emp.shift_group";
+					(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+				GROUP BY 
+					emp.dept, emp.section, emp.line_no, emp.shift_group 
+			)
+
+			SELECT * FROM AttendanceData
+
+			UNION ALL
+
+			SELECT 
+				'Total' AS shift_group, 
+				NULL AS dept, 
+				NULL AS section, 
+				NULL AS line_no, 
+				SUM(total) AS total, 
+				SUM(total_present) AS total_present, 
+				SUM(total_absent) AS total_absent, 
+				FORMAT(CASE 
+					WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
+					ELSE 0 
+				END, 'N2') AS attendance_percentage,
+				1 AS table_order
+			FROM 
+				AttendanceData
+			ORDER BY 
+				table_order ASC, shift_group ASC";
 
 $params[] = $day;
 
@@ -114,10 +135,14 @@ $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-	$c++;
+	$c_label = "";
+	if ($row['shift_group'] != 'Total') {
+		$c++;
+		$c_label = $c;
+	}
 
 	$lineData = array(
-		$c,
+		$c_label,
 		$row['shift_group'],
 		$row['dept'],
 		$row['section'],
@@ -129,9 +154,6 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	);
 	fputcsv($f, $lineData, $delimiter);
 }
-
-// $lineData = array("Total MP :", "", "", "", "", $total_mp, $total_present_mp, $total_absent_mp, $total_attendance_percentage); 
-// fputcsv($f, $lineData, $delimiter);
 
 // Move back to beginning of file 
 fseek($f, 0);

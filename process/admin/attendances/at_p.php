@@ -1057,24 +1057,26 @@ if ($method == 'get_attendance_summary_report') {
 	$row_class = $row_class_arr[0];
 
 	//MS SQL Server
-	$sql = "SELECT 
-				emp.shift_group, 
-				emp.dept, 
-				emp.section, 
-				ISNULL(emp.line_no, 'No Line') AS line_no, 
-				COUNT(emp.emp_no) AS total, 
-				COUNT(tio.emp_no) AS total_present, 
-				COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
-				FORMAT(CASE 
-					WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
-					ELSE 0 
-				END, 'N2') AS attendance_percentage
-			FROM 
-				m_employees emp 
-			LEFT JOIN 
-				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
-			WHERE 
-				dept != ''";
+	$sql = "WITH AttendanceData AS (
+				SELECT 
+					emp.shift_group, 
+					emp.dept, 
+					emp.section, 
+					ISNULL(emp.line_no, 'No Line') AS line_no, 
+					COUNT(emp.emp_no) AS total, 
+					COUNT(tio.emp_no) AS total_present, 
+					COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+					FORMAT(CASE 
+						WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+						ELSE 0 
+					END, 'N2') AS attendance_percentage,
+					0 AS table_order
+				FROM 
+					m_employees emp 
+				LEFT JOIN 
+					t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
+				WHERE 
+					dept != ''";
 	
 	$params = [];
 
@@ -1104,8 +1106,29 @@ if ($method == 'get_attendance_summary_report') {
 						(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
 					GROUP BY 
 						emp.dept, emp.section, emp.line_no, emp.shift_group 
-					ORDER BY 
-						emp.shift_group";
+				)
+
+				SELECT * FROM AttendanceData
+
+				UNION ALL
+
+				SELECT 
+					'Total' AS shift_group, 
+					NULL AS dept, 
+					NULL AS section, 
+					NULL AS line_no, 
+					SUM(total) AS total, 
+					SUM(total_present) AS total_present, 
+					SUM(total_absent) AS total_absent, 
+					FORMAT(CASE 
+						WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
+						ELSE 0 
+					END, 'N2') AS attendance_percentage,
+					1 AS table_order
+				FROM 
+					AttendanceData
+				ORDER BY 
+					table_order ASC, shift_group ASC";
 	
 	$params[] = $day;
 
@@ -1113,21 +1136,29 @@ if ($method == 'get_attendance_summary_report') {
 	$stmt->execute($params);
 
 	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-		$c++;
+		$c_label = "";
+		$total_class = "";
+		if ($row['shift_group'] != 'Total') {
+			$c++;
+			$c_label = $c;
 
-		$total = intval($row['total']);
-		$total_present = intval($row['total_present']);
-		
-		if ($row['line_no'] == 'No Line') {
-			$row_class = $row_class_arr[4];
-		} else if ($total_present == $total) {
-			$row_class = $row_class_arr[1];
-		} else if ($total_present < $total && $total_present > 0) {
-			$row_class = $row_class_arr[2];
-		} else if ($total_present < 1) {
-			$row_class = $row_class_arr[3];
+			$total = intval($row['total']);
+			$total_present = intval($row['total_present']);
+			
+			if ($row['line_no'] == 'No Line') {
+				$row_class = $row_class_arr[4];
+			} else if ($total_present == $total) {
+				$row_class = $row_class_arr[1];
+			} else if ($total_present < $total && $total_present > 0) {
+				$row_class = $row_class_arr[2];
+			} else if ($total_present < 1) {
+				$row_class = $row_class_arr[3];
+			} else {
+				$row_class = $row_class_arr[0];
+			}
 		} else {
-			$row_class = $row_class_arr[0];
+			$row_class = "bg-black";
+			$total_class = " class='text-bold'";
 		}
 		
 		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#attendance_summary_report_details" 
@@ -1141,15 +1172,15 @@ if ($method == 'get_attendance_summary_report') {
 				.'~!~'.$row['total_absent']
 				.'~!~'.$row['attendance_percentage'].'&quot;)">';
 			
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$row['shift_group'].'</td>';
+		echo '<td>'.$c_label.'</td>';
+		echo '<td'.$total_class.'>'.$row['shift_group'].'</td>';
 		echo '<td>'.$row['dept'].'</td>';
 		echo '<td>'.$row['section'].'</td>';
 		echo '<td>'.$row['line_no'].'</td>';
-		echo '<td>'.$row['total'].'</td>';
-		echo '<td>'.$row['total_present'].'</td>';
-		echo '<td>'.$row['total_absent'].'</td>';
-		echo '<td>'.$row['attendance_percentage'].'%</td>';
+		echo '<td'.$total_class.'>'.$row['total'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_present'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_absent'].'</td>';
+		echo '<td'.$total_class.'>'.$row['attendance_percentage'].'%</td>';
 
 		echo '</tr>';
 	}
