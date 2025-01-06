@@ -35,7 +35,11 @@ if (isset($_POST['login_btn'])) {
             $_SESSION['line_no'] = $line_no;
             $_SESSION['shift_group'] = $shift_group;
             $_SESSION['role'] = $role;
-            header('location: employees.php');
+            if (empty($_SESSION['line_no'])) {
+                header('location: employees.php');
+            } else {
+                header('location: certification.php');
+            }
         } else {
             echo '<script>alert("Sign In Failed. Maybe an incorrect credential or account not found")</script>';
         }

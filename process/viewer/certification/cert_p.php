@@ -9,12 +9,18 @@ $method = $_POST['method'];
 
 if ($method == 'fetch_pro') {
 	$category = $_POST['category'];
-	$query = "SELECT process FROM [qualif].[dbo].[m_process] WHERE category = '$category' ORDER BY process ASC";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
+
+	$query = "SELECT process FROM [qualif].[dbo].[m_process] WHERE category = ? ORDER BY process ASC";
+	$params[] = $category;
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	if (count($results) > 0) {
 		echo '<option value="">Please select a process.....</option>';
-		foreach ($stmt->fetchAll() as $row) {
+		foreach ($results as $row) {
 			echo '<option>' . htmlspecialchars($row['process']) . '</option>';
 		}
 	} else {
@@ -48,41 +54,60 @@ function count_category($search_arr, $conn)
 				JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
 				WHERE a.i_status = 'Approved' ";
 
+	$params = [];
+
 	if (!empty($search_arr['emp_id'])) {
-		$query = $query . " AND (b.emp_id = '" . $search_arr['emp_id'] . "' OR b.emp_id_old = '" . $search_arr['emp_id'] . "')";
+		$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+		$params[] = $search_arr['emp_id'];
+		$params[] = $search_arr['emp_id'];
 	}
 	if (!empty($search_arr['fullname'])) {
-		$query = $query . " AND b.fullname LIKE'" . $search_arr['fullname'] . "%'";
+		$query .= " AND b.fullname LIKE ?";
+		$fullname_search = $search_arr['fullname'] . "%";
+		$params[] = $fullname_search;
 	}
 
 	if (!empty($search_arr['pro'])) {
-		$query = $query . " AND a.process LIKE '" . $search_arr['pro'] . "'";
+		$query .= " AND a.process LIKE ?";
+		$pro_search = $search_arr['pro'] . "%";
+		$params[] = $pro_search;
 	}
 	if (!empty($search_arr['date'])) {
-		$query = $query . " AND a.expire_date = '" . $search_arr['date'] . "' ";
+		$query .= " AND a.expire_date = ? ";
+		$params[] = $search_arr['date'];
 	}
 	if (!empty($search_arr['date_authorized'])) {
-		$query = $query . " AND a.date_authorized = '" . $search_arr['date_authorized'] . "' ";
+		$query .= " AND a.date_authorized = ? ";
+		$params[] = $search_arr['date_authorized'];
 	}
 
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND emp.dept LIKE '" . $search_arr['dept'] . "%'";
+		$query .= " AND emp.dept LIKE ?";
+		$dept_search = $search_arr['dept'] . "%";
+		$params[] = $dept_search;
 	}
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND emp.section LIKE '" . $search_arr['section'] . "%'";
+		$query .= " AND emp.section LIKE ?";
+		$section_search = $search_arr['section'] . "%";
+		$params[] = $section_search;
 	}
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND emp.line_no LIKE '" . $search_arr['line_no'] . "%'";
+		$query .= " AND emp.line_no LIKE ?";
+		$line_no_search = $search_arr['line_no'] . "%";
+		$params[] = $line_no_search;
 	}
 
 	$query .= ") SELECT COUNT(id) AS total
 					FROM RankedAuth
 					WHERE rn = 1";
 
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach ($stmt->fetchALL() as $row) {
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	if (count($results) > 0) {
+		foreach ($results as $row) {
 			$total = $row['total'];
 		}
 	} else {
@@ -101,16 +126,21 @@ if ($method == 'count_category') {
 
 	$dept = '';
 	$section = '';
+	$line_no = '';
 
 	if (isset($_SESSION['emp_no_control_area'])) {
 		$dept = $_SESSION['dept'];
 		$section = $_SESSION['section'];
+		if (empty($_SESSION['line_no'])) {
+			$line_no = $_POST['line_no'];
+		} else {
+			$line_no = $_SESSION['line_no'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 		$section = $_POST['section'];
+		$line_no = $_POST['line_no'];
 	}
-
-	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
 		"emp_id" => $emp_id,
@@ -137,16 +167,21 @@ if ($method == 'fetch_category_pagination') {
 
 	$dept = '';
 	$section = '';
+	$line_no = '';
 
 	if (isset($_SESSION['emp_no_control_area'])) {
 		$dept = $_SESSION['dept'];
 		$section = $_SESSION['section'];
+		if (empty($_SESSION['line_no'])) {
+			$line_no = $_POST['line_no'];
+		} else {
+			$line_no = $_SESSION['line_no'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 		$section = $_POST['section'];
+		$line_no = $_POST['line_no'];
 	}
-
-	$line_no = $_POST['line_no'];
 
 	$search_arr = array(
 		"emp_id" => $emp_id,
@@ -182,16 +217,21 @@ if ($method == 'fetch_category') {
 
 	$dept = '';
 	$section = '';
+	$line_no = '';
 
 	if (isset($_SESSION['emp_no_control_area'])) {
 		$dept = $_SESSION['dept'];
 		$section = $_SESSION['section'];
+		if (empty($_SESSION['line_no'])) {
+			$line_no = $_POST['line_no'];
+		} else {
+			$line_no = $_SESSION['line_no'];
+		}
 	} else {
 		$dept = $_POST['dept'];
 		$section = $_POST['section'];
+		$line_no = $_POST['line_no'];
 	}
-
-	$line_no = $_POST['line_no'];
 
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
@@ -235,55 +275,79 @@ if ($method == 'fetch_category') {
 		$params = [];
 
 		if (!empty($emp_id)) {
-			$query .= " AND (b.emp_id = '$emp_id' OR b.emp_id_old = '$emp_id')";
+			$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+			$params[] = $emp_id;
+			$params[] = $emp_id;
 		}
 
 		if (!empty($fullname)) {
-			$query .= " AND b.fullname LIKE '$fullname%'";
+			$query .= " AND b.fullname LIKE ?";
+			$fullname_search = $fullname . "%";
+			$params[] = $fullname_search;
 		}
 
 		if (!empty($pro)) {
-			$query .= " AND a.process LIKE '$pro%'";
+			$query .= " AND a.process LIKE ?";
+			$pro_search = $pro . "%";
+			$params[] = $pro_search;
 		}
 
 		if (!empty($date)) {
-			$query .= " AND a.expire_date = '$date'";
+			$query .= " AND a.expire_date = ?";
+			$params[] = $date;
 		}
 
 		if (!empty($date_authorized)) {
-			$query .= " AND a.date_authorized = '$date_authorized'";
+			$query .= " AND a.date_authorized = ?";
+			$params[] = $date_authorized;
 		}
 
 		if (!empty($dept)) {
-			$query .= " AND emp.dept LIKE '$dept%'";
+			$query.= " AND emp.dept LIKE ?";
+			$dept_search = $dept . "%";
+			$params[] = $dept_search;
 		}
-		
+
 		if (!empty($section)) {
-			$query .= " AND emp.section LIKE '$section%'";
+			$query .= " AND emp.section LIKE ?";
+			$section_search = $section . "%";
+			$params[] = $section_search;
 		}
-		
+
 		if (!empty($line_no)) {
-			$query .= " AND emp.line_no LIKE '$line_no%'";
+			$query .= " AND emp.line_no LIKE ?";
+			$line_no_search = $line_no . "%";
+			$params[] = $line_no_search;
 		}
 
 		$query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC 
-                    OFFSET :page_first_result ROWS 
-                    FETCH NEXT :results_per_page ROWS ONLY";
+                    OFFSET ? ROWS 
+                    FETCH NEXT ? ROWS ONLY";
 
 		$query .= ") SELECT *
 					FROM RankedAuth
 					WHERE rn = 1";
+		
+		echo var_dump($params);
 
-		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+		$stmt = $conn->prepare($query);
 
-		$stmt->bindValue(':page_first_result', $page_first_result, PDO::PARAM_INT);
-		$stmt->bindValue(':results_per_page', $results_per_page, PDO::PARAM_INT);
+		// Bind parameters dynamically
+		foreach ($params as $index => $param) {
+			$stmt->bindValue($index + 1, $param); // Bind each filtering parameter
+		}
+
+		// Bind pagination parameters
+		$stmt->bindValue(count($params) + 1, $page_first_result, PDO::PARAM_INT); // Bind OFFSET
+		$stmt->bindValue(count($params) + 2, $results_per_page, PDO::PARAM_INT); // Bind FETCH NEXT
 
 		$stmt->execute();
 
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 		// Check if rows are returned
-		if ($stmt->rowCount() > 0) {
-			foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+		if (count($results) > 0) {
+			foreach ($results as $row) {
 				$c++;
 
 				$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";

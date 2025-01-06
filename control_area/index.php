@@ -1,7 +1,11 @@
 <?php require '../process/login5.php';
 
 if (isset($_SESSION['emp_no_control_area'])) {
-  header('location: employees.php');
+  if (empty($_SESSION['line_no'])) {
+    header('location: employees.php');
+  } else {
+    header('location: certification.php');
+  }
   exit;
 }
 ?>

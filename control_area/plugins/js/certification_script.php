@@ -1,6 +1,8 @@
 <script type="text/javascript">
     $(document).ready(function () {
+        <?php if (empty($_SESSION['line_no'])) {?>
         fetch_line_dropdown();
+        <?php }?>
 
         $("#category").change(function () {
             var category = document.getElementById("category").value;
