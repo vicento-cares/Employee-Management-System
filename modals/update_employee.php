@@ -10,6 +10,19 @@
         </button>
       </div>
       <div class="modal-body">
+        <div class="row mb-2">
+          <div class="col-sm-4">
+            <img id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
+          </div>
+          <div class="col-sm-4 offset-sm-4">
+            <label>&nbsp;</label>
+            <button type="button" class="btn btn-warning btn-block btn-file">
+              <form id="employee_picture_form" enctype="multipart/form-data">
+                <span class="mx-0 my-0"><i class="fas fa-upload"></i> Change Picture </span><input type="file" id="employee_picture_master_update" name="file" onchange="upload_employee_picture()" accept=".png">
+              </form>
+            </button>
+          </div>
+        </div>
         <div class="row">
           <div class="col-4">
             <input type="hidden" id="id_employee_master_update" class="form-control">

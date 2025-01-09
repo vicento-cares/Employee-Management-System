@@ -456,10 +456,12 @@ if ($method == 'get_attendance_list') {
 	$sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date,
 	tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
-	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason 
+	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason, 
+	pic.file_url 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = '$day'
+		LEFT JOIN m_employee_pictures pic ON pic.emp_no = emp.emp_no
 		WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
@@ -506,6 +508,14 @@ if ($method == 'get_attendance_list') {
 			}
 
 			echo '<td>'.$c.'</td>';
+
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+			if (!empty($row['file_url'])) {
+				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+			} else {
+				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+			}
+
 			if (!empty($row['time_in'])) {
 				echo '<td>'.$row['time_in_day'].'</td>';
 				echo '<td>'.$row['time_in_shift'].'</td>';
@@ -711,11 +721,13 @@ if ($method == 'get_attendance_list2') {
 	$sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.skill_level, emp.line_no, emp.shift_group, emp.resigned_date,
 	tio.time_in, tio.time_out, tio.day AS time_in_day, tio.shift AS time_in_shift, 
-	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason 
+	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason, 
+	pic.file_url 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = '$day'
 		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day'
+		LEFT JOIN m_employee_pictures pic ON pic.emp_no = emp.emp_no
 		WHERE ((emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
@@ -771,6 +783,14 @@ if ($method == 'get_attendance_list2') {
 			}
 
 			echo '<td>'.$c.'</td>';
+
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+			if (!empty($row['file_url'])) {
+				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+			} else {
+				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+			}
+			
 			if (!empty($row['time_in'])) {
 				echo '<td>'.$row['time_in_day'].'</td>';
 				echo '<td>'.$row['time_in_shift'].'</td>';

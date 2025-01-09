@@ -11,6 +11,7 @@ include '../modals/logout_modal.php';
 include '../modals/new_account.php';
 include '../modals/update_account.php';
 include '../modals/absence_details.php';
+include '../modals/leave_form_pending.php';
 include '../modals/leave_form_history.php';
 include '../modals/new_employee.php';
 include '../modals/update_employee.php';
