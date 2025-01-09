@@ -172,137 +172,158 @@ if ($method == 'get_recent_time_in_out') {
 
 if ($method == 'get_time_out_counting') {
 	$day = $_GET['day'];
-	$day_tomorrow = date('Y-m-d',(strtotime('+1 day',strtotime($day))));
 
 	$c = 0;
 
-	$results = array();
+	$sql = "DECLARE @day DATETIME = ?;
+			DECLARE @day_tomorrow DATETIME = DATEADD(DAY, 1, CAST(@day AS DATETIME2));
 
-	$sql = "SELECT dept, section FROM m_employees GROUP BY dept, section";
+			WITH AttendanceData AS (
+			SELECT 
+				emp.dept, 
+				emp.section,
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day +' 15:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+							OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) AS total_0,
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) AS total_1,
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) AS total_2,
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END) AS total_3,
+							-- Calculate total
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day + ' 15:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+							OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END) AS total,
+				(
+					(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day + ' 15:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+								OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) * 0) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) * 1) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) * 2) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END) * 3) 
+				) AS total_times,
+							-- Calculate average_ot
+				FORMAT(
+				CASE WHEN (
+					COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day + ' 15:59:59')) 
+							OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+							OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END)
+				) > 0 
+				THEN
+				(
+					CAST((
+						(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day + ' 15:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+									OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) * 0) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) * 1) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) * 2) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END) * 3) 
+					) AS FLOAT)
+					/ 
+					CAST((
+						COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 15:00:00') AND CONVERT(DATETIME, @day + ' 15:59:59')) 
+								OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 03:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 03:59:59')) 
+								OR (tio.time_out IS NULL AND tio.day = @day) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 16:00:00') AND CONVERT(DATETIME, @day + ' 16:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 04:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 04:59:59')) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 17:00:00') AND CONVERT(DATETIME, @day + ' 17:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 05:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 05:59:59')) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN CONVERT(DATETIME, @day + ' 18:00:00') AND CONVERT(DATETIME, @day + ' 18:59:59')) 
+									OR (tio.time_out BETWEEN CONVERT(DATETIME, @day_tomorrow + ' 06:00:00') AND CONVERT(DATETIME, @day_tomorrow + ' 06:59:59')) THEN 1 END)
+					) AS FLOAT)
+				) ELSE 0 END, 'N2') AS average_ot,
+				0 AS table_order
+			FROM 
+				m_employees emp
+			LEFT JOIN 
+				t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = @day
+			GROUP BY 
+				emp.dept, emp.section
+			)
 
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row) {
-			array_push($results, array('dept' => $row['dept'], 'section' => $row['section'], 'total_0' => 0, 'total_0_5' => 0, 'total_1' => 0, 'total_1_5' => 0, 'total_2' => 0, 'total_3' => 0));
-		}
-	}
+			SELECT * FROM AttendanceData
 
-	// Queries for Time Out Count
+			UNION ALL
 
-	// OUT 3
-	$sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_0 FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp
-	ON tio.emp_no = emp.emp_no
-	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 15:00:00' AND '$day 15:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 03:00:00' AND '$day_tomorrow 03:59:59')
-	OR tio.day = '$day' AND tio.time_out IS NULL
-	GROUP BY emp.dept, emp.section";
+			SELECT 
+				'Total' AS dept, 
+				NULL AS section,
+				SUM(total_0) AS total_0,
+				SUM(total_1) AS total_1,
+				SUM(total_2) AS total_2,
+				SUM(total_3) AS total_3,
+				SUM(total) AS total,
+				SUM(total_times) AS total_times,
+				FORMAT(CASE 
+					WHEN SUM(total) > 0 THEN 
+						CAST(((SUM(total_0) * 0) + (SUM(total_1) * 1) + (SUM(total_2) * 2) + (SUM(total_3) * 3)) AS FLOAT) / CAST(SUM(total) AS FLOAT)
+					ELSE 0 
+				END, 'N2') AS average_ot,
+				1 AS table_order
+			FROM
+				AttendanceData
+			ORDER BY 
+				table_order ASC, dept ASC";
+				
+	$params[] = $day;
 
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['dept'] == $row['dept'] && $result['section'] == $row['section']) {
-					$result['total_0'] = intval($row['total_0']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// OUT 4
-	$sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_1 FROM t_time_in_out tio
-	LEFT JOIN m_employees emp
-	ON tio.emp_no = emp.emp_no
-	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 16:00:00' AND '$day 16:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 04:00:00' AND '$day_tomorrow 04:59:59')
-	GROUP BY emp.dept, emp.section";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['dept'] == $row['dept'] && $result['section'] == $row['section']) {
-					$result['total_1'] = intval($row['total_1']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// OUT 5
-	$sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_2 FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp
-	ON tio.emp_no = emp.emp_no
-	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 17:00:00' AND '$day 17:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 05:00:00' AND '$day_tomorrow 05:59:59')
-	GROUP BY emp.dept, emp.section";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['dept'] == $row['dept'] && $result['section'] == $row['section']) {
-					$result['total_2'] = intval($row['total_2']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// OUT 6
-	$sql = "SELECT emp.dept, emp.section, count(tio.id) AS total_3 FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp
-	ON tio.emp_no = emp.emp_no
-	WHERE tio.day = '$day' AND (tio.time_out BETWEEN '$day 18:00:00' AND '$day 18:59:59') OR (tio.time_out BETWEEN '$day_tomorrow 06:00:00' AND '$day_tomorrow 06:59:59')
-	GROUP BY emp.dept, emp.section";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['dept'] == $row['dept'] && $result['section'] == $row['section']) {
-					$result['total_3'] = intval($row['total_3']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	foreach ($results as &$result) {
-		$c++;
-
-		$total = $result['total_0'] + $result['total_1'] + $result['total_2'] + $result['total_3'];
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
 	
-		$average_ot = 0;
-		if ($total > 0) {
-			$average_ot = round((($result['total_0'] * 0) + ($result['total_1'] * 1) + ($result['total_2'] * 2) + ($result['total_3'] * 3)) / $total, 2);
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		$tr_class = "";
+		$c_label = "";
+		$total_class = "";
+		if ($row['dept'] != 'Total') {
+			$c++;
+			$c_label = $c;
+		} else {
+			$tr_class = " class='bg-black'";
+			$total_class = " class='text-bold'";
 		}
 
-		echo '<tr>';
+		echo '<tr'.$tr_class.'>';
 
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$result['dept'].'</td>';
-		echo '<td>'.$result['section'].'</td>';
+		echo '<td>'.$c_label.'</td>';
+		echo '<td'.$total_class.'>'.$row['dept'].'</td>';
+		echo '<td>'.$row['section'].'</td>';
 		echo '<td>Manpower</td>';
-		echo '<td>'.$result['total_0'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_0'].'</td>';
 		echo '<td>0</td>';
-		echo '<td>'.$result['total_1'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_1'].'</td>';
 		echo '<td>0</td>';
-		echo '<td>'.$result['total_2'].'</td>';
-		echo '<td>'.$result['total_3'].'</td>';
-		echo '<td>'.$total.'</td>';
-		echo '<td>'.$average_ot.'</td>';
+		echo '<td'.$total_class.'>'.$row['total_2'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_3'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total'].'</td>';
+		echo '<td'.$total_class.'>'.$row['average_ot'].'</td>';
 		
 		echo '</tr>';
 	} 
 }
 
 $conn = NULL;
-?>

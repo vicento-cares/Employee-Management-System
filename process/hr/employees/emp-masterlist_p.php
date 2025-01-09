@@ -10,75 +10,104 @@ $method = $_POST['method'];
 // Employee Masterlist
 
 function count_employee_list($search_arr, $conn) {
-	$query = "SELECT count(id) AS total FROM m_employees WHERE";
-	if (!empty($search_arr['emp_no'])) {
-		$query = $query . " emp_no LIKE '".$search_arr['emp_no']."%'";
+	$query = "SELECT COUNT(id) AS total FROM m_employees WHERE";
+	$params = [];
+
+	if (!empty($search_arr['search_multiple_employee_arr'])) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_arr['search_multiple_employee_arr']), '?'));
+		$query = $query . " emp_no IN ($placeholders)";
+		$params = array_merge($params, $search_arr['search_multiple_employee_arr']); // Flatten the array
 	} else {
-		$query = $query . " emp_no != ''";
-	}
-	if (!empty($search_arr['full_name'])) {
-		$query = $query . " AND full_name LIKE '".$search_arr['full_name']."%'";
-	}
-	if (!empty($search_arr['provider'])) {
-		$query = $query . " AND provider = '".$search_arr['provider']."'";
-	}
-	if (isset($_SESSION['emp_no'])) {
-		/*if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
-			$query = $query . " AND dept = '".$_SESSION['dept']."'";
+		if (!empty($search_arr['emp_no'])) {
+			$query = $query . " emp_no LIKE ?";
+			$emp_no_search = $search_arr['emp_no'] . "%";
+			$params[] = $emp_no_search;
 		} else {
-			$query = $query . " AND dept IS NULL";
+			$query = $query . " emp_no != ''";
 		}
-		if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
-			$query = $query . " AND section = '".$_SESSION['section']."'";
-		} else {
-			$query = $query . " AND section IS NULL";
+		if (!empty($search_arr['full_name'])) {
+			$query = $query . " AND full_name LIKE ?";
+			$full_name_search = $search_arr['full_name'] . "%";
+			$params[] = $full_name_search;
 		}
-		if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
-			$query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+		if (!empty($search_arr['provider'])) {
+			$query = $query . " AND provider = ?";
+			$params[] = $search_arr['provider'];
+		}
+		if (isset($_SESSION['emp_no'])) {
+			/*if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
+				$query = $query . " AND dept = '".$_SESSION['dept']."'";
+			} else {
+				$query = $query . " AND dept IS NULL";
+			}
+			if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
+				$query = $query . " AND section = '".$_SESSION['section']."'";
+			} else {
+				$query = $query . " AND section IS NULL";
+			}
+			if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
+				$query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+			} else {
+				$query = $query . " AND line_no IS NULL";
+			}*/
+	
+			if (!empty($search_arr['dept'])) {
+				$query = $query . " AND dept = ?";
+				$params[] = $search_arr['dept'];
+			}
+			if (!empty($search_arr['section'])) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $search_arr['section'] . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($search_arr['line_no'])) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $search_arr['line_no'] . "%";
+				$params[] = $line_no_search;
+			}
+	
+			/*$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";*/
 		} else {
-			$query = $query . " AND line_no IS NULL";
-		}*/
+			if (!empty($search_arr['dept'])) {
+				$query = $query . " AND dept = ?";
+				$params[] = $search_arr['dept'];
+			}
+			if (!empty($search_arr['section'])) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $search_arr['section'] . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($search_arr['line_no'])) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $search_arr['line_no'] . "%";
+				$params[] = $line_no_search;
+			}
+		}
+	
+		if (!empty($search_arr['date_updated_from']) && !empty($search_arr['date_updated_to'])) {
+			$query = $query . " AND date_updated BETWEEN ? AND ?";
+			$params[] = $search_arr['date_updated_from'];
+			$params[] = $search_arr['date_updated_to'];
+		}
+	
+		if ($search_arr['resigned'] != '') {
+			$query = $query . " AND resigned = '".$search_arr['resigned']."'";
+			$params[] = $search_arr['resigned'];
+		}
+	}
 
-		if (!empty($search_arr['dept'])) {
-			$query = $query . " AND dept = '".$search_arr['dept']."'";
-		}
-		if (!empty($search_arr['section'])) {
-			$query = $query . " AND section LIKE '".$search_arr['section']."%'";
-		}
-		if (!empty($search_arr['line_no'])) {
-			$query = $query . " AND line_no LIKE '".$search_arr['line_no']."%'";
-		}
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
 
-		/*$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";*/
+	$row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		$total = $row['total'];
 	} else {
-		if (!empty($search_arr['dept'])) {
-			$query = $query . " AND dept = '".$search_arr['dept']."'";
-		}
-		if (!empty($search_arr['section'])) {
-			$query = $query . " AND section LIKE '".$search_arr['section']."%'";
-		}
-		if (!empty($search_arr['line_no'])) {
-			$query = $query . " AND line_no LIKE '".$search_arr['line_no']."%'";
-		}
-	}
-
-	if (!empty($search_arr['date_updated_from']) && !empty($search_arr['date_updated_to'])) {
-		$query = $query . " AND date_updated BETWEEN '".$search_arr['date_updated_from']."' AND '".$search_arr['date_updated_to']."'";
-	}
-
-	if ($search_arr['resigned'] != '') {
-		$query = $query . " AND resigned = '".$search_arr['resigned']."'";
-	}
-
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = $row['total'];
-		}
-	}else{
 		$total = 0;
 	}
+
 	return $total;
 }
 
@@ -146,20 +175,27 @@ if ($method == 'fetch_sub_section_dropdown') {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$section = addslashes($_POST['section']);
+	$section = $_POST['section'];
+
 	$sql = "SELECT line_no FROM m_access_locations";
+	$params = [];
+
 	if (!empty($section)) {
 		if ($section != 'QA') {
-			$sql = $sql . " WHERE section = '$section'";
+			$sql = $sql . " WHERE section = ?";
+			$params[] = $section;
 		}
 	}
 	$sql = $sql . " GROUP BY line_no ORDER BY line_no ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+
+	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	if (count($results) > 0) {
 		echo '<option selected value="">Select Line No.</option>';
 		echo '<option value="">All</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		foreach ($results as $row) {
 			echo '<option value="'.htmlspecialchars($row['line_no']).'">'.htmlspecialchars($row['line_no']).'</option>';
 		}
 	} else {
@@ -300,8 +336,8 @@ if ($method == 'fetch_employee_name_approver_dropdown') {
 }
 
 if ($method == 'count_employee_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -337,19 +373,24 @@ if ($method == 'count_employee_list') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
 		$resigned = '';
 	} else {
 		$resigned = $_POST['resigned'];
+	}
+
+	$search_multiple_employee_arr = [];
+	if (isset($_POST['search_multiple_employee_arr'])) {
+		$search_multiple_employee_arr = $_POST['search_multiple_employee_arr'];
 	}
 	
 	$search_arr = array(
@@ -361,15 +402,16 @@ if ($method == 'count_employee_list') {
 		"line_no" => $line_no,
 		"date_updated_from" => $date_updated_from,
 		"date_updated_to" => $date_updated_to,
-		"resigned" => $resigned
+		"resigned" => $resigned,
+		"search_multiple_employee_arr" => $search_multiple_employee_arr
 	);
 
 	echo count_employee_list($search_arr, $conn);
 }
 
 if ($method == 'employee_list_last_page') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -405,19 +447,24 @@ if ($method == 'employee_list_last_page') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
 		$resigned = '';
 	} else {
 		$resigned = $_POST['resigned'];
+	}
+
+	$search_multiple_employee_arr = [];
+	if (isset($_POST['search_multiple_employee_arr'])) {
+		$search_multiple_employee_arr = $_POST['search_multiple_employee_arr'];
 	}
 
 	$search_arr = array(
@@ -429,7 +476,8 @@ if ($method == 'employee_list_last_page') {
 		"line_no" => $line_no,
 		"date_updated_from" => $date_updated_from,
 		"date_updated_to" => $date_updated_to,
-		"resigned" => $resigned
+		"resigned" => $resigned,
+		"search_multiple_employee_arr" => $search_multiple_employee_arr
 	);
 
 	$results_per_page = 20;
@@ -444,8 +492,8 @@ if ($method == 'employee_list_last_page') {
 }
 
 if ($method == 'employee_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 	$provider = $_POST['provider'];
 
 	$date_updated_from = '';
@@ -481,19 +529,24 @@ if ($method == 'employee_list') {
 			$section = $_SESSION['section'];
 		}
 	} else {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	}
 
 	if (!isset($_POST['line_no'])) {
 		$line_no = '';
 	} else {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	}
 
 	if (!isset($_POST['resigned'])) {
 		$resigned = '';
 	} else {
 		$resigned = $_POST['resigned'];
+	}
+
+	$search_multiple_employee_arr = [];
+	if (isset($_POST['search_multiple_employee_arr'])) {
+		$search_multiple_employee_arr = $_POST['search_multiple_employee_arr'];
 	}
 
 	$current_page = intval($_POST['current_page']);
@@ -507,63 +560,91 @@ if ($method == 'employee_list') {
 	$c = $page_first_result;
 
 	$query = "SELECT id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
-	if (!empty($emp_no)) {
-		$query = $query . " emp_no LIKE '".$emp_no."%'";
+	
+	$params = [];
+
+	if (!empty($search_multiple_employee_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_employee_arr), '?'));
+		$query = $query . " emp_no IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_employee_arr); // Flatten the array
 	} else {
-		$query = $query . " emp_no != ''";
-	}
-	if (!empty($full_name)) {
-		$query = $query . " AND full_name LIKE '$full_name%'";
-	}
-	if (!empty($provider)) {
-		$query = $query . " AND provider = '$provider'";
-	}
-	if (isset($_SESSION['emp_no'])) {
-		/*if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
-			$query = $query . " AND dept = '".$_SESSION['dept']."'";
+		if (!empty($emp_no)) {
+			$query = $query . " emp_no LIKE ?";
+			$emp_no_search = $emp_no . "%";
+			$params[] = $emp_no_search;
 		} else {
-			$query = $query . " AND dept IS NULL";
+			$query = $query . " emp_no != ''";
 		}
-		if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
-			$query = $query . " AND section = '".$_SESSION['section']."'";
+		if (!empty($full_name)) {
+			$query = $query . " AND full_name LIKE ?";
+			$full_name_search = $full_name . "%";
+			$params[] = $full_name_search;
+		}
+		if (!empty($provider)) {
+			$query = $query . " AND provider = ?";
+			$params[] = $provider;
+		}
+		if (isset($_SESSION['emp_no'])) {
+			/*if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
+				$query = $query . " AND dept = '".$_SESSION['dept']."'";
+			} else {
+				$query = $query . " AND dept IS NULL";
+			}
+			if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
+				$query = $query . " AND section = '".$_SESSION['section']."'";
+			} else {
+				$query = $query . " AND section IS NULL";
+			}
+			if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
+				$query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+			} else {
+				$query = $query . " AND line_no IS NULL";
+			}*/
+	
+			if (!empty($dept)) {
+				$query = $query . " AND dept = ?";
+				$params[] = $dept;
+			}
+			if (!empty($section)) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $section . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($line_no)) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $line_no . "%";
+				$params[] = $line_no_search;
+			}
+	
+			/*$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";*/
 		} else {
-			$query = $query . " AND section IS NULL";
+			if (!empty($dept)) {
+				$query = $query . " AND dept = ?";
+				$params[] = $dept;
+			}
+			if (!empty($section)) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $section . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($line_no)) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $line_no . "%";
+				$params[] = $line_no_search;
+			}
 		}
-		if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
-			$query = $query . " AND line_no = '".$_SESSION['line_no']."'";
-		} else {
-			$query = $query . " AND line_no IS NULL";
-		}*/
-
-		if (!empty($dept)) {
-			$query = $query . " AND dept = '$dept'";
+	
+		if (!empty($date_updated_from) && !empty($date_updated_to)) {
+			$query = $query . " AND date_updated BETWEEN ? AND ?";
+			$params[] = $date_updated_from;
+			$params[] = $date_updated_to;
 		}
-		if (!empty($section)) {
-			$query = $query . " AND section LIKE '$section%'";
+	
+		if ($resigned != '') {
+			$query = $query . " AND resigned = ?";
+			$params[] = $resigned;
 		}
-		if (!empty($line_no)) {
-			$query = $query . " AND line_no LIKE '$line_no%'";
-		}
-
-		/*$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";*/
-	} else {
-		if (!empty($dept)) {
-			$query = $query . " AND dept = '$dept'";
-		}
-		if (!empty($section)) {
-			$query = $query . " AND section LIKE '$section%'";
-		}
-		if (!empty($line_no)) {
-			$query = $query . " AND line_no LIKE '$line_no%'";
-		}
-	}
-
-	if (!empty($date_updated_from) && !empty($date_updated_to)) {
-		$query = $query . " AND date_updated BETWEEN '$date_updated_from' AND '$date_updated_to'";
-	}
-
-	if ($resigned != '') {
-		$query = $query . " AND resigned = '$resigned'";
 	}
 
 	// MySQL Query
@@ -573,10 +654,13 @@ if ($method == 'employee_list') {
 	$query = $query . " ORDER BY id ASC";
 	$query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 	
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	if (count($results) > 0) {
+		foreach($results as $row){
 			$c++;
 			
 			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {

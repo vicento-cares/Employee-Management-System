@@ -79,10 +79,14 @@
               <br>
               <div class="row">
                 <div class="col-sm-3 offset-sm-5">
+                  <?php if (empty($_SESSION['line_no'])) {?>
                   <label>Line No.</label>
                   <select id="line_no_search" class="form-control" onchange="search_data(1)">
                     <option value="">Select Line No.</option>
                   </select>
+                  <?php } else { ?>
+                  <input type="hidden" id="line_no_search" value="<?=$_SESSION['line_no']?>">
+                  <?php } ?>
                 </div>
                 <div class="col-sm-2">
                   <label>&nbsp;</label>

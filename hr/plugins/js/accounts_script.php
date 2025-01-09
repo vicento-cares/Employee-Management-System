@@ -20,6 +20,7 @@
             },
             success: function (response) {
                 document.getElementById("dept").innerHTML = response;
+                document.getElementById("dept_search").innerHTML = response;
                 document.getElementById("dept_update").innerHTML = response;
             }
         });
@@ -57,6 +58,8 @@
 
     var typingTimerEmpNoSearch; // Timer identifier EmpNo Search
     var typingTimerFullNameSearch; // Timer identifier FullName Search
+    var typingTimerSectionSearch; // Timer identifier Section Search
+    var typingTimerLineNoSearch; // Timer identifier LineNo Search
     var doneTypingInterval = 250; // Time in ms
 
     // On keyup, start the countdown
@@ -81,10 +84,40 @@
         clearTimeout(typingTimerFullNameSearch);
     });
 
+    // On keyup, start the countdown
+    document.getElementById("section_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerSectionSearch);
+        typingTimerSectionSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("section_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerSectionSearch);
+    });
+
+    // On keyup, start the countdown
+    document.getElementById("line_no_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerLineNoSearch);
+        typingTimerLineNoSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("line_no_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerLineNoSearch);
+    });
+
     // User is "finished typing," do something
     const doneTypingLoadAccounts = () => {
         load_accounts(1);
     }
+
+    document.getElementById("dept_search").addEventListener('change', e => {
+        load_accounts(1);
+    });
+
+    document.getElementById("role_search").addEventListener('change', e => {
+        load_accounts(1);
+    });
 
     // Table Responsive Scroll Event for Load More
     document.getElementById("list_of_accounts_res").addEventListener("scroll", () => {
@@ -113,6 +146,9 @@
     const count_account_list = () => {
         var emp_no = sessionStorage.getItem('emp_no_search');
         var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var role = sessionStorage.getItem('role_search');
         $.ajax({
             url: '../process/admin/accounts/acct-management_p.php',
@@ -122,6 +158,9 @@
                 method: 'count_account_list',
                 emp_no: emp_no,
                 full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
                 role: role
             },
             success: function (response) {
@@ -142,6 +181,9 @@
     const load_accounts_last_page = () => {
         var emp_no = sessionStorage.getItem('emp_no_search');
         var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var role = sessionStorage.getItem('role_search');
         var current_page = parseInt(sessionStorage.getItem('list_of_accounts_table_pagination'));
         $.ajax({
@@ -152,6 +194,9 @@
                 method: 'account_list_last_page',
                 emp_no: emp_no,
                 full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
                 role: role
             },
             success: function (response) {
@@ -177,19 +222,31 @@
 
         var emp_no = document.getElementById('emp_no_search').value;
         var full_name = document.getElementById('full_name_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
         var role = document.getElementById('role_search').value;
 
         var emp_no1 = sessionStorage.getItem('emp_no_search');
         var full_name1 = sessionStorage.getItem('full_name_search');
+        var dept1 = sessionStorage.getItem('dept_search');
+        var section1 = sessionStorage.getItem('section_search');
+        var line_no1 = sessionStorage.getItem('line_no_search');
         var role1 = sessionStorage.getItem('role_search');
 
         if (current_page > 1) {
             switch (true) {
                 case emp_no !== emp_no1:
                 case full_name !== full_name1:
+                case dept !== dept1:
+                case section !== section1:
+                case line_no !== line_no1:
                 case role !== role1:
                     emp_no = emp_no1;
                     full_name = full_name1;
+                    dept = dept1;
+                    section = section1;
+                    line_no = line_no1;
                     role = role1;
                     break;
                 default:
@@ -197,6 +254,9 @@
         } else {
             sessionStorage.setItem('emp_no_search', emp_no);
             sessionStorage.setItem('full_name_search', full_name);
+            sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('section_search', section);
+            sessionStorage.setItem('line_no_search', line_no);
             sessionStorage.setItem('role_search', role);
         }
 
@@ -211,6 +271,9 @@
                 method: 'account_list',
                 emp_no: emp_no,
                 full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
                 role: role,
                 current_page: current_page
             },
@@ -653,8 +716,16 @@
     const print_accounts_qr_all = () => {
         var emp_no = sessionStorage.getItem('emp_no_search');
         var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var role = sessionStorage.getItem('role_search');
 
-        window.open('../process/print/print_accounts_qr_all.php?emp_no=' + emp_no + "&full_name=" + full_name + '&role=' + role, '_blank');
+        window.open('../process/print/print_accounts_qr_all.php?emp_no=' + emp_no 
+                    + "&full_name=" + full_name 
+                    + "&dept=" + dept 
+                    + "&section=" + section 
+                    + "&line_no=" + line_no 
+                    + '&role=' + role, '_blank');
     }
 </script>

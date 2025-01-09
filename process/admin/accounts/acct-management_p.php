@@ -10,42 +10,87 @@ $method = $_POST['method'];
 // Account Management
 
 function count_account_list($search_arr, $conn) {
-	$query = "SELECT count(id) AS total FROM m_accounts WHERE";
+	$query = "SELECT COUNT(id) AS total FROM m_accounts WHERE";
+	$params = [];
 
 	if (!empty($search_arr['emp_no'])) {
-		$query = $query . " emp_no LIKE '".$search_arr['emp_no']."%'";
+		$query = $query . " emp_no LIKE ?";
+		$emp_no_search = $search_arr['emp_no'] . "%";
+		$params[] = $emp_no_search;
 	} else {
 		$query = $query . " emp_no != ''";
 	}
 
 	if (!empty($search_arr['full_name'])) {
-		$query = $query . " AND full_name LIKE '".$search_arr['full_name']."%'";
+		$query = $query . " AND full_name LIKE ?";
+		$full_name_search = $search_arr['full_name'] . "%";
+		$params[] = $full_name_search;
+	}
+
+	if (!empty($search_arr['dept'])) {
+		$query = $query . " AND dept = ?";
+		$params[] = $search_arr['dept'];
+	}
+	if (!empty($search_arr['section'])) {
+		$query = $query . " AND section LIKE ?";
+		$section_search = $search_arr['section'] . "%";
+		$params[] = $section_search;
+	}
+	if (!empty($search_arr['line_no'])) {
+		$query = $query . " AND line_no LIKE ?";
+		$line_no_search = $search_arr['line_no'] . "%";
+		$params[] = $line_no_search;
 	}
 
 	if (!empty($search_arr['role'])) {
-		$query = $query . " AND role = '".$search_arr['role']."'";
+		$query = $query . " AND role = ?";
+		$params[] = $search_arr['role'];
 	}
 	
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = $row['total'];
-		}
-	}else{
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		$total = $row['total'];
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
 if ($method == 'count_account_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
-	$role = addslashes($_POST['role']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+
+	if (!isset($_POST['dept'])) {
+		$dept = '';
+	} else {
+		$dept = $_POST['dept'];
+	}
+
+	if (!isset($_POST['section'])) {
+		$section = '';
+	} else {
+		$section = $_POST['section'];
+	}
+
+	if (!isset($_POST['line_no'])) {
+		$line_no = '';
+	} else {
+		$line_no = $_POST['line_no'];
+	}
+
+	$role = $_POST['role'];
 	
 	$search_arr = array(
 		"emp_no" => $emp_no,
 		"full_name" => $full_name,
+		"dept" => $dept,
+		"section" => $section,
+		"line_no" => $line_no,
 		"role" => $role
 	);
 
@@ -53,13 +98,35 @@ if ($method == 'count_account_list') {
 }
 
 if ($method == 'account_list_last_page') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
-	$role = addslashes($_POST['role']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+
+	if (!isset($_POST['dept'])) {
+		$dept = '';
+	} else {
+		$dept = $_POST['dept'];
+	}
+
+	if (!isset($_POST['section'])) {
+		$section = '';
+	} else {
+		$section = $_POST['section'];
+	}
+
+	if (!isset($_POST['line_no'])) {
+		$line_no = '';
+	} else {
+		$line_no = $_POST['line_no'];
+	}
+
+	$role = $_POST['role'];
 
 	$search_arr = array(
 		"emp_no" => $emp_no,
 		"full_name" => $full_name,
+		"dept" => $dept,
+		"section" => $section,
+		"line_no" => $line_no,
 		"role" => $role
 	);
 
@@ -74,9 +141,28 @@ if ($method == 'account_list_last_page') {
 }
 
 if ($method == 'account_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
-	$role = addslashes($_POST['role']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+
+	if (!isset($_POST['dept'])) {
+		$dept = '';
+	} else {
+		$dept = $_POST['dept'];
+	}
+
+	if (!isset($_POST['section'])) {
+		$section = '';
+	} else {
+		$section = $_POST['section'];
+	}
+
+	if (!isset($_POST['line_no'])) {
+		$line_no = '';
+	} else {
+		$line_no = $_POST['line_no'];
+	}
+
+	$role = $_POST['role'];
 
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
@@ -90,18 +176,40 @@ if ($method == 'account_list') {
 
 	$query = "SELECT id, emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE";
 
+	$params = [];
+
 	if (!empty($emp_no)) {
-		$query = $query . " emp_no LIKE '$emp_no%'";
+		$query = $query . " emp_no LIKE ?";
+		$emp_no_search = $emp_no . "%";
+		$params[] = $emp_no_search;
 	} else {
 		$query = $query . " emp_no != ''";
 	}
 
 	if (!empty($full_name)) {
-		$query = $query . " AND full_name LIKE '$full_name%'";
+		$query = $query . " AND full_name LIKE ?";
+		$full_name_search = $full_name . "%";
+		$params[] = $full_name_search;
+	}
+
+	if (!empty($dept)) {
+		$query = $query . " AND dept = ?";
+		$params[] = $dept;
+	}
+	if (!empty($section)) {
+		$query = $query . " AND section LIKE ?";
+		$section_search = $section . "%";
+		$params[] = $section_search;
+	}
+	if (!empty($line_no)) {
+		$query = $query . " AND line_no LIKE ?";
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
 	}
 
 	if (!empty($role)) {
-		$query = $query . " AND role = '$role'";
+		$query = $query . " AND role = ?";
+		$params[] = $role;
 	}
 
 	// MySQL Query
@@ -111,10 +219,13 @@ if ($method == 'account_list') {
 	$query = $query . " ORDER BY id ASC";
 	$query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
 
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+	if (count($results) > 0) {
+		foreach($results as $row){
 			$c++;
 
 			if (isset($_SESSION['emp_no_hr'])) {
@@ -140,7 +251,7 @@ if ($method == 'account_list') {
 		}
 	}else{
 		echo '<tr>';
-			echo '<td colspan="7" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="9" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }

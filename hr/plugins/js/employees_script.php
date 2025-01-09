@@ -2,6 +2,8 @@
     // AJAX IN PROGRESS GLOBAL VARS
     var load_employees_ajax_in_process = false;
 
+    var search_multiple_employee_arr = [];
+
     $(document).ready(function () {
         fetch_dept_dropdown();
         fetch_group_dropdown();
@@ -66,8 +68,29 @@
 
     // User is "finished typing," do something
     const doneTypingLoadEmployees = () => {
+        clear_search_multiple_employee();
         load_employees(1);
     }
+
+    document.getElementById("provider_master_search").addEventListener('change', e => {
+        clear_search_multiple_employee();
+        load_employees(1);
+    });
+
+    document.getElementById("dept_master_search").addEventListener('change', e => {
+        clear_search_multiple_employee();
+        load_employees(1);
+    });
+
+    document.getElementById("resigned_master_search").addEventListener('change', e => {
+        clear_search_multiple_employee();
+        load_employees(1);
+    });
+
+    document.getElementById("btnSearchEmployee").addEventListener('click', e => {
+        clear_search_multiple_employee();
+        load_employees(1);
+    });
 
     // Table Responsive Scroll Event for Load More
     document.getElementById("list_of_employees_res").addEventListener("scroll", function () {
@@ -363,7 +386,8 @@
                 line_no: line_no,
                 date_updated_from: date_updated_from,
                 date_updated_to: date_updated_to,
-                resigned: resigned
+                resigned: resigned,
+                search_multiple_employee_arr: search_multiple_employee_arr
             },
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -405,7 +429,8 @@
                 line_no: line_no,
                 date_updated_from: date_updated_from,
                 date_updated_to: date_updated_to,
-                resigned: resigned
+                resigned: resigned,
+                search_multiple_employee_arr: search_multiple_employee_arr
             },
             success: function (response) {
                 sessionStorage.setItem('last_page', response);
@@ -510,7 +535,8 @@
                     date_updated_from: date_updated_from,
                     date_updated_to: date_updated_to,
                     resigned: resigned,
-                    current_page: current_page
+                    current_page: current_page,
+                    search_multiple_employee_arr: search_multiple_employee_arr
                 },
                 beforeSend: (jqXHR, settings) => {
                     document.getElementById("btnNextPage").setAttribute('disabled', true);
@@ -545,6 +571,90 @@
                 load_employees_ajax_in_process = false;
             });
         }
+    }
+
+    document.getElementById("search_multiple_employee_form").addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the value from the input field
+        const emp_no = document.getElementById("emp_no_search_multiple").value.trim();
+
+        // Add the employee number to the global array
+        search_multiple_employee_arr.push(emp_no);
+
+        console.log(search_multiple_employee_arr);
+
+        // Create a new card element
+        const newCard = document.createElement('div');
+        newCard.className = 'card bg-success collapsed-card ml-2';
+        newCard.innerHTML = `
+            <div class="card-header">
+                <h3 class="card-title">${emp_no}</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" onclick="remove_search_multiple_employee(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->
+        `;
+
+        // Append the new card to the container
+        document.getElementById('search_multiple_employee_container').appendChild(newCard);
+
+        // Clear the input field after adding the card
+        document.getElementById("emp_no_search_multiple").value = '';
+
+        check_search_multiple_employee();
+    });
+
+    const remove_search_multiple_employee = button => {
+        // Check if button is defined
+        if (!button) {
+            console.error('Button is undefined');
+            return;
+        }
+
+        // Find the closest card div to the button that was clicked
+        const card = button.closest('.card');
+
+        // Check if card is found
+        if (!card) {
+            console.error('Card not found');
+            return;
+        }
+        
+        // Get the innerHTML of the card-title
+        const emp_no = card.querySelector('.card-title').innerHTML;
+
+        // Remove the employee number from the global array
+        search_multiple_employee_arr = search_multiple_employee_arr.filter(emp => emp !== emp_no);
+
+        console.log(search_multiple_employee_arr);
+
+        console.log('Removed Search:', emp_no); // You can use this value as needed
+
+        // Remove the card from the DOM
+        card.remove();
+
+        check_search_multiple_employee();
+    }
+
+    const check_search_multiple_employee = () => {
+        var sme_arr_length = search_multiple_employee_arr.length;
+
+        if (sme_arr_length > 0) {
+            document.getElementById("btnSearchMultipleEmployee").removeAttribute('disabled');
+        } else {
+            document.getElementById("btnSearchMultipleEmployee").setAttribute('disabled', true);
+        }
+    }
+
+    const clear_search_multiple_employee = () => {
+        search_multiple_employee_arr = [];
+        document.getElementById('search_multiple_employee_container').innerHTML = '';
+        document.getElementById("btnSearchMultipleEmployee").setAttribute('disabled', true);
     }
 
     $("#new_employee").on('hidden.bs.modal', e => {
@@ -872,7 +982,7 @@
             document.getElementById('emp_js_s_master_update').value = emp_js_s_no;
             document.getElementById('emp_sv_master_update').value = emp_sv_no;
             document.getElementById('emp_approver_master_update').value = emp_approver_no;
-        }, 500);
+        }, 750);
     }
 
     const update_employee = () => {
@@ -1128,7 +1238,23 @@
         var date_updated_from = sessionStorage.getItem('date_updated_from_master_search');
         var date_updated_to = sessionStorage.getItem('date_updated_to_master_search');
         var resigned = sessionStorage.getItem('resigned_master_search');
-        window.open('../process/export/exp_employees_hr.php?emp_no=' + emp_no + "&full_name=" + full_name + '&provider=' + provider + '&dept=' + dept + '&section=' + section + '&line_no=' + line_no + '&date_updated_from=' + date_updated_from + '&date_updated_to=' + date_updated_to + '&resigned=' + resigned, '_blank');
+
+        var sme_arr_length = search_multiple_employee_arr.length;
+        var search_multiple_employee_obj = '';
+        if (sme_arr_length > 0) {
+            search_multiple_employee_obj = Object.values(search_multiple_employee_arr);
+        }
+        console.log(search_multiple_employee_obj);
+        window.open('../process/export/exp_employees_hr.php?emp_no=' + emp_no 
+                    + "&full_name=" + full_name 
+                    + '&provider=' + provider 
+                    + '&dept=' + dept 
+                    + '&section=' + section 
+                    + '&line_no=' + line_no 
+                    + '&date_updated_from=' + date_updated_from 
+                    + '&date_updated_to=' + date_updated_to 
+                    + '&resigned=' + resigned 
+                    + '&search_multiple_employee_arr=' + search_multiple_employee_obj, '_blank');
     }
 
     const print_employees_qr = () => {

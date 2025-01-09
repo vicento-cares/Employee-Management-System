@@ -22,6 +22,7 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <!-- Add icons to the links using the .nav-icon class
              with font-awesome or any other icon font library -->
+        <?php if (empty($_SESSION['line_no'])) {?>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/employees.php") { ?>
           <a href="employees.php" class="nav-link active">
@@ -34,6 +35,7 @@
             </p>
           </a>
         </li>
+        <?php } ?>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/certification.php") { ?>
           <a href="certification.php" class="nav-link active">

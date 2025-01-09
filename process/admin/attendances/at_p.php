@@ -816,123 +816,102 @@ if ($method == 'get_attendance_list_counting') {
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
-			$dept = addslashes($_POST['dept']);
+			$dept = $_POST['dept'];
 		} else {
 			$dept = '';
 		}
 		if (!empty($_POST['section'])) {
-			$section = addslashes($_POST['section']);
+			$section = $_POST['section'];
 		} else {
 			$section = '';
 		}
 		if (!empty($_POST['line_no'])) {
-			$line_no = addslashes($_POST['line_no']);
+			$line_no = $_POST['line_no'];
 		} else {
 			$line_no = '';
 		}
 	} else {
 		if (!empty($_POST['dept'])) {
-			$dept = addslashes($_POST['dept']);
+			$dept = $_POST['dept'];
 		} else {
 			$dept = '';
 		}
-		$section = $_SESSION['section'];
-		$line_no = $_SESSION['line_no'];
+		if (!empty($_SESSION['section'])) {
+			$section = $_SESSION['section'];
+		} else if (isset($_POST['section']) && !empty($_POST['section'])) {
+			$section = $_POST['section'];
+		} else {
+			$section = '';
+		}
+		if (!empty($_SESSION['line_no'])) {
+			$line_no = $_SESSION['line_no'];
+		} else if (isset($_POST['line_no']) && !empty($_POST['line_no'])) {
+			$line_no = $_POST['line_no'];
+		} else {
+			$line_no = '';
+		}
 	}
 
 	$c = 0;
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
 	$row_class = $row_class_arr[0];
 
-	$results = array();
-
-	//MySQL
-	// $sql = "SELECT IFNULL(process, 'No Process') AS process1, 
-	// 		COUNT(emp_no) AS total 
-	// 	FROM m_employees 
-	// 	WHERE shift_group = '$shift_group'";
 	//MS SQL Server
-	$sql = "SELECT ISNULL(process, 'No Process') AS process1, 
-			COUNT(emp_no) AS total 
-		FROM m_employees 
-		WHERE shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
-	}
-
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			if ($row['process1'] == '') {
-				array_push($results, array('process' => 'No Process', 'total_present' => 0, 'total' => $row['total']));
-			} else {
-				array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
-			}
-		}
-	}
+	$sql = "SELECT 
+				ISNULL(emp.process, 'No Process') AS process, 
+				COUNT(emp.emp_no) AS total, 
+				COUNT(tio.emp_no) AS total_present, 
+				COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent 
+			FROM 
+				m_employees emp 
+			LEFT JOIN 
+				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
+			WHERE 
+				emp.dept != ''";
 	
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp 
-	// 	ON tio.emp_no = emp.emp_no 
-	// 	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-			COUNT(tio.emp_no) AS total_present 
-		FROM t_time_in_out tio 
-		LEFT JOIN m_employees emp 
-		ON tio.emp_no = emp.emp_no 
-		WHERE tio.day = '$day' AND shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
+	$params = [];
+
+	$params[] = $day;
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND emp.shift_group = ?";
+		$params[] = $shift_group;
 	} else {
-		$sql = $sql . " AND emp.dept != ''";
+		$sql = $sql . " AND (emp.shift_group = '' OR emp.shift_group IS NULL)";
+	}
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept LIKE ?";
+		$dept_search = $dept . "%";
+		$params[] = $dept_search;
 	}
 	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE '$section%'";
+		$sql = $sql . " AND emp.section LIKE ?";
+		$section_search = $section . "%";
+		$params[] = $section_search;
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total_present'] = $row['total_present'];
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
+		$sql = $sql . " AND emp.line_no LIKE ?";
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
 	}
 
-	foreach ($results as &$result) {
+	$sql = $sql . " AND 
+						(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+					GROUP BY 
+						emp.process";
+	
+	$params[] = $day;
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
 		$c++;
 
-		$total = intval($result['total']);
-		$total_present = intval($result['total_present']);
-		$total_absent = $total - $total_present;
+		$total = intval($row['total']);
+		$total_present = intval($row['total_present']);
 
-		if ($result['process'] == 'No Process') {
+		if ($row['process'] == 'No Process') {
 			$row_class = $row_class_arr[4];
 		} else if ($total_present == $total) {
 			$row_class = $row_class_arr[1];
@@ -946,497 +925,10 @@ if ($method == 'get_attendance_list_counting') {
 		
 		echo '<tr class="'.$row_class.'">';
 		echo '<td>'.$c.'</td>';
-		echo '<td>'.$result['process'].'</td>';
-		echo '<td>'.$result['total_present'].'</td>';
-		echo '<td>'.$total_absent.'</td>';
-		echo '<td>'.$result['total'].'</td>';
-
-		echo '</tr>';
-	}
-
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process, 
-	// 		COUNT(tio.emp_no) AS total_present, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp
-	// 	LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	// $sql = "SELECT ISNULL(emp.process, 'No Process') AS process, 
-	// 		COUNT(tio.emp_no) AS total_present, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp
-	// 	LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	// if (!empty($dept)) {
-	// 	$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	// } else {
-	// 	$sql = $sql . " AND emp.dept != ''";
-	// }
-	// if (!empty($section)) {
-	// 	$sql = $sql . " AND emp.section LIKE '$section%'";
-	// }
-	// if (!empty($line_no)) {
-	// 	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
-	// }
-	// $sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
-	// $sql = $sql . " GROUP BY emp.process";
-
-	// $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	// $stmt->execute();
-	// if ($stmt->rowCount() > 0) {
-	// 	foreach($stmt->fetchALL() as $row){
-	// 		$c++;
-
-	// 		$total = intval($row['total']);
-	// 		$total_present = intval($row['total_present']);
-	// 		$total_absent = $total - $total_present;
-
-	// 		if ($row['process'] == 'No Process') {
-	// 			$row_class = $row_class_arr[4];
-	// 		} else if ($total_present == $total) {
-	// 			$row_class = $row_class_arr[1];
-	// 		} else if ($total_present < $total && $total_present > 0) {
-	// 			$row_class = $row_class_arr[2];
-	// 		} else if ($total_present < 1) {
-	// 			$row_class = $row_class_arr[3];
-	// 		} else {
-	// 			$row_class = $row_class_arr[0];
-	// 		}
-			
-	// 		echo '<tr class="'.$row_class.'">';
-	// 		echo '<td>'.$c.'</td>';
-	// 		echo '<td>'.$row['process'].'</td>';
-	// 		echo '<td>'.$row['total_present'].'</td>';
-	// 		echo '<td>'.$total_absent.'</td>';
-	// 		echo '<td>'.$row['total'].'</td>';
-
-	// 		echo '</tr>';
-	// 	}
-	// }
-}
-
-if ($method == 'get_attendance_list_counting2') {
-	$day = $_POST['day'];
-	$shift_group = $_POST['shift_group'];
-
-	if (!empty($_SESSION['emp_no_hr'])) {
-		if (!empty($_POST['dept'])) {
-			$dept = addslashes($_POST['dept']);
-		} else {
-			$dept = '';
-		}
-		if (!empty($_POST['section'])) {
-			$section = addslashes($_POST['section']);
-		} else {
-			$section = '';
-		}
-		if (!empty($_POST['line_no'])) {
-			$line_no = addslashes($_POST['line_no']);
-		} else {
-			$line_no = '';
-		}
-	} else {
-		if (!empty($_POST['dept'])) {
-			$dept = addslashes($_POST['dept']);
-		} else {
-			$dept = '';
-		}
-		if (isset($_POST['section']) && !empty($_POST['section'])) {
-			$section = addslashes($_POST['section']);
-		} else {
-			$section = '';
-		}
-		if (isset($_POST['line_no']) && !empty($_POST['line_no'])) {
-			$line_no = addslashes($_POST['line_no']);
-		} else {
-			$line_no = '';
-		}
-	}
-
-	$c = 0;
-	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
-	$row_class = $row_class_arr[0];
-
-	$results = array();
-
-	// Get list of processes with total mp based on Employee Masterlist
-
-	//MySQL
-	// $sql = "SELECT IFNULL(process, 'No Process') AS process1, 
-	// 		COUNT(emp_no) AS total 
-	// 	FROM m_employees 
-	// 	WHERE shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(process, 'No Process') AS process1, 
-		COUNT(emp_no) AS total 
-	FROM m_employees 
-	WHERE shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
-	}
-	if ($line_no == 'No Line') {
-		$sql = $sql . " AND line_no IS NULL";
-	} else if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
-	} else {
-		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
-	}
-
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			if ($row['process1'] == '') {
-				array_push($results, array('process' => 'No Process', 'total_present' => 0, 'total' => intval($row['total'])));
-			} else {
-				array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => intval($row['total'])));
-			}
-		}
-	}
-
-	// Get list of processes with total mp based on Line Support
-
-	// Update Total based on Line Support To
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$additional_process = true;
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total'] += intval($row['total']);
-					$additional_process = false;
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			
-			unset($result); // unset reference to last element
-
-			if ($additional_process == true) {
-				array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => intval($row['total'])));
-			}
-		}
-	}
-
-	// Update Total based on Line Support From Rejected
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'rejected'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$additional_process = true;
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					// $result['total'] += intval($row['total']);
-					$additional_process = false;
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			
-			unset($result); // unset reference to last element
-
-			// if ($additional_process == true) {
-			// 	array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => intval($row['total'])));
-			// }
-		}
-	}
-
-	// Update Total based on Line Support From
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total'] -= intval($row['total']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-
-			unset($result); // unset reference to last element
-		}
-
-		// Filter the results array to remove processes with total less than 1
-		// $results = array_filter($results, function($result) {
-		// 	return $result['total'] >= 1;
-		// });
-	}
-
-	// Update total_present from list of processes based on t_time_in_out
-
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp 
-	// 	ON tio.emp_no = emp.emp_no 
-	// 	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp 
-	ON tio.emp_no = emp.emp_no 
-	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE '$section%'";
-	}
-	if ($line_no == 'No Line') {
-		$sql = $sql . " AND emp.line_no IS NULL";
-	} else if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
-	} else {
-		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
-	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total_present'] = intval($row['total_present']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update total_present from list of processes based on t_time_in_out and Line Support
-
-	// Update Total Present based on Line Support To
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total_present'] += intval($row['total_present']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present based on Line Support From Rejected
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'rejected'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					// $result['total_present'] += intval($row['total_present']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present based on Line Support From
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.process, 'No Process') AS process1, 
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.process, 'No Process') AS process1, 
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON emp.emp_no = tio.emp_no AND tio.day = '$day' 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no  AND lsh.day = '$day'
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.process";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['process'] == $row['process1']) {
-					$result['total_present'] -= intval($row['total_present']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-
-			unset($result); // unset reference to last element
-		}
-	}
-
-	foreach ($results as &$result) {
-		$c++;
-
-		$total = intval($result['total']);
-		$total_present = intval($result['total_present']);
-		$total_absent = $total - $total_present;
-
-		if ($result['process'] == 'No Process') {
-			$row_class = $row_class_arr[4];
-		} else if ($total_present == $total) {
-			$row_class = $row_class_arr[1];
-		} else if ($total_present < $total && $total_present > 0) {
-			$row_class = $row_class_arr[2];
-		} else if ($total_present < 1) {
-			$row_class = $row_class_arr[3];
-		} else {
-			$row_class = $row_class_arr[0];
-		}
-		
-		echo '<tr class="'.$row_class.'">';
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$result['process'].'</td>';
-		echo '<td>'.$result['total_present'].'</td>';
-		echo '<td>'.$total_absent.'</td>';
-		echo '<td>'.$result['total'].'</td>';
+		echo '<td>'.$row['process'].'</td>';
+		echo '<td>'.$row['total_present'].'</td>';
+		echo '<td>'.$row['total_absent'].'</td>';
+		echo '<td>'.$row['total'].'</td>';
 
 		echo '</tr>';
 	}
@@ -1545,628 +1037,153 @@ if ($method == 'get_attendance_summary_report') {
 	$shift_group = $_POST['shift_group'];
 
 	if (!empty($_POST['dept'])) {
-		$dept = addslashes($_POST['dept']);
+		$dept = $_POST['dept'];
 	} else {
 		$dept = '';
 	}
 	if (!empty($_POST['section'])) {
-		$section = addslashes($_POST['section']);
+		$section = $_POST['section'];
 	} else {
 		$section = '';
 	}
 	if (!empty($_POST['line_no'])) {
-		$line_no = addslashes($_POST['line_no']);
+		$line_no = $_POST['line_no'];
 	} else {
 		$line_no = '';
 	}
 
-	// $current_page = intval($_POST['current_page']);
 	$c = 0;
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
 	$row_class = $row_class_arr[0];
 
-	$results_per_page = 20;
-
-	//determine the sql LIMIT starting number for the results on the displaying page
-	// $page_first_result = ($current_page-1) * $results_per_page;
-
-	// $c = $page_first_result;
-
-	$results = array();
-
-	//MySQL
-	// $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
-	// 		COUNT(emp_no) AS total 
-	// 	FROM m_employees 
-	// 	WHERE shift_group = '$shift_group'";
 	//MS SQL Server
-	$sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
-		COUNT(emp_no) AS total 
-	FROM m_employees 
-	WHERE shift_group = '$shift_group'";
+	$sql = "WITH AttendanceData AS (
+				SELECT 
+					emp.shift_group, 
+					emp.dept, 
+					emp.section, 
+					ISNULL(emp.line_no, 'No Line') AS line_no, 
+					COUNT(emp.emp_no) AS total, 
+					COUNT(tio.emp_no) AS total_present, 
+					COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+					FORMAT(CASE 
+						WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+						ELSE 0 
+					END, 'N2') AS attendance_percentage,
+					0 AS table_order
+				FROM 
+					m_employees emp 
+				LEFT JOIN 
+					t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
+				WHERE 
+					dept != ''";
+	
+	$params = [];
+
+	$params[] = $day;
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND emp.shift_group = ?";
+		$params[] = $shift_group;
+	}
 	if (!empty($dept)) {
-		$sql = $sql . " AND dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND dept != ''";
+		$sql = $sql . " AND emp.dept LIKE ?";
+		$dept_search = $dept . "%";
+		$params[] = $dept_search;
 	}
 	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
+		$sql = $sql . " AND emp.section LIKE ?";
+		$section_search = $section . "%";
+		$params[] = $section_search;
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY dept, section, line_no, shift_group";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			array_push($results, array('shift_group' => $row['shift_group'], 'dept' => $row['dept'], 'section' => $row['section'], 'line_no' => $row['line_no1'], 'total_present' => 0, 'total' => $row['total']));
-		}
+		$sql = $sql . " AND emp.line_no LIKE ?";
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
 	}
 
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp 
-	// 	ON tio.emp_no = emp.emp_no 
-	// 	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp 
-	ON tio.emp_no = emp.emp_no 
-	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE '$section%'";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no";
+	$sql = $sql . " AND 
+						(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+					GROUP BY 
+						emp.dept, emp.section, emp.line_no, emp.shift_group 
+				)
 
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-					$result['total_present'] = $row['total_present'];
-					break; // exit the loop once you've found and updated the process
-				}
+				SELECT * FROM AttendanceData
+
+				UNION ALL
+
+				SELECT 
+					'Total' AS shift_group, 
+					NULL AS dept, 
+					NULL AS section, 
+					NULL AS line_no, 
+					SUM(total) AS total, 
+					SUM(total_present) AS total_present, 
+					SUM(total_absent) AS total_absent, 
+					FORMAT(CASE 
+						WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
+						ELSE 0 
+					END, 'N2') AS attendance_percentage,
+					1 AS table_order
+				FROM 
+					AttendanceData
+				ORDER BY 
+					table_order ASC, shift_group ASC";
+	
+	$params[] = $day;
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		$c_label = "";
+		$total_class = "";
+		if ($row['shift_group'] != 'Total') {
+			$c++;
+			$c_label = $c;
+
+			$total = intval($row['total']);
+			$total_present = intval($row['total_present']);
+			
+			if ($row['line_no'] == 'No Line') {
+				$row_class = $row_class_arr[4];
+			} else if ($total_present == $total) {
+				$row_class = $row_class_arr[1];
+			} else if ($total_present < $total && $total_present > 0) {
+				$row_class = $row_class_arr[2];
+			} else if ($total_present < 1) {
+				$row_class = $row_class_arr[3];
+			} else {
+				$row_class = $row_class_arr[0];
 			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	foreach ($results as &$result) {
-		$c++;
-
-		$total = intval($result['total']);
-		$total_present = intval($result['total_present']);
-		$total_absent = $total - $total_present;
-		if ($total != 0) {
-			$attendance_percentage = round(($total_present / $total) * 100, 2);
 		} else {
-			$attendance_percentage = 0;
+			$row_class = "bg-black";
+			$total_class = " class='text-bold'";
 		}
 		
-
-		if ($result['line_no'] == 'No Line') {
-			$row_class = $row_class_arr[4];
-		} else if ($total_present == $total) {
-			$row_class = $row_class_arr[1];
-		} else if ($total_present < $total && $total_present > 0) {
-			$row_class = $row_class_arr[2];
-		} else if ($total_present < 1) {
-			$row_class = $row_class_arr[3];
-		} else {
-			$row_class = $row_class_arr[0];
-		}
-		
-		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#attendance_summary_report_details" onclick="get_attendance_summary_report_details(&quot;'.$day.'~!~'.$result['shift_group'].'~!~'.$result['dept'].'~!~'.$result['section'].'~!~'.$result['line_no'].'~!~'.$result['total'].'~!~'.$result['total_present'].'~!~'.$total_absent.'~!~'.$attendance_percentage.'&quot;)">';
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$result['shift_group'].'</td>';
-		echo '<td>'.$result['dept'].'</td>';
-		echo '<td>'.$result['section'].'</td>';
-		echo '<td>'.$result['line_no'].'</td>';
-		echo '<td>'.$result['total'].'</td>';
-		echo '<td>'.$result['total_present'].'</td>';
-		echo '<td>'.$total_absent.'</td>';
-		echo '<td>'.$attendance_percentage.'%</td>';
-
-		echo '</tr>';
-	}
-}
-
-if ($method == 'get_attendance_summary_report2') {
-	$day = $_POST['day'];
-	$shift_group = $_POST['shift_group'];
-
-	if (!empty($_POST['dept'])) {
-		$dept = addslashes($_POST['dept']);
-	} else {
-		$dept = '';
-	}
-	if (!empty($_POST['section'])) {
-		$section = addslashes($_POST['section']);
-	} else {
-		$section = '';
-	}
-	if (!empty($_POST['line_no'])) {
-		$line_no = addslashes($_POST['line_no']);
-	} else {
-		$line_no = '';
-	}
-
-	// $current_page = intval($_POST['current_page']);
-	$c = 0;
-	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
-	$row_class = $row_class_arr[0];
-
-	$results_per_page = 20;
-
-	//determine the sql LIMIT starting number for the results on the displaying page
-	// $page_first_result = ($current_page-1) * $results_per_page;
-
-	// $c = $page_first_result;
-
-	$results = array();
-
-	// Get list of lines with total mp count based on Employee Masterlist
-	//MySQL
-	// $sql = "SELECT shift_group, dept, section, IFNULL(line_no, 'No Line') AS line_no1, 
-	// 		COUNT(emp_no) AS total 
-	// 	FROM m_employees 
-	// 	WHERE shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT shift_group, dept, section, ISNULL(line_no, 'No Line') AS line_no1, 
-		COUNT(emp_no) AS total 
-	FROM m_employees 
-	WHERE shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY dept, section, line_no, shift_group";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			array_push($results, array('shift_group' => $row['shift_group'], 'dept' => $row['dept'], 'section' => $row['section'], 'line_no' => $row['line_no1'], 'total_present' => 0, 'total' => intval($row['total'])));
-		}
-	}
-
-	// Update Total from list of lines based on Line Support To
-	//MySQL
-	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to, emp.shift_group";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no2'] && $result['dept'] == $row['dept']) {
-						$result['total'] += intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no2'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						$result['total'] += intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total from list of lines based on Line Support From Rejected
-	//MySQL
-	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'rejected'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to, emp.shift_group";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no1'] && $result['dept'] == $row['dept']) {
-						// $result['total'] += intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						// $result['total'] += intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total from list of lines based on Line Support From
-	//MySQL
-	// $sql = "SELECT emp.shift_group, emp.dept, emp.section, IFNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-	// 		COUNT(emp.emp_no) AS total 
-	// 	FROM m_employees emp 
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT emp.shift_group, emp.dept, emp.section, ISNULL(emp.line_no, 'No Line') AS line_no1, lsh.line_no_to AS line_no2, 
-		COUNT(emp.emp_no) AS total 
-	FROM m_employees emp 
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to, emp.shift_group";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no1'] && $result['dept'] == $row['dept']) {
-						$result['total'] -= intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						$result['total'] -= intval($row['total']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present from list of lines based on t_time_in_out
-	//MySQL
-	// $sql = "SELECT IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp 
-	// 	ON tio.emp_no = emp.emp_no 
-	// 	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp 
-	ON tio.emp_no = emp.emp_no 
-	WHERE tio.day = '$day' AND emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE '$section%'";
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			foreach ($results as &$result) {
-				if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-					$result['total_present'] = intval($row['total_present']);
-					break; // exit the loop once you've found and updated the process
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present from list of lines based on t_time_in_out and Line Support To
-	//MySQL
-	// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_to LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no2'] && $result['dept'] == $row['dept']) {
-						$result['total_present'] += intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no2'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						$result['total_present'] += intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present from list of lines based on t_time_in_out and Line Support From Rejected
-	//MySQL
-	// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'rejected'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no1'] && $result['dept'] == $row['dept']) {
-						// $result['total_present'] += intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						// $result['total_present'] += intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	// Update Total Present from list of lines based on t_time_in_out and Line Support From
-	//MySQL
-	// $sql = "SELECT lsh.line_no_to AS line_no2, IFNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-	// 		COUNT(tio.emp_no) AS total_present 
-	// 	FROM t_time_in_out tio 
-	// 	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	// 	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	// 	WHERE emp.shift_group = '$shift_group'";
-	//MS SQL Server
-	$sql = "SELECT lsh.line_no_to AS line_no2, ISNULL(emp.line_no, 'No Line') AS line_no1, section, dept,
-		COUNT(tio.emp_no) AS total_present 
-	FROM t_time_in_out tio 
-	LEFT JOIN m_employees emp ON tio.emp_no = emp.emp_no AND tio.day = '$day'
-	LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day' 
-	WHERE emp.shift_group = '$shift_group'";
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE '$dept%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	if (!empty($section)) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($line_no, 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$section."%'";
-		}
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND lsh.line_no_from LIKE '$line_no%'";
-	}
-	$sql = $sql . " AND lsh.status = 'accepted'";
-	$sql = $sql . " GROUP BY emp.dept, emp.section, emp.line_no, lsh.line_no_to";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-			$line_number_first_char = substr($line_no, 0, 1);
-			foreach ($results as &$result) {
-				if (is_numeric($line_number_first_char)) {
-					if ($result['line_no'] == $row['line_no1'] && $result['dept'] == $row['dept']) {
-						$result['total_present'] -= intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				} else {
-					if ($result['line_no'] == $row['line_no1'] && $result['section'] == $row['section'] && $result['dept'] == $row['dept']) {
-						$result['total_present'] -= intval($row['total_present']);
-						break; // exit the loop once you've found and updated the process
-					}
-				}
-			}
-			unset($result); // unset reference to last element
-		}
-	}
-
-	foreach ($results as &$result) {
-		$c++;
-
-		$total = intval($result['total']);
-		$total_present = intval($result['total_present']);
-		$total_absent = $total - $total_present;
-		if ($total != 0) {
-			$attendance_percentage = round(($total_present / $total) * 100, 2);
-		} else {
-			$attendance_percentage = 0;
-		}
-		
-
-		if ($result['line_no'] == 'No Line') {
-			$row_class = $row_class_arr[4];
-		} else if ($total_present == $total) {
-			$row_class = $row_class_arr[1];
-		} else if ($total_present < $total && $total_present > 0) {
-			$row_class = $row_class_arr[2];
-		} else if ($total_present < 1) {
-			$row_class = $row_class_arr[3];
-		} else {
-			$row_class = $row_class_arr[0];
-		}
-		
-		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#attendance_summary_report_details" onclick="get_attendance_summary_report_details(&quot;'.$day.'~!~'.$result['shift_group'].'~!~'.$result['dept'].'~!~'.$result['section'].'~!~'.$result['line_no'].'~!~'.$result['total'].'~!~'.$result['total_present'].'~!~'.$total_absent.'~!~'.$attendance_percentage.'&quot;)">';
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$result['shift_group'].'</td>';
-		echo '<td>'.$result['dept'].'</td>';
-		echo '<td>'.$result['section'].'</td>';
-		echo '<td>'.$result['line_no'].'</td>';
-		echo '<td>'.$result['total'].'</td>';
-		echo '<td>'.$result['total_present'].'</td>';
-		echo '<td>'.$total_absent.'</td>';
-		echo '<td>'.$attendance_percentage.'%</td>';
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#attendance_summary_report_details" 
+				onclick="get_attendance_summary_report_details(&quot;'.$day
+				.'~!~'.$row['shift_group']
+				.'~!~'.$row['dept']
+				.'~!~'.$row['section']
+				.'~!~'.$row['line_no']
+				.'~!~'.$row['total']
+				.'~!~'.$row['total_present']
+				.'~!~'.$row['total_absent']
+				.'~!~'.$row['attendance_percentage'].'&quot;)">';
+			
+		echo '<td>'.$c_label.'</td>';
+		echo '<td'.$total_class.'>'.$row['shift_group'].'</td>';
+		echo '<td>'.$row['dept'].'</td>';
+		echo '<td>'.$row['section'].'</td>';
+		echo '<td>'.$row['line_no'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_present'].'</td>';
+		echo '<td'.$total_class.'>'.$row['total_absent'].'</td>';
+		echo '<td'.$total_class.'>'.$row['attendance_percentage'].'%</td>';
 
 		echo '</tr>';
 	}
 }
 
 $conn = NULL;
-?>

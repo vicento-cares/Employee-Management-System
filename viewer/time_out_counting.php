@@ -56,7 +56,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                 </div>
                                 <div id="timeOutCountingTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
-                                    <table id="timeOutCountingTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap table-hover">
+                                    <table id="timeOutCountingTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap">
                                     <thead style="text-align: center;">
                                         <tr>
                                         <th>#</th>

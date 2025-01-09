@@ -49,7 +49,8 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <div class="col-sm-2">
                                     <label>Shift Group</label>
                                     <select class="form-control" id="shift_group_search" style="width: 100%;" onchange="get_attendance_summary_report(1)" required>
-                                        <option selected value="A">Shift A</option>
+                                        <option selected value="">All</option>
+                                        <option value="A">Shift A</option>
                                         <option value="B">Shift B</option>
                                         <option value="ADS">Shift ADS</option>
                                     </select>
@@ -58,8 +59,6 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <label>Department</label>
                                     <select id="dept_search" class="form-control" onchange="get_attendance_summary_report(1)">
                                         <option selected value="">All</option>
-                                        <option value="PD">PD</option>
-                                        <option value="QA">QA</option>
                                     </select>
                                     </div>
                                     <div class="col-sm-3">
@@ -111,7 +110,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                 </div>
                                 <div id="attendanceSummaryReportTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
-                                    <table id="attendanceSummaryReportTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap table-hover">
+                                    <table id="attendanceSummaryReportTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap">
                                     <thead style="text-align: center;">
                                         <tr>
                                         <th>#</th>

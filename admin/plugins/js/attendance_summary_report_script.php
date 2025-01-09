@@ -444,7 +444,7 @@
             type: 'POST',
             cache: false,
             data: {
-                method: 'get_attendance_list_counting2',
+                method: 'get_attendance_list_counting',
                 day: day,
                 shift_group: shift_group,
                 dept: dept,
@@ -529,6 +529,6 @@
         let dept = sessionStorage.getItem('dept_asrd');
         let section = sessionStorage.getItem('section_asrd');
         let line_no = sessionStorage.getItem('line_no_asrd');
-        window.open('../process/export/exp_attendances_counting2.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept + "&section=" + section + "&line_no=" + line_no, '_blank');
+        window.open('../process/export/exp_attendances_counting.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept + "&section=" + section + "&line_no=" + line_no, '_blank');
     }
 </script>

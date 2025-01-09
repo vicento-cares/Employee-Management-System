@@ -499,7 +499,7 @@
             document.getElementById('emp_js_s_master_update').value = emp_js_s_no;
             document.getElementById('emp_sv_master_update').value = emp_sv_no;
             document.getElementById('emp_approver_master_update').value = emp_approver_no;
-        }, 500);
+        }, 750);
     }
 
     const update_employee = () => {
