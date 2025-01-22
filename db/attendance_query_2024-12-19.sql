@@ -59,6 +59,10 @@ WITH AttendanceData AS (
     LEFT JOIN 
         t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = '2024-12-11' 
     WHERE 
+		emp.shift_group IN ('A', 'B') AND 
+		emp.dept IN ('PD1', 'PD2', 'QA') AND 
+		emp.section IN ('FAP1 Mazda', 'First Process', 'Gemba Compliance') AND 
+		emp.line_no IN ('1146', 'Mazda J12 Initial', 'Repair') AND 
         (emp.resigned_date IS NULL OR emp.resigned_date >= '2024-12-11') 
     GROUP BY 
         emp.dept, emp.section, emp.line_no, emp.shift_group
@@ -87,6 +91,45 @@ FROM
 ORDER BY 
     table_order ASC, shift_group ASC;
 
+-- Attendance Summary Report with Date Range filter 
+-- Define the start and end dates
+DECLARE @StartDate DATE = '2024-12-01';
+DECLARE @EndDate DATE = '2024-12-11';
+
+-- CTE to generate a list of dates
+WITH DateRange AS (
+    SELECT @StartDate AS ReportDate
+    UNION ALL
+    SELECT DATEADD(DAY, 1, ReportDate)
+    FROM DateRange
+    WHERE ReportDate < @EndDate
+)
+
+SELECT 
+    COUNT(emp.emp_no) AS total, 
+    COUNT(tio.emp_no) AS total_present, 
+    COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+    FORMAT(CASE 
+        WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+        ELSE 0 
+    END, 'N2') AS attendance_percentage,
+    dr.ReportDate
+FROM 
+    DateRange dr
+LEFT JOIN 
+    m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
+LEFT JOIN 
+    t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.ReportDate
+WHERE 
+    emp.shift_group IN ('A', 'B', 'ADS') AND 
+    emp.dept IN ('PD1', 'PD2', 'QA') AND 
+    emp.section IN ('FAP1 Mazda', 'First Process', 'Gemba Compliance') AND 
+    emp.line_no IN ('1146', 'Mazda J12 Initial', 'Repair')
+GROUP BY 
+    dr.ReportDate
+OPTION (MAXRECURSION 0);  -- Allow recursion to go beyond the default limit if needed
+
+-- M
 DECLARE @day DATETIME = '2024-12-11';
 DECLARE @day_tomorrow DATETIME = DATEADD(DAY, 1, CAST(@day AS DATETIME2));
 
