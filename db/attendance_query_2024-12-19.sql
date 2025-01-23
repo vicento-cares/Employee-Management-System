@@ -113,7 +113,7 @@ SELECT
         WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
         ELSE 0 
     END, 'N2') AS attendance_percentage,
-    dr.ReportDate
+    dr.ReportDate AS day
 FROM 
     DateRange dr
 LEFT JOIN 

@@ -1052,6 +1052,26 @@ if ($method == 'get_attendance_summary_report') {
 		$line_no = '';
 	}
 
+	$search_multiple_asr_shift_group_arr = [];
+	if (isset($_POST['search_multiple_asr_shift_group_arr'])) {
+		$search_multiple_asr_shift_group_arr = $_POST['search_multiple_asr_shift_group_arr'];
+	}
+
+	$search_multiple_asr_dept_arr = [];
+	if (isset($_POST['search_multiple_asr_dept_arr'])) {
+		$search_multiple_asr_dept_arr = $_POST['search_multiple_asr_dept_arr'];
+	}
+
+	$search_multiple_asr_section_arr = [];
+	if (isset($_POST['search_multiple_asr_section_arr'])) {
+		$search_multiple_asr_section_arr = $_POST['search_multiple_asr_section_arr'];
+	}
+
+	$search_multiple_asr_line_no_arr = [];
+	if (isset($_POST['search_multiple_asr_line_no_arr'])) {
+		$search_multiple_asr_line_no_arr = $_POST['search_multiple_asr_line_no_arr'];
+	}
+
 	$c = 0;
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-warning', 'modal-trigger bg-danger', 'modal-trigger bg-gray');
 	$row_class = $row_class_arr[0];
@@ -1082,24 +1102,55 @@ if ($method == 'get_attendance_summary_report') {
 
 	$params[] = $day;
 
-	if (!empty($shift_group)) {
-		$sql = $sql . " AND emp.shift_group = ?";
-		$params[] = $shift_group;
-	}
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE ?";
-		$dept_search = $dept . "%";
-		$params[] = $dept_search;
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE ?";
-		$section_search = $section . "%";
-		$params[] = $section_search;
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no LIKE ?";
-		$line_no_search = $line_no . "%";
-		$params[] = $line_no_search;
+	if (!empty($search_multiple_asr_shift_group_arr) || 
+		!empty($search_multiple_asr_dept_arr) || 
+		!empty($search_multiple_asr_section_arr) || 
+		!empty($search_multiple_asr_line_no_arr)) {
+			
+		if (!empty($search_multiple_asr_shift_group_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_shift_group_arr), '?'));
+			$sql = $sql . " AND emp.shift_group IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_shift_group_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_dept_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_dept_arr), '?'));
+			$sql = $sql . " AND emp.dept IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_dept_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_section_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_section_arr), '?'));
+			$sql = $sql . " AND emp.section IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_section_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_line_no_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_line_no_arr), '?'));
+			$sql = $sql . " AND emp.line_no IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_line_no_arr); // Flatten the array
+		}
+	} else {
+		if (!empty($shift_group)) {
+			$sql = $sql . " AND emp.shift_group = ?";
+			$params[] = $shift_group;
+		}
+		if (!empty($dept)) {
+			$sql = $sql . " AND emp.dept LIKE ?";
+			$dept_search = $dept . "%";
+			$params[] = $dept_search;
+		}
+		if (!empty($section)) {
+			$sql = $sql . " AND emp.section LIKE ?";
+			$section_search = $section . "%";
+			$params[] = $section_search;
+		}
+		if (!empty($line_no)) {
+			$sql = $sql . " AND emp.line_no LIKE ?";
+			$line_no_search = $line_no . "%";
+			$params[] = $line_no_search;
+		}
 	}
 
 	$sql = $sql . " AND 
@@ -1184,6 +1235,138 @@ if ($method == 'get_attendance_summary_report') {
 
 		echo '</tr>';
 	}
+}
+
+if ($method == 'get_multiple_attendance_summary_report') {
+	$day_from = $_POST['day_from'];
+	$day_to = $_POST['day_to'];
+
+	$search_multiple_asr_shift_group_arr = [];
+	if (isset($_POST['search_multiple_asr_shift_group_arr'])) {
+		$search_multiple_asr_shift_group_arr = $_POST['search_multiple_asr_shift_group_arr'];
+	}
+
+	$search_multiple_asr_dept_arr = [];
+	if (isset($_POST['search_multiple_asr_dept_arr'])) {
+		$search_multiple_asr_dept_arr = $_POST['search_multiple_asr_dept_arr'];
+	}
+
+	$search_multiple_asr_section_arr = [];
+	if (isset($_POST['search_multiple_asr_section_arr'])) {
+		$search_multiple_asr_section_arr = $_POST['search_multiple_asr_section_arr'];
+	}
+
+	$search_multiple_asr_line_no_arr = [];
+	if (isset($_POST['search_multiple_asr_line_no_arr'])) {
+		$search_multiple_asr_line_no_arr = $_POST['search_multiple_asr_line_no_arr'];
+	}
+
+	$c = 0;
+
+	//MS SQL Server
+	$sql = "-- Define the start and end dates
+			DECLARE @StartDate DATE = ?;
+			DECLARE @EndDate DATE = ?;
+
+			-- CTE to generate a list of dates
+			WITH DateRange AS (
+				SELECT @StartDate AS ReportDate
+				UNION ALL
+				SELECT DATEADD(DAY, 1, ReportDate)
+				FROM DateRange
+				WHERE ReportDate < @EndDate
+			)
+
+			SELECT 
+				COUNT(emp.emp_no) AS total, 
+				COUNT(tio.emp_no) AS total_present, 
+				COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+				FORMAT(CASE 
+					WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+					ELSE 0 
+				END, 'N2') AS attendance_percentage,
+				dr.ReportDate AS day
+			FROM 
+				DateRange dr
+			LEFT JOIN 
+				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
+			LEFT JOIN 
+				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.ReportDate
+			WHERE 
+				emp.dept != ''";
+	$params = [];
+
+	$params[] = $day_from;
+	$params[] = $day_to;
+
+	if (!empty($search_multiple_asr_shift_group_arr) || 
+		!empty($search_multiple_asr_dept_arr) || 
+		!empty($search_multiple_asr_section_arr) || 
+		!empty($search_multiple_asr_line_no_arr)) {
+			
+		if (!empty($search_multiple_asr_shift_group_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_shift_group_arr), '?'));
+			$sql = $sql . " AND emp.shift_group IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_shift_group_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_dept_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_dept_arr), '?'));
+			$sql = $sql . " AND emp.dept IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_dept_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_section_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_section_arr), '?'));
+			$sql = $sql . " AND emp.section IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_section_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_asr_line_no_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_asr_line_no_arr), '?'));
+			$sql = $sql . " AND emp.line_no IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_asr_line_no_arr); // Flatten the array
+		}
+	}
+
+	$sql .= "GROUP BY 
+				dr.ReportDate
+			OPTION (MAXRECURSION 0);  -- Allow recursion to go beyond the default limit if needed";
+	
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	echo '<table id="multipleAttendanceSummaryReportTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap">
+			<thead style="text-align: center;">
+				<tr>
+				<th>#</th>
+				<th>Day</th>
+				<th>Total MP</th>
+				<th>Present</th>
+				<th>Absent</th>
+				<th>Percentage</th>
+				</tr>
+			</thead>
+			<tbody id="multipleAttendanceSummaryReportData" style="text-align: center;">';
+
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		$c++;
+		
+		echo '<tr style="cursor:pointer;"  
+				onclick="set_attendance_summary_report_date(&quot;'.$row['day'].'&quot;)">';
+			
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$row['day'].'</td>';
+		echo '<td>'.$row['total'].'</td>';
+		echo '<td>'.$row['total_present'].'</td>';
+		echo '<td>'.$row['total_absent'].'</td>';
+		echo '<td>'.$row['attendance_percentage'].'%</td>';
+
+		echo '</tr>';
+	}
+
+	echo '</tbody></table>';
 }
 
 $conn = NULL;

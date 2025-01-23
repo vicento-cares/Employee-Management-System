@@ -2,6 +2,12 @@
     // AJAX IN PROGRESS GLOBAL VARS
     var get_attendance_summary_report_ajax_in_process = false;
     var get_attendance_list_ajax_in_process = false;
+    var get_multiple_attendance_summary_report_ajax_in_process = false;
+
+    var search_multiple_asr_shift_group_arr = [];
+    var search_multiple_asr_dept_arr = [];
+    var search_multiple_asr_section_arr = [];
+    var search_multiple_asr_line_no_arr = [];
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
@@ -23,6 +29,7 @@
             },
             success: function (response) {
                 $('#dept_search').html(response);
+                $('#dept_search_multiple').html(response);
             }
         });
     }
@@ -51,6 +58,7 @@
             },
             success: function (response) {
                 $('#section_search').html(response);
+                $('#section_search_multiple').html(response);
             }
         });
     }
@@ -68,8 +76,50 @@
             },
             success: function (response) {
                 $('#line_no_search').html(response);
+                $('#line_no_search_multiple').html(response);
             }
         });
+    }
+
+    document.getElementById("attendance_date_search").addEventListener('change', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    document.getElementById("shift_group_search").addEventListener('change', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    document.getElementById("dept_search").addEventListener('change', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    document.getElementById("section_search").addEventListener('change', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    document.getElementById("line_no_search").addEventListener('change', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    document.getElementById("btnSearchAttendanceSummaryReport").addEventListener('click', e => {
+        clear_search_multiple_asr();
+        get_attendance_summary_report(1);
+    });
+
+    const clear_get_attendance_summary_report = () => {
+        document.getElementById('shift_group_search').value = '';
+        document.getElementById('dept_search').value = '';
+        document.getElementById('section_search').value = '';
+        document.getElementById('line_no_search').value = '';
+        sessionStorage.setItem('shift_group_search', '');
+        sessionStorage.setItem('dept_search', '');
+        sessionStorage.setItem('section_search', '');
+        sessionStorage.setItem('line_no_search', '');
     }
 
     // Table Responsive Scroll Event for Load More
@@ -220,7 +270,11 @@
                 dept: dept,
                 section: section,
                 line_no: line_no,
-                current_page: current_page
+                current_page: current_page,
+                search_multiple_asr_shift_group_arr: search_multiple_asr_shift_group_arr,
+                search_multiple_asr_dept_arr: search_multiple_asr_dept_arr,
+                search_multiple_asr_section_arr: search_multiple_asr_section_arr,
+                search_multiple_asr_line_no_arr: search_multiple_asr_line_no_arr
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
@@ -235,6 +289,16 @@
             },
             success: function (response) {
                 $('#loading').remove();
+
+                var smasrsg_arr_length = search_multiple_asr_shift_group_arr.length;
+                var smasrd_arr_length = search_multiple_asr_dept_arr.length;
+                var smasrs_arr_length = search_multiple_asr_section_arr.length;
+                var smasrln_arr_length = search_multiple_asr_line_no_arr.length;
+
+                if (smasrsg_arr_length == 0 && smasrd_arr_length == 0 && smasrs_arr_length == 0 && smasrln_arr_length == 0) {
+                    $('#multipleDateAttendanceSummaryReportTableRes').html('');
+                }
+
                 document.getElementById("btnNextPage").removeAttribute('disabled');
                 if (current_page == 1) {
                     $('#attendanceSummaryReportTable tbody').html(response);
@@ -255,6 +319,460 @@
             get_attendance_summary_report_ajax_in_process = false;
         });
     }
+    
+    $("#search_multiple_asr").on('show.bs.modal', e => {
+        var attendance_date = document.getElementById("attendance_date_search").value;
+        let day_from = document.getElementById('attendance_date_from_search_multiple').value;
+        let day_to = document.getElementById('attendance_date_to_search_multiple').value;
+
+        if (day_from == '' && day_to == '') {
+            document.getElementById("attendance_date_from_search_multiple").value = attendance_date;
+            document.getElementById("attendance_date_to_search_multiple").value = attendance_date;
+        }
+    });
+
+    document.getElementById("attendance_date_search_multiple_chkbx").addEventListener('change', function() {
+        // Toggle the disabled property of the input field
+        document.getElementById("attendance_date_from_search_multiple").disabled = !this.checked;
+        document.getElementById("attendance_date_to_search_multiple").disabled = !this.checked;
+
+        if (!this.checked) {
+            var day_from = document.getElementById('attendance_date_from_search_multiple').value;
+            document.getElementById('attendance_date_to_search_multiple').value = day_from;
+        }
+
+        check_search_multiple_asr();
+    });
+
+    document.getElementById("shift_group_search_multiple_chkbx").addEventListener('change', function() {
+        // Toggle the disabled property of the input field
+        document.getElementById("shift_group_search_multiple").disabled = !this.checked;
+        document.getElementById("btnAddSearchMultipleAsrShiftGroup").disabled = !this.checked;
+
+        if (!this.checked) {
+            search_multiple_asr_shift_group_arr = [];
+            document.getElementById('search_multiple_asr_shift_group_container').innerHTML = '';
+        }
+
+        check_search_multiple_asr();
+    });
+
+    document.getElementById("dept_search_multiple_chkbx").addEventListener('change', function() {
+        // Toggle the disabled property of the input field
+        document.getElementById("dept_search_multiple").disabled = !this.checked;
+        document.getElementById("btnAddSearchMultipleAsrDept").disabled = !this.checked;
+
+        if (!this.checked) {
+            search_multiple_asr_dept_arr = [];
+            document.getElementById('search_multiple_asr_dept_container').innerHTML = '';
+        }
+
+        check_search_multiple_asr();
+    });
+
+    document.getElementById("section_search_multiple_chkbx").addEventListener('change', function() {
+        // Toggle the disabled property of the input field
+        document.getElementById("section_search_multiple").disabled = !this.checked;
+        document.getElementById("btnAddSearchMultipleAsrSection").disabled = !this.checked;
+
+        if (!this.checked) {
+            search_multiple_asr_section_arr = [];
+            document.getElementById('search_multiple_asr_section_container').innerHTML = '';
+        }
+
+        check_search_multiple_asr();
+    });
+
+    document.getElementById("line_no_search_multiple_chkbx").addEventListener('change', function() {
+        // Toggle the disabled property of the input field
+        document.getElementById("line_no_search_multiple").disabled = !this.checked;
+        document.getElementById("btnAddSearchMultipleAsrLineNo").disabled = !this.checked;
+
+        if (!this.checked) {
+            search_multiple_asr_line_no_arr = [];
+            document.getElementById('search_multiple_asr_line_no_container').innerHTML = '';
+        }
+
+        check_search_multiple_asr();
+    });
+
+    document.getElementById("search_multiple_asr_shift_group_form").addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the value from the input field
+        const shift_group = document.getElementById("shift_group_search_multiple").value.trim();
+
+        // Check if the value already exists in the array
+        if (!search_multiple_asr_shift_group_arr.includes(shift_group) && shift_group != '') {
+            // Add the employee number to the global array
+            search_multiple_asr_shift_group_arr.push(shift_group);
+
+            console.log(search_multiple_asr_shift_group_arr);
+
+            // Create a new card element
+            const newCard = document.createElement('div');
+            newCard.className = 'card bg-success collapsed-card ml-2';
+            newCard.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${shift_group}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="remove" onclick="remove_search_multiple_asr_shift_group(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+            `;
+
+            // Append the new card to the container
+            document.getElementById('search_multiple_asr_shift_group_container').appendChild(newCard);
+        }
+
+        // Clear the input field after adding the card
+        document.getElementById("shift_group_search_multiple").value = '';
+
+        check_search_multiple_asr();
+    });
+
+    const remove_search_multiple_asr_shift_group = button => {
+        // Check if button is defined
+        if (!button) {
+            console.error('Button is undefined');
+            return;
+        }
+
+        // Find the closest card div to the button that was clicked
+        const card = button.closest('.card');
+
+        // Check if card is found
+        if (!card) {
+            console.error('Card not found');
+            return;
+        }
+        
+        // Get the innerHTML of the card-title
+        const shift_group = card.querySelector('.card-title').innerHTML;
+
+        // Remove the employee number from the global array
+        search_multiple_asr_shift_group_arr = search_multiple_asr_shift_group_arr.filter(sg => sg !== shift_group);
+
+        console.log(search_multiple_asr_shift_group_arr);
+
+        console.log('Removed Search:', shift_group); // You can use this value as needed
+
+        // Remove the card from the DOM
+        card.remove();
+
+        check_search_multiple_asr();
+    }
+
+    document.getElementById("search_multiple_asr_dept_form").addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the value from the input field
+        const dept = document.getElementById("dept_search_multiple").value.trim();
+
+        // Check if the value already exists in the array
+        if (!search_multiple_asr_dept_arr.includes(dept) && dept != '') {
+            // Add the employee number to the global array
+            search_multiple_asr_dept_arr.push(dept);
+
+            console.log(search_multiple_asr_dept_arr);
+
+            // Create a new card element
+            const newCard = document.createElement('div');
+            newCard.className = 'card bg-success collapsed-card ml-2';
+            newCard.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${dept}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="remove" onclick="remove_search_multiple_asr_dept(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+            `;
+
+            // Append the new card to the container
+            document.getElementById('search_multiple_asr_dept_container').appendChild(newCard);
+        }
+
+        // Clear the input field after adding the card
+        document.getElementById("dept_search_multiple").value = '';
+
+        check_search_multiple_asr();
+    });
+
+    const remove_search_multiple_asr_dept = button => {
+        // Check if button is defined
+        if (!button) {
+            console.error('Button is undefined');
+            return;
+        }
+
+        // Find the closest card div to the button that was clicked
+        const card = button.closest('.card');
+
+        // Check if card is found
+        if (!card) {
+            console.error('Card not found');
+            return;
+        }
+        
+        // Get the innerHTML of the card-title
+        const dept = card.querySelector('.card-title').innerHTML;
+
+        // Remove the employee number from the global array
+        search_multiple_asr_dept_arr = search_multiple_asr_dept_arr.filter(d => d !== dept);
+
+        console.log(search_multiple_asr_dept_arr);
+
+        console.log('Removed Search:', dept); // You can use this value as needed
+
+        // Remove the card from the DOM
+        card.remove();
+
+        check_search_multiple_asr();
+    }
+
+    document.getElementById("search_multiple_asr_section_form").addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the value from the input field
+        const section = document.getElementById("section_search_multiple").value.trim();
+
+        // Check if the value already exists in the array
+        if (!search_multiple_asr_section_arr.includes(section) && section != '') {
+            // Add the employee number to the global array
+            search_multiple_asr_section_arr.push(section);
+
+            console.log(search_multiple_asr_section_arr);
+
+            // Create a new card element
+            const newCard = document.createElement('div');
+            newCard.className = 'card bg-success collapsed-card ml-2';
+            newCard.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${section}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="remove" onclick="remove_search_multiple_asr_section(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+            `;
+
+            // Append the new card to the container
+            document.getElementById('search_multiple_asr_section_container').appendChild(newCard);
+        }
+
+        // Clear the input field after adding the card
+        document.getElementById("section_search_multiple").value = '';
+
+        check_search_multiple_asr();
+    });
+
+    const remove_search_multiple_asr_section = button => {
+        // Check if button is defined
+        if (!button) {
+            console.error('Button is undefined');
+            return;
+        }
+
+        // Find the closest card div to the button that was clicked
+        const card = button.closest('.card');
+
+        // Check if card is found
+        if (!card) {
+            console.error('Card not found');
+            return;
+        }
+        
+        // Get the innerHTML of the card-title
+        const section = card.querySelector('.card-title').innerHTML;
+
+        // Remove the employee number from the global array
+        search_multiple_asr_section_arr = search_multiple_asr_section_arr.filter(sec => sec !== section);
+
+        console.log(search_multiple_asr_section_arr);
+
+        console.log('Removed Search:', section); // You can use this value as needed
+
+        // Remove the card from the DOM
+        card.remove();
+
+        check_search_multiple_asr();
+    }
+
+    document.getElementById("search_multiple_asr_line_no_form").addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the value from the input field
+        const line_no = document.getElementById("line_no_search_multiple").value.trim();
+
+        // Check if the value already exists in the array
+        if (!search_multiple_asr_line_no_arr.includes(line_no) && line_no != '') {
+            // Add the employee number to the global array
+            search_multiple_asr_line_no_arr.push(line_no);
+
+            console.log(search_multiple_asr_line_no_arr);
+
+            // Create a new card element
+            const newCard = document.createElement('div');
+            newCard.className = 'card bg-success collapsed-card ml-2';
+            newCard.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${line_no}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="remove" onclick="remove_search_multiple_asr_line_no(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- /.card-tools -->
+                </div>
+                <!-- /.card-header -->
+            `;
+
+            // Append the new card to the container
+            document.getElementById('search_multiple_asr_line_no_container').appendChild(newCard);
+        }
+
+        // Clear the input field after adding the card
+        document.getElementById("line_no_search_multiple").value = '';
+
+        check_search_multiple_asr();
+    });
+
+    const remove_search_multiple_asr_line_no = button => {
+        // Check if button is defined
+        if (!button) {
+            console.error('Button is undefined');
+            return;
+        }
+
+        // Find the closest card div to the button that was clicked
+        const card = button.closest('.card');
+
+        // Check if card is found
+        if (!card) {
+            console.error('Card not found');
+            return;
+        }
+        
+        // Get the innerHTML of the card-title
+        const line_no = card.querySelector('.card-title').innerHTML;
+
+        // Remove the employee number from the global array
+        search_multiple_asr_line_no_arr = search_multiple_asr_line_no_arr.filter(line => line !== line_no);
+
+        console.log(search_multiple_asr_line_no_arr);
+
+        console.log('Removed Search:', line_no); // You can use this value as needed
+
+        // Remove the card from the DOM
+        card.remove();
+
+        check_search_multiple_asr();
+    }
+
+    const check_search_multiple_asr = () => {
+        var smasrsg_arr_length = search_multiple_asr_shift_group_arr.length;
+        var smasrd_arr_length = search_multiple_asr_dept_arr.length;
+        var smasrs_arr_length = search_multiple_asr_section_arr.length;
+        var smasrln_arr_length = search_multiple_asr_line_no_arr.length;
+
+        if (smasrsg_arr_length > 0 || smasrd_arr_length > 0 || smasrs_arr_length > 0 || smasrln_arr_length > 0) {
+            document.getElementById("btnSearchMultipleAsr").removeAttribute('disabled');
+        } else {
+            document.getElementById("btnSearchMultipleAsr").setAttribute('disabled', true);
+        }
+    }
+
+    const clear_search_multiple_asr = () => {
+        search_multiple_asr_shift_group_arr = [];
+        search_multiple_asr_dept_arr = [];
+        search_multiple_asr_section_arr = [];
+        search_multiple_asr_line_no_arr = [];
+        document.getElementById('attendance_date_from_search_multiple').value = '';
+        document.getElementById('attendance_date_to_search_multiple').value = '';
+        document.getElementById('search_multiple_asr_shift_group_container').innerHTML = '';
+        document.getElementById('search_multiple_asr_dept_container').innerHTML = '';
+        document.getElementById('search_multiple_asr_section_container').innerHTML = '';
+        document.getElementById('search_multiple_asr_line_no_container').innerHTML = '';
+        document.getElementById("btnSearchMultipleAsr").setAttribute('disabled', true);
+    }
+
+    const review_search_multiple_asr = () => {
+        // Code for checking date here
+        let day_from = document.getElementById('attendance_date_from_search_multiple').value;
+        let day_to = document.getElementById('attendance_date_to_search_multiple').value;
+
+        clear_get_attendance_summary_report();
+
+        if (day_from != day_to) {
+            get_multiple_attendance_summary_report();
+        } else {
+            set_attendance_summary_report_date(day_from);
+        }
+    }
+
+    const get_multiple_attendance_summary_report = () => {
+        // If an AJAX call is already in progress, return immediately
+        if (get_multiple_attendance_summary_report_ajax_in_process) {
+            return;
+        }
+
+        let day_from = document.getElementById('attendance_date_from_search_multiple').value;
+        let day_to = document.getElementById('attendance_date_to_search_multiple').value;
+
+        // Set the flag to true as we're starting an AJAX call
+        get_multiple_attendance_summary_report_ajax_in_process = true;
+
+        $.ajax({
+            url: '../process/admin/attendances/at_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_multiple_attendance_summary_report',
+                day_from: day_from,
+                day_to: day_to,
+                search_multiple_asr_shift_group_arr: search_multiple_asr_shift_group_arr,
+                search_multiple_asr_dept_arr: search_multiple_asr_dept_arr,
+                search_multiple_asr_section_arr: search_multiple_asr_section_arr,
+                search_multiple_asr_line_no_arr: search_multiple_asr_line_no_arr
+            },
+            beforeSend: (jqXHR, settings) => {
+                var loading = `<div class="d-flex justify-content-center align-items-center" id="loading"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></div>`;
+                document.getElementById("multipleDateAttendanceSummaryReportTableRes").innerHTML = loading;
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            },
+            success: function (response) {
+                $('#loading').remove();
+                $('#attendanceSummaryReportData').html('');
+                $('#multipleDateAttendanceSummaryReportTableRes').html(response);
+                // Set the flag back to false as the AJAX call has completed
+                get_multiple_attendance_summary_report_ajax_in_process = false;
+            }
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+            $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
+            // Set the flag back to false as the AJAX call has completed
+            get_multiple_attendance_summary_report_ajax_in_process = false;
+        });
+    }
+
+    const set_attendance_summary_report_date = day => {
+        document.getElementById('attendance_date_search').value = day;
+        get_attendance_summary_report(1);
+    }
 
     const export_attendances_all = () => {
         let day = sessionStorage.getItem('attendance_date_search');
@@ -267,7 +785,44 @@
         let dept = sessionStorage.getItem('dept_search');
         let section = sessionStorage.getItem('section_search');
         let line_no = sessionStorage.getItem('line_no_search');
-        window.open('../process/export/exp_attendance_summary_report.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept + "&section=" + section + "&line_no=" + line_no, '_blank');
+
+        var smasrsg_arr_length = search_multiple_asr_shift_group_arr.length;
+        var search_multiple_asr_shift_group_obj = '';
+        if (smasrsg_arr_length > 0) {
+            search_multiple_asr_shift_group_obj = Object.values(search_multiple_asr_shift_group_arr);
+        }
+        console.log(search_multiple_asr_shift_group_obj);
+
+        var smasrd_arr_length = search_multiple_asr_dept_arr.length;
+        var search_multiple_asr_dept_obj = '';
+        if (smasrd_arr_length > 0) {
+            search_multiple_asr_dept_obj = Object.values(search_multiple_asr_dept_arr);
+        }
+        console.log(search_multiple_asr_dept_obj);
+
+        var smasrs_arr_length = search_multiple_asr_section_arr.length;
+        var search_multiple_asr_section_obj = '';
+        if (smasrs_arr_length > 0) {
+            search_multiple_asr_section_obj = Object.values(search_multiple_asr_section_arr);
+        }
+        console.log(search_multiple_asr_section_obj);
+
+        var smasrln_arr_length = search_multiple_asr_line_no_arr.length;
+        var search_multiple_asr_line_no_obj = '';
+        if (smasrln_arr_length > 0) {
+            search_multiple_asr_line_no_obj = Object.values(search_multiple_asr_line_no_arr);
+        }
+        console.log(search_multiple_asr_line_no_obj);
+
+        window.open('../process/export/exp_attendance_summary_report.php?day=' + day 
+                    + "&shift_group=" + shift_group 
+                    + "&dept=" + dept 
+                    + "&section=" + section 
+                    + "&line_no=" + line_no 
+                    + "&search_multiple_asr_shift_group_arr=" + search_multiple_asr_shift_group_obj 
+                    + "&search_multiple_asr_dept_arr=" + search_multiple_asr_dept_obj 
+                    + "&search_multiple_asr_section_arr=" + search_multiple_asr_section_obj 
+                    + "&search_multiple_asr_line_no_arr=" + search_multiple_asr_line_no_obj, '_blank');
     }
 
     // Table Responsive Scroll Event for Load More
