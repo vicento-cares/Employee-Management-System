@@ -507,36 +507,36 @@ if ($method == 'get_attendance_list') {
 				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
 			}
 
-			echo '<td>'.$c.'</td>';
+			echo '<td style="vertical-align: middle;">'.$c.'</td>';
 
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 			if (!empty($row['file_url'])) {
-				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+				echo '<td style="vertical-align: middle;"><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			} else {
-				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+				echo '<td style="vertical-align: middle;"><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			}
 
 			if (!empty($row['time_in'])) {
-				echo '<td>'.$row['time_in_day'].'</td>';
-				echo '<td>'.$row['time_in_shift'].'</td>';
-				echo '<td>'.$row['shift_group'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
 			} else {
-				echo '<td>'.$row['absent_day'].'</td>';
-				echo '<td></td>';
-				echo '<td>'.$row['absent_shift_group'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['absent_day'].'</td>';
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;">'.$row['absent_shift_group'].'</td>';
 			}
-			echo '<td>'.$row['provider'].'</td>';
-			echo '<td>'.$row['emp_no'].'</td>';
-			echo '<td>'.$row['full_name'].'</td>';
-			echo '<td>'.$row['dept'].'</td>';
-			echo '<td>'.$row['section'].'</td>';
-			echo '<td>'.$row['line_no'].'</td>';
-			echo '<td>'.$row['absent_type'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['provider'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['line_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['absent_type'].'</td>';
 			$reason = $row['reason'];
 			if (strlen($reason) > 12) {
 				$reason = substr($reason, 0, 12) . "...";
 			}
-			echo '<td>'.$reason.'</td>';
+			echo '<td style="vertical-align: middle;">'.$reason.'</td>';
 
 			echo '</tr>';
 		}
@@ -782,44 +782,44 @@ if ($method == 'get_attendance_list2') {
 				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-dismiss="modal" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
 			}
 
-			echo '<td>'.$c.'</td>';
+			echo '<td style="vertical-align: middle;">'.$c.'</td>';
 
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 			if (!empty($row['file_url'])) {
-				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+				echo '<td style="vertical-align: middle;"><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			} else {
-				echo '<td><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="50" width="50"></td>';
+				echo '<td style="vertical-align: middle;"><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			}
 			
 			if (!empty($row['time_in'])) {
-				echo '<td>'.$row['time_in_day'].'</td>';
-				echo '<td>'.$row['time_in_shift'].'</td>';
-				echo '<td>'.$row['shift_group'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
 			} else {
-				echo '<td>'.$row['absent_day'].'</td>';
-				echo '<td></td>';
-				echo '<td>'.$row['absent_shift_group'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['absent_day'].'</td>';
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;">'.$row['absent_shift_group'].'</td>';
 			}
-			echo '<td>'.$row['provider'].'</td>';
-			echo '<td>'.$row['emp_no'].'</td>';
-			echo '<td>'.$row['full_name'].'</td>';
-			echo '<td>'.$row['dept'].'</td>';
-			echo '<td>'.$row['section'].'</td>';
-			echo '<td>'.$row['line_no'].'</td>';
-			echo '<td>'.$row['process'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['provider'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['line_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['process'].'</td>';
 			if (!empty($row['skill_level'])) {
-				echo '<td>Level '.$row['skill_level'].'</td>';
+				echo '<td style="vertical-align: middle;">Level '.$row['skill_level'].'</td>';
 			} else {
-				echo '<td>'.$row['skill_level'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['skill_level'].'</td>';
 			}
-			echo '<td>'.$row['time_in'].'</td>';
-			echo '<td>'.$row['time_out'].'</td>';
-			echo '<td>'.$row['absent_type'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['time_in'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['time_out'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['absent_type'].'</td>';
 			$reason = $row['reason'];
 			if (strlen($reason) > 12) {
 				$reason = substr($reason, 0, 12) . "...";
 			}
-			echo '<td>'.$reason.'</td>';
+			echo '<td style="vertical-align: middle;">'.$reason.'</td>';
 
 			echo '</tr>';
 		}
