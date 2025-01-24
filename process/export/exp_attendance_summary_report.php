@@ -21,26 +21,53 @@ $dept = $_GET['dept'];
 $section = $_GET['section'];
 $line_no = $_GET['line_no'];
 
+$search_multiple_asr_shift_group_arr = [];
+if (isset($_GET['search_multiple_asr_shift_group_arr']) && !empty($_GET['search_multiple_asr_shift_group_arr'])) {
+  $search_multiple_asr_shift_group_arr = explode(",", $_GET['search_multiple_asr_shift_group_arr']);
+}
+
+$search_multiple_asr_dept_arr = [];
+if (isset($_GET['search_multiple_asr_dept_arr']) && !empty($_GET['search_multiple_asr_dept_arr'])) {
+  $search_multiple_asr_dept_arr = explode(",", $_GET['search_multiple_asr_dept_arr']);
+}
+
+$search_multiple_asr_section_arr = [];
+if (isset($_GET['search_multiple_asr_section_arr']) && !empty($_GET['search_multiple_asr_section_arr'])) {
+  $search_multiple_asr_section_arr = explode(",", $_GET['search_multiple_asr_section_arr']);
+}
+
+$search_multiple_asr_line_no_arr = [];
+if (isset($_GET['search_multiple_asr_line_no_arr']) && !empty($_GET['search_multiple_asr_line_no_arr'])) {
+  $search_multiple_asr_line_no_arr = explode(",", $_GET['search_multiple_asr_line_no_arr']);
+}
+
 $c = 0;
 
 $delimiter = ",";
 
 $filename = "EmpMgtSys_AttendanceSummaryReport_";
 
-if (!empty($dept)) {
-	$filename = $filename . $dept . "-";
-}
-if (!empty($section)) {
-	$filename = $filename . $section . "-";
-}
-if (!empty($line_no)) {
-	$filename = $filename . $line_no;
-}
-
-$filename = $filename . "_" . $day;
-
-if (!empty($shift_group)) {
-	$filename = $filename . "-" . $shift_group;
+if (!empty($search_multiple_asr_shift_group_arr) || 
+	!empty($search_multiple_asr_dept_arr) || 
+	!empty($search_multiple_asr_section_arr) || 
+	!empty($search_multiple_asr_line_no_arr)) {
+	$filename = $filename . "MultipleSearch_" . $server_date_only;
+} else {
+	if (!empty($dept)) {
+		$filename = $filename . $dept . "-";
+	}
+	if (!empty($section)) {
+		$filename = $filename . $section . "-";
+	}
+	if (!empty($line_no)) {
+		$filename = $filename . $line_no;
+	}
+	
+	$filename = $filename . "_" . $day;
+	
+	if (!empty($shift_group)) {
+		$filename = $filename . "-" . $shift_group;
+	}
 }
 
 $filename = $filename . ".csv";
@@ -81,24 +108,55 @@ $params = [];
 
 $params[] = $day;
 
-if (!empty($shift_group)) {
-	$sql = $sql . " AND emp.shift_group = ?";
-	$params[] = $shift_group;
-}
-if (!empty($dept)) {
-	$sql = $sql . " AND emp.dept LIKE ?";
-	$dept_search = $dept . "%";
-	$params[] = $dept_search;
-}
-if (!empty($section)) {
-	$sql = $sql . " AND emp.section LIKE ?";
-	$section_search = $section . "%";
-	$params[] = $section_search;
-}
-if (!empty($line_no)) {
-	$sql = $sql . " AND emp.line_no LIKE ?";
-	$line_no_search = $line_no . "%";
-	$params[] = $line_no_search;
+if (!empty($search_multiple_asr_shift_group_arr) || 
+	!empty($search_multiple_asr_dept_arr) || 
+	!empty($search_multiple_asr_section_arr) || 
+	!empty($search_multiple_asr_line_no_arr)) {
+	
+	if (!empty($search_multiple_asr_shift_group_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_asr_shift_group_arr), '?'));
+		$sql = $sql . " AND emp.shift_group IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_asr_shift_group_arr); // Flatten the array
+	}
+	if (!empty($search_multiple_asr_dept_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_asr_dept_arr), '?'));
+		$sql = $sql . " AND emp.dept IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_asr_dept_arr); // Flatten the array
+	}
+	if (!empty($search_multiple_asr_section_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_asr_section_arr), '?'));
+		$sql = $sql . " AND emp.section IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_asr_section_arr); // Flatten the array
+	}
+	if (!empty($search_multiple_asr_line_no_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_asr_line_no_arr), '?'));
+		$sql = $sql . " AND emp.line_no IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_asr_line_no_arr); // Flatten the array
+	}
+} else {
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND emp.shift_group = ?";
+		$params[] = $shift_group;
+	}
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept LIKE ?";
+		$dept_search = $dept . "%";
+		$params[] = $dept_search;
+	}
+	if (!empty($section)) {
+		$sql = $sql . " AND emp.section LIKE ?";
+		$section_search = $section . "%";
+		$params[] = $section_search;
+	}
+	if (!empty($line_no)) {
+		$sql = $sql . " AND emp.line_no LIKE ?";
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
+	}
 }
 
 $sql = $sql . " AND 

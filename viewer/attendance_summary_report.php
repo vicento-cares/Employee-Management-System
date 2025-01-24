@@ -44,11 +44,11 @@ include 'plugins/navbar/viewer_navbar.php';
                                 <div class="row mb-4">
                                     <div class="col-sm-2">
                                     <label>Attendance Date</label>
-                                    <input type="date" class="form-control" id="attendance_date_search" onchange="get_attendance_summary_report(1)">
+                                    <input type="date" class="form-control" id="attendance_date_search">
                                     </div>
                                     <div class="col-sm-2">
                                     <label>Shift Group</label>
-                                    <select class="form-control" id="shift_group_search" style="width: 100%;" onchange="get_attendance_summary_report(1)" required>
+                                    <select class="form-control" id="shift_group_search" style="width: 100%;" required>
                                         <option selected value="">All</option>
                                         <option value="A">Shift A</option>
                                         <option value="B">Shift B</option>
@@ -57,7 +57,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                     <div class="col-sm-2">
                                     <label>Department</label>
-                                    <select id="dept_search" class="form-control" onchange="get_attendance_summary_report(1)">
+                                    <select id="dept_search" class="form-control">
                                         <option selected value="">All</option>
                                     </select>
                                     </div>
@@ -67,28 +67,32 @@ include 'plugins/navbar/viewer_navbar.php';
                                         <option value="">Select Group</option>
                                     </select> -->
                                     <label>Section</label>
-                                    <select id="section_search" class="form-control" onchange="get_attendance_summary_report(1)">
+                                    <select id="section_search" class="form-control">
                                         <option value="">Select Section</option>
                                     </select>
                                     </div>
                                     <div class="col-sm-3">
                                     <label>Line No.</label>
-                                    <select id="line_no_search" class="form-control" onchange="get_attendance_summary_report(1)">
+                                    <select id="line_no_search" class="form-control">
                                         <option value="">Select Line No.</option>
                                     </select>
                                     </div>
                                 </div>
-                                <div class="row mb-2">
-                                    <div class="col-sm-2 offset-sm-4">
+                                <div class="row mb-4">
+                                    <div class="col-sm-2 offset-sm-2">
+                                    <button type="button" class="btn bg-olive btn-block" data-toggle="modal" data-target="#search_multiple_asr"><i class="fas fa-search"></i> Search Multiple 🔥</button>
+                                    </div>
+                                    <div class="col-sm-2">
                                     <button type="button" class="btn bg-teal btn-block" onclick="export_attendances_all()"><i class="fas fa-download"></i> All Attendances</button>
                                     </div>
                                     <div class="col-sm-3">
                                     <button type="button" class="btn bg-success btn-block" onclick="export_attendance_summary_report()"><i class="fas fa-download"></i> Attendance Summary Report</button>
                                     </div>
                                     <div class="col-sm-3">
-                                    <button type="button" class="btn bg-gray-dark btn-block" onclick="get_attendance_summary_report(1)"><i class="fas fa-search"></i> Search</button>
+                                    <button type="button" class="btn bg-gray-dark btn-block" id="btnSearchAttendanceSummaryReport"><i class="fas fa-search"></i> Search</button>
                                     </div>
                                 </div>
+                                <div id="multipleDateAttendanceSummaryReportTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;"></div>
                                 <div id="accordion_attendance_legend">
                                     <div class="card shadow">
                                     <div class="card-header">
@@ -156,6 +160,7 @@ include 'plugins/navbar/viewer_navbar.php';
         <!-- /.content-wrapper -->
 <?php
 include 'plugins/footer.php';
+include '../modals/search_multiple_asr.php';
 include '../modals/attendance_summary_report_details.php';
 include '../modals/absence_details2.php';
 include 'plugins/js/attendance_summary_report_script.php';
