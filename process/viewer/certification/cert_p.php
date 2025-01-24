@@ -427,7 +427,7 @@ if ($method == 'update_skill_level') {
 
 		$row = $stmt -> fetch(PDO::FETCH_ASSOC);
 
-		if ($row && $id < 1) {
+		if ($row && $id > 0) {
 			$query = "UPDATE m_skill_level SET skill_level = ? WHERE id = ?";
 			$stmt = $conn->prepare($query);
 			$params = array($skill_level, $id);

@@ -983,6 +983,8 @@
             document.getElementById('emp_sv_master_update').value = emp_sv_no;
             document.getElementById('emp_approver_master_update').value = emp_approver_no;
         }, 750);
+
+        reload_employee_picture();
     }
 
     const update_employee = () => {
@@ -1349,5 +1351,82 @@
                 console.log(jqXHR);
                 swal('System Error', `Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`, 'error');
             });
+    }
+
+    // reload employee picture
+    const reload_employee_picture = () => {
+        var emp_no = document.getElementById('emp_no_master_update').value;
+
+        $.ajax({
+            url:'../process/hr/employees/employee_picture_p.php',
+            type:'POST',
+            cache:false,
+            data:{
+                method:'reload_employee_picture',
+                emp_no:emp_no
+            },success:function(response){
+                document.getElementById('employee_picture_img_tag').src = response;
+            }
+        });
+    }
+
+    // upload employee picture
+    const upload_employee_picture = () => {
+        var file_form = document.getElementById('employee_picture_form');
+        var form_data = new FormData(file_form);
+        var emp_no = document.getElementById('emp_no_master_update').value;
+
+        form_data.append("emp_no", emp_no);
+
+        $.ajax({
+            url: '../process/import/imp_employee_picture.php',
+            type: 'POST',
+            dataType: 'text',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,
+            beforeSend: (jqXHR, settings) => {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Uploading Please Wait...',
+                    text: 'Info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false
+                });
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            }, 
+            success: response => {
+                setTimeout(() => {
+                    swal.close();
+                    if (response != '') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Employee Picture Error',
+                            text: `Error: ${response}`,
+                            showConfirmButton: false,
+                            timer : 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Upload Employee Picture',
+                            text: 'Uploaded and updated successfully',
+                            showConfirmButton: false,
+                            timer : 1000
+                        });
+                        reload_employee_picture();
+                    }
+                    document.getElementById("employee_picture_master_update").value = '';
+                }, 500);
+            }
+        })
+        .fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            swal('System Error', `Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`, 'error');
+        });
     }
 </script>
