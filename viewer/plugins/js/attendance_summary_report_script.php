@@ -735,6 +735,7 @@
         if (day_from !== day_to) {
             get_multiple_attendance_summary_report();
         } else {
+            $('#multipleDateAttendanceSummaryReportTableRes').html('');
             set_attendance_summary_report_date(day_from);
         }
     }
