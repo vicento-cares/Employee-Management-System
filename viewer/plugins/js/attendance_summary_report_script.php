@@ -708,13 +708,31 @@
     }
 
     const review_search_multiple_asr = () => {
-        // Code for checking date here
-        let day_from = document.getElementById('attendance_date_from_search_multiple').value;
-        let day_to = document.getElementById('attendance_date_to_search_multiple').value;
+        // Get the input elements
+        const dayFromInput = document.getElementById('attendance_date_from_search_multiple');
+        const dayToInput = document.getElementById('attendance_date_to_search_multiple');
+
+        // Get the values from the input elements
+        let day_from = dayFromInput.value;
+        let day_to = dayToInput.value;
+
+        // Convert the date strings to Date objects for comparison
+        const fromDate = new Date(day_from);
+        const toDate = new Date(day_to);
+
+        // Check if day_from is greater than day_to
+        if (fromDate > toDate) {
+            // Swap values
+            [day_from, day_to] = [day_to, day_from];
+
+            // Update the DOM elements with the swapped values
+            dayFromInput.value = day_from;
+            dayToInput.value = day_to;
+        }
 
         clear_get_attendance_summary_report();
 
-        if (day_from != day_to) {
+        if (day_from !== day_to) {
             get_multiple_attendance_summary_report();
         } else {
             set_attendance_summary_report_date(day_from);
