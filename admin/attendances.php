@@ -143,6 +143,7 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Picture</th>
                       <th>Day</th>
                       <th>Shift</th>
                       <th>Shift Group</th>
