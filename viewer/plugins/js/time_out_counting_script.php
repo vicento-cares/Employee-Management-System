@@ -3,6 +3,93 @@
     var get_time_out_counting_ajax_in_process = false;
     var get_attendance_list_ajax_in_process = false
 
+    // DOMContentLoaded function
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch_dept_dropdown();
+        // fetch_group_dropdown();
+        fetch_section_dropdown();
+        fetch_line_dropdown();
+        document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
+    });
+
+    const fetch_dept_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_dept_dropdown'
+            },
+            success: function (response) {
+                $('#dept_search').html(response);
+                // $('#dept_search_multiple').html(response);
+            }
+        });
+    }
+
+    const fetch_section_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_section_dropdown'
+            },
+            success: function (response) {
+                $('#section_search').html(response);
+                // $('#section_search_multiple').html(response);
+            }
+        });
+    }
+
+    const fetch_line_dropdown = () => {
+        let section = document.getElementById('section_search').value;
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#line_no_search').html(response);
+                // $('#line_no_search_multiple').html(response);
+            }
+        });
+    }
+
+    document.getElementById("attendance_date_search").addEventListener('change', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
+    document.getElementById("shift_group_search").addEventListener('change', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
+    document.getElementById("dept_search").addEventListener('change', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
+    document.getElementById("section_search").addEventListener('change', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
+    document.getElementById("line_no_search").addEventListener('change', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
+    document.getElementById("btnSearchTimeOutCounting").addEventListener('click', e => {
+        // clear_search_multiple_asr();
+        get_time_out_counting(1);
+    });
+
     const get_time_out_counting = current_page => {
         // If an AJAX call is already in progress, return immediately
         if (get_time_out_counting_ajax_in_process) {
@@ -10,18 +97,38 @@
         }
 
         let day = document.getElementById('attendance_date_search').value;
+        let shift_group = document.getElementById('shift_group_search').value;
+        let dept = document.getElementById('dept_search').value;
+        let section = document.getElementById('section_search').value;
+        let line_no = document.getElementById('line_no_search').value;
 
         var day1 = sessionStorage.getItem('attendance_date_search');
+        var shift_group1 = sessionStorage.getItem('shift_group_search');
+        var dept1 = sessionStorage.getItem('dept_search');
+        var section1 = sessionStorage.getItem('section_search');
+        var line_no1 = sessionStorage.getItem('line_no_search');
 
         if (current_page > 1) {
             switch (true) {
                 case day !== day1:
+                case shift_group !== shift_group1:
+                case dept !== dept1:
+                case section !== section1:
+                case line_no !== line_no1:
                     day = day1;
+                    shift_group = shift_group1;
+                    dept = dept1;
+                    section = section1;
+                    line_no = line_no1;
                     break;
                 default:
             }
         } else {
             sessionStorage.setItem('attendance_date_search', day);
+            sessionStorage.setItem('shift_group_search', shift_group);
+            sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('section_search', section);
+            sessionStorage.setItem('line_no_search', line_no);
         }
 
         // Set the flag to true as we're starting an AJAX call
@@ -33,7 +140,11 @@
             cache: false,
             data: {
                 method: 'get_time_out_counting',
-                day: day
+                day: day,
+                shift_group: shift_group,
+                dept: dept,
+                section: section,
+                line_no: line_no
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);

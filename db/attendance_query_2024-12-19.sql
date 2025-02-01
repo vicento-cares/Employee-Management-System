@@ -236,7 +236,13 @@ WITH AttendanceData AS (
 	FROM 
 		m_employees emp
 	LEFT JOIN 
-		t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = @day
+		t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = @day 
+	WHERE
+		emp.dept != '' AND (emp.resigned_date IS NULL OR emp.resigned_date >= @day) AND 
+		emp.shift_group = '' AND 
+		emp.dept = '' AND 
+		emp.section = '' AND 
+		emp.line_no = '' 
 	GROUP BY 
 		emp.dept, emp.section
 )
@@ -354,6 +360,7 @@ WITH AttendanceData AS (
 	LEFT JOIN 
 		t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = @day
 	WHERE 
+		emp.dept != '' AND (emp.resigned_date IS NULL OR emp.resigned_date >= @day) AND 
 		emp.shift_group IN ('A', 'B', 'ADS') AND 
 		emp.dept IN ('PD1', 'PD2', 'QA') AND 
 		emp.section IN ('FAP1 Mazda', 'First Process', 'Gemba Compliance') AND 

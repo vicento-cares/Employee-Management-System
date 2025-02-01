@@ -41,16 +41,49 @@ include 'plugins/navbar/viewer_navbar.php';
                                 </div>
                                 <!-- /.card-header -->
                                 <div class="card-body">
-                                <div class="row mb-4">
+                                <div class="row mb-2">
                                     <div class="col-sm-2">
                                     <label>Attendance Date</label>
-                                    <input type="date" class="form-control" id="attendance_date_search" onchange="get_time_out_counting(1)">
-                                    </div>
-                                    <div class="col-sm-2 offset-sm-6">
-                                    <label>&nbsp;</label>
-                                    <button type="button" class="btn bg-gray-dark btn-block" onclick="get_time_out_counting(1)"><i class="fas fa-search"></i> Search</button>
+                                    <input type="date" class="form-control" id="attendance_date_search">
                                     </div>
                                     <div class="col-sm-2">
+                                    <label>Shift Group</label>
+                                    <select class="form-control" id="shift_group_search" style="width: 100%;" required>
+                                        <option selected value="">All</option>
+                                        <option value="A">Shift A</option>
+                                        <option value="B">Shift B</option>
+                                        <option value="ADS">Shift ADS</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                    <label>Department</label>
+                                    <select id="dept_search" class="form-control">
+                                        <option selected value="">All</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                    <!-- <label>Group:</label>
+                                    <select id="group_search" class="form-control" onchange="get_attendance_summary_report(1)">
+                                        <option value="">Select Group</option>
+                                    </select> -->
+                                    <label>Section</label>
+                                    <select id="section_search" class="form-control">
+                                        <option value="">Select Section</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                    <label>Line No.</label>
+                                    <select id="line_no_search" class="form-control">
+                                        <option value="">Select Line No.</option>
+                                    </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-sm-3 offset-sm-6">
+                                    <label>&nbsp;</label>
+                                    <button type="button" class="btn bg-gray-dark btn-block" id="btnSearchTimeOutCounting"><i class="fas fa-search"></i> Search</button>
+                                    </div>
+                                    <div class="col-sm-3">
                                     <label>&nbsp;</label>
                                     <button type="button" class="btn bg-success btn-block" onclick="export_time_out_counting('timeOutCountingTable')"><i class="fas fa-download"></i> Time Out Counting</button>
                                     </div>
