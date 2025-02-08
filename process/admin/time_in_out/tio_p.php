@@ -191,6 +191,26 @@ if ($method == 'get_time_out_counting') {
 		$line_no = '';
 	}
 
+	$search_multiple_toc_shift_group_arr = [];
+	if (isset($_GET['search_multiple_toc_shift_group_arr'])) {
+		$search_multiple_toc_shift_group_arr = $_GET['search_multiple_toc_shift_group_arr'];
+	}
+
+	$search_multiple_toc_dept_arr = [];
+	if (isset($_GET['search_multiple_toc_dept_arr'])) {
+		$search_multiple_toc_dept_arr = $_GET['search_multiple_toc_dept_arr'];
+	}
+
+	$search_multiple_toc_section_arr = [];
+	if (isset($_GET['search_multiple_toc_section_arr'])) {
+		$search_multiple_toc_section_arr = $_GET['search_multiple_toc_section_arr'];
+	}
+
+	$search_multiple_toc_line_no_arr = [];
+	if (isset($_GET['search_multiple_toc_line_no_arr'])) {
+		$search_multiple_toc_line_no_arr = $_GET['search_multiple_toc_line_no_arr'];
+	}
+
 	$c = 0;
 
 	$sql = "DECLARE @day DATETIME = ?;
@@ -305,24 +325,55 @@ if ($method == 'get_time_out_counting') {
 
 	$params[] = $day;
 
-	if (!empty($shift_group)) {
-		$sql = $sql . " AND emp.shift_group = ?";
-		$params[] = $shift_group;
-	}
-	if (!empty($dept)) {
-		$sql = $sql . " AND emp.dept LIKE ?";
-		$dept_search = $dept . "%";
-		$params[] = $dept_search;
-	}
-	if (!empty($section)) {
-		$sql = $sql . " AND emp.section LIKE ?";
-		$section_search = $section . "%";
-		$params[] = $section_search;
-	}
-	if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no LIKE ?";
-		$line_no_search = $line_no . "%";
-		$params[] = $line_no_search;
+	if (!empty($search_multiple_toc_shift_group_arr) || 
+		!empty($search_multiple_toc_dept_arr) || 
+		!empty($search_multiple_toc_section_arr) || 
+		!empty($search_multiple_toc_line_no_arr)) {
+			
+		if (!empty($search_multiple_toc_shift_group_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_shift_group_arr), '?'));
+			$sql = $sql . " AND emp.shift_group IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_shift_group_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_dept_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_dept_arr), '?'));
+			$sql = $sql . " AND emp.dept IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_dept_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_section_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_section_arr), '?'));
+			$sql = $sql . " AND emp.section IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_section_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_line_no_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_line_no_arr), '?'));
+			$sql = $sql . " AND emp.line_no IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_line_no_arr); // Flatten the array
+		}
+	} else {
+		if (!empty($shift_group)) {
+			$sql = $sql . " AND emp.shift_group = ?";
+			$params[] = $shift_group;
+		}
+		if (!empty($dept)) {
+			$sql = $sql . " AND emp.dept LIKE ?";
+			$dept_search = $dept . "%";
+			$params[] = $dept_search;
+		}
+		if (!empty($section)) {
+			$sql = $sql . " AND emp.section LIKE ?";
+			$section_search = $section . "%";
+			$params[] = $section_search;
+		}
+		if (!empty($line_no)) {
+			$sql = $sql . " AND emp.line_no LIKE ?";
+			$line_no_search = $line_no . "%";
+			$params[] = $line_no_search;
+		}
 	}
 
 	$sql .= "
@@ -388,6 +439,216 @@ if ($method == 'get_time_out_counting') {
 		
 		echo '</tr>';
 	} 
+}
+
+if ($method == 'get_multiple_time_out_counting') {
+	$day_from = $_GET['day_from'];
+	$day_to = $_GET['day_to'];
+
+	$search_multiple_toc_shift_group_arr = [];
+	if (isset($_GET['search_multiple_toc_shift_group_arr'])) {
+		$search_multiple_toc_shift_group_arr = $_GET['search_multiple_toc_shift_group_arr'];
+	}
+
+	$search_multiple_toc_dept_arr = [];
+	if (isset($_GET['search_multiple_toc_dept_arr'])) {
+		$search_multiple_toc_dept_arr = $_GET['search_multiple_toc_dept_arr'];
+	}
+
+	$search_multiple_toc_section_arr = [];
+	if (isset($_GET['search_multiple_toc_section_arr'])) {
+		$search_multiple_toc_section_arr = $_GET['search_multiple_toc_section_arr'];
+	}
+
+	$search_multiple_toc_line_no_arr = [];
+	if (isset($_GET['search_multiple_toc_line_no_arr'])) {
+		$search_multiple_toc_line_no_arr = $_GET['search_multiple_toc_line_no_arr'];
+	}
+
+	$c = 0;
+
+	//MS SQL Server
+	$sql = "-- Define the start and end dates
+			DECLARE @StartDate DATE = ?;
+			DECLARE @EndDate DATE = ?;
+
+			-- CTE to generate a list of dates
+			WITH DateRange AS (
+				SELECT @StartDate AS ReportDate
+				UNION ALL
+				SELECT DATEADD(DAY, 1, ReportDate)
+				FROM DateRange
+				WHERE ReportDate < @EndDate
+			)
+
+			SELECT 
+				dr.ReportDate AS day,
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+							OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) AS total_0,
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) AS total_1,
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) AS total_2,
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) AS total_3,
+							-- Calculate total
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+							OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+				COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) AS total,
+				(
+					(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+								OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) * 0) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 1) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 2) 
+								+
+					(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 3) 
+				) AS total_times,
+							-- Calculate average_ot
+				FORMAT(
+				CASE WHEN (
+					COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+							OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+							OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+					COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END)
+				) > 0 
+				THEN
+				(
+					CAST((
+						(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+									OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) * 0) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 1) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 2) 
+									+
+						(COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) * 3) 
+					) AS FLOAT)
+					/ 
+					CAST((
+						COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 15, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 15 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+								OR (tio.time_out BETWEEN DATEADD(HOUR, 3, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 3 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) 
+								OR (tio.time_out IS NULL AND tio.day = dr.ReportDate) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 16, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 16 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 4, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 4 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 17, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 17 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 5, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 5 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END) +
+						COUNT(CASE WHEN (tio.time_out BETWEEN DATEADD(HOUR, 18, CAST(dr.ReportDate AS DATETIME2)) AND DATEADD(SECOND, 18 * 3600 + 59 * 60 + 59, CAST(dr.ReportDate AS DATETIME2))) 
+									OR (tio.time_out BETWEEN DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2))) AND DATEADD(SECOND, 6 * 3600 + 59 * 60 + 59, DATEADD(DAY, 1, CAST(dr.ReportDate AS DATETIME2)))) THEN 1 END)
+					) AS FLOAT)
+				) ELSE 0 END, 'N2') AS average_ot
+			FROM 
+				DateRange dr
+			LEFT JOIN 
+				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
+			LEFT JOIN 
+				t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = dr.ReportDate
+			WHERE 
+				emp.dept != ''";
+	$params = [];
+
+	$params[] = $day_from;
+	$params[] = $day_to;
+
+	if (!empty($search_multiple_toc_shift_group_arr) || 
+		!empty($search_multiple_toc_dept_arr) || 
+		!empty($search_multiple_toc_section_arr) || 
+		!empty($search_multiple_toc_line_no_arr)) {
+			
+		if (!empty($search_multiple_toc_shift_group_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_shift_group_arr), '?'));
+			$sql = $sql . " AND emp.shift_group IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_shift_group_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_dept_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_dept_arr), '?'));
+			$sql = $sql . " AND emp.dept IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_dept_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_section_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_section_arr), '?'));
+			$sql = $sql . " AND emp.section IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_section_arr); // Flatten the array
+		}
+		if (!empty($search_multiple_toc_line_no_arr)) {
+			// Create a placeholder string for the IDs
+			$placeholders = implode(',', array_fill(0, count($search_multiple_toc_line_no_arr), '?'));
+			$sql = $sql . " AND emp.line_no IN ($placeholders)";
+			$params = array_merge($params, $search_multiple_toc_line_no_arr); // Flatten the array
+		}
+	}
+
+	$sql .= "GROUP BY 
+				dr.ReportDate
+			OPTION (MAXRECURSION 0);  -- Allow recursion to go beyond the default limit if needed";
+	
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	echo '<table id="multipleTimeOutCountingTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap">
+			<thead style="text-align: center;">
+				<tr>
+				<th>#</th>
+				<th>Day</th>
+				<th>WT</th>
+				<th>0</th>
+				<th>0.5</th>
+				<th>1</th>
+				<th>1.5</th>
+				<th>2</th>
+				<th>3</th>
+				<th>Total</th>
+				<th>Average OT</th>
+				</tr>
+			</thead>
+			<tbody id="multipleTimeOutCountingData" style="text-align: center;">';
+
+	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+		$c++;
+		
+		echo '<tr style="cursor:pointer;"  
+				onclick="set_time_out_counting_date(&quot;'.$row['day'].'&quot;)">';
+			
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$row['day'].'</td>';
+		echo '<td>Manpower</td>';
+		echo '<td>'.$row['total_0'].'</td>';
+		echo '<td>0</td>';
+		echo '<td>'.$row['total_1'].'</td>';
+		echo '<td>0</td>';
+		echo '<td>'.$row['total_2'].'</td>';
+		echo '<td>'.$row['total_3'].'</td>';
+		echo '<td>'.$row['total'].'</td>';
+		echo '<td>'.$row['average_ot'].'</td>';
+
+		echo '</tr>';
+	}
+
+	echo '</tbody></table>';
 }
 
 $conn = NULL;

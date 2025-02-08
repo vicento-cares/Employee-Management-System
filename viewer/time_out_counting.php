@@ -79,7 +79,11 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </div>
                                 </div>
                                 <div class="row mb-4">
-                                    <div class="col-sm-3 offset-sm-6">
+                                    <div class="col-sm-2 offset-sm-4">
+                                    <label>&nbsp;</label>
+                                    <button type="button" class="btn bg-olive btn-block" data-toggle="modal" data-target="#search_multiple_toc"><i class="fas fa-search"></i> Search Multiple 🔥</button>
+                                    </div>
+                                    <div class="col-sm-3">
                                     <label>&nbsp;</label>
                                     <button type="button" class="btn bg-gray-dark btn-block" id="btnSearchTimeOutCounting"><i class="fas fa-search"></i> Search</button>
                                     </div>
@@ -88,6 +92,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <button type="button" class="btn bg-success btn-block" onclick="export_time_out_counting('timeOutCountingTable')"><i class="fas fa-download"></i> Time Out Counting</button>
                                     </div>
                                 </div>
+                                <div id="multipleDateTimeOutCountingTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;"></div>
                                 <div id="timeOutCountingTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
                                     <table id="timeOutCountingTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap">
                                     <thead style="text-align: center;">
@@ -130,5 +135,6 @@ include 'plugins/navbar/viewer_navbar.php';
         <!-- /.content-wrapper -->
 <?php
 include 'plugins/footer.php';
+include '../modals/search_multiple_toc.php';
 include 'plugins/js/time_out_counting_script.php';
 ?>
