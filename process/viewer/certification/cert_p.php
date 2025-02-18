@@ -327,8 +327,6 @@ if ($method == 'fetch_category') {
 		$query .= ") SELECT *
 					FROM RankedAuth
 					WHERE rn = 1";
-		
-		echo var_dump($params);
 
 		$stmt = $conn->prepare($query);
 

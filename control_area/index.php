@@ -6,6 +6,7 @@ if (isset($_SESSION['emp_no_control_area'])) {
   } else {
     header('location: certification.php');
   }
+  // header('location: maintenance.html');
   exit;
 }
 ?>

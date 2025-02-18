@@ -12,7 +12,6 @@
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         fetch_dept_dropdown();
-        // fetch_group_dropdown();
         fetch_section_dropdown();
         fetch_line_dropdown();
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
@@ -682,11 +681,6 @@
         document.getElementById('attendance_date_search').value = day;
         get_time_out_counting(1);
     }
-
-    // const export_time_out_counting = () => {
-    //     let day = sessionStorage.getItem('attendance_date_search');
-    //     window.open('../process/export/exp_time_out_counting.php?day=' + day, '_blank');
-    // }
 
     const export_time_out_counting = (table_id, separator = ',') => {
         let day = sessionStorage.getItem('attendance_date_search');

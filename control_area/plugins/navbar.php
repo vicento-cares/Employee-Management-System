@@ -5,7 +5,9 @@ include '../process/login5.php';
 if (!isset($_SESSION['emp_no_control_area'])) {
   header('location:/emp_mgt/control_area');
   exit;
-}
+}/* else {
+  header('location: maintenance.html');
+}*/
 ?>  
 <!DOCTYPE html>
 <html lang="en">
