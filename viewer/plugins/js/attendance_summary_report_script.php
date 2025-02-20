@@ -319,7 +319,7 @@
             get_attendance_summary_report_ajax_in_process = false;
         });
     }
-    
+
     $("#search_multiple_asr").on('show.bs.modal', e => {
         var attendance_date = document.getElementById("attendance_date_search").value;
         let day_from = document.getElementById('attendance_date_from_search_multiple').value;

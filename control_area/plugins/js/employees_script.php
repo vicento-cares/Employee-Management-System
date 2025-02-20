@@ -578,7 +578,7 @@
                 type: 'POST',
                 cache: false,
                 data: {
-                    method: 'update_employee',
+                    method: 'update_employee2',
                     id: id,
                     emp_no: emp_no,
                     full_name: full_name,

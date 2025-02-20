@@ -45,33 +45,33 @@ $params = [];
 
 if (!empty($emp_no)) {
   $query = $query . " emp_no LIKE ?";
-	$emp_no_search = $search_arr['emp_no'] . "%";
-	$params[] = $emp_no_search;
+  $emp_no_search = $search_arr['emp_no'] . "%";
+  $params[] = $emp_no_search;
 } else {
   $query = $query . " emp_no != ''";
 }
 if (!empty($full_name)) {
   $query = $query . " AND full_name LIKE ?";
-	$full_name_search = $search_arr['full_name'] . "%";
-	$params[] = $full_name_search;
+  $full_name_search = $search_arr['full_name'] . "%";
+  $params[] = $full_name_search;
 }
 if (!empty($dept)) {
-  $query = $query . " AND dept = ?";
-  $params[] = $dept;
-}
-if (!empty($section)) {
-  $query = $query . " AND section LIKE ?";
-  $section_search = $section . "%";
-  $params[] = $section_search;
-}
-if (!empty($line_no)) {
-  $query = $query . " AND line_no LIKE ?";
-  $line_no_search = $line_no . "%";
-  $params[] = $line_no_search;
-}
+    $query = $query . " AND dept = ?";
+    $params[] = $dept;
+  }
+  if (!empty($section)) {
+    $query = $query . " AND section LIKE ?";
+    $section_search = $section . "%";
+    $params[] = $section_search;
+  }
+  if (!empty($line_no)) {
+    $query = $query . " AND line_no LIKE ?";
+    $line_no_search = $line_no . "%";
+    $params[] = $line_no_search;
+  }
 if (!empty($role)) {
   $query = $query . " AND role = ?";
-	$params[] = $search_arr['role'];
+  $params[] = $search_arr['role'];
 }
 
 $stmt = $conn->prepare($query);

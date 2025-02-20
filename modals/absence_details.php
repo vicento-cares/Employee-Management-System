@@ -35,8 +35,8 @@
           </div>
           <div class="col-sm-6">
             <div class="form-group">
-              <label>Shift Group : </label>
-              <span id="absent_shift_group_absence_update" class="ml-2"></span>
+              <label>Shift : </label>
+              <span id="absent_shift_absence_update" class="ml-2"></span>
             </div>
           </div>
         </div>

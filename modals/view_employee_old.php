@@ -37,23 +37,9 @@
             </select>
           </div>
           <div class="col-4">
-            <label>Group:</label>
-            <select id="group_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;" disabled>
-              <option value="">Select Group</option>
-            </select>
-          </div>
-          <div class="col-4">
             <label>Section:</label>
             <select id="section_master_update" class="form-control" onchange="fetch_line_dropdown(2)" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Section</option>
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-8">
-            <label>Sub Section:</label>
-            <select id="sub_section_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;" disabled>
-              <option value="">Select Sub Section</option>
             </select>
           </div>
           <div class="col-4">
@@ -64,7 +50,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-4">
+          <div class="col-6">
             <label>Position:</label>
             <select id="position_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Position</option>
@@ -77,19 +63,13 @@
               <option value="Supervisor">Supervisor</option>
             </select>
           </div>
-          <div class="col-4">
-            <label>Process:</label>
-            <select id="process_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
-              <option value="">Select Process</option>
-            </select>
-          </div>
-          <div class="col-4">
+          <div class="col-6">
             <label>Date Hired:</label>
             <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
           </div>
         </div>
         <div class="row">
-          <div class="col-4">
+          <div class="col-6">
             <label>Provider:</label>
             <select id="provider_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
               <option value="">Select Provider</option>
@@ -100,15 +80,6 @@
               <option value="MEGATREND">MEGATREND</option>
               <option value="ONE SOURCE">ONE SOURCE</option>
               <option value="PKIMT">PKIMT</option>
-            </select>
-          </div>
-          <div class="col-2">
-            <label>Shift Group:</label>
-            <select id="shift_group_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
-              <option value="">Select Shift Group</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="ADS">ADS</option>
             </select>
           </div>
           <div class="col-6">

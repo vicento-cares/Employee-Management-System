@@ -68,19 +68,19 @@
               <div class="row mb-4">
                 <div class="col-sm-1">
                   <label>&nbsp;</label>
-                  <button type="button" class="btn bg-success btn-block" id="btnOut5" onclick="verify_set_out(5)">OUT 3 😁</button>
+                  <button type="button" class="btn bg-success btn-block" id="btnOut5" onclick="set_out(5)">OUT 3 😁</button>
                 </div>
                 <div class="col-sm-1">
                   <label>&nbsp;</label>
-                  <button type="button" class="btn bg-info btn-block" id="btnOut6" onclick="verify_set_out(6)">OUT 4 😑</button>
+                  <button type="button" class="btn bg-info btn-block" id="btnOut6" onclick="set_out(6)">OUT 4 😑</button>
                 </div>
                 <div class="col-sm-1">
                   <label>&nbsp;</label>
-                  <button type="button" class="btn bg-danger btn-block" id="btnOut7" onclick="verify_set_out(7)">OUT 5 😠</button>
+                  <button type="button" class="btn bg-danger btn-block" id="btnOut7" onclick="set_out(7)">OUT 5 😠</button>
                 </div>
                 <div class="col-sm-1">
                   <label>&nbsp;</label>
-                  <button type="button" class="btn bg-purple btn-block" id="btnOut8" onclick="verify_set_out(8)">OUT 6 👻</button>
+                  <button type="button" class="btn bg-purple btn-block" id="btnOut8" onclick="set_out(8)">OUT 6 👻</button>
                 </div>
               </div>
               <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">

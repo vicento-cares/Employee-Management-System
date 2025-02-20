@@ -30,7 +30,6 @@ switch (true) {
   case !isset($_GET['line_no']):
   case !isset($_GET['date_updated_from']):
   case !isset($_GET['date_updated_to']):
-  case !isset($_GET['resigned']):
     echo 'Query Parameters Not Set';
     exit();
 }
@@ -94,7 +93,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.', 'Process', 'Position', 'Provider', 'Gender', 'Shift Group', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Jr. Staff or Staff', 'Supervisor', 'Approver', 'Date Resigned'); 
+$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.', 'Position', 'Provider', 'Gender', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Jr. Staff or Staff', 'Supervisor', 'Approver', 'Date Resigned'); 
 fputcsv($f, $fields, $delimiter); 
 
 $query = "SELECT emp_no, full_name, dept, section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned_date FROM m_employees WHERE";
@@ -109,7 +108,7 @@ if (!empty($search_multiple_employee_arr)) {
   if (!empty($emp_no)) {
     $query = $query . " emp_no LIKE ?";
     $emp_no_search = $emp_no . "%";
-		$params[] = $emp_no_search;
+    $params[] = $emp_no_search;
   } else {
     $query = $query . " emp_no != ''";
   }
@@ -139,14 +138,14 @@ if (!empty($search_multiple_employee_arr)) {
   
   if (!empty($date_updated_from) && !empty($date_updated_to)) {
     $query = $query . " AND date_updated BETWEEN ? AND ?";
-		$params[] = $date_updated_from;
-		$params[] = $date_updated_to;
+    $params[] = $date_updated_from;
+    $params[] = $date_updated_to;
   }
   
   if ($resigned != '') {
     if ($resigned == 1 || $resigned == 0) {
       $query = $query . " AND resigned = ?";
-			$params[] = $resigned;
+      $params[] = $resigned;
     }
   }
 }
@@ -161,7 +160,7 @@ if (count($results) > 0) {
     // Output each row of the data, format line as csv and write to file pointer 
     foreach ($results as $row) {
 
-        $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['process'], $row['position'], $row['provider'], $row['gender'], $row['shift_group'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
+        $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['position'], $row['provider'], $row['gender'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
         fputcsv($f, $lineData, $delimiter); 
 	    
     }

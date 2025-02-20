@@ -9,183 +9,6 @@ $method = $_POST['method'];
 
 // Attendances
 
-function count_line_support_to($search_arr, $conn) {
-	$sql = "SELECT count(lsh.emp_no) AS total 
-		FROM t_line_support_history lsh
-		LEFT JOIN m_employees emp ON emp.emp_no = lsh.emp_no
-		WHERE lsh.day = '".$search_arr['day']."' AND lsh.line_no_to LIKE '".$search_arr['line_no']."%' AND lsh.status = 'accepted'";
-
-	$sql = $sql . " AND emp.shift_group = '".$search_arr['shift_group']."'";
-
-	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept = '".$search_arr['dept']."'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-
-	if (!empty($search_arr['section'])) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($search_arr['line_no'], 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
-		}
-	}
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
-		$total = 0;
-	}
-	return $total;
-}
-
-function count_line_support_from($search_arr, $conn) {
-	$sql = "SELECT count(lsh.emp_no) AS total 
-		FROM t_line_support_history lsh
-		LEFT JOIN m_employees emp ON emp.emp_no = lsh.emp_no
-		WHERE lsh.day = '".$search_arr['day']."' AND lsh.line_no_from LIKE '".$search_arr['line_no']."%' AND lsh.status = 'accepted'";
-
-	$sql = $sql . " AND emp.shift_group = '".$search_arr['shift_group']."'";
-
-	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept = '".$search_arr['dept']."'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-
-	if (!empty($search_arr['section'])) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($search_arr['line_no'], 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
-		}
-	}
-
-	// if ($search_arr['line_no'] == 'No Line') {
-	// 	$sql = $sql . " AND emp.line_no IS NULL";
-	// } else if (!empty($search_arr['line_no'])) {
-	// 	$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
-	// } else {
-	// 	$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
-	// }
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
-		$total = 0;
-	}
-	return $total;
-}
-
-function count_line_support_from_rejected($search_arr, $conn) {
-	$sql = "SELECT count(lsh.emp_no) AS total 
-		FROM t_line_support_history lsh
-		LEFT JOIN m_employees emp ON emp.emp_no = lsh.emp_no
-		WHERE lsh.day = '".$search_arr['day']."' AND lsh.line_no_from LIKE '".$search_arr['line_no']."%' AND lsh.status = 'rejected'";
-
-	$sql = $sql . " AND emp.shift_group = '".$search_arr['shift_group']."'";
-
-	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept = '".$search_arr['dept']."'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-	
-	if (!empty($search_arr['section'])) {
-		// Check line number first char if it is numeric (Final Process)
-		// If not (Initial Process)
-		$line_number_first_char = substr($search_arr['line_no'], 0, 1);
-		if (!is_numeric($line_number_first_char)) {
-			$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
-		}
-	}
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
-		$total = 0;
-	}
-	return $total;
-}
-
-function get_attendance_list_line_support_to($search_arr, $conn) {
-	$table_data = "";
-
-	$c = 0;
-
-	$sql = "SELECT 
-	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date,
-	tio.time_in, tio.time_out, tio.day AS time_in_day, tio.shift AS time_in_shift
-		FROM m_employees emp
-		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '".$search_arr['day']."'
-		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '".$search_arr['day']."'
-		WHERE emp.shift_group = '".$search_arr['shift_group']."'";
-
-	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept LIKE '".$search_arr['dept']."%'";
-	} else {
-		$sql = $sql . " AND emp.dept != ''";
-	}
-
-	$sql = $sql . " AND lsh.line_no_to LIKE '".$search_arr['line_no']."%' AND lsh.status = 'accepted'
-		AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')
-		ORDER BY emp.full_name ASC";
-
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
-
-			$table_data .= '<tr class="modal-trigger bg-warning">';
-			$table_data .= '<td>'.$c.'</td>';
-			if (!empty($row['time_in'])) {
-				$table_data .= '<td>'.$row['time_in_day'].'</td>';
-				$table_data .= '<td>'.$row['time_in_shift'].'</td>';
-				$table_data .= '<td>'.$row['shift_group'].'</td>';
-			} else {
-				$table_data .= '<td>'.$search_arr['day'].'</td>';
-				$table_data .= '<td></td>';
-				$table_data .= '<td>'.$row['shift_group'].'</td>';
-			}
-			$table_data .= '<td>'.$row['provider'].'</td>';
-			$table_data .= '<td>'.$row['emp_no'].'</td>';
-			$table_data .= '<td>'.$row['full_name'].'</td>';
-			$table_data .= '<td>'.$row['dept'].'</td>';
-			$table_data .= '<td>'.$row['section'].'</td>';
-			$table_data .= '<td>'.$row['line_no'].'</td>';
-			$table_data .= '<td>'.$row['process'].'</td>';
-			$table_data .= '<td>'.$row['time_in'].'</td>';
-			$table_data .= '<td>'.$row['time_out'].'</td>';
-			$table_data .= '<td></td>';
-			$table_data .= '<td></td>';
-
-			$table_data .= '</tr>';
-		}
-	}
-
-	$response_array = array(
-		"table_data" => $table_data,
-		"c" => $c
-	);
-
-	return $response_array;
-}
-
 function count_attendance_list($search_arr, $conn) {
 	$sql = "SELECT count(emp_no) AS total 
 		FROM m_employees
@@ -245,11 +68,6 @@ function count_attendance_list2($search_arr, $conn) {
 	}else{
 		$total = 0;
 	}
-
-	$total += count_line_support_to($search_arr, $conn);
-	// $total += count_line_support_from_rejected($search_arr, $conn);
-	$total -= count_line_support_from($search_arr, $conn);
-
 	return $total;
 }
 
@@ -456,7 +274,7 @@ if ($method == 'get_attendance_list') {
 	$sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date,
 	tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
-	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason, 
+	absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason,
 	pic.file_url 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
@@ -695,28 +513,12 @@ if ($method == 'get_attendance_list2') {
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-danger');
 	$row_class = $row_class_arr[0];
 
-	$search_arr = array(
-		"day" => $day,
-		"shift_group" => $shift_group,
-		"dept" => $dept,
-		"section" => $section,
-		"line_no" => $line_no
-	);
-
 	$results_per_page = 20;
 
 	//determine the sql LIMIT starting number for the results on the displaying page
 	$page_first_result = ($current_page-1) * $results_per_page;
 
-	// Get Attendances from Line Support History
-	if ($page_first_result == 0) {
-		$attendance_list_line_support_to_arr = get_attendance_list_line_support_to($search_arr, $conn);
-		$c += $attendance_list_line_support_to_arr["c"];
-	} else {
-		$c += count_line_support_to($search_arr, $conn);
-	}
-
-	$c += $page_first_result;
+	$c = $page_first_result;
 
 	$sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.skill_level, emp.line_no, emp.shift_group, emp.resigned_date,
@@ -726,9 +528,8 @@ if ($method == 'get_attendance_list2') {
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = '$day'
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = '$day'
-		LEFT JOIN t_line_support_history lsh ON lsh.emp_no = emp.emp_no AND lsh.day = '$day'
 		LEFT JOIN m_employee_pictures pic ON pic.emp_no = emp.emp_no
-		WHERE ((emp.shift_group = '$shift_group'";
+		WHERE emp.shift_group = '$shift_group'";
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE '$dept%'";
 	} else {
@@ -744,7 +545,6 @@ if ($method == 'get_attendance_list2') {
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . ") AND (lsh.line_no_from IS NULL OR lsh.status != 'accepted'))";
 	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
 	$sql = $sql . " ORDER BY emp.full_name ASC";
 
@@ -757,10 +557,6 @@ if ($method == 'get_attendance_list2') {
 	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 	$stmt->execute();
 	if ($stmt->rowCount() > 0) {
-		if ($page_first_result == 0){
-			echo $attendance_list_line_support_to_arr["table_data"];
-		}
-
 		foreach($stmt->fetchALL() as $row){
 			$c++;
 
@@ -790,7 +586,7 @@ if ($method == 'get_attendance_list2') {
 			} else {
 				echo '<td style="vertical-align: middle;"><img src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			}
-			
+
 			if (!empty($row['time_in'])) {
 				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
 				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
@@ -824,9 +620,9 @@ if ($method == 'get_attendance_list2') {
 			echo '</tr>';
 		}
 	}else{
-		// echo '<tr>';
-		// 	echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
-		// echo '</tr>';
+		echo '<tr>';
+			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
 	}
 }
 

@@ -771,15 +771,11 @@ if ($method == 'register_employee') {
 	$full_name = addslashes(trim($_POST['full_name']));
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$dept = trim($_POST['dept']);
-	$group = trim($_POST['group']);
 	$section = trim($_POST['section']);
-	$sub_section = trim($_POST['sub_section']);
-	$process = trim($_POST['line_process']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
-	$shift_group = trim($_POST['shift_group']);
 	$address = addslashes(trim($_POST['address']));
 	$contact_no = addslashes(trim($_POST['contact_no']));
 	$emp_status = trim($_POST['emp_status']);
@@ -800,35 +796,25 @@ if ($method == 'register_employee') {
 	}else{
 		$stmt = NULL;
 
-		$query = "INSERT INTO m_employees 
-				(emp_no, full_name, dept, section, sub_section, process, line_no, date_hired, position, provider, gender, shift_group, 
+		$query = "INSERT INTO m_employees
+				(emp_no, full_name, dept, section, line_no, date_hired, position, provider, gender, 
 				address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
 				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no',N'$full_name'";
 
 		if (!empty($dept)) {
 			$query = $query . ",'$dept'";
 		} else {
-			$query = $query . ", 'Undefined'";
+			$query = $query . ", NULL";
 		}
 		if (!empty($section)) {
 			$query = $query . ",'$section'";
 		} else {
-			$query = $query . ", 'Undefined'";
-		}
-		if (!empty($sub_section)) {
-			$query = $query . ",'$sub_section'";
-		} else {
-			$query = $query . ", 'Undefined'";
-		}
-		if (!empty($process)) {
-			$query = $query . ",'$process'";
-		} else {
-			$query = $query . ", 'Undefined'";
+			$query = $query . ", NULL";
 		}
 		if (!empty($line_no)) {
 			$query = $query . ",'$line_no'";
 		} else {
-			$query = $query . ", 'Undefined'";
+			$query = $query . ", NULL";
 		}
 
 		if (!empty($date_hired)) {
@@ -837,7 +823,7 @@ if ($method == 'register_employee') {
 			$query = $query . ", NULL";
 		}
 
-		$query = $query . ",'$position','$provider','$gender','$shift_group','$address','$contact_no','$emp_status',
+		$query = $query . ",'$position','$provider','$gender','$address','$contact_no','$emp_status',
 						'$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
 
 		$stmt = $conn->prepare($query);
@@ -850,6 +836,134 @@ if ($method == 'register_employee') {
 }
 
 if ($method == 'update_employee') {
+	$id = $_POST['id'];
+	$emp_no = addslashes(trim($_POST['emp_no']));
+	$full_name = addslashes(trim($_POST['full_name']));
+	$dept = trim($_POST['dept']);
+	$section = trim($_POST['section']);
+	$line_no = trim($_POST['line_no']);
+	$position = trim($_POST['position']);
+	$date_hired = trim($_POST['date_hired']);
+	$provider = trim($_POST['provider']);
+	$address = addslashes(trim($_POST['address']));
+	$contact_no = addslashes(trim($_POST['contact_no']));
+	$emp_status = trim($_POST['emp_status']);
+	$shuttle_route = trim($_POST['shuttle_route']);
+	$gender = trim($_POST['gender']);
+	$emp_js_s_no = trim($_POST['emp_js_s_no']);
+	$emp_sv_no = trim($_POST['emp_sv_no']);
+	$emp_approver_no = trim($_POST['emp_approver_no']);
+	$emp_js_s = trim($_POST['emp_js_s']);
+	$emp_sv = trim($_POST['emp_sv']);
+	$emp_approver = trim($_POST['emp_approver']);
+	$resigned = intval($_POST['resigned']);
+	$resigned_date = trim($_POST['resigned_date']);
+
+	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = N'$full_name'";
+	
+	if (!empty($dept)) {
+		$query = $query . ", dept = '$dept'";
+	} else {
+		$query = $query . ", dept = NULL";
+	}
+	if (!empty($section)) {
+		$query = $query . ", section = '$section'";
+	} else {
+		$query = $query . ", section = NULL";
+	}
+	if (!empty($line_no)) {
+		$query = $query . ", line_no = '$line_no'";
+	} else {
+		$query = $query . ", line_no = NULL";
+	}
+
+	if (!empty($date_hired)) {
+		$query = $query . ", date_hired = '$date_hired'";
+	} else {
+		$query = $query . ", date_hired = NULL";
+	}
+
+	if (!empty($resigned_date)) {
+		$query = $query . ", resigned_date = '$resigned_date'";
+	} else {
+		$query = $query . ", resigned_date = NULL";
+	}
+
+	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', 
+						address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', 
+						shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', 
+						emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', 
+						resigned = '$resigned' WHERE id = '$id'";
+
+	$stmt = $conn->prepare($query);
+	if ($stmt->execute()) {
+		$query = "UPDATE m_control_area_accounts SET";
+	
+		if (!empty($dept)) {
+			$query = $query . " dept = '$dept'";
+		} else {
+			$query = $query . " dept = ''";
+		}
+		if (!empty($section)) {
+			$query = $query . ", section = '$section'";
+		} else {
+			$query = $query . ", section = NULL";
+		}
+		if (!empty($line_no)) {
+			$query = $query . ", line_no = '$line_no'";
+		} else {
+			$query = $query . ", line_no = NULL";
+		}
+		// if (!empty($shift_group)) {
+		// 	$query = $query . ", shift_group = '$shift_group'";
+		// } else {
+		// 	$query = $query . ", shift_group = NULL";
+		// }
+
+		$query = $query . " WHERE emp_no = '$emp_no'";
+		$stmt = $conn->prepare($query);
+
+		if ($stmt->execute()) {
+			$query = "UPDATE m_accounts SET";
+	
+			if (!empty($dept)) {
+				$query = $query . " dept = '$dept'";
+			} else {
+				$query = $query . " dept = ''";
+			}
+			if (!empty($section)) {
+				$query = $query . ", section = '$section'";
+			} else {
+				$query = $query . ", section = NULL";
+			}
+			if (!empty($line_no)) {
+				$query = $query . ", line_no = '$line_no'";
+			} else {
+				$query = $query . ", line_no = NULL";
+			}
+			// if (!empty($shift_group)) {
+			// 	$query = $query . ", shift_group = '$shift_group'";
+			// } else {
+			// 	$query = $query . ", shift_group = NULL";
+			// }
+
+			$query = $query . " WHERE emp_no = '$emp_no'";
+			$stmt = $conn->prepare($query);
+
+			if ($stmt->execute()) {
+				echo 'success';
+			} else {
+				echo 'error';
+			}
+		} else {
+			echo 'error';
+		}
+	}else{
+		echo 'error';
+	}
+}
+
+if ($method == 'update_employee2') {
 	$id = $_POST['id'];
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$full_name = addslashes(trim($_POST['full_name']));
@@ -875,8 +989,8 @@ if ($method == 'update_employee') {
 	$emp_js_s = trim($_POST['emp_js_s']);
 	$emp_sv = trim($_POST['emp_sv']);
 	$emp_approver = trim($_POST['emp_approver']);
-	$resigned = intval($_POST['resigned']);
-	$resigned_date = trim($_POST['resigned_date']);
+	// $resigned = intval($_POST['resigned']);
+	// $resigned_date = trim($_POST['resigned_date']);
 
 	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = N'$full_name'";
 	
@@ -918,17 +1032,8 @@ if ($method == 'update_employee') {
 		$query = $query . ", date_hired = NULL";
 	}
 
-	if (!empty($resigned_date)) {
-		$query = $query . ", resigned_date = '$resigned_date'";
-	} else {
-		$query = $query . ", resigned_date = NULL";
-	}
 
-	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', 
-						address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', 
-						shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', 
-						emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', 
-						resigned = '$resigned' WHERE id = '$id'";
+	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no' WHERE id = '$id'";
 
 	$stmt = $conn->prepare($query);
 	if ($stmt->execute()) {

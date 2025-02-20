@@ -10,7 +10,7 @@ $method = $_POST['method'];
 // Account Management
 
 function count_account_list($search_arr, $conn) {
-	$query = "SELECT COUNT(id) AS total FROM m_accounts WHERE";
+	$query = "SELECT count(id) AS total FROM m_accounts WHERE";
 	$params = [];
 
 	if (!empty($search_arr['emp_no'])) {
@@ -62,8 +62,8 @@ function count_account_list($search_arr, $conn) {
 }
 
 if ($method == 'count_account_list') {
-	$emp_no = $_POST['emp_no'];
-	$full_name = $_POST['full_name'];
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -83,7 +83,7 @@ if ($method == 'count_account_list') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = $_POST['role'];
+	$role = addslashes($_POST['role']);
 	
 	$search_arr = array(
 		"emp_no" => $emp_no,
@@ -98,8 +98,8 @@ if ($method == 'count_account_list') {
 }
 
 if ($method == 'account_list_last_page') {
-	$emp_no = $_POST['emp_no'];
-	$full_name = $_POST['full_name'];
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -119,7 +119,7 @@ if ($method == 'account_list_last_page') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = $_POST['role'];
+	$role = addslashes($_POST['role']);
 
 	$search_arr = array(
 		"emp_no" => $emp_no,
@@ -141,8 +141,8 @@ if ($method == 'account_list_last_page') {
 }
 
 if ($method == 'account_list') {
-	$emp_no = $_POST['emp_no'];
-	$full_name = $_POST['full_name'];
+	$emp_no = addslashes($_POST['emp_no']);
+	$full_name = addslashes($_POST['full_name']);
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -162,7 +162,7 @@ if ($method == 'account_list') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = $_POST['role'];
+	$role = addslashes($_POST['role']);
 
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
@@ -227,7 +227,6 @@ if ($method == 'account_list') {
 	if (count($results) > 0) {
 		foreach($results as $row){
 			$c++;
-
 			if (isset($_SESSION['emp_no_hr'])) {
 				echo '<tr>';
 
@@ -239,7 +238,6 @@ if ($method == 'account_list') {
 
 				echo '<td>'.$c.'</td>';
 			}
-
 				echo '<td>'.$row['emp_no'].'</td>';
 				echo '<td>'.$row['full_name'].'</td>';
 				echo '<td>'.$row['dept'].'</td>';
@@ -251,7 +249,7 @@ if ($method == 'account_list') {
 		}
 	}else{
 		echo '<tr>';
-			echo '<td colspan="9" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="7" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }

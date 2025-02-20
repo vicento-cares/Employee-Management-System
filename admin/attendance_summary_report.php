@@ -59,6 +59,7 @@
                     <option selected value="">All</option>
                     <option value="PD">PD</option>
                     <option value="QA">QA</option>
+                    <option value="Undefined">Undefined</option>
                   </select>
                 </div>
                 <div class="col-sm-3">

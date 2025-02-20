@@ -120,161 +120,137 @@ function set_time_out($server_date_time, $emp_no, $day, $shift, $conn) {
 // REMOTE IP ADDRESS
 $ip = $_SERVER['REMOTE_ADDR'];
 $line_no_label = check_ip_access_location($ip, $conn);
-$error_message = "";
 
 if (!isset($_SESSION['emp_no'])) {
   header('location:../admin');
   exit;
-} else if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (isset($_POST['emp_no'])) {
-    if (!empty($_POST['emp_no'])) {
-      // Time Out Process
-      $emp_no = $_POST['emp_no'];
-      $full_name = '';
-      $provider = '';
-      $dept = '';
-      $section = '';
-      $sub_section = '';
-      $line_no = '';
-      $line_process = '';
-      $shift_group = '';
-      $concat_details = '';
-      $unregistered = '';
-      $wrong_scanning = '';
-      $is_ads = false;
-      $wrong_shift_group = '';
-      $no_time_in = '';
-      $already_time_out = '';
-      $allow_time_out = '';
+} else if (isset($_POST['emp_no'])) {
+  // Time Out Process
+  $emp_no = $_POST['emp_no'];
+  $full_name = '';
+  $provider = '';
+  $dept = '';
+  $section = '';
+  $sub_section = '';
+  $line_no = '';
+  $line_process = '';
+  $shift_group = '';
+  $concat_details = '';
+  $unregistered = '';
+  $wrong_scanning = '';
+  // $is_ads = false;
+  //$wrong_shift_group = '';
+  $no_time_in = '';
+  $already_time_out = '';
+  $allow_time_out = '';
 
-      try {
-        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
-        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-        $stmt -> execute();
+  $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
+  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+  $stmt -> execute();
 
-        if ($stmt -> rowCount() > 0) {
-          while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-            $full_name = $row['full_name'];
-            $provider = $row['provider'];
-            $dept = $row['dept'];
-            $section = $row['section'];
-            $sub_section = $row['sub_section'];
-            $line_no = $row['line_no'];
-            $line_process = $row['process'];
-            $shift_group = $row['shift_group'];
-            $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-            // Added Temporarily
-            if(empty($full_name)) {
-              $full_name = ' ';
-            }
-          }
-
-          if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-            $shift = get_shift_line_support($server_time);
-            $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
-
-            // Line Support Query
-            // MySQL
-            // $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
-            // MS SQL Server
-            $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC";
-            $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-            $stmt -> execute();
-
-            if ($stmt -> rowCount() < 1) {
-              $wrong_scanning = true;
-            }
-          } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-            $wrong_scanning = true;
-          }
-
-          if ($wrong_scanning != true) {
-            if (empty($shift_group) || empty($_SESSION['shift_group'])) {
-              $wrong_shift_group = true;
-            } else if ($_SESSION['shift_group'] != $shift_group) {
-              if ($_SESSION['shift_group'] == 'ADS' || $shift_group == 'ADS') {
-                $is_ads = true;
-              }
-
-              if ($is_ads != true) {
-                $wrong_shift_group = true;
-              }
-            }
-
-            if ($wrong_shift_group != true) {
-              // MySQL
-              // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-              // MS SQL Server
-              $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
-              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-              $params = array($emp_no, $server_date_only);
-              $stmt -> execute($params);
-
-              $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-
-              // Check first query result
-              if (!$row) {
-                // MySQL
-                // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-                // MS SQL Server
-                $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
-                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-                $params = array($emp_no, $server_date_only_yesterday);
-                $stmt -> execute($params);
-
-                $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-              }
-
-              // Check first or second query result
-              if ($row) {
-                $day = $row['day'];
-                $shift = $row['shift'];
-
-                // Check Shuttle Allocation for Time Out
-                /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
-                if ($allow_time_out == true) {
-                  set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-                }*/
-
-                // Temporary Allow Timeout W/O Shuttle Allocation
-                $allow_time_out = true;
-                set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-              } else {
-                $shift = get_shift($server_time);
-
-                $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
-                $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-                $params = array($emp_no, $server_date_only, $shift);
-                $stmt -> execute($params);
-
-                if ($stmt -> rowCount() < 1) {
-                  $no_time_in = true;
-                } else {
-                  $already_time_out = true;
-                }
-              }
-            }
-          }
-        } else {
-          $unregistered = true;
-        }
-      } catch (PDOException $e) {
-        $full_name = '';
-        $unregistered = '';
-        $wrong_scanning = '';
-        $wrong_shift_group = '';
-        $no_time_in = '';
-        $already_time_out = '';
-        $allow_time_out = '';
-        $error_message .= "System Error: " . $e->getMessage() . " Call IT Personnel Immediately.";
+  if ($stmt -> rowCount() > 0) {
+    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+      $full_name = $row['full_name'];
+      $provider = $row['provider'];
+      $dept = $row['dept'];
+      $section = $row['section'];
+      $sub_section = $row['sub_section'];
+      $line_no = $row['line_no'];
+      $line_process = $row['process'];
+      $shift_group = $row['shift_group'];
+      $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+      // Added Temporarily
+      if(empty($full_name)) {
+        $full_name = ' ';
       }
-      $_POST['emp_no'] = NULL;
-    } else {
-      $error_message .= "Error: Empty data recieved. Please try again or call IT Personnel Immediately.";
+    }
+
+    if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+      $shift = get_shift_line_support($server_time);
+      $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
+
+      // Line Support Query
+      // MySQL
+      // $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
+      // MS SQL Server
+      $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC";
+      $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+      $stmt -> execute();
+
+      if ($stmt -> rowCount() < 1) {
+        $wrong_scanning = true;
+      }
+    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+      $wrong_scanning = true;
+    }
+
+    /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+      $wrong_scanning = true;
+    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+      $wrong_scanning = true;
+    } else {*/
+    if ($wrong_scanning != true) {
+      /*if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+        $wrong_shift_group = true;
+      } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
+        $wrong_shift_group = true;
+      } else {*/
+      // MySQL
+      // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+      // MS SQL Server
+      $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
+      $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+      $params = array($emp_no, $server_date_only);
+      $stmt -> execute($params);
+
+      $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+      // Check first query result
+      if (!$row) {
+        // MySQL
+        // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+        // MS SQL Server
+        $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+        $params = array($emp_no, $server_date_only_yesterday);
+        $stmt -> execute($params);
+
+        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+      }
+
+      // Check first or second query result
+      if ($row) {
+        $day = $row['day'];
+        $shift = $row['shift'];
+
+        // Check Shuttle Allocation for Time Out
+        /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
+        if ($allow_time_out == true) {
+          set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
+        }*/
+
+        // Temporary Allow Timeout W/O Shuttle Allocation
+        $allow_time_out = true;
+        set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
+      } else {
+        $shift = get_shift($server_time);
+
+        $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
+        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+        $params = array($emp_no, $server_date_only, $shift);
+        $stmt -> execute($params);
+
+        if ($stmt -> rowCount() < 1) {
+          $no_time_in = true;
+        } else {
+          $already_time_out = true;
+        }
+      }
     }
   } else {
-    $error_message .= "Error: Data not set. Please try again or call IT Personnel Immediately.";
+    $unregistered = true;
   }
+  $_POST['emp_no'] = NULL;
 }
 ?>
 <!DOCTYPE html>
@@ -321,7 +297,7 @@ if (!isset($_SESSION['emp_no'])) {
 
         <form action="" method="POST" id="scan_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="TIME OUT" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="20" required>
+            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="Scan Here" oncopy="return false" onpaste="return false" autofocus autocomplete="off" maxlength="20" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-qrcode"></span>
@@ -335,6 +311,11 @@ if (!isset($_SESSION['emp_no'])) {
         </p>
       </div>
     </div>
+    <!-- <div class="card mt-2">
+          <div class="card-body timeout-label">
+            <p class="login-box-msg"><b>WRONG or NO Shift Group</b></p>
+          </div>
+        </div> -->
     <?php 
     if (!empty($full_name)) {
       if (!empty($wrong_scanning)) {
@@ -342,14 +323,6 @@ if (!isset($_SESSION['emp_no'])) {
       <div class="card mt-2">
         <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Scanned in WRONG Line No. or PC<br>Note: If this was your new Line, please submit transfer form to HR</b></p>
-        </div>
-      </div>
-    <?php
-      } else if (!empty($wrong_shift_group)) {
-    ?>
-      <div class="card mt-2">
-        <div class="card-body timeout-label">
-          <p class="login-box-msg"><b>WRONG or NO Shift Group</b></p>
         </div>
       </div>
     <?php
@@ -373,13 +346,13 @@ if (!isset($_SESSION['emp_no'])) {
     ?>
       <div class="card mt-2">
         <div class="card-body timeout-label">
-          <p class="m-0 p-1 text-center">Employee No: <b><?=$emp_no?></b></p>
-          <p class="m-0 p-1 text-center">Name: <b><?=$full_name?></b></p>
-          <p class="m-0 p-1 text-center">Provider: <b><?=$provider?></b></p>
-          <p class="m-0 p-1 text-center">Line No: <b><?=$line_no?></b></p>
+          <p class="m-0 p-2 text-center">Employee No: <b><?=$emp_no?></b></p>
+          <p class="m-0 p-2 text-center">Name: <b><?=$full_name?></b></p>
+          <p class="m-0 p-2 text-center">Provider: <b><?=$provider?></b></p>
+          <p class="m-0 p-2 text-center">Line No: <b><?=$line_no?></b></p>
           <p class="m-0 p-1 text-center">Details: <b><?=$concat_details?></b></p>
           <p class="m-0 p-1 text-center">Shift Group: <b><?=$shift_group?></b></p>
-          <p class="m-0 p-1 text-center">Time Out: <b><?=$server_time_a?></b></p>
+          <p class="m-0 p-2 text-center">Time Out: <b><?=$server_time_a?></b></p>
         </div>
       </div>
     <?php 
@@ -397,14 +370,6 @@ if (!isset($_SESSION['emp_no'])) {
       <div class="card mt-2">
         <div class="card-body timeout-label">
           <p class="login-box-msg"><b>Time Out Failed. Unregistered or Resigned</b></p>
-        </div>
-      </div>
-    <?php 
-    } else if (!empty($error_message)) {
-    ?>
-      <div class="card mt-2">
-        <div class="card-body timeout-label">
-          <p class="login-box-msg"><b><?=$error_message?></b></p>
         </div>
       </div>
     <?php
@@ -429,7 +394,7 @@ if (!isset($_SESSION['emp_no'])) {
   // DOMContentLoaded function
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("emp_no").focus();
-    
+
     // var serverDateTimeObject = new Date().toISOString().split('T')[0];
     var serverDateTimeObject = document.getElementById('server_date_time').value;
     sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTimeObject);
@@ -476,7 +441,7 @@ if (!isset($_SESSION['emp_no'])) {
     // serverTime = serverDate.toISOString().substr(11, 8);
 
     // Create a new Date object for the display time
-    // var displayDate = new Date(serverDateTime.getTime());
+    // var displayDate = new Date(serverDate.getTime());
 
     // Adjust for the Philippine time zone (GMT+8)
     // -8 instead of +8
