@@ -12,7 +12,7 @@
       <div class="modal-body">
         <div class="row mb-2">
           <div class="col-sm-4">
-            <img id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
+            <img class="update_employee_picture_img_tag" id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
           </div>
           <div class="col-sm-4 offset-sm-4">
             <label>&nbsp;</label>

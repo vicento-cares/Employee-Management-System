@@ -61,6 +61,20 @@ if (!isset($_SESSION['emp_no_hr'])) {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(1080deg); }
     } 
+
+    /* Employee Picture Style */
+    .update_employee_picture_img_tag {
+      width: 100px; /* Fixed width */
+      height: 100px; /* Fixed height */
+      object-fit: contain; /* Ensure the whole image is visible */
+      object-position: center; /* Center the image within the container */
+    }
+    .attendances_employee_picture_img_tag {
+      width: 75px; /* Fixed width */
+      height: 75px; /* Fixed height */
+      object-fit: contain; /* Ensure the whole image is visible */
+      object-position: center; /* Center the image within the container */
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
