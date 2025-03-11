@@ -200,9 +200,10 @@ if ($method == 'update_access_location') {
     $line_no = trim($_POST['line_no']);
     $ip = trim($_POST['ip']);
 
-    $query = "SELECT id FROM m_access_locations WHERE ip = ?";
+    $query = "SELECT id FROM m_access_locations 
+                WHERE dept = ? AND section = ? AND line_no = ? AND ip = ?";
 
-    $params[] = $ip;
+    $params = array($dept, $section, $line_no, $ip);
 
     $stmt = $conn->prepare($query);
     $stmt->execute($params);
