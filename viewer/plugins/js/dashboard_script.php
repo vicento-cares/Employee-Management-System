@@ -7,9 +7,42 @@
         // fetch_group_dropdown();
         fetch_section_dropdown();
         fetch_line_dropdown();
+
+        <?php
+            // PCAD GET Params
+            if (isset($_GET['pcad_exec_server_date_only'])) {
+                $server_date_only = $_GET['pcad_exec_server_date_only'];
+            }
+
+            if (isset($_GET['dept'])) {
+                $dept = $_GET['dept'];
+            }
+
+            if (isset($_GET['section'])) {
+                $section = $_GET['section'];
+            }
+
+            if (isset($_GET['line_no'])) {
+                $line_no = $_GET['line_no'];
+            }
+        ?>
+
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
+        <?php if (!empty($dept) && !empty($section) && !empty($line_no)) { ?>
+        console.log('Dept:', '<?= $dept ?>');
+        console.log('Section:', '<?= $section ?>');
+        console.log('Line No:', '<?= $line_no ?>');
+        setTimeout(() => {
+            document.getElementById('dept_master_search').value = '<?= $dept ?>';
+            document.getElementById('section_master_search').value = '<?= $section ?>';
+            document.getElementById('line_no_master_search').value = '<?= $line_no ?>';
+            count_emp_dashboard();
+            realtime_count_emp_dashboard = setInterval(count_emp_dashboard, 30000);
+        }, 1000);
+        <?php } else { ?>
         count_emp_dashboard();
         realtime_count_emp_dashboard = setInterval(count_emp_dashboard, 30000);
+        <?php } ?>
     });
 
     const fetch_dept_dropdown = () => {
