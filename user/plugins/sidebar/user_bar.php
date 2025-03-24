@@ -34,6 +34,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/user/individual_attendances.php") { ?>
+          <a href="individual_attendances.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="individual_attendances.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              Individual Attendances
+            </p>
+          </a>
+        </li>
         <?php include 'logout.php' ;?>
       </ul>
     </nav>
