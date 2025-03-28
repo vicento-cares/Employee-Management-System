@@ -95,6 +95,11 @@ function count_employee_list($search_arr, $conn) {
 			$query = $query . " AND resigned = '".$search_arr['resigned']."'";
 			$params[] = $search_arr['resigned'];
 		}
+
+		// Control Area Only Active Employees
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$query = $query . " AND resigned = 0";
+		}
 	}
 
 	$stmt = $conn->prepare($query);
@@ -644,6 +649,11 @@ if ($method == 'employee_list') {
 		if ($resigned != '') {
 			$query = $query . " AND resigned = ?";
 			$params[] = $resigned;
+		}
+
+		// Control Area Only Active Employees
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$query = $query . " AND resigned = 0";
 		}
 	}
 
