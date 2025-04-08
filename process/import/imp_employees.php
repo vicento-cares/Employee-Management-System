@@ -5,25 +5,29 @@ session_name("emp_mgt");
 session_start();
 
 require '../conn.php';
-require'../lib/validate.php';
+require '../lib/validate.php';
 
-switch (true) {
-  case !isset($_SESSION['emp_no_hr']):
-    header('location:/emp_mgt/hr');
-    exit;
-    break;
-  case isset($_SESSION['emp_no']):
-    header('location:/emp_mgt/admin');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_user']):
-    header('location:/emp_mgt/user');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_clinic']):
-    header('location:/emp_mgt/clinic');
-    exit;
-    break;
+if (!isset($_SESSION['emp_no_hr']) || !isset($_SESSION['emp_no_tc'])) {
+    switch (true) {
+        case isset($_SESSION['emp_no']):
+            header('location:/emp_mgt/admin');
+            exit();
+        case isset($_SESSION['emp_no_user']):
+            header('location:/emp_mgt/user');
+            exit();
+        case isset($_SESSION['emp_no_clinic']):
+            header('location:/emp_mgt/clinic');
+            exit();
+    }
+} else {
+    switch (true) {
+        case !isset($_SESSION['emp_no_hr']):
+            header('location:/emp_mgt/hr');
+            exit();
+        case !isset($_SESSION['emp_no_tc']):
+            header('location:/emp_mgt/tc');
+            exit();
+    }
 }
 
 function get_dept($conn) {
@@ -679,4 +683,3 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'],$csvMime
 
 // KILL CONNECTION
 $conn = null;
-?>

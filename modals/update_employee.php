@@ -14,6 +14,7 @@
           <div class="col-sm-4">
             <img class="update_employee_picture_img_tag" id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
           </div>
+          <?php if (isset($_SESSION['emp_no_hr'])) {?>
           <div class="col-sm-4 offset-sm-4">
             <label>&nbsp;</label>
             <button type="button" class="btn btn-warning btn-block btn-file">
@@ -22,6 +23,7 @@
               </form>
             </button>
           </div>
+          <?php } ?>
         </div>
         <div class="row">
           <div class="col-4">
@@ -175,7 +177,9 @@
           </div>
           <div class="col-5">
             <div class="float-right">
+              <?php if (isset($_SESSION['emp_no_hr'])) {?>
               <a href="#" class="btn btn-success" onclick="print_employees_qr()">Print QR Code</a>
+              <?php } ?>
               <a href="#" class="btn btn-primary" onclick="update_employee()">Update Employee</a>
             </div>
           </div>

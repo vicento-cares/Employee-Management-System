@@ -673,7 +673,7 @@ if ($method == 'employee_list') {
 		foreach($results as $row){
 			$c++;
 			
-			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
+			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area']) || isset($_SESSION['emp_no_tc'])) {
 				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" onclick="get_employees_details(&quot;'.$row['id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row['dept'].'~!~'.$row['section'].'~!~'.$row['line_no'].'~!~'.$row['position'].'~!~'.$row['provider'].'~!~'.$row['date_hired'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['emp_status'].'~!~'.$row['shuttle_route'].'~!~'.$row['emp_js_s_no'].'~!~'.$row['emp_sv_no'].'~!~'.$row['emp_approver_no'].'~!~'.$row['resigned'].'~!~'.$row['resigned_date'].'~!~'.$row['gender'].'~!~'.$row['shift_group'].'~!~'.$row['process'].'~!~'.$row['section'].'~!~'.$row['sub_section'].'~!~'.$row['skill_level'].'&quot;)">';
 
 				echo '<td >'.$c.'</td>';
