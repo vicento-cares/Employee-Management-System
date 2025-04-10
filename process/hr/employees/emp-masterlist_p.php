@@ -973,12 +973,11 @@ if ($method == 'update_employee') {
 	}
 }
 
-if ($method == 'update_employee2') {
+if ($method == 'update_employee_advanced') {
 	$id = $_POST['id'];
 	$emp_no = addslashes(trim($_POST['emp_no']));
 	$full_name = addslashes(trim($_POST['full_name']));
 	$dept = trim($_POST['dept']);
-	$group = trim($_POST['group']);
 	$section = trim($_POST['section']);
 	$sub_section = trim($_POST['sub_section']);
 	$process = trim($_POST['line_process']);
