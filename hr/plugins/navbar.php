@@ -27,6 +27,8 @@ if (!isset($_SESSION['emp_no_hr'])) {
   <link rel="stylesheet" href="../plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <!-- Sweet Alert -->
   <link rel="stylesheet" href="../plugins/sweetalert2/dist/sweetalert2.min.css">
+  <!-- Apexcharts -->
+  <link rel="stylesheet" href="../plugins/apexcharts/3.22.2/css/apexcharts.min.css">
   <style>
     .loader {
       border: 16px solid #f3f3f3;

@@ -167,8 +167,9 @@ SELECT
 	tio.emp_no,
 	tio.day,
 	tio.shift,
-	tio.time_in,
-	tio.time_out
+    CONVERT(VARCHAR, tio.date_updated, 120) AS date_updated,
+	CONVERT(VARCHAR, tio.time_in, 120) AS time_in,
+	CONVERT(VARCHAR, tio.time_out, 120) AS time_out
 FROM 
     m_employees emp
 LEFT JOIN
@@ -180,7 +181,9 @@ WHERE
     tio.emp_no = ''  -- Specific Employee Number Here
     AND tio.emp_no IS NOT NULL 
     AND tio.time_out IS NULL  -- This condition checks for employees without time records
-    AND CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE);  -- Exclude today's date
+    AND CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+ORDER BY
+	tio.day DESC;
 
 -- Get Manpower Non-Compliance on Specific Employee Time In Out Records (Past No Time Out Only)
 DECLARE @Month INT = 4;    -- Specify the month
@@ -190,8 +193,9 @@ SELECT
     tio.emp_no,
     tio.day,
     tio.shift,
-    tio.time_in,
-    tio.time_out
+    CONVERT(VARCHAR, tio.date_updated, 120) AS date_updated,
+	CONVERT(VARCHAR, tio.time_in, 120) AS time_in,
+	CONVERT(VARCHAR, tio.time_out, 120) AS time_out
 FROM 
     m_employees emp
 LEFT JOIN
