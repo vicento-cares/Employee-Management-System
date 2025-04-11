@@ -83,6 +83,18 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/non_compliance.php") { ?>
+          <a href="non_compliance.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="non_compliance.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              Non-Compliance
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/individual_attendances.php") { ?>
           <a href="individual_attendances.php" class="nav-link active">
           <?php } else { ?>
