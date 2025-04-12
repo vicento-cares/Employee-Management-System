@@ -186,7 +186,8 @@ ORDER BY
 	tio.day DESC;
 
 -- Get Manpower Non-Compliance on Specific Employee Time In Out Records (Past No Time Out Only)
-DECLARE @Month INT = 4;    -- Specify the month
+DECLARE @Year INT = 2024;  -- Specify the year
+DECLARE @Month INT = 12;    -- Specify the month
 
 SELECT 
     emp.emp_no,
@@ -194,18 +195,24 @@ SELECT
     tio.day,
     tio.shift,
     CONVERT(VARCHAR, tio.date_updated, 120) AS date_updated,
-	CONVERT(VARCHAR, tio.time_in, 120) AS time_in,
-	CONVERT(VARCHAR, tio.time_out, 120) AS time_out
+    CONVERT(VARCHAR, tio.time_in, 120) AS time_in,
+    CONVERT(VARCHAR, tio.time_out, 120) AS time_out
 FROM 
     m_employees emp
 LEFT JOIN
     t_time_in_out tio ON emp.emp_no = tio.emp_no 
     AND emp.resigned = 0 
-    AND (MONTH(tio.day) < @Month OR YEAR(tio.day) < YEAR(GETDATE()))  -- Adjusted to include past years
 WHERE
     tio.emp_no = ''  -- Place your specific Employee Number here
     AND tio.emp_no IS NOT NULL 
-    AND tio.time_out IS NULL;  -- This condition checks for employees without time records
+    AND tio.time_out IS NULL  -- This condition checks for employees without time records
+    AND (
+        YEAR(tio.day) < @Year OR 
+        (YEAR(tio.day) = @Year AND MONTH(tio.day) < @Month)
+    )  -- Filter for records before the specified year and month
+    AND CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+ORDER BY
+	tio.day DESC;
 
 
 -- Get Manpower Non-Compliance Count by Line No. (No Time Out Only)
@@ -245,7 +252,127 @@ WHERE
 GROUP BY 
     line_no
 ORDER BY 
-    line_no ASC;
+    AuditCount DESC, line_no ASC;
+
+
+-- Get Manpower Non-Compliance Count by TOP 10 Line No. (No Time Out Only)
+DECLARE @Year INT = 2025;  -- Specify the year
+DECLARE @Month INT = 4;    -- Specify the month
+
+WITH TimeRecords AS (
+    SELECT 
+        emp.emp_no,
+        emp.line_no,
+        COUNT(CASE WHEN tio.time_out IS NULL THEN 1 END) AS NullTimeOutCount
+    FROM 
+        m_employees emp
+    LEFT JOIN
+        t_time_in_out tio ON emp.emp_no = tio.emp_no 
+        AND emp.resigned = 0 
+        AND MONTH(tio.day) = @Month 
+        AND YEAR(tio.day) = @Year 
+    WHERE
+		CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+    GROUP BY 
+        emp.emp_no, emp.line_no 
+)
+
+SELECT TOP 10
+    line_no,
+    COUNT(CASE 
+        WHEN NullTimeOutCount > 2 THEN 1 
+    END) AS AuditCount,
+    COUNT(CASE 
+        WHEN NullTimeOutCount <= 2 AND NullTimeOutCount > 0 THEN 1 
+    END) AS WarningCount
+FROM 
+    TimeRecords
+WHERE 
+    NullTimeOutCount > 2  -- Filter to show only employees with null time records (0 to see warning)
+GROUP BY 
+    line_no
+ORDER BY 
+    AuditCount DESC, line_no ASC;
+
+
+-- Get Manpower Non-Compliance Count by TOP 10 Process (No Time Out Only)
+DECLARE @Year INT = 2025;  -- Specify the year
+DECLARE @Month INT = 4;    -- Specify the month
+
+WITH TimeRecords AS (
+    SELECT 
+        emp.emp_no,
+        emp.process,
+        COUNT(CASE WHEN tio.time_out IS NULL THEN 1 END) AS NullTimeOutCount
+    FROM 
+        m_employees emp
+    LEFT JOIN
+        t_time_in_out tio ON emp.emp_no = tio.emp_no 
+        AND emp.resigned = 0 
+        AND MONTH(tio.day) = @Month 
+        AND YEAR(tio.day) = @Year 
+    WHERE
+		CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+    GROUP BY 
+        emp.emp_no, emp.process 
+)
+
+SELECT TOP 10 
+    process,
+    COUNT(CASE 
+        WHEN NullTimeOutCount > 2 THEN 1 
+    END) AS AuditCount,
+    COUNT(CASE 
+        WHEN NullTimeOutCount <= 2 AND NullTimeOutCount > 0 THEN 1 
+    END) AS WarningCount
+FROM 
+    TimeRecords
+WHERE 
+    NullTimeOutCount > 2  -- Filter to show only employees with null time records (0 to see warning)
+GROUP BY 
+    process
+ORDER BY 
+    AuditCount DESC, process ASC;
+
+
+-- Get Manpower Non-Compliance Count by TOP 10 Section (No Time Out Only)
+DECLARE @Year INT = 2025;  -- Specify the year
+DECLARE @Month INT = 4;    -- Specify the month
+
+WITH TimeRecords AS (
+    SELECT 
+        emp.emp_no,
+        emp.section,
+        COUNT(CASE WHEN tio.time_out IS NULL THEN 1 END) AS NullTimeOutCount
+    FROM 
+        m_employees emp
+    LEFT JOIN
+        t_time_in_out tio ON emp.emp_no = tio.emp_no 
+        AND emp.resigned = 0 
+        AND MONTH(tio.day) = @Month 
+        AND YEAR(tio.day) = @Year 
+    WHERE
+		CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+    GROUP BY 
+        emp.emp_no, emp.section 
+)
+
+SELECT TOP 10 
+    section,
+    COUNT(CASE 
+        WHEN NullTimeOutCount > 2 THEN 1 
+    END) AS AuditCount,
+    COUNT(CASE 
+        WHEN NullTimeOutCount <= 2 AND NullTimeOutCount > 0 THEN 1 
+    END) AS WarningCount
+FROM 
+    TimeRecords
+WHERE 
+    NullTimeOutCount > 2  -- Filter to show only employees with null time records (0 to see warning)
+GROUP BY 
+    section
+ORDER BY 
+    AuditCount DESC, section ASC;
 
 
 -- Get Manpower Non-Compliance Count by Dept, Section, Line No & Process (No Time Out Only)

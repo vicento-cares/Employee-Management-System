@@ -27,6 +27,35 @@
         <div class="col-sm-12">
           <div class="card card-gray-dark card-outline">
             <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>No Time Out Non-Compliance as of <?=date("F j, Y")?></h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <div class="row">
+                <div class="col-4" id="top_section_no_time_out_chart"></div>
+                <div class="col-4" id="top_line_no_time_out_chart"></div>
+                <div class="col-4" id="top_process_no_time_out_chart"></div>
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card card-gray-dark card-outline">
+            <div class="card-header">
               <h3 class="card-title"><i class="fas fa-tasks"></i> No Time Out Non-Compliance Table</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -75,6 +104,11 @@
                   </div>
                 </div>
               </form>
+              <div class="row">
+                <div class="col-4" id="top_section_no_time_out_search_chart"></div>
+                <div class="col-4" id="top_line_no_time_out_search_chart"></div>
+                <div class="col-4" id="top_process_no_time_out_search_chart"></div>
+              </div>
               <div class="row mb-2">
                 <div class="col-sm-2">
                   <span id="count_view"></span>

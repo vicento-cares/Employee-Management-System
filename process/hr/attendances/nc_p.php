@@ -268,12 +268,14 @@ if ($method == 'non_compliance_details_list') {
 }
 
 if ($method == 'past_no_time_out_record_list') {
+    $year = $_POST['year'];
     $month = $_POST['month'];
     $emp_no = $_POST['emp_no'];
 
     $c = 0;
 
     $query = "
+                DECLARE @Year INT = ?;  -- Specify the year
                 DECLARE @Month INT = ?;    -- Specify the month
 
                 SELECT 
@@ -289,17 +291,22 @@ if ($method == 'past_no_time_out_record_list') {
                 LEFT JOIN
                     t_time_in_out tio ON emp.emp_no = tio.emp_no 
                     AND emp.resigned = 0 
-                    AND (MONTH(tio.day) < @Month OR YEAR(tio.day) < YEAR(GETDATE()))  -- Adjusted to include past years
                 WHERE
                     tio.emp_no = ?  -- Place your specific Employee Number here
                     AND tio.emp_no IS NOT NULL 
                     AND tio.time_out IS NULL  -- This condition checks for employees without time records
+                    AND (
+                        YEAR(tio.day) < @Year OR 
+                        (YEAR(tio.day) = @Year AND MONTH(tio.day) < @Month)
+                    )  -- Filter for records before the specified year and month
+                    AND CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
                 ORDER BY
 	                tio.day DESC;
             ";
 
     $params = [];
 
+    $params[] = $year;
     $params[] = $month;
     $params[] = $emp_no;
 

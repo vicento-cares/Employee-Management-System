@@ -234,6 +234,7 @@
     }
 
     const past_no_time_out_record_list = () => {
+        let year = sessionStorage.getItem('nc_year_search');
         let month = sessionStorage.getItem('nc_month_search');
         let emp_no = document.getElementById('emp_no_ncd').innerHTML;
 
@@ -243,6 +244,7 @@
             cache: false,
             data: {
                 method: 'past_no_time_out_record_list',
+                year: year,
                 month: month,
                 emp_no: emp_no
             },

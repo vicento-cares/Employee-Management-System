@@ -91,7 +91,7 @@
             <tbody id="nonComplianceDetailsData" style="text-align: center;"></tbody>
           </table>
         </div>
-        <div class="row">
+        <div class="row mt-2">
           <div class="col-sm-9">
             <div class="form-group mb-0">
               <label>Past No Time Out Records Table</label>
