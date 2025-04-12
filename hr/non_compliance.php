@@ -27,7 +27,7 @@
         <div class="col-sm-12">
           <div class="card card-gray-dark card-outline">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>No Time Out Non-Compliance as of <?=date("F j, Y")?></h3>
+              <h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>No Time Out Non-Compliance as of <?=date('F j, Y', strtotime('-1 day'))?></h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
@@ -44,6 +44,41 @@
                 <div class="col-4" id="top_line_no_time_out_chart"></div>
                 <div class="col-4" id="top_process_no_time_out_chart"></div>
               </div>
+              <div class="row">
+                <div class="col-12" id="month_section_no_time_out_chart"></div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-sm-9">
+                  <div class="form-group mb-0">
+                    <label>No Time Out Non-Compliance Table</label>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <button type="button" class="btn bg-success btn-block" onclick="export_non_compliance('recentNonComplianceTable')"><i class="fas fa-download"></i> Export Non-Compliance List</button>
+                </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-sm-2">
+                  <span id="count_view_recent"></span>
+                </div>
+              </div>
+              <div id="recentNonComplianceTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                <table id="recentNonComplianceTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap table-hover">
+                  <thead style="text-align: center;">
+                    <tr>
+                      <th>#</th>
+                      <th>Employee No.</th>
+                      <th>Full Name</th>
+                      <th>Department</th>
+                      <th>Section</th>
+                      <th>Line No.</th>
+                      <th>Process</th>
+                      <th>No Time Out Count</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentNonComplianceData" style="text-align: center;"></tbody>
+                </table>
+              </div>
             </div>
             <!-- /.card-body -->
           </div>
@@ -56,7 +91,7 @@
         <div class="col-sm-12">
           <div class="card card-gray-dark card-outline">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-tasks"></i> No Time Out Non-Compliance Table</h3>
+              <h3 class="card-title"><i class="fas fa-tasks"></i> No Time Out Non-Compliance Search</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
@@ -69,7 +104,7 @@
             <!-- /.card-header -->
             <div class="card-body">
               <form id="non_compliance_form">
-                <div class="row mb-2">
+                <div class="row mb-4">
                   <div class="col-sm-2">
                       <label>Year</label>
                       <select id="nc_year_search" class="form-control" required>
@@ -94,13 +129,9 @@
                           <option value="12">December</option>
                       </select>
                   </div>
-                  <div class="col-sm-2 offset-sm-4">
+                  <div class="col-sm-3 offset-sm-5">
                     <label>&nbsp;</label>
                     <button type="submit" class="btn bg-gray-dark btn-block"><i class="fas fa-search"></i> Search</button>
-                  </div>
-                  <div class="col-sm-2">
-                    <label>&nbsp;</label>
-                    <button type="button" class="btn bg-success btn-block" onclick="export_non_compliance('nonComplianceTable')"><i class="fas fa-download"></i> Export Non-Compliance List</button>
                   </div>
                 </div>
               </form>
@@ -108,6 +139,19 @@
                 <div class="col-4" id="top_section_no_time_out_search_chart"></div>
                 <div class="col-4" id="top_line_no_time_out_search_chart"></div>
                 <div class="col-4" id="top_process_no_time_out_search_chart"></div>
+              </div>
+              <div class="row">
+                <div class="col-12" id="month_section_no_time_out_search_chart"></div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-sm-9">
+                  <div class="form-group mb-0">
+                    <label>No Time Out Non-Compliance Table</label>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <button type="button" class="btn bg-success btn-block" onclick="export_non_compliance('nonComplianceTable')"><i class="fas fa-download"></i> Export Non-Compliance List</button>
+                </div>
               </div>
               <div class="row mb-2">
                 <div class="col-sm-2">

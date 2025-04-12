@@ -375,6 +375,50 @@ ORDER BY
     AuditCount DESC, section ASC;
 
 
+-- Get Month Manpower Count by Section (No Time Out Only)
+DECLARE @Year INT = YEAR(GETDATE());  -- Get the current year
+DECLARE @Month INT = MONTH(GETDATE()); -- Get the current month
+
+WITH DateRange AS (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = 'P' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)))  -- Generate dates for the month
+),
+EmployeeTimeInOut AS (
+    SELECT 
+        emp.emp_no,
+        emp.section,
+        CAST(tio.day AS DATE) AS report_date
+    FROM 
+        m_employees emp
+    LEFT JOIN
+        t_time_in_out tio ON emp.emp_no = tio.emp_no 
+    WHERE
+        emp.resigned = 0 AND 
+        (tio.day >= DATEADD(HOUR, 6, CAST(DATEFROMPARTS(@Year, @Month, 1) AS DATETIME2)) AND 
+        tio.day < DATEADD(HOUR, 6, DATEADD(DAY, 1, CAST(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)) AS DATETIME2)))) 
+        AND CAST(tio.day AS DATE) <> CAST(GETDATE() AS DATE)  -- Exclude today's date
+        AND tio.time_out IS NULL
+)
+
+SELECT 
+    dr.report_date,
+    eio.section,
+    COUNT(eio.emp_no) AS emp_no_count
+FROM 
+    DateRange dr
+LEFT JOIN
+    EmployeeTimeInOut eio ON dr.report_date = eio.report_date  -- Join on the report_date
+GROUP BY 
+    dr.report_date, eio.section
+ORDER BY 
+    dr.report_date ASC, eio.section ASC;
+
+
 -- Get Manpower Non-Compliance Count by Dept, Section, Line No & Process (No Time Out Only)
 DECLARE @Year INT = 2025;  -- Specify the year
 DECLARE @Month INT = 4;    -- Specify the month
