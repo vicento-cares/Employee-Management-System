@@ -473,3 +473,84 @@ ORDER BY
     section ASC,
     line_no ASC,
     process ASC;
+
+
+
+
+DECLARE @Year INT = YEAR(GETDATE());  -- Get the current year
+DECLARE @Month INT = MONTH(GETDATE()); -- Get the current month
+
+-- Step 2: Create a dynamic SQL for pivoting
+DECLARE @cols NVARCHAR(MAX);
+DECLARE @query NVARCHAR(MAX);
+
+-- Step 1: Generate the list of dates for the current month and prepare the column names
+SELECT @cols = STRING_AGG(QUOTENAME(CONVERT(VARCHAR, DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)), 23)), ', ')
+FROM master.dbo.spt_values
+WHERE type = 'P' AND 
+      number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)));  -- Generate dates for the month
+
+-- Step 4: Create the dynamic SQL query
+SET @query = '
+SELECT *
+FROM (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(' + CAST(@Year AS VARCHAR) + ', ' + CAST(@Month AS VARCHAR) + ', 1)) AS report_date,
+        1 AS Value  -- You can replace this with any value you want to display
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = ''P'' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(' + CAST(@Year AS VARCHAR) + ', ' + CAST(@Month AS VARCHAR) + ', 1)))
+) AS SourceTable
+PIVOT (
+    MAX(Value)
+    FOR report_date IN (' + @cols + ')
+) AS PivotTable;';
+
+-- Step 5: Execute the dynamic SQL
+EXEC sp_executesql @query;
+
+
+-- Define the start and end dates
+DECLARE @Year INT = 2025;  -- Get the current year
+DECLARE @Month INT = 4; -- Get the current month
+
+WITH DateRange AS (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = 'P' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)))  -- Generate dates for the month
+)
+
+SELECT 
+    COUNT(emp.emp_no) AS total, 
+    COUNT(CASE WHEN tio.shift = 'DS' THEN 1 END) AS total_present_ds, 
+    COUNT(CASE WHEN tio.shift = 'NS' THEN 1 END) AS total_present_ns, 
+    COUNT(tio.emp_no) AS total_present, 
+    COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
+    FORMAT(CASE 
+        WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
+        ELSE 0 
+    END, 'N2') AS attendance_percentage,
+    FORMAT(CASE 
+        WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+        ELSE 0 
+    END, 'N2') AS absent_rate,
+    dr.report_date AS day
+FROM 
+    DateRange dr
+LEFT JOIN 
+    m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+LEFT JOIN 
+    t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+WHERE 
+    emp.line_no = '5101' 
+GROUP BY 
+    dr.report_date 
+ORDER BY 
+	dr.report_date 
+OPTION (MAXRECURSION 0);  -- Allow recursion to go beyond the default limit if needed
