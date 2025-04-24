@@ -512,6 +512,8 @@ PIVOT (
 EXEC sp_executesql @query;
 
 
+
+
 -- Define the start and end dates
 DECLARE @Year INT = 2025;  -- Get the current year
 DECLARE @Month INT = 4; -- Get the current month
@@ -532,14 +534,14 @@ SELECT
     COUNT(CASE WHEN tio.shift = 'NS' THEN 1 END) AS total_present_ns, 
     COUNT(tio.emp_no) AS total_present, 
     COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent, 
-    FORMAT(CASE 
+    CAST(CASE 
         WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
         ELSE 0 
-    END, 'N2') AS attendance_percentage,
-    FORMAT(CASE 
+    END AS DECIMAL(10, 2)) AS attendance_percentage,
+    CAST(CASE 
         WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
         ELSE 0 
-    END, 'N2') AS absent_rate,
+    END AS DECIMAL(10, 2)) AS absent_rate,
     dr.report_date AS day
 FROM 
     DateRange dr
@@ -554,3 +556,430 @@ GROUP BY
 ORDER BY 
 	dr.report_date 
 OPTION (MAXRECURSION 0);  -- Allow recursion to go beyond the default limit if needed
+
+
+
+
+
+-- MANUAL REPORTDATE PIVOT (DAILY ABSENT PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+WITH DateRange AS (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = 'P' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)))
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,  -- Convert to string
+        emp.section,
+        COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN ('PD1', 'PD2', 'QA') AND 
+        emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+    GROUP BY 
+        dr.report_date, emp.section
+)
+
+-- Pivot using the string version of the date
+SELECT 
+    *
+FROM 
+    AttendanceData
+PIVOT (
+    SUM(total_absent) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS PivotTable
+
+UNION ALL
+
+-- Total row
+SELECT 
+    'Total' AS section,
+    SUM([2025-04-01]), SUM([2025-04-02]), SUM([2025-04-03]), SUM([2025-04-04]), SUM([2025-04-05]),
+    SUM([2025-04-06]), SUM([2025-04-07]), SUM([2025-04-08]), SUM([2025-04-09]), SUM([2025-04-10]),
+    SUM([2025-04-11]), SUM([2025-04-12]), SUM([2025-04-13]), SUM([2025-04-14]), SUM([2025-04-15]),
+    SUM([2025-04-16]), SUM([2025-04-17]), SUM([2025-04-18]), SUM([2025-04-19]), SUM([2025-04-20]),
+    SUM([2025-04-21]), SUM([2025-04-22]), SUM([2025-04-23]), SUM([2025-04-24]), SUM([2025-04-25]),
+    SUM([2025-04-26]), SUM([2025-04-27]), SUM([2025-04-28]), SUM([2025-04-29]), SUM([2025-04-30])
+FROM AttendanceData
+PIVOT (
+    SUM(total_absent) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS TotalPivot;
+
+
+-- DYNAMIC REPORTDATE PIVOT (DAILY ABSENT PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+DECLARE @StartDate DATE = DATEFROMPARTS(@Year, @Month, 1);
+DECLARE @EndDate DATE = EOMONTH(@StartDate);
+
+DECLARE @cols NVARCHAR(MAX), @sumcols NVARCHAR(MAX), @sql NVARCHAR(MAX);
+
+-- Generate pivot column list
+SELECT 
+    @cols = STRING_AGG(QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ','),
+    @sumcols = STRING_AGG('SUM(' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)) + ') AS ' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ',')
+FROM (
+    SELECT DATEADD(DAY, number, @StartDate) AS d
+    FROM master.dbo.spt_values
+    WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)
+) AS DateList;
+
+-- Step 2: Build dynamic SQL with pivot
+SET @sql = '
+WITH DateRange AS (
+    SELECT DATEADD(DAY, number, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''') AS report_date
+    FROM master.dbo.spt_values
+    WHERE type = ''P'' AND number <= DATEDIFF(DAY, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''', ''' + CONVERT(VARCHAR(10), @EndDate, 120) + ''')
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,
+        emp.section,
+        COUNT(emp.emp_no) - COUNT(tio.emp_no) AS total_absent
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN (''PD1'', ''PD2'', ''QA'') AND 
+        emp.section NOT IN (''CQA'', ''QC'', ''QA'', ''QM'', ''QAE'')
+    GROUP BY 
+        dr.report_date, emp.section
+)
+SELECT *
+FROM AttendanceData
+PIVOT (
+    SUM(total_absent)
+    FOR report_date_str IN (' + @cols + ')
+) AS PivotTable
+
+UNION ALL
+
+SELECT 
+    ''Total'' AS section, ' + @sumcols + '
+FROM AttendanceData
+PIVOT (
+    SUM(total_absent)
+    FOR report_date_str IN (' + @cols + ')
+) AS TotalPivot
+';
+
+-- Step 3: Execute the dynamic SQL
+EXEC sp_executesql @sql;
+
+
+-- MANUAL REPORTDATE PIVOT (DAILY MP PRESENT PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+WITH DateRange AS (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = 'P' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)))
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,  -- Convert to string
+        emp.section,
+        COUNT(tio.emp_no) AS total_present
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN ('PD1', 'PD2', 'QA') AND 
+        emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+    GROUP BY 
+        dr.report_date, emp.section
+)
+
+-- Pivot using the string version of the date
+SELECT 
+    *
+FROM 
+    AttendanceData
+PIVOT (
+    SUM(total_present) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS PivotTable
+
+UNION ALL
+
+-- Total row
+SELECT 
+    'Total' AS section,
+    SUM([2025-04-01]), SUM([2025-04-02]), SUM([2025-04-03]), SUM([2025-04-04]), SUM([2025-04-05]),
+    SUM([2025-04-06]), SUM([2025-04-07]), SUM([2025-04-08]), SUM([2025-04-09]), SUM([2025-04-10]),
+    SUM([2025-04-11]), SUM([2025-04-12]), SUM([2025-04-13]), SUM([2025-04-14]), SUM([2025-04-15]),
+    SUM([2025-04-16]), SUM([2025-04-17]), SUM([2025-04-18]), SUM([2025-04-19]), SUM([2025-04-20]),
+    SUM([2025-04-21]), SUM([2025-04-22]), SUM([2025-04-23]), SUM([2025-04-24]), SUM([2025-04-25]),
+    SUM([2025-04-26]), SUM([2025-04-27]), SUM([2025-04-28]), SUM([2025-04-29]), SUM([2025-04-30])
+FROM AttendanceData
+PIVOT (
+    SUM(total_present) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS TotalPivot;
+
+
+-- DYNAMIC REPORTDATE PIVOT (DAILY MP PRESENT PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+DECLARE @StartDate DATE = DATEFROMPARTS(@Year, @Month, 1);
+DECLARE @EndDate DATE = EOMONTH(@StartDate);
+
+DECLARE @cols NVARCHAR(MAX), @sumcols NVARCHAR(MAX), @sql NVARCHAR(MAX);
+
+-- Generate pivot column list
+SELECT 
+    @cols = STRING_AGG(QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ','),
+    @sumcols = STRING_AGG('SUM(' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)) + ') AS ' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ',')
+FROM (
+    SELECT DATEADD(DAY, number, @StartDate) AS d
+    FROM master.dbo.spt_values
+    WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)
+) AS DateList;
+
+-- Step 2: Build dynamic SQL with pivot
+SET @sql = '
+WITH DateRange AS (
+    SELECT DATEADD(DAY, number, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''') AS report_date
+    FROM master.dbo.spt_values
+    WHERE type = ''P'' AND number <= DATEDIFF(DAY, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''', ''' + CONVERT(VARCHAR(10), @EndDate, 120) + ''')
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,
+        emp.section,
+        COUNT(tio.emp_no) AS total_present
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN (''PD1'', ''PD2'', ''QA'') AND 
+        emp.section NOT IN (''CQA'', ''QC'', ''QA'', ''QM'', ''QAE'')
+    GROUP BY 
+        dr.report_date, emp.section
+)
+SELECT *
+FROM AttendanceData
+PIVOT (
+    SUM(total_present)
+    FOR report_date_str IN (' + @cols + ')
+) AS PivotTable
+
+UNION ALL
+
+SELECT 
+    ''Total'' AS section, ' + @sumcols + '
+FROM AttendanceData
+PIVOT (
+    SUM(total_present)
+    FOR report_date_str IN (' + @cols + ')
+) AS TotalPivot
+';
+
+-- Step 3: Execute the dynamic SQL
+EXEC sp_executesql @sql;
+
+
+-- MANUAL REPORTDATE PIVOT (DAILY ABSENT RATE PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+WITH DateRange AS (
+    SELECT 
+        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+    FROM 
+        master.dbo.spt_values
+    WHERE 
+        type = 'P' AND 
+        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1)))
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,  -- Convert to string
+        emp.section,
+        CAST(
+			CASE 
+				WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+				ELSE 0 
+			END AS DECIMAL(10, 2)
+		) AS absent_rate
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN ('PD1', 'PD2', 'QA') AND 
+        emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+    GROUP BY 
+        dr.report_date, emp.section
+)
+
+-- Pivot using the string version of the date
+SELECT 
+    *
+FROM 
+    AttendanceData
+PIVOT (
+    SUM(absent_rate) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS PivotTable
+
+UNION ALL
+
+-- Total row
+SELECT 
+    'Total' AS section,
+    AVG([2025-04-01]), AVG([2025-04-02]), AVG([2025-04-03]), AVG([2025-04-04]), AVG([2025-04-05]),
+    AVG([2025-04-06]), AVG([2025-04-07]), AVG([2025-04-08]), AVG([2025-04-09]), AVG([2025-04-10]),
+    AVG([2025-04-11]), AVG([2025-04-12]), AVG([2025-04-13]), AVG([2025-04-14]), AVG([2025-04-15]),
+    AVG([2025-04-16]), AVG([2025-04-17]), AVG([2025-04-18]), AVG([2025-04-19]), AVG([2025-04-20]),
+    AVG([2025-04-21]), AVG([2025-04-22]), AVG([2025-04-23]), AVG([2025-04-24]), AVG([2025-04-25]),
+    AVG([2025-04-26]), AVG([2025-04-27]), AVG([2025-04-28]), AVG([2025-04-29]), AVG([2025-04-30])
+FROM AttendanceData
+PIVOT (
+    SUM(absent_rate) 
+    FOR report_date_str IN (
+        [2025-04-01], [2025-04-02], [2025-04-03], [2025-04-04], [2025-04-05], 
+        [2025-04-06], [2025-04-07], [2025-04-08], [2025-04-09], [2025-04-10], 
+        [2025-04-11], [2025-04-12], [2025-04-13], [2025-04-14], [2025-04-15], 
+        [2025-04-16], [2025-04-17], [2025-04-18], [2025-04-19], [2025-04-20], 
+        [2025-04-21], [2025-04-22], [2025-04-23], [2025-04-24], [2025-04-25], 
+        [2025-04-26], [2025-04-27], [2025-04-28], [2025-04-29], [2025-04-30]
+    )
+) AS TotalPivot;
+
+
+-- DYNAMIC REPORTDATE PIVOT (DAILY ABSENT RATE PER SECTION WITH TOTAL)
+DECLARE @Year INT = 2025;
+DECLARE @Month INT = 4;
+
+DECLARE @StartDate DATE = DATEFROMPARTS(@Year, @Month, 1);
+DECLARE @EndDate DATE = EOMONTH(@StartDate);
+
+DECLARE @cols NVARCHAR(MAX), @avgcols NVARCHAR(MAX), @sql NVARCHAR(MAX);
+
+-- Generate pivot column list
+SELECT 
+    @cols = STRING_AGG(QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ','),
+    @avgcols = STRING_AGG('AVG(' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)) + ') AS ' + QUOTENAME(CONVERT(VARCHAR(10), d, 120)), ',')
+FROM (
+    SELECT DATEADD(DAY, number, @StartDate) AS d
+    FROM master.dbo.spt_values
+    WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)
+) AS DateList;
+
+-- Step 2: Build dynamic SQL with pivot
+SET @sql = '
+WITH DateRange AS (
+    SELECT DATEADD(DAY, number, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''') AS report_date
+    FROM master.dbo.spt_values
+    WHERE type = ''P'' AND number <= DATEDIFF(DAY, ''' + CONVERT(VARCHAR(10), @StartDate, 120) + ''', ''' + CONVERT(VARCHAR(10), @EndDate, 120) + ''')
+),
+AttendanceData AS (
+    SELECT 
+        CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date_str,
+        emp.section,
+        CAST(
+			CASE 
+				WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+				ELSE 0 
+			END AS DECIMAL(10, 2)
+		) AS absent_rate
+    FROM 
+        DateRange dr
+    LEFT JOIN 
+        m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+    LEFT JOIN 
+        t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+    WHERE 
+        emp.dept IN (''PD1'', ''PD2'', ''QA'') AND 
+        emp.section NOT IN (''CQA'', ''QC'', ''QA'', ''QM'', ''QAE'')
+    GROUP BY 
+        dr.report_date, emp.section
+)
+SELECT *
+FROM AttendanceData
+PIVOT (
+    SUM(absent_rate)
+    FOR report_date_str IN (' + @cols + ')
+) AS PivotTable
+
+UNION ALL
+
+SELECT 
+    ''Total'' AS section, ' + @avgcols + '
+FROM AttendanceData
+PIVOT (
+    SUM(absent_rate)
+    FOR report_date_str IN (' + @cols + ')
+) AS TotalPivot
+';
+
+-- Step 3: Execute the dynamic SQL
+EXEC sp_executesql @sql;
