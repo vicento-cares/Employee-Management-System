@@ -74,36 +74,52 @@ $query = "WITH LatestAuth AS (
             JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
             WHERE a.i_status = 'Approved'";
 
+$params = [];
+
 if (!empty($emp_id)) {
-    $query .= " AND (b.emp_id = '$emp_id' OR b.emp_id_old = '$emp_id')";
+    $query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+    $params[] = $emp_id;
+    $params[] = $emp_id;
 }
 
 if (!empty($fullname)) {
-    $query .= " AND b.fullname LIKE '$fullname%'";
+    $query .= " AND b.fullname LIKE ?";
+    $fullname_search = $fullname . "%";
+    $params[] = $fullname_search;
 }
 
 if (!empty($pro)) {
-    $query .= " AND a.process LIKE '$pro%'";
+    $query .= " AND a.process LIKE ?";
+    $pro_search = $pro . "%";
+    $params[] = $pro_search;
 }
 
 if (!empty($date)) {
-    $query .= " AND a.expire_date = '$date'";
+    $query .= " AND a.expire_date = ?";
+    $params[] = $date;
 }
 
 if (!empty($date_authorized)) {
-    $query .= " AND a.date_authorized = '$date_authorized'";
+    $query .= " AND a.date_authorized = ?";
+    $params[] = $date_authorized;
 }
 
 if (!empty($dept)) {
-    $query .= " AND emp.dept LIKE '$dept%'";
+    $query.= " AND emp.dept LIKE ?";
+    $dept_search = $dept . "%";
+    $params[] = $dept_search;
 }
 
 if (!empty($section)) {
-    $query .= " AND emp.section LIKE '$section%'";
+    $query .= " AND emp.section LIKE ?";
+    $section_search = $section . "%";
+    $params[] = $section_search;
 }
 
 if (!empty($line_no)) {
-    $query .= " AND emp.line_no LIKE '$line_no%'";
+    $query .= " AND emp.line_no LIKE ?";
+    $line_no_search = $line_no . "%";
+    $params[] = $line_no_search;
 }
 
 $query .= ") SELECT *
@@ -116,7 +132,7 @@ $query .= " ORDER BY process ASC, fullname ASC, auth_year DESC";
 $stmt = $conn->prepare($query);
 
 // Execute the statement in batches
-$stmt->execute();
+$stmt->execute($params);
 
 // Stream output directly to the browser in chunks
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

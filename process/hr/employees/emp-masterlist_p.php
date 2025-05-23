@@ -119,14 +119,18 @@ function count_employee_list($search_arr, $conn) {
 // Get Dept Dropdown
 if ($method == 'fetch_dept_dropdown') {
 	$sql = "SELECT dept FROM m_dept ORDER BY dept ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Department</option>';
 		echo '<option value="">All</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['dept']).'">'.htmlspecialchars($row['dept']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Department</option>';
 	}
@@ -135,13 +139,17 @@ if ($method == 'fetch_dept_dropdown') {
 // Get Group Dropdown
 if ($method == 'fetch_group_dropdown') {
 	$sql = "SELECT falp_group FROM m_falp_groups ORDER BY falp_group ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Group</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['falp_group']).'">'.htmlspecialchars($row['falp_group']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Group</option>';
 	}
@@ -150,14 +158,18 @@ if ($method == 'fetch_group_dropdown') {
 // Get Section Dropdown
 if ($method == 'fetch_section_dropdown') {
 	$sql = "SELECT section FROM m_access_locations GROUP BY section ORDER BY section ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Section</option>';
 		echo '<option value="">All</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['section']).'">'.htmlspecialchars($row['section']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Section</option>';
 	}
@@ -166,13 +178,17 @@ if ($method == 'fetch_section_dropdown') {
 // Get Sub Section Dropdown
 if ($method == 'fetch_sub_section_dropdown') {
 	$sql = "SELECT sub_section FROM m_sub_sections ORDER BY sub_section ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Sub Section</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['sub_section']).'">'.htmlspecialchars($row['sub_section']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Sub Section</option>';
 	}
@@ -195,14 +211,14 @@ if ($method == 'fetch_line_dropdown') {
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
+    if ($row) {
 		echo '<option selected value="">Select Line No.</option>';
 		echo '<option value="">All</option>';
-		foreach ($results as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['line_no']).'">'.htmlspecialchars($row['line_no']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Line No.</option>';
 	}
@@ -211,13 +227,17 @@ if ($method == 'fetch_line_dropdown') {
 // Get Position Dropdown
 if ($method == 'fetch_position_dropdown') {
 	$sql = "SELECT position FROM m_positions ORDER BY position ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Position</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['position']).'">'.htmlspecialchars($row['position']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Position</option>';
 	}
@@ -226,13 +246,16 @@ if ($method == 'fetch_position_dropdown') {
 // Get Position Dropdown
 if ($method == 'fetch_process_dropdown') {
 	$sql = "SELECT process FROM m_process ORDER BY process ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Process</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['process']).'">'.htmlspecialchars($row['process']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Process</option>';
 	}
@@ -241,13 +264,17 @@ if ($method == 'fetch_process_dropdown') {
 // Get Provider Dropdown
 if ($method == 'fetch_provider_dropdown') {
 	$sql = "SELECT provider FROM m_providers ORDER BY provider ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+	$stmt = $conn -> prepare($sql);
 	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Provider</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['provider']).'">'.htmlspecialchars($row['provider']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Provider</option>';
 	}
@@ -260,23 +287,34 @@ if ($method == 'fetch_employee_name_js_s_dropdown') {
 	$line_no = trim($_POST['line_no']);
 
 	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Jr. Staff', 'Staff') AND resigned = 0";
+	$params = [];
+
 	if (!empty($dept)) {
-		$sql = $sql . " AND dept = '$dept'";
+		$sql = $sql . " AND dept = ?";
+		$params[] = $dept;
 	}
 	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
+		$sql = $sql . " AND section LIKE ?";
+		$section_param = $section . '%';
+		$params[] = $section_param;
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
+		$sql = $sql . " AND line_no LIKE ?";
+		$line_no_param = $line_no . '%';
+		$params[] = $line_no_param;
 	}
 	$sql = $sql . " ORDER BY full_name ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Name</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['emp_no']).'">'.htmlspecialchars($row['full_name']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Name</option>';
 	}
@@ -289,23 +327,34 @@ if ($method == 'fetch_employee_name_sv_dropdown') {
 	$line_no = trim($_POST['line_no']);
 
 	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position = 'Supervisor' AND resigned = 0";
+	$params = [];
+
 	if (!empty($dept)) {
-		$sql = $sql . " AND dept = '$dept'";
+		$sql = $sql . " AND dept = ?";
+		$params[] = $dept;
 	}
 	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
+		$sql = $sql . " AND section LIKE ?";
+		$section_param = $section . '%';
+		$params[] = $section_param;
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
+		$sql = $sql . " AND line_no LIKE ?";
+		$line_no_param = $line_no . '%';
+		$params[] = $line_no_param;
 	}
 	$sql = $sql . " ORDER BY full_name ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option selected value="">Select Name</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['emp_no']).'">'.htmlspecialchars($row['full_name']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Name</option>';
 	}
@@ -317,24 +366,36 @@ if ($method == 'fetch_employee_name_approver_dropdown') {
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 
-	$sql = "SELECT emp_no, full_name FROM m_employees WHERE position IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
+	$sql = "SELECT emp_no, full_name FROM m_employees 
+			WHERE position IN ('Assistant Manager', 'Section Manager', 'Manager') AND resigned = 0";
+	$params = [];
+
 	if (!empty($dept)) {
-		$sql = $sql . " AND dept = '$dept'";
+		$sql = $sql . " AND dept = ?";
+		$params[] = $dept;
 	}
 	if (!empty($section)) {
-		$sql = $sql . " AND section LIKE '$section%'";
+		$sql = $sql . " AND section LIKE ?";
+		$section_param = $section . '%';
+		$params[] = $section_param;
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND line_no LIKE '$line_no%'";
+		$sql = $sql . " AND line_no LIKE ?";
+		$line_no_param = $line_no . '%';
+		$params[] = $line_no_param;
 	}
 	$sql = $sql . " ORDER BY full_name ASC";
-	$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt -> execute();
-	if ($stmt -> rowCount() > 0) {
+
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo '<option disabled selected value="">Select Name</option>';
-		foreach($stmt -> fetchAll() as $row) {
+		do {
 			echo '<option value="'.htmlspecialchars($row['emp_no']).'">'.htmlspecialchars($row['full_name']).'</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Name</option>';
 	}
@@ -564,7 +625,11 @@ if ($method == 'employee_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date FROM m_employees WHERE";
+	$query = "SELECT 
+				id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, 
+				position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, 
+				shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date 
+			FROM m_employees WHERE";
 	
 	$params = [];
 
@@ -667,10 +732,10 @@ if ($method == 'employee_list') {
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
-		foreach($results as $row){
+    if ($row) {
+		do {
 			$c++;
 			
 			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area']) || isset($_SESSION['emp_no_tc'])) {
@@ -693,8 +758,8 @@ if ($method == 'employee_list') {
 				echo '<td>'.$row['provider'].'</td>';
 				echo '<td>'.$row['shuttle_route'].'</td>';
 			echo '</tr>';
-		}
-	}else{
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
 		$colspan = 0;
 		if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
 			$colspan = 8;
@@ -708,7 +773,7 @@ if ($method == 'employee_list') {
 }
 
 if ($method == 'get_employee_data') {
-	$emp_no = addslashes($_POST['emp_no']);
+	$emp_no = $_POST['emp_no'];
 	$response_arr = array();
 	$full_name = '';
 	$dept = '';
@@ -724,24 +789,30 @@ if ($method == 'get_employee_data') {
 	$role = '';
 	$message = '';
 
-	$query = "SELECT emp_no, full_name, dept, section, line_no, position, shift_group, date_hired, address, contact_no, emp_status, resigned FROM m_employees WHERE emp_no = '$emp_no'";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$emp_no = $row['emp_no'];
-			$full_name = $row['full_name'];
-			$dept = $row['dept'];
-			$section = $row['section'];
-			$line_no = $row['line_no'];
-			$position = $row['position'];
-			$shift_group = $row['shift_group'];
-			$date_hired = $row['date_hired'];
-			$address = $row['address'];
-			$contact_no = $row['contact_no'];
-			$emp_status = $row['emp_status'];
-			$resigned = intval($row['resigned']);
-		}
+	$query = "SELECT 
+				emp_no, full_name, dept, section, line_no, position, shift_group, 
+				date_hired, address, contact_no, emp_status, resigned 
+			FROM m_employees WHERE emp_no = ?";
+	$stmt = $conn->prepare($query);
+	$params = array($emp_no);
+	$stmt->execute($params);
+	
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$emp_no = $row['emp_no'];
+		$full_name = $row['full_name'];
+		$dept = $row['dept'];
+		$section = $row['section'];
+		$line_no = $row['line_no'];
+		$position = $row['position'];
+		$shift_group = $row['shift_group'];
+		$date_hired = $row['date_hired'];
+		$address = $row['address'];
+		$contact_no = $row['contact_no'];
+		$emp_status = $row['emp_status'];
+		$resigned = intval($row['resigned']);
+		
 		if ($resigned == 0) {
 			$message = 'success';
 		} else {
@@ -778,16 +849,16 @@ if ($method == 'get_employee_data') {
 }
 
 if ($method == 'register_employee') {
-	$full_name = addslashes(trim($_POST['full_name']));
-	$emp_no = addslashes(trim($_POST['emp_no']));
+	$full_name = trim($_POST['full_name']);
+	$emp_no = trim($_POST['emp_no']);
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
-	$address = addslashes(trim($_POST['address']));
-	$contact_no = addslashes(trim($_POST['contact_no']));
+	$address = trim($_POST['address']);
+	$contact_no = trim($_POST['contact_no']);
 	$emp_status = trim($_POST['emp_status']);
 	$shuttle_route = trim($_POST['shuttle_route']);
 	$gender = trim($_POST['gender']);
@@ -798,46 +869,79 @@ if ($method == 'register_employee') {
 	$emp_sv = trim($_POST['emp_sv']);
 	$emp_approver = trim($_POST['emp_approver']);
 
-	$check = "SELECT id FROM m_employees WHERE emp_no = '$emp_no'";
-	$stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
+	$check = "SELECT id FROM m_employees WHERE emp_no = ?";
+	
+	$stmt = $conn->prepare($check);
+	$params = array($emp_no);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
 		echo 'Already Exist';
-	}else{
+	} else {
 		$stmt = NULL;
 
 		$query = "INSERT INTO m_employees
 				(emp_no, full_name, dept, section, line_no, date_hired, position, provider, gender, 
 				address, contact_no, emp_status, shuttle_route, emp_js_s, emp_sv, 
-				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES ('$emp_no',N'$full_name'";
+				emp_approver, emp_js_s_no, emp_sv_no, emp_approver_no) VALUES (?, ?";
+		
+		$params1 = [
+			$emp_no,
+			$full_name
+		];
 
 		if (!empty($dept)) {
-			$query = $query . ",'$dept'";
+			$query = $query . ", ?";
+			$params1[] = $dept;
 		} else {
 			$query = $query . ", NULL";
 		}
 		if (!empty($section)) {
-			$query = $query . ",'$section'";
+			$query = $query . ", ?";
+			$params1[] = $section;
 		} else {
 			$query = $query . ", NULL";
 		}
 		if (!empty($line_no)) {
-			$query = $query . ",'$line_no'";
+			$query = $query . ", ?";
+			$params1[] = $line_no;
 		} else {
 			$query = $query . ", NULL";
 		}
 
 		if (!empty($date_hired)) {
-			$query = $query . ",'$date_hired'";
+			$query = $query . ", ?";
+			$params1[] = $date_hired;
 		} else {
 			$query = $query . ", NULL";
 		}
 
-		$query = $query . ",'$position','$provider','$gender','$address','$contact_no','$emp_status',
-						'$shuttle_route','$emp_js_s','$emp_sv','$emp_approver','$emp_js_s_no','$emp_sv_no','$emp_approver_no')";
+		$query = $query . ", ?, ?, ?, ?, ?, ?, 
+						?, ?, ?, ?, ?, ?, ?)";
+
+		$params2 = [
+			$position,
+			$provider,
+			$gender,
+			$address,
+			$contact_no,
+			$emp_status,
+			$shuttle_route,
+			$emp_js_s,
+			$emp_sv,
+			$emp_approver,
+			$emp_js_s_no,
+			$emp_sv_no,
+			$emp_approver_no
+		];
+
+		$params = array_merge($params1, $params2);
 
 		$stmt = $conn->prepare($query);
-		if ($stmt->execute()) {
+
+		if ($stmt->execute($params)) {
 			echo 'success';
 		}else{
 			echo 'error';
@@ -847,16 +951,16 @@ if ($method == 'register_employee') {
 
 if ($method == 'update_employee') {
 	$id = $_POST['id'];
-	$emp_no = addslashes(trim($_POST['emp_no']));
-	$full_name = addslashes(trim($_POST['full_name']));
+	$emp_no = trim($_POST['emp_no']);
+	$full_name = trim($_POST['full_name']);
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 	$position = trim($_POST['position']);
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
-	$address = addslashes(trim($_POST['address']));
-	$contact_no = addslashes(trim($_POST['contact_no']));
+	$address = trim($_POST['address']);
+	$contact_no = trim($_POST['contact_no']);
 	$emp_status = trim($_POST['emp_status']);
 	$shuttle_route = trim($_POST['shuttle_route']);
 	$gender = trim($_POST['gender']);
@@ -869,58 +973,93 @@ if ($method == 'update_employee') {
 	$resigned = intval($_POST['resigned']);
 	$resigned_date = trim($_POST['resigned_date']);
 
-	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = N'$full_name'";
+	$query = "UPDATE m_employees SET emp_no = ?, full_name = ?";
+
+	$params1 = [
+		$emp_no,
+		$full_name
+	];
 	
 	if (!empty($dept)) {
-		$query = $query . ", dept = '$dept'";
+		$query = $query . ", dept = ?";
+		$params1[] = $dept;
 	} else {
 		$query = $query . ", dept = NULL";
 	}
 	if (!empty($section)) {
-		$query = $query . ", section = '$section'";
+		$query = $query . ", section = ?";
+		$params1[] = $section;
 	} else {
 		$query = $query . ", section = NULL";
 	}
 	if (!empty($line_no)) {
-		$query = $query . ", line_no = '$line_no'";
+		$query = $query . ", line_no = ?";
+		$params1[] = $line_no;
 	} else {
 		$query = $query . ", line_no = NULL";
 	}
 
 	if (!empty($date_hired)) {
-		$query = $query . ", date_hired = '$date_hired'";
+		$query = $query . ", date_hired = ?";
+		$params1[] = $date_hired;
 	} else {
 		$query = $query . ", date_hired = NULL";
 	}
 
 	if (!empty($resigned_date)) {
-		$query = $query . ", resigned_date = '$resigned_date'";
+		$query = $query . ", resigned_date = ?";
+		$params1[] = $resigned_date;
 	} else {
 		$query = $query . ", resigned_date = NULL";
 	}
 
-	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', 
-						address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', 
-						shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', 
-						emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no', 
-						resigned = '$resigned' WHERE id = '$id'";
+	$query = $query . ", position = ?, provider = ?, gender = ?, 
+						address = ?, contact_no = ?, emp_status = ?, 
+						shuttle_route = ?, emp_js_s = ?, emp_sv = ?, emp_approver = ?, 
+						emp_js_s_no = ?, emp_sv_no = ?, emp_approver_no = ?, 
+						resigned = ? WHERE id = ?";
+	
+	$params2 = [
+		$position,
+		$provider,
+		$gender,
+		$address,
+		$contact_no,
+		$emp_status,
+		$shuttle_route,
+		$emp_js_s,
+		$emp_sv,
+		$emp_approver,
+		$emp_js_s_no,
+		$emp_sv_no,
+		$emp_approver_no,
+		$resigned,
+		$id
+	];
+
+	$params = array_merge($params1, $params2);
 
 	$stmt = $conn->prepare($query);
-	if ($stmt->execute()) {
+
+	if ($stmt->execute($params)) {
 		$query = "UPDATE m_control_area_accounts SET";
+		$params = [];
 	
 		if (!empty($dept)) {
-			$query = $query . " dept = '$dept'";
+			$query = $query . " dept = ?";
+			$params[] = $dept;
 		} else {
 			$query = $query . " dept = ''";
 		}
 		if (!empty($section)) {
-			$query = $query . ", section = '$section'";
+			$query = $query . ", section = ?";
+			$params[] = $section;
 		} else {
 			$query = $query . ", section = NULL";
 		}
 		if (!empty($line_no)) {
-			$query = $query . ", line_no = '$line_no'";
+			$query = $query . ", line_no = ?";
+			$params[] = $line_no;
 		} else {
 			$query = $query . ", line_no = NULL";
 		}
@@ -930,24 +1069,29 @@ if ($method == 'update_employee') {
 		// 	$query = $query . ", shift_group = NULL";
 		// }
 
-		$query = $query . " WHERE emp_no = '$emp_no'";
+		$query = $query . " WHERE emp_no = ?";
+		$params[] = $emp_no;
 		$stmt = $conn->prepare($query);
 
-		if ($stmt->execute()) {
+		if ($stmt->execute($params)) {
 			$query = "UPDATE m_accounts SET";
+			$params = [];
 	
 			if (!empty($dept)) {
-				$query = $query . " dept = '$dept'";
+				$query = $query . " dept = ?";
+				$params[] = $dept;
 			} else {
 				$query = $query . " dept = ''";
 			}
 			if (!empty($section)) {
-				$query = $query . ", section = '$section'";
+				$query = $query . ", section = ?";
+				$params[] = $section;
 			} else {
 				$query = $query . ", section = NULL";
 			}
 			if (!empty($line_no)) {
-				$query = $query . ", line_no = '$line_no'";
+				$query = $query . ", line_no = ?";
+				$params[] = $line_no;
 			} else {
 				$query = $query . ", line_no = NULL";
 			}
@@ -957,10 +1101,11 @@ if ($method == 'update_employee') {
 			// 	$query = $query . ", shift_group = NULL";
 			// }
 
-			$query = $query . " WHERE emp_no = '$emp_no'";
+			$query = $query . " WHERE emp_no = ?";
+			$params[] = $emp_no;
 			$stmt = $conn->prepare($query);
 
-			if ($stmt->execute()) {
+			if ($stmt->execute($params)) {
 				echo 'success';
 			} else {
 				echo 'error';
@@ -975,8 +1120,8 @@ if ($method == 'update_employee') {
 
 if ($method == 'update_employee_advanced') {
 	$id = $_POST['id'];
-	$emp_no = addslashes(trim($_POST['emp_no']));
-	$full_name = addslashes(trim($_POST['full_name']));
+	$emp_no = trim($_POST['emp_no']);
+	$full_name = trim($_POST['full_name']);
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$sub_section = trim($_POST['sub_section']);
@@ -987,8 +1132,8 @@ if ($method == 'update_employee_advanced') {
 	$date_hired = trim($_POST['date_hired']);
 	$provider = trim($_POST['provider']);
 	$shift_group = trim($_POST['shift_group']);
-	$address = addslashes(trim($_POST['address']));
-	$contact_no = addslashes(trim($_POST['contact_no']));
+	$address = trim($_POST['address']);
+	$contact_no = trim($_POST['contact_no']);
 	$emp_status = trim($_POST['emp_status']);
 	$shuttle_route = trim($_POST['shuttle_route']);
 	$gender = trim($_POST['gender']);
@@ -1001,105 +1146,155 @@ if ($method == 'update_employee_advanced') {
 	// $resigned = intval($_POST['resigned']);
 	// $resigned_date = trim($_POST['resigned_date']);
 
-	$query = "UPDATE m_employees SET emp_no = '$emp_no', full_name = N'$full_name'";
+	$query = "UPDATE m_employees SET emp_no = ?, full_name = ?";
+
+	$params1 = [
+		$emp_no,
+		$full_name
+	];
 	
 	if (!empty($dept)) {
-		$query = $query . ", dept = '$dept'";
+		$query = $query . ", dept = ?";
+		$params1[] = $dept;
 	} else {
 		$query = $query . ", dept = 'Undefined'";
 	}
 	if (!empty($section)) {
-		$query = $query . ", section = '$section'";
+		$query = $query . ", section = ?";
+		$params1[] = $section;
 	} else {
 		$query = $query . ", section = 'Undefined'";
 	}
 	if (!empty($sub_section)) {
-		$query = $query . ", sub_section = '$sub_section'";
+		$query = $query . ", sub_section = ?";
+		$params1[] = $sub_section;
 	} else {
 		$query = $query . ", sub_section = 'Undefined'";
 	}
 	if (!empty($process)) {
-		$query = $query . ", process = '$process'";
+		$query = $query . ", process = ?";
+		$params1[] = $process;
 	} else {
 		$query = $query . ", process = 'Undefined'";
 	}
 	if (!empty($line_no)) {
-		$query = $query . ", line_no = '$line_no'";
+		$query = $query . ", line_no = ?";
+		$params1[] = $line_no;
 	} else {
 		$query = $query . ", line_no = 'Undefined'";
 	}
 
 	if (!empty($skill_level)) {
-		$query = $query . ", skill_level = '$skill_level'";
+		$query = $query . ", skill_level = ?";
+		$params1[] = $skill_level;
 	} else {
 		$query = $query . ", skill_level = NULL";
 	}
 
 	if (!empty($date_hired)) {
-		$query = $query . ", date_hired = '$date_hired'";
+		$query = $query . ", date_hired = ?";
+		$params1[] = $date_hired;
 	} else {
 		$query = $query . ", date_hired = NULL";
 	}
 
-
-	$query = $query . ", position = '$position', provider = '$provider', gender = '$gender', shift_group = '$shift_group', address = '$address', contact_no = '$contact_no', emp_status = '$emp_status', shuttle_route = '$shuttle_route', emp_js_s = '$emp_js_s', emp_sv = '$emp_sv', emp_approver = '$emp_approver', emp_js_s_no = '$emp_js_s_no', emp_sv_no = '$emp_sv_no', emp_approver_no = '$emp_approver_no' WHERE id = '$id'";
+	$query = $query . ", position = ?, provider = ?, gender = ?, 
+						shift_group = ?, address = ?, contact_no = ?, 
+						emp_status = ?, shuttle_route = ?, 
+						emp_js_s = ?, emp_sv = ?, emp_approver = ?, emp_js_s_no = ?, 
+						emp_sv_no = ?, emp_approver_no = ? 
+						WHERE id = ?";
 
 	$stmt = $conn->prepare($query);
-	if ($stmt->execute()) {
+
+	$params2 = [
+		$position,
+		$provider,
+		$gender,
+		$shift_group,
+		$address,
+		$contact_no,
+		$emp_status,
+		$shuttle_route,
+		$emp_js_s,
+		$emp_sv,
+		$emp_approver,
+		$emp_js_s_no,
+		$emp_sv_no,
+		$emp_approver_no,
+		$id
+	];
+
+	$params = array_merge($params1, $params2);
+
+	if ($stmt->execute($params)) {
 		$query = "UPDATE m_control_area_accounts SET";
+		$params = [];
 	
 		if (!empty($dept)) {
-			$query = $query . " dept = '$dept'";
+			$query = $query . " dept = ?";
+			$params[] = $dept;
 		} else {
 			$query = $query . " dept = ''";
 		}
 		if (!empty($section)) {
-			$query = $query . ", section = '$section'";
+			$query = $query . ", section = ?";
+			$params[] = $section;
 		} else {
 			$query = $query . ", section = NULL";
 		}
 		if (!empty($line_no)) {
-			$query = $query . ", line_no = '$line_no'";
+			$query = $query . ", line_no = ?";
+			$params[] = $line_no;
 		} else {
 			$query = $query . ", line_no = NULL";
 		}
 		if (!empty($shift_group)) {
-			$query = $query . ", shift_group = '$shift_group'";
+			$query = $query . ", shift_group = ?";
+			$params[] = $shift_group;
 		} else {
 			$query = $query . ", shift_group = NULL";
 		}
 
-		$query = $query . " WHERE emp_no = '$emp_no'";
+		$query = $query . " WHERE emp_no = ?";
+		$params[] = $emp_no;
 		$stmt = $conn->prepare($query);
 
-		if ($stmt->execute()) {
+		if ($stmt->execute($params)) {
 			$query = "UPDATE m_accounts SET";
+			$params = [];
 	
 			if (!empty($dept)) {
-				$query = $query . " dept = '$dept'";
+				$query = $query . " dept = ?";
+				$params[] = $dept;
 			} else {
 				$query = $query . " dept = ''";
 			}
 			if (!empty($section)) {
-				$query = $query . ", section = '$section'";
+				$query = $query . ", section = ?";
+				$params[] = $section;
 			} else {
 				$query = $query . ", section = NULL";
 			}
 			if (!empty($line_no)) {
-				$query = $query . ", line_no = '$line_no'";
+				$query = $query . ", line_no = ?";
+				$params[] = $line_no;
 			} else {
 				$query = $query . ", line_no = NULL";
 			}
 			if (!empty($shift_group)) {
-				$query = $query . ", shift_group = '$shift_group'";
+				$query = $query . ", shift_group = ?";
+				$params[] = $shift_group;
 			} else {
 				$query = $query . ", shift_group = NULL";
 			}
 
-			$query = $query . " WHERE emp_no = '$emp_no'";
+			$query = $query . " WHERE emp_no = ?";
+			$params[] = $emp_no;
+
 			$stmt = $conn->prepare($query);
 
-			if ($stmt->execute()) {
+			if ($stmt->execute($params)) {
 				echo 'success';
 			} else {
 				echo 'error';
@@ -1115,9 +1310,10 @@ if ($method == 'update_employee_advanced') {
 if ($method == 'delete_employee') {
 	$id = $_POST['id'];
 
-	$query = "DELETE FROM m_employees WHERE id = '$id'";
+	$query = "DELETE FROM m_employees WHERE id = ?";
+	$params = array($id);
 	$stmt = $conn->prepare($query);
-	if ($stmt->execute()) {
+	if ($stmt->execute($params)) {
 		echo 'success';
 	}else{
 		echo 'error';
@@ -1125,4 +1321,3 @@ if ($method == 'delete_employee') {
 }
 
 $conn = NULL;
-?>

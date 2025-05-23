@@ -568,22 +568,22 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                         continue; // Skip blank lines
                     }
 
-                    $emp_no = addslashes(custom_trim($line[0]));
-                    $full_name = addslashes(custom_trim($line[1]));
+                    $emp_no = custom_trim($line[0]);
+                    $full_name = custom_trim($line[1]);
                     $dept = custom_trim($line[2]);
-                    $section = addslashes(custom_trim($line[3]));
-                    $sub_section = addslashes(custom_trim($line[4]));
-                    $line_no = addslashes(custom_trim($line[5]));
-                    $process = addslashes(custom_trim($line[6]));
-                    $position = addslashes(custom_trim($line[7]));
-                    $provider = addslashes(custom_trim($line[8]));
-                    $shift_group = addslashes(custom_trim($line[9]));
+                    $section = custom_trim($line[3]);
+                    $sub_section = custom_trim($line[4]);
+                    $line_no = custom_trim($line[5]);
+                    $process = custom_trim($line[6]);
+                    $position = custom_trim($line[7]);
+                    $provider = custom_trim($line[8]);
+                    $shift_group = custom_trim($line[9]);
                     $gender = strtoupper(custom_trim($line[10]));
                     $date_hired = custom_trim($line[11]);
                     $address = custom_trim($line[12]);
                     $contact_no = custom_trim($line[13]);
                     $emp_status = custom_trim($line[14]);
-                    $shuttle_route = addslashes(custom_trim($line[15]));
+                    $shuttle_route = custom_trim($line[15]);
                     $emp_js_s_no = custom_trim($line[16]);
                     $emp_sv_no = custom_trim($line[17]);
                     $emp_approver_no = custom_trim($line[18]);
@@ -604,125 +604,170 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     }
 
                     // CHECK DATA
-                    $sql = "SELECT id FROM m_employees WHERE emp_no = '$emp_no'";
+                    $sql = "SELECT id FROM m_employees WHERE emp_no = ?";
                     $stmt = $conn->prepare($sql);
-                    $stmt->execute();
+                    $params = array($emp_no);
+                    $stmt->execute($params);
 
-                    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if (count($results) > 0) {
-                        foreach ($results as $row) {
-                            $id = $row['id'];
-                        }
+                    if ($row) {
+                        $id = $row['id'];
 
-                        $sql = "UPDATE m_employees SET emp_no='$emp_no',full_name=N'$full_name'";
+                        $sql = "UPDATE m_employees SET emp_no = ?, full_name = ?";
+
+                        $params1 = [
+                            $emp_no,
+                            $full_name
+                        ];
 
                         if (!empty($dept)) {
-                            $sql = $sql . ", dept = '$dept'";
+                            $sql = $sql . ", dept = ?";
+                            $params1[] = $dept;
                         } else {
                             $sql = $sql . ", dept = 'Undefined'";
                         }
                         if (!empty($section)) {
-                            $sql = $sql . ", section = '$section'";
+                            $sql = $sql . ", section = ?";
+                            $params1[] = $section;
                         } else {
                             $sql = $sql . ", section = 'Undefined'";
                         }
                         if (!empty($sub_section)) {
-                            $sql = $sql . ", sub_section = '$sub_section'";
+                            $sql = $sql . ", sub_section = ?";
+                            $params1[] = $sub_section;
                         } else {
                             $sql = $sql . ", sub_section = 'Undefined'";
                         }
                         if (!empty($line_no)) {
-                            $sql = $sql . ", line_no = '$line_no'";
+                            $sql = $sql . ", line_no = ?";
+                            $params1[] = $line_no;
                         } else {
                             $sql = $sql . ", line_no = 'Undefined'";
                         }
                         if (!empty($process)) {
-                            $sql = $sql . ", process = '$process'";
+                            $sql = $sql . ", process = ?";
+                            $params1[] = $process;
                         } else {
                             $sql = $sql . ", process = 'Undefined'";
                         }
                         if (!empty($shift_group)) {
-                            $sql = $sql . ", shift_group = '$shift_group'";
+                            $sql = $sql . ", shift_group = ?";
+                            $params1[] = $shift_group;
                         } else {
                             $sql = $sql . ", shift_group = 'ADS'";
                         }
 
                         if (!empty($date_hired)) {
-                            $sql = $sql . ", date_hired = '$date_hired'";
+                            $sql = $sql . ", date_hired = ?";
+                            $params1[] = $date_hired;
                         } else {
                             $sql = $sql . ", date_hired = NULL";
                         }
 
                         if (!empty($resigned_date)) {
-                            $sql = $sql . ", resigned_date = '$resigned_date'";
+                            $sql = $sql . ", resigned_date = ?";
+                            $params1[] = $resigned_date;
                         } else {
                             $sql = $sql . ", resigned_date = NULL";
                         }
 
-                        $sql = $sql . ",position='$position',provider='$provider',gender='$gender',
-                                address='$address',contact_no='$contact_no',emp_status='$emp_status',
-                                shuttle_route='$shuttle_route',emp_js_s='',emp_js_s_no='$emp_js_s_no',emp_sv='',emp_sv_no='$emp_sv_no',
-                                emp_approver='',emp_approver_no='$emp_approver_no',
-                                resigned='$resigned' WHERE id = '$id'";
+                        $sql = $sql . ",position = ?, provider = ?, gender = ?, 
+                                address = ?, contact_no = ?, emp_status = ?,  
+                                shuttle_route = ?, emp_js_s = ?, emp_js_s_no = ?, emp_sv = ?, emp_sv_no = ?, 
+                                emp_approver = ?,emp_approver_no = ?,
+                                resigned = ? WHERE id = ?";
+                        $params2 = [
+                            $position,
+                            $provider,
+                            $gender,
+                            $address,
+                            $contact_no,
+                            $emp_status,
+                            $shuttle_route,
+                            '',
+                            $emp_js_s_no,
+                            '',
+                            $emp_sv_no,
+                            '',
+                            $emp_approver_no,
+                            $resigned,
+                            $id
+                        ];
+
+                        $params = array_merge($params1, $params2);
 
                         $stmt = $conn->prepare($sql);
 
-                        if ($stmt->execute()) {
+                        if ($stmt->execute($params)) {
                             $query = "UPDATE m_control_area_accounts SET";
+                            $params = [];
 
                             if (!empty($dept)) {
-                                $query = $query . " dept = '$dept'";
+                                $query = $query . " dept = ?";
+                                $params[] = $dept;
                             } else {
                                 $query = $query . " dept = ''";
                             }
                             if (!empty($section)) {
-                                $query = $query . ", section = '$section'";
+                                $query = $query . ", section = ?";
+                                $params[] = $section;
                             } else {
                                 $query = $query . ", section = NULL";
                             }
                             if (!empty($line_no)) {
-                                $query = $query . ", line_no = '$line_no'";
+                                $query = $query . ", line_no = ?";
+                                $params[] = $line_no;
                             } else {
                                 $query = $query . ", line_no = NULL";
                             }
                             if (!empty($shift_group)) {
-                                $query = $query . ", shift_group = '$shift_group'";
+                                $query = $query . ", shift_group = ?";
+                                $params[] = $shift_group;
                             } else {
                                 $query = $query . ", shift_group = 'ADS'";
                             }
 
-                            $query = $query . " WHERE emp_no = '$emp_no'";
+                            $query = $query . " WHERE emp_no = ?";
+                            $params[] = $emp_no;
+
                             $stmt = $conn->prepare($query);
 
-                            if ($stmt->execute()) {
+                            if ($stmt->execute($params)) {
                                 $query = "UPDATE m_accounts SET";
+                                $params = [];
 
                                 if (!empty($dept)) {
-                                    $query = $query . " dept = '$dept'";
+                                    $query = $query . " dept = ?";
+                                    $params[] = $dept;
                                 } else {
                                     $query = $query . " dept = ''";
                                 }
                                 if (!empty($section)) {
-                                    $query = $query . ", section = '$section'";
+                                    $query = $query . ", section = ?";
+                                    $params[] = $section;
                                 } else {
                                     $query = $query . ", section = NULL";
                                 }
                                 if (!empty($line_no)) {
-                                    $query = $query . ", line_no = '$line_no'";
+                                    $query = $query . ", line_no = ?";
+                                    $params[] = $line_no;
                                 } else {
                                     $query = $query . ", line_no = NULL";
                                 }
                                 if (!empty($shift_group)) {
-                                    $query = $query . ", shift_group = '$shift_group'";
+                                    $query = $query . ", shift_group = ?";
+                                    $params[] = $shift_group;
                                 } else {
                                     $query = $query . ", shift_group = 'ADS'";
                                 }
 
-                                $query = $query . " WHERE emp_no = '$emp_no'";
+                                $query = $query . " WHERE emp_no = ?";
+                                $params[] = $emp_no;
+
                                 $stmt = $conn->prepare($query);
 
-                                $stmt->execute();
+                                $stmt->execute($params);
                             }
                         }
                     } else {
@@ -731,57 +776,93 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                                 date_hired, resigned_date, 
                                 position, provider, gender, address, contact_no, emp_status, shuttle_route, 
                                 emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, resigned) 
-                                VALUES ('$emp_no',N'$full_name'";
+                                VALUES (?, ?";
+                        $params1 = [
+                            $emp_no,
+                            $full_name
+                        ];
 
                         if (!empty($dept)) {
-                            $sql = $sql . ",'$dept'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $dept;
                         } else {
                             $sql = $sql . ", 'Undefined'";
                         }
+                        
                         if (!empty($section)) {
-                            $sql = $sql . ",'$section'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $section;
                         } else {
                             $sql = $sql . ", 'Undefined'";
                         }
+
                         if (!empty($sub_section)) {
-                            $sql = $sql . ",'$sub_section'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $sub_section;
                         } else {
                             $sql = $sql . ", 'Undefined'";
                         }
+
                         if (!empty($line_no)) {
-                            $sql = $sql . ",'$line_no'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $line_no;
                         } else {
                             $sql = $sql . ", 'Undefined'";
                         }
+
                         if (!empty($process)) {
-                            $sql = $sql . ",'$process'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $process;
                         } else {
                             $sql = $sql . ", 'Undefined'";
                         }
+
                         if (!empty($shift_group)) {
-                            $sql = $sql . ",'$shift_group'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $shift_group;
                         } else {
                             $sql = $sql . ", 'ADS'";
                         }
 
+
                         if (!empty($date_hired)) {
-                            $sql = $sql . ",'$date_hired'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $date_hired;
                         } else {
                             $sql = $sql . ", NULL";
                         }
 
                         if (!empty($resigned_date)) {
-                            $sql = $sql . ",'$resigned_date'";
+                            $sql = $sql . ", ?";
+                            $params1[] = $resigned_date;
                         } else {
                             $sql = $sql . ", NULL";
                         }
 
-                        $sql = $sql . ",'$position','$provider','$gender','$address','$contact_no','$emp_status',
-                            '$shuttle_route','','$emp_js_s_no','','$emp_sv_no','','$emp_approver_no','$resigned')";
+                        $sql = $sql . ", ?, ?, ?, ?, ?, ?, ?, 
+                                        ?, ?, ?, ?, ?, ?, ?)";
+                        $params2 = [
+                            $position,
+                            $provider,
+                            $gender,
+                            $address,
+                            $contact_no,
+                            $emp_status,
+                            $shuttle_route,
+                            '',
+                            $emp_js_s_no,
+                            '',
+                            $emp_sv_no,
+                            '',
+                            $emp_approver_no,
+                            $resigned
+                        ];
+
+                        $params = array_merge($params1, $params2);
 
                         $stmt = $conn->prepare($sql);
 
-                        $stmt->execute();
+                        $stmt->execute($params);
                     }
                 }
 

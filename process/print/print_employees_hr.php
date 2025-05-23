@@ -7,33 +7,43 @@ include '../conn.php';
 
 function count_employee_list($search_arr, $conn) {
   $query = "SELECT count(id) AS total FROM m_employees WHERE";
+  $params = [];
+
   if (!empty($search_arr['emp_no'])) {
-    $query = $query . " emp_no LIKE '".$search_arr['emp_no']."%'";
+    $query = $query . " emp_no LIKE ?";
+    $emp_no_param = $search_arr['emp_no'] ."%";
+    $params[] = $emp_no_param;
   } else {
     $query = $query . " emp_no != ''";
   }
   if (!empty($search_arr['full_name'])) {
-    $query = $query . " AND full_name LIKE '".$search_arr['full_name']."%'";
+    $query = $query . " AND full_name LIKE ?";
+    $full_name_param = $search_arr['full_name'] ."%";
+    $params[] = $full_name_param;
   }
   if (!empty($search_arr['provider'])) {
-    $query = $query . " AND provider = '".$search_arr['provider']."'";
+    $query = $query . " AND provider = ?";
+    $params[] = $search_arr['provider'];
   }
   if (isset($_SESSION['emp_no'])) {
     if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
       $dept = $_SESSION['dept'];
       $query = $query . " AND dept = '$dept'";
+      $params[] = $dept;
     } else {
       $query = $query . " AND dept IS NULL";
     }
     if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
       $section = $_SESSION['section'];
       $query = $query . " AND section = '$section'";
+      $params[] = $section;
     } else {
       $query = $query . " AND section IS NULL";
     }
     if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
       $line_no = $_SESSION['line_no'];
       $query = $query . " AND line_no = '$line_no'";
+      $params[] = $line_no;
     } else {
       $query = $query . " AND line_no IS NULL";
     }
@@ -42,32 +52,42 @@ function count_employee_list($search_arr, $conn) {
   } else {
     if (!empty($search_arr['dept'])) {
       $query = $query . " AND dept = '".$search_arr['dept']."'";
+      $params[] = $search_arr['dept'];
     }
     if (!empty($search_arr['section'])) {
       $query = $query . " AND section LIKE '".$search_arr['section']."%'";
+      $section_param = $search_arr['section'] ."%";
+      $params[] = $section_param;
     }
     if (!empty($search_arr['line_no'])) {
       $query = $query . " AND line_no LIKE '".$search_arr['line_no']."%'";
+      $line_no_param = $search_arr['line_no'] ."%";
+      $params[] = $line_no_param;
     }
   }
 
   if (!empty($search_arr['date_updated_from']) && !empty($search_arr['date_updated_to'])) {
-    $query = $query . " AND date_updated BETWEEN '".$search_arr['date_updated_from']."' AND '".$search_arr['date_updated_to']."'";
+    $query = $query . " AND date_updated BETWEEN ? AND ?";
+    $params[] = $search_arr['date_updated_from'];
+    $params[] = $search_arr['date_updated_to'];
   }
 
   if ($search_arr['resigned'] != '') {
-    $query = $query . " AND resigned = '".$search_arr['resigned']."'";
+    $query = $query . " AND resigned = ?";
+    $params[] = $search_arr['resigned'];
   }
 
-  $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-  $stmt->execute();
-  if ($stmt->rowCount() > 0) {
-    foreach($stmt->fetchALL() as $row){
-      $total = $row['total'];
-    }
-  }else{
+  $stmt = $conn->prepare($query);
+  $stmt->execute($params);
+
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($row) {
+    $total = $row['total'];
+  } else {
     $total = 0;
   }
+
   return $total;
 }
 
@@ -105,12 +125,12 @@ switch (true) {
     break;
 }
 
-$emp_no = addslashes(trim($_GET['emp_no']));
-$full_name = addslashes(trim($_GET['full_name']));
+$emp_no = trim($_GET['emp_no']);
+$full_name = trim($_GET['full_name']);
 $provider = trim($_GET['provider']);
 $dept = trim($_GET['dept']);
-$section = addslashes(trim($_GET['section']));
-$line_no = addslashes(trim($_GET['line_no']));
+$section = trim($_GET['section']);
+$line_no = trim($_GET['line_no']);
 
 $date_updated_from = '';
 if (isset($_GET['date_updated_from'])) {
@@ -148,40 +168,59 @@ $search_arr = array(
 
 $count_employees = count_employee_list($search_arr, $conn);
 
-$query = "SELECT id, emp_no, full_name, dept, section, line_no, position, provider, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no FROM m_employees WHERE";
+$query = "SELECT 
+            id, emp_no, full_name, dept, section, line_no, position, provider, 
+            date_hired, address, contact_no, emp_status, shuttle_route, 
+            emp_js_s_no, emp_sv_no, emp_approver_no 
+          FROM m_employees WHERE";
+$params = [];
+
 if (!empty($emp_no)) {
-  $query = $query . " emp_no LIKE '".$emp_no."%'";
+  $query = $query . " emp_no LIKE ?";
+  $emp_no_param = $emp_no ."%";
+  $params[] = $emp_no_param;
 } else {
   $query = $query . " emp_no != ''";
 }
 if (!empty($full_name)) {
-  $query = $query . " AND full_name LIKE '$full_name%'";
+  $query = $query . " AND full_name LIKE ?";
+  $full_name_param = $full_name ."%";
+  $params[] = $full_name_param;
 }
 if (!empty($provider)) {
-  $query = $query . " AND provider = '$provider'";
+  $query = $query . " AND provider = ?";
+  $params[] = $provider;
 }
 if (!empty($dept)) {
-  $query = $query . " AND dept = '$dept'";
+  $query = $query . " AND dept = ?";
+  $params[] = $dept;
 }
 if (!empty($section)) {
-  $query = $query . " AND section LIKE '$section%'";
+  $query = $query . " AND section LIKE ?";
+  $section_param = $section ."%";
+  $params[] = $section_param;
 }
 if (!empty($line_no)) {
-  $query = $query . " AND line_no LIKE '$line_no%'";
+  $query = $query . " AND line_no LIKE ?";
+  $line_no_param = $line_no ."%";
+  $params[] = $line_no_param;
 }
 
 if (!empty($date_updated_from) && !empty($date_updated_to)) {
-  $query = $query . " AND date_updated BETWEEN '$date_updated_from' AND '$date_updated_to'";
+  $query = $query . " AND date_updated BETWEEN ? AND ?";
+  $params[] = $date_updated_from;
+  $params[] = $date_updated_to;
 }
 
 if ($resigned != '') {
   if ($resigned == 1 || $resigned == 0) {
-    $query = $query . " AND resigned = '$resigned'";
+    $query = $query . " AND resigned = ?";
+    $params[] = $resigned;
   }
 }
 
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -238,8 +277,10 @@ $stmt->execute();
                       </thead>
                       <tbody id="list_of_employees" style="text-align: center;">
                         <?php
-                          if ($stmt->rowCount() > 0) {
-                            foreach($stmt->fetchALL() as $row){
+                          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                          if ($row) {
+                            do {
                               $c++;
                               echo '<tr>';
                                 echo '<td>'.$c.'</td>';
@@ -254,8 +295,8 @@ $stmt->execute();
                                 echo '<td>'.$row['date_hired'].'</td>';
                                 echo '<td>'.$row['emp_status'].'</td>';
                               echo '</tr>';
-                            }
-                          }else{
+                            } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+                          } else {
                             echo '<tr>';
                               echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
                             echo '</tr>';

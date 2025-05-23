@@ -29,51 +29,81 @@ if ($method == 'save_leave_form_clinic') {
 	$sl_dr_date = $_POST['sl_dr_date'];
 	$sl_dr_name = $_SESSION['full_name'];
 
-	$sql = "UPDATE t_leave_form SET leave_form_status='pending',sl_r1_1_hrs='$sl_r1_1_hrs',sl_r1_1_date='$sl_r1_1_date',sl_r1_1_time_in='$sl_r1_1_time_in',sl_r1_1_time_out='$sl_r1_1_time_out',sl_r1_2_days='$sl_r1_2_days',sl_r1_3_date='$sl_r1_3_date',sl_rc_1_days='$sl_rc_1_days',sl_rc_2_from='$sl_rc_2_from',sl_rc_2_to='$sl_rc_2_to',sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='$sl_dr_name',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
-
-	$sql = "UPDATE t_leave_form SET leave_form_status='pending',sl_r1_1_hrs='$sl_r1_1_hrs',";
+	$sql = "UPDATE t_leave_form 
+				SET leave_form_status = 'pending', 
+				sl_r1_1_hrs = ?,";
+	$params1 = [];
+	$params1[] = $sl_r1_1_hrs;
 
 	if (empty($sl_r1_1_date)) {
-		$sql = $sql . "sl_r1_1_date=NULL,";
+		$sql = $sql . "sl_r1_1_date = NULL,";
 	} else {
-		$sql = $sql . "sl_r1_1_date='$sl_r1_1_date',";
+		$sql = $sql . "sl_r1_1_date = ?,";
+		$params1[] = $sl_r1_1_date;
 	}
 	if (empty($sl_r1_1_time_in)) {
-		$sql = $sql . "sl_r1_1_time_in=NULL,";
+		$sql = $sql . "sl_r1_1_time_in = NULL,";
 	} else {
-		$sql = $sql . "sl_r1_1_time_in='$sl_r1_1_time_in',";
+		$sql = $sql . "sl_r1_1_time_in = ?,";
+		$params1[] = $sl_r1_1_time_in;
 	}
 	if (empty($sl_r1_1_time_out)) {
-		$sql = $sql . "sl_r1_1_time_out=NULL,";
+		$sql = $sql . "sl_r1_1_time_out = NULL,";
 	} else {
-		$sql = $sql . "sl_r1_1_time_out='$sl_r1_1_time_out',";
+		$sql = $sql . "sl_r1_1_time_out = ?,";
+		$params1[] = $sl_r1_1_time_out;
 	}
 
-	$sql = $sql . "sl_r1_2_days='$sl_r1_2_days',";
+	$sql = $sql . "sl_r1_2_days = ?,";
+	$params1[] = $sl_r1_2_days;
 
 	if (empty($sl_r1_3_date)) {
-		$sql = $sql . "sl_r1_3_date=NULL,";
+		$sql = $sql . "sl_r1_3_date = NULL,";
 	} else {
-		$sql = $sql . "sl_r1_3_date='$sl_r1_3_date',";
+		$sql = $sql . "sl_r1_3_date = ?,";
+		$params1[] = $sl_r1_3_date;
 	}
 
-	$sql = $sql . "sl_rc_1_days='$sl_rc_1_days',";
+	$sql = $sql . "sl_rc_1_days = ?,";
+	$params1[] = $sl_rc_1_days;
 
 	if (empty($sl_rc_2_from)) {
-		$sql = $sql . "sl_rc_2_from=NULL,";
+		$sql = $sql . "sl_rc_2_from = NULL,";
 	} else {
-		$sql = $sql . "sl_rc_2_from='$sl_rc_2_from',";
+		$sql = $sql . "sl_rc_2_from = ?,";
+		$params1[] = $sl_rc_2_from;
 	}
 	if (empty($sl_rc_2_to)) {
-		$sql = $sql . "sl_rc_2_to=NULL,";
+		$sql = $sql . "sl_rc_2_to = NULL,";
 	} else {
-		$sql = $sql . "sl_rc_2_to='$sl_rc_2_to',";
+		$sql = $sql . "sl_rc_2_to = ?,";
+		$params1[] = $sl_rc_2_to;
 	}
 
-	$sql = $sql . "sl_rc_3_oc='$sl_rc_3_oc',sl_rc_4_hm='$sl_rc_4_hm',sl_rc_mgh='$sl_rc_mgh',sl_r2='$sl_r2',sl_dr_name='$sl_dr_name',sl_dr_date='$sl_dr_date',date_updated='$date_updated' WHERE leave_form_id = '$leave_form_id'";
+	$sql = $sql . "sl_rc_3_oc = ?, 
+					sl_rc_4_hm = ?, 
+					sl_rc_mgh = ?, 
+					sl_r2 = ?, 
+					sl_dr_name = ?, 
+					sl_dr_date = ?, 
+					date_updated = ?, 
+				WHERE leave_form_id = ?";
+	
+	$params2 = [
+		$sl_rc_3_oc,
+		$sl_rc_4_hm,
+		$sl_rc_mgh,
+		$sl_r2,
+		$sl_dr_name,
+		$sl_dr_date,
+		$date_updated,
+		$leave_form_id
+	];
+	
+	$params = array_merge($params1, $params2);
 
 	$stmt = $conn->prepare($sql);
-	$stmt->execute();
+	$stmt->execute($params);
 
 	echo 'success';
 }
@@ -83,32 +113,42 @@ if ($method == 'get_pending_leave_forms') {
 	$row_class = $row_class_arr[0];
 	$c = 0;
 
-	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form WHERE leave_form_status = 'clinic' OR (leave_form_status = 'pending' AND sl_dr_name != '') ORDER BY id DESC";
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+	$sql = "SELECT 
+				leave_form_id, emp_no, date_filed, address, contact_no, leave_type, 
+				leave_date_from, leave_date_to, total_leave_days, 
+				irt_phone_call, irt_letter, irb, reason, issued_by, 
+				js_s, sv, approver, leave_form_status, 
+				sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, 
+				sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, 
+				sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date 
+			FROM t_leave_form 
+			WHERE leave_form_status = 'clinic' OR 
+				(leave_form_status = 'pending' AND sl_dr_name != '') 
+			ORDER BY id DESC";
+	$stmt = $conn->prepare($sql);
 	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
 
-			if ($row['leave_form_status'] == 'clinic') {
-				$row_class = $row_class_arr[1];
-			} else if ($row['leave_form_status'] == 'pending') {
-				$row_class = $row_class_arr[2];
-			} else {
-				$row_class = $row_class_arr[0];
-			}
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$c++;
 
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_clinic" onclick="get_pending_leave_forms_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'&quot;)">';
-
-            echo '<td>'.$c.'</td>';
-			echo '<td>'.$row['date_filed'].'</td>';
-			echo '<td>'.$row['leave_form_id'].'</td>';
-			echo '<td>'.$row['leave_type'].'</td>';
-			echo '<td>'.$row['leave_date_from'].'</td>';
-			echo '<td>'.$row['leave_date_to'].'</td>';
-			
-			echo '</tr>';
+		if ($row['leave_form_status'] == 'clinic') {
+			$row_class = $row_class_arr[1];
+		} else if ($row['leave_form_status'] == 'pending') {
+			$row_class = $row_class_arr[2];
+		} else {
+			$row_class = $row_class_arr[0];
 		}
+
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_clinic" onclick="get_pending_leave_forms_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'&quot;)">';
+
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$row['date_filed'].'</td>';
+		echo '<td>'.$row['leave_form_id'].'</td>';
+		echo '<td>'.$row['leave_type'].'</td>';
+		echo '<td>'.$row['leave_date_from'].'</td>';
+		echo '<td>'.$row['leave_date_to'].'</td>';
+		
+		echo '</tr>';
 	}
 }
 
@@ -120,32 +160,43 @@ if ($method == 'get_recent_leave_forms_history') {
 	// MySQL
 	// $sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE (leave_form_status = 'approved' OR leave_form_status = 'disapproved') AND sl_dr_name != '' ORDER BY id DESC LIMIT 25";
 	// MS SQL Server
-	$sql = "SELECT TOP 25 leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history WHERE (leave_form_status = 'approved' OR leave_form_status = 'disapproved') AND sl_dr_name != '' ORDER BY id DESC";
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+	$sql = "SELECT TOP 25 
+				leave_form_id, emp_no, date_filed, address, contact_no, leave_type, 
+				leave_date_from, leave_date_to, total_leave_days, 
+				irt_phone_call, irt_letter, irb, reason, issued_by, 
+				js_s, sv, approver, leave_form_status, 
+				sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, 
+				sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, 
+				sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date 
+			FROM t_leave_form_history 
+			WHERE (leave_form_status = 'approved' OR leave_form_status = 'disapproved') AND 
+				sl_dr_name != '' 
+			ORDER BY id DESC";
+	
+	$stmt = $conn->prepare($sql);
 	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
 
-			if ($row['leave_form_status'] == 'approved') {
-				$row_class = $row_class_arr[1];
-			} else if ($row['leave_form_status'] == 'disapproved') {
-				$row_class = $row_class_arr[2];
-			} else {
-				$row_class = $row_class_arr[0];
-			}
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$c++;
 
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" onclick="get_leave_forms_history_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'~!~'.$row['leave_form_status'].'&quot;)">';
-
-            echo '<td>'.$c.'</td>';
-			echo '<td>'.$row['date_filed'].'</td>';
-			echo '<td>'.$row['leave_form_id'].'</td>';
-			echo '<td>'.$row['leave_type'].'</td>';
-			echo '<td>'.$row['leave_date_from'].'</td>';
-			echo '<td>'.$row['leave_date_to'].'</td>';
-			
-			echo '</tr>';
+		if ($row['leave_form_status'] == 'approved') {
+			$row_class = $row_class_arr[1];
+		} else if ($row['leave_form_status'] == 'disapproved') {
+			$row_class = $row_class_arr[2];
+		} else {
+			$row_class = $row_class_arr[0];
 		}
+
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" onclick="get_leave_forms_history_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'~!~'.$row['leave_form_status'].'&quot;)">';
+
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$row['date_filed'].'</td>';
+		echo '<td>'.$row['leave_form_id'].'</td>';
+		echo '<td>'.$row['leave_type'].'</td>';
+		echo '<td>'.$row['leave_date_from'].'</td>';
+		echo '<td>'.$row['leave_date_to'].'</td>';
+		
+		echo '</tr>';
 	}
 }
 
@@ -167,10 +218,20 @@ if ($method == 'get_leave_forms_history') {
 	$row_class = $row_class_arr[0];
 	$c = 0;
 
-	$sql = "SELECT leave_form_id, emp_no, date_filed, address, contact_no, leave_type, leave_date_from, leave_date_to, total_leave_days, irt_phone_call, irt_letter, irb, reason, issued_by, js_s, sv, approver, leave_form_status, sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date FROM t_leave_form_history";
+	$sql = "SELECT 
+				leave_form_id, emp_no, date_filed, address, contact_no, 
+				leave_type, leave_date_from, leave_date_to, total_leave_days, 
+				irt_phone_call, irt_letter, irb, reason, issued_by, 
+				js_s, sv, approver, leave_form_status, 
+				sl_r1_1_hrs, sl_r1_1_date, sl_r1_1_time_in, sl_r1_1_time_out, sl_r1_2_days, sl_r1_3_date, 
+				sl_rc_1_days, sl_rc_2_from, sl_rc_2_to, sl_rc_3_oc, 
+				sl_rc_4_hm, sl_rc_mgh, sl_r2, sl_dr_name, sl_dr_date 
+			FROM t_leave_form_history";
+	$params = [];
 
 	if (!empty($leave_type)) {
-		$sql = $sql . " WHERE leave_type = '$leave_type'";
+		$sql = $sql . " WHERE leave_type = ?";
+		$params[] = $leave_type;
 		if (empty($leave_form_status)) {
 			$sql = $sql . " AND (leave_form_status = 'approved' OR leave_form_status = 'disapproved')";
 		} else if ($leave_form_status == 'approved') {
@@ -194,33 +255,31 @@ if ($method == 'get_leave_forms_history') {
 
 	$sql = $sql . " ORDER BY id DESC";
 
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
 
-			if ($row['leave_form_status'] == 'approved') {
-				$row_class = $row_class_arr[1];
-			} else if ($row['leave_form_status'] == 'disapproved') {
-				$row_class = $row_class_arr[2];
-			} else {
-				$row_class = $row_class_arr[0];
-			}
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$c++;
 
-			echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" onclick="get_leave_forms_history_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'~!~'.$row['leave_form_status'].'&quot;)">';
-
-            echo '<td>'.$c.'</td>';
-			echo '<td>'.$row['date_filed'].'</td>';
-			echo '<td>'.$row['leave_form_id'].'</td>';
-			echo '<td>'.$row['leave_type'].'</td>';
-			echo '<td>'.$row['leave_date_from'].'</td>';
-			echo '<td>'.$row['leave_date_to'].'</td>';
-			
-			echo '</tr>';
+		if ($row['leave_form_status'] == 'approved') {
+			$row_class = $row_class_arr[1];
+		} else if ($row['leave_form_status'] == 'disapproved') {
+			$row_class = $row_class_arr[2];
+		} else {
+			$row_class = $row_class_arr[0];
 		}
+
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" onclick="get_leave_forms_history_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'~!~'.$row['leave_form_status'].'&quot;)">';
+
+		echo '<td>'.$c.'</td>';
+		echo '<td>'.$row['date_filed'].'</td>';
+		echo '<td>'.$row['leave_form_id'].'</td>';
+		echo '<td>'.$row['leave_type'].'</td>';
+		echo '<td>'.$row['leave_date_from'].'</td>';
+		echo '<td>'.$row['leave_date_to'].'</td>';
+		
+		echo '</tr>';
 	}
 }
 
 $conn = NULL;
-?>

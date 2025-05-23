@@ -4,7 +4,7 @@ include '../conn.php';
 $c = 0;
 
 $query = "SELECT emp_no, full_name FROM m_accounts WHERE emp_no LIKE 'QA%'";
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+$stmt = $conn->prepare($query);
 $stmt->execute();
 ?>
 <!DOCTYPE html>
@@ -44,7 +44,7 @@ $stmt->execute();
   </noscript>
 
   <div class="row">
-  <?php foreach($stmt -> fetchAll() as $row) { $c++;?>
+  <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $c++;?>
   <div class="col-4">
     <table class="mx-0 my-0" style="height:100%;width:100%;table-layout:fixed;">
       <tbody>

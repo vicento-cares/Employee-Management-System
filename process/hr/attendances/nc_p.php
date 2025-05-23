@@ -422,13 +422,13 @@ if ($method == 'get_non_compliance_year_dropdown_search') {
 
     $stmt->execute();
 
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (count($results) > 0) {
+    if ($row) {
         echo '<option selected value="">Select Year</option>';
-        foreach ($results as $row) {
+        do {
             echo '<option value="' . htmlspecialchars($row['Year']) . '">' . htmlspecialchars($row['Year']) . '</option>';
-        }
+        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
     } else {
         echo '<option selected value="">Select Year</option>';
     }

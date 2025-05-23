@@ -81,18 +81,22 @@ if ($method == 'get_recent_time_in_out') {
 		JOIN m_employees emp
 		ON tio.emp_no = emp.emp_no
 		WHERE";
+	$params = [];
 	
 	if (!empty($section)) {
-		$sql = $sql . " emp.section = '$section'";
+		$sql = $sql . " emp.section = ?";
+		$params[] = $section;
 	} else {
 		$sql = $sql . " emp.section IS NULL";
 	}
 	if (!empty($line_no)) {
-		$sql = $sql . " AND emp.line_no = '$line_no'";
+		$sql = $sql . " AND emp.line_no = ?";
+		$params[] = $line_no;
 	} else {
 		$sql = $sql . " AND emp.line_no IS NULL";
 	}
-	$sql = $sql . " AND emp.shift_group = '$shift_group'";
+	$sql = $sql . " AND emp.shift_group = ?";
+	$params[] = $shift_group;
 
 	// Search by IP
 	// if ($ip != '172.25.112.131') {
@@ -114,59 +118,60 @@ if ($method == 'get_recent_time_in_out') {
 	// 	$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
 	// }
 	if ($server_time >= '05:00:00' && $server_time <= '23:59:59') {
-		$sql = $sql . " AND tio.day = '$server_date_only'";
+		$sql = $sql . " AND tio.day = ?";
+		$params[] = $server_date_only;
 	} else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-		$sql = $sql . " AND tio.day = '$server_date_only_yesterday'";
+		$sql = $sql . " AND tio.day = ?";
+		$params[] = $server_date_only_yesterday;
 	}
 	$sql = $sql . " ORDER BY tio.date_updated DESC";
 
 	//Temporary
 	//$sql = $sql . " LIMIT 0, 100";
 
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$c++;
-			$hr_diff = intval($row['hr_diff']);
-			$min_diff = intval($row['min_diff']);
-			$hr_excess = intval($row['hr_excess']);
-			$diff = "";
-			$excess = "";
-			echo '<tr>';
-				echo '<td>'.$c.'</td>';
-				echo '<td>'.$row['emp_no'].'</td>';
-				echo '<td>'.$row['full_name'].'</td>';
-				echo '<td>'.$row['time_in'].'</td>';
-				echo '<td>'.$row['time_out'].'</td>';
-				// Time Diff
-				if ($hr_diff > 1) {
-					$diff = $hr_diff . " hrs";
-				} else if ($hr_diff == 1) {
-					$diff = $hr_diff . " hr";
-				}
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$c++;
+		$hr_diff = intval($row['hr_diff']);
+		$min_diff = intval($row['min_diff']);
+		$hr_excess = intval($row['hr_excess']);
+		$diff = "";
+		$excess = "";
+		echo '<tr>';
+			echo '<td>'.$c.'</td>';
+			echo '<td>'.$row['emp_no'].'</td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['time_in'].'</td>';
+			echo '<td>'.$row['time_out'].'</td>';
+			// Time Diff
+			if ($hr_diff > 1) {
+				$diff = $hr_diff . " hrs";
+			} else if ($hr_diff == 1) {
+				$diff = $hr_diff . " hr";
+			}
+			if ($min_diff > 1) {
+				$diff = $diff . " " .$min_diff. " mins";
+			} else if ($min_diff == 1) {
+				$diff = $diff . " " .$min_diff. " min";
+			}
+			echo '<td>'.$diff.'</td>';
+			// Excess
+			if ($hr_excess > 1) {
+				$excess = $hr_excess . " hrs";
+			} else if ($hr_excess == 1) {
+				$excess = $hr_excess . " hr";
+			}
+			if ($hr_excess >= 8) {
 				if ($min_diff > 1) {
-					$diff = $diff . " " .$min_diff. " mins";
+					$excess = $excess . " " .$min_diff. " mins";
 				} else if ($min_diff == 1) {
-					$diff = $diff . " " .$min_diff. " min";
+					$excess = $excess . " " .$min_diff. " min";
 				}
-				echo '<td>'.$diff.'</td>';
-				// Excess
-				if ($hr_excess > 1) {
-					$excess = $hr_excess . " hrs";
-				} else if ($hr_excess == 1) {
-					$excess = $hr_excess . " hr";
-				}
-				if ($hr_excess >= 8) {
-					if ($min_diff > 1) {
-						$excess = $excess . " " .$min_diff. " mins";
-					} else if ($min_diff == 1) {
-						$excess = $excess . " " .$min_diff. " min";
-					}
-				}
-				echo '<td>'.$excess.'</td>';
-			echo '</tr>';
-		}
+			}
+			echo '<td>'.$excess.'</td>';
+		echo '</tr>';
 	}
 }
 

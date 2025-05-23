@@ -16,13 +16,13 @@ if ($method == 'fetch_pro') {
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
+    if ($row) {
 		echo '<option value="">Please select a process.....</option>';
-		foreach ($results as $row) {
+		do {
 			echo '<option>' . htmlspecialchars($row['process']) . '</option>';
-		}
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option>Please select a process.....</option>';
 	}
@@ -104,12 +104,10 @@ function count_category($search_arr, $conn)
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
-		foreach ($results as $row) {
-			$total = $row['total'];
-		}
+    if ($row) {
+		$total = $row['total'];
 	} else {
 		$total = 0;
 	}
@@ -341,11 +339,11 @@ if ($method == 'fetch_category') {
 
 		$stmt->execute();
 
-		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		// Check if rows are returned
-		if (count($results) > 0) {
-			foreach ($results as $row) {
+		if ($row) {
+			do {
 				$c++;
 
 				$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
@@ -388,7 +386,7 @@ if ($method == 'fetch_category') {
 					echo '<td></td>';
 				}
 				echo '</tr>';
-			}
+			} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 		} else {
 			echo '<tr>';
 			echo '<td style="text-align:center;" colspan="4">No Result</td>';
