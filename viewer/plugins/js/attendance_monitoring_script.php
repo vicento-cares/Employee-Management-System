@@ -11,7 +11,7 @@
             document.getElementById('am_month_search').value = '<?=date('n')?>';
 
             get_attendance_monitoring();
-        }, 750);
+        }, 1000);
     });
 
     const get_attendance_monitoring_year_dropdown_search = () => {

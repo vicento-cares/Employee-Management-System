@@ -74,7 +74,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Section with No Time In Employee Count`,
+						text: `Top 10 Section with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -140,7 +140,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Line with No Time In Employee Count`,
+						text: `Top 10 Line with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -206,7 +206,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Process with No Time In Employee Count`,
+						text: `Top 10 Process with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -408,7 +408,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Section with No Time In Employee Count`,
+						text: `Top 10 Section with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -479,7 +479,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Line with No Time In Employee Count`,
+						text: `Top 10 Line with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -550,7 +550,7 @@
                         }
 					},
 					title: {
-						text: `Top 10 Process with No Time In Employee Count`,
+						text: `Top 10 Process with No Time Out Employee Count`,
 						align: 'left'
 					}
 				};
@@ -804,7 +804,7 @@
 						categories: response.categories
 					},
 					title: {
-						text: `Monthly No Time In Count at Year ${year}`,
+						text: `Monthly No Time Out Count at Year ${year}`,
 						align: 'left'
 					}
 				};
