@@ -134,6 +134,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/admin/osh_voting.php") { ?>
+          <a href="osh_voting.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="osh_voting.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-users"></i>
+            <p>
+              OSH Voting
+            </p>
+          </a>
+        </li>
         <?php include 'logout.php'; ?>
       </ul>
     </nav>
