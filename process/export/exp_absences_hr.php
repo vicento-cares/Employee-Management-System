@@ -40,19 +40,19 @@ $shift_group = $_GET['shift_group'];
 
 if (!empty($_GET['dept'])) {
 	$dept_label = $_GET['dept'];
-	$dept = addslashes($dept_label);
+	$dept = $dept_label;
 } else {
 	$dept = '';
 }
 if (!empty($_GET['section'])) {
 	$section_label = $_GET['section'];
-	$section = addslashes($section_label);
+	$section = $section_label;
 } else {
 	$section = '';
 }
 if (!empty($_GET['line_no'])) {
 	$line_no_label = $_GET['line_no'];
-	$line_no = addslashes($line_no_label);
+	$line_no = $line_no_label;
 } else {
 	$line_no = '';
 }
@@ -96,9 +96,14 @@ $sql = "SELECT
 	FROM m_employees emp
 	LEFT JOIN 
 	t_absences absences ON absences.emp_no = emp.emp_no
-	WHERE absences.day = '$day' AND absences.shift_group = '$shift_group' AND absences.absent_type != '' AND absences.reason != ''";
+	WHERE absences.day = ? AND absences.shift_group = ? AND absences.absent_type != '' AND absences.reason != ''";
+$params = [];
+$params[] = $day;
+$params[] = $shift_group;
+
 if (!empty($dept)) {
-	$sql = $sql . " AND emp.dept = '$dept'";
+	$sql = $sql . " AND emp.dept = ?";
+	$params[] = $dept;
 } else {
 	$sql = $sql . " AND emp.dept != ''";
 }
@@ -108,20 +113,28 @@ if (!empty($dept)) {
 	$sql = $sql . " emp.dept != ''";
 }*/
 if (!empty($section)) {
-	$sql = $sql . " AND emp.section LIKE '$section%'";
+	$sql = $sql . " AND emp.section LIKE ?";
+	$section_param = $section . "%";
+	$params[] = $section_param;
 }
 if (!empty($line_no)) {
-	$sql = $sql . " AND emp.line_no LIKE '$line_no%'";
+	$sql = $sql . " AND emp.line_no LIKE ?";
+	$line_no_param = $line_no . "%";
+	$params[] = $line_no_param;
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$params[] = $day;
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
-$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
-if ($stmt -> rowCount() > 0) {
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($row) {
 
     // Output each row of the data, format line as csv and write to file pointer 
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
+    do { 
     	$c++;
     	$row_section = '';
     	$row_line_no = '';
@@ -139,7 +152,7 @@ if ($stmt -> rowCount() > 0) {
 
         $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row_no_of_absent, $row['absent_type'], $row['reason']); 
         fputcsv($f, $lineData, $delimiter);
-    }
+    } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 
 } else {
 
@@ -160,5 +173,3 @@ header('Content-Disposition: attachment; filename="' . $filename . '";');
 fpassthru($f); 
 
 $conn = null;
-
-?>

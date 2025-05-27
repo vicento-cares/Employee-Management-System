@@ -460,7 +460,7 @@
         var gender = string[18];
         var shift_group = string[19];
         var line_process = string[20];
-        var group = string[21];
+        // var group = string[21];
         var sub_section = string[22];
         var skill_level = string[23];
 
@@ -488,7 +488,6 @@
         document.getElementById('gender_master_update').value = gender;
         document.getElementById('shift_group_master_update').value = shift_group;
         document.getElementById('process_master_update').value = line_process;
-        document.getElementById('group_master_update').value = group;
         document.getElementById('sub_section_master_update').value = sub_section;
         document.getElementById('skill_level_master_update').value = skill_level;
 
@@ -519,7 +518,6 @@
         var gender = document.getElementById('gender_master_update').value;
         var shift_group = document.getElementById('shift_group_master_update').value;
         var line_process = document.getElementById('process_master_update').value;
-        var group = document.getElementById('group_master_update').value;
         var sub_section = document.getElementById('sub_section_master_update').value;
         var skill_level = document.getElementById('skill_level_master_update').value;
 
@@ -578,12 +576,11 @@
                 type: 'POST',
                 cache: false,
                 data: {
-                    method: 'update_employee2',
+                    method: 'update_employee_advanced',
                     id: id,
                     emp_no: emp_no,
                     full_name: full_name,
                     dept: dept,
-                    group: group,
                     section: section,
                     sub_section: sub_section,
                     line_no: line_no,

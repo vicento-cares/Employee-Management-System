@@ -2,7 +2,7 @@
     <strong>Copyright &copy; 2023. Developed by: Vince Dale Alcantara</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-      <b>Beta Version</b> 1.1.3
+      <b>Beta Version</b> 1.1.4
     </div>
   </footer>
 <?php
@@ -16,6 +16,7 @@ include '../modals/leave_form_history.php';
 include '../modals/new_employee.php';
 include '../modals/update_employee.php';
 include '../modals/search_multiple_employee.php';
+include '../modals/non_compliance_details.php';
 include '../modals/new_access_location.php';
 include '../modals/update_access_location.php';
 ?>
@@ -35,6 +36,8 @@ include '../modals/update_access_location.php';
 <script src="../plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
 <!-- AdminLTE App -->
 <script src="../dist/js/adminlte.js"></script>
+<!-- Apexcharts -->
+<script src="../plugins/apexcharts/3.22.2/js/apexcharts.min.js"></script>
 
 </body>
 </html>

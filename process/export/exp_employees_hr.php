@@ -6,19 +6,27 @@ session_start();
 include '../server_date_time.php';
 include '../conn.php';
 
-switch (true) {
-  case !isset($_SESSION['emp_no_hr']):
-    header('location:/emp_mgt/hr');
-    exit();
-  case isset($_SESSION['emp_no']):
-    header('location:/emp_mgt/admin');
-    exit();
-  case isset($_SESSION['emp_no_user']):
-    header('location:/emp_mgt/user');
-    exit();
-  case isset($_SESSION['emp_no_clinic']):
-    header('location:/emp_mgt/clinic');
-    exit();
+if (!isset($_SESSION['emp_no_hr']) || !isset($_SESSION['emp_no_tc'])) {
+  switch (true) {
+    case isset($_SESSION['emp_no']):
+      header('location:/emp_mgt/admin');
+      exit();
+    case isset($_SESSION['emp_no_user']):
+      header('location:/emp_mgt/user');
+      exit();
+    case isset($_SESSION['emp_no_clinic']):
+      header('location:/emp_mgt/clinic');
+      exit();
+  }
+} else {
+  switch (true) {
+    case !isset($_SESSION['emp_no_hr']):
+      header('location:/emp_mgt/hr');
+      exit();
+    case !isset($_SESSION['emp_no_tc']):
+      header('location:/emp_mgt/tc');
+      exit();
+  }
 }
 
 switch (true) {
@@ -34,12 +42,12 @@ switch (true) {
     exit();
 }
 
-$emp_no = addslashes(trim($_GET['emp_no']));
-$full_name = addslashes(trim($_GET['full_name']));
+$emp_no = trim($_GET['emp_no']);
+$full_name = trim($_GET['full_name']);
 $provider = trim($_GET['provider']);
 $dept = trim($_GET['dept']);
-$section = addslashes(trim($_GET['section']));
-$line_no = addslashes(trim($_GET['line_no']));
+$section = trim($_GET['section']);
+$line_no = trim($_GET['line_no']);
 
 $date_updated_from = '';
 if (isset($_GET['date_updated_from'])) {
@@ -153,17 +161,17 @@ if (!empty($search_multiple_employee_arr)) {
 $stmt = $conn->prepare($query);
 $stmt->execute($params);
 
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (count($results) > 0) {
+if ($row) {
 
     // Output each row of the data, format line as csv and write to file pointer 
-    foreach ($results as $row) {
+    do {
 
         $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['position'], $row['provider'], $row['gender'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
         fputcsv($f, $lineData, $delimiter); 
 	    
-    }
+    } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 
 } else {
 

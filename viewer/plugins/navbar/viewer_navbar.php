@@ -32,6 +32,12 @@
                             <li><a href="attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
                             <?php } ?>
 
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/attendance_monitoring.php") { ?>
+                            <li><a href="attendance_monitoring.php" class="dropdown-item active">Attendance Monitoring</a></li>
+                            <?php } else { ?>
+                            <li><a href="attendance_monitoring.php" class="dropdown-item">Attendance Monitoring</a></li>
+                            <?php } ?>
+
                             <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/line_support.php") { ?>
                             <li><a href="line_support.php" class="dropdown-item active">Line Support</a></li>
                             <?php } else { ?>
@@ -68,6 +74,7 @@
                             <li><a href="/emp_mgt/user/" target="_blank" class="dropdown-item">EmpMgtSys User Login</a></li>
                             <li><a href="/emp_mgt/clinic/" target="_blank" class="dropdown-item">EmpMgtSys Clinic Login</a></li>
                             <li><a href="/emp_mgt/hr/" target="_blank" class="dropdown-item">EmpMgtSys HR Login</a></li>
+                            <li><a href="/emp_mgt/tc/" target="_blank" class="dropdown-item">EmpMgtSys TC Login</a></li>
                             <li><a href="/emp_mgt/control_area/" target="_blank" class="dropdown-item">EmpMgtSys Control Area Login</a></li>
                         </ul>
                     </li>

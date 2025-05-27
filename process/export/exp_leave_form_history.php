@@ -55,10 +55,14 @@ $sql = "SELECT
 		FROM t_leave_form_history lfh
 		LEFT JOIN m_employees emp
 		ON emp.emp_no = lfh.emp_no
-		WHERE (lfh.date_filed >= '$date_filed_from' AND lfh.date_filed <= '$date_filed_to')";
+		WHERE (lfh.date_filed >= ? AND lfh.date_filed <= ?)";
+$params = [];
+$params[] = $date_filed_from;
+$params[] = $date_filed_to;
 
 if (!empty($leave_type)) {
-	$sql = $sql . " AND lfh.leave_type = '$leave_type'";
+	$sql = $sql . " AND lfh.leave_type = ?";
+	$params[] = $leave_type;
 	if (empty($leave_form_status)) {
 		$sql = $sql . " AND (lfh.leave_form_status = 'approved' OR lfh.leave_form_status = 'disapproved')";
 	} else if ($leave_form_status == 'approved') {
@@ -76,8 +80,9 @@ if (!empty($leave_type)) {
 
 $sql = $sql . " ORDER BY lfh.id DESC";
 
-$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+
 if ($stmt -> rowCount() > 0) {
 
     // Output each row of the data, format line as csv and write to file pointer 

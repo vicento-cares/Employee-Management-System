@@ -29,64 +29,66 @@ $sql = "SELECT
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
 	tio.shift, tio.time_in, tio.time_out, tio.ip
 	FROM m_employees emp
-	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = '$day'
+	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE";
-$sql = $sql . " (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
+$sql = $sql . " (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
-$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
-if ($stmt -> rowCount() > 0) {
-     
-    // Output each row of the data, format line as csv and write to file pointer 
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
-    	$c++;
-    	$row_section = '';
-    	$row_line_no = '';
-    	$row_status = '';
-        $ot = 0;
+$params = [];
+$params[] = $day;
+$params[] = $day;
 
-        if (!empty($row['section'])) {
-			$row_section = $row['section'];
-		} else {
-			$row_section = 'N/A';
-		}
-		if (!empty($row['line_no'])) {
-			$row_line_no = $row['line_no'];
-		} else {
-			$row_line_no = 'N/A';
-		}
-		if (!empty($row['time_in'])) {
-			$row_status = 'Present';
-		} else {
-			$row_status = 'Absent';
-		}
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
 
-        // Count Number of OT Hours
-        if (!empty($row['time_out'])) {
-            $time_out_hr = date('H', strtotime($row['time_out']));
+// Output each row of the data, format line as csv and write to file pointer 
+while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
+    $c++;
+    $row_section = '';
+    $row_line_no = '';
+    $row_status = '';
+    $ot = 0;
 
-            switch ($time_out_hr) {
-                case 4:
-                case 16:
-                    $ot = 1;
-                    break;
-                case 5:
-                case 17:
-                    $ot = 2;
-                    break;
-                case 6:
-                case 18:
-                    $ot = 3;
-                    break;
-                default:
-                    $ot = 0;
-            }
+    if (!empty($row['section'])) {
+        $row_section = $row['section'];
+    } else {
+        $row_section = 'N/A';
+    }
+    if (!empty($row['line_no'])) {
+        $row_line_no = $row['line_no'];
+    } else {
+        $row_line_no = 'N/A';
+    }
+    if (!empty($row['time_in'])) {
+        $row_status = 'Present';
+    } else {
+        $row_status = 'Absent';
+    }
+
+    // Count Number of OT Hours
+    if (!empty($row['time_out'])) {
+        $time_out_hr = date('H', strtotime($row['time_out']));
+
+        switch ($time_out_hr) {
+            case 4:
+            case 16:
+                $ot = 1;
+                break;
+            case 5:
+            case 17:
+                $ot = 2;
+                break;
+            case 6:
+            case 18:
+                $ot = 3;
+                break;
+            default:
+                $ot = 0;
         }
+    }
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
-        fputcsv($f, $lineData, $delimiter);
-    } 
+    $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
+    fputcsv($f, $lineData, $delimiter);
 }
 
 // Move back to beginning of file 
@@ -100,5 +102,3 @@ header('Content-Disposition: attachment; filename="' . $filename . '";');
 fpassthru($f); 
 
 $conn = null;
-
-?>

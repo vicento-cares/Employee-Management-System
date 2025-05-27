@@ -75,10 +75,13 @@ $c = 0;
   <div class="row">
   <?php 
   foreach ($id_arr as $id) {
-    $query = "SELECT id, emp_no, full_name, role FROM m_accounts WHERE id = '$id'";
-    $stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-    $stmt->execute();
-    foreach($stmt -> fetchAll() as $row) { 
+    $query = "SELECT id, emp_no, full_name, role FROM m_accounts WHERE id = ?";
+
+    $stmt = $conn->prepare($query);
+    $params = array($id);
+    $stmt->execute($params);
+    
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $c++;
   ?>
   <div class="col-4">

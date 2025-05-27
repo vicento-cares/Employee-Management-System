@@ -77,6 +77,7 @@
                         <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
                             <li><a href="viewer/dashboard.php" class="dropdown-item">Dashboard</a></li>
                             <li><a href="viewer/attendance_summary_report.php" class="dropdown-item">Attendance Summary Report</a></li>
+                            <li><a href="viewer/attendance_monitoring.php" class="dropdown-item">Attendance Monitoring</a></li>
                             <li><a href="viewer/line_support.php" class="dropdown-item">Line Support</a></li>
                             <li><a href="viewer/time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                             <li><a href="viewer/certification.php" class="dropdown-item">Employee Process Certification</a></li>
@@ -99,6 +100,7 @@
                             <li><a href="/emp_mgt/user/" target="_blank" class="dropdown-item">EmpMgtSys User Login</a></li>
                             <li><a href="/emp_mgt/clinic/" target="_blank" class="dropdown-item">EmpMgtSys Clinic Login</a></li>
                             <li><a href="/emp_mgt/hr/" target="_blank" class="dropdown-item">EmpMgtSys HR Login</a></li>
+                            <li><a href="/emp_mgt/tc/" target="_blank" class="dropdown-item">EmpMgtSys TC Login</a></li>
                             <li><a href="/emp_mgt/control_area/" target="_blank" class="dropdown-item">EmpMgtSys Control Area Login</a></li>
                         </ul>
                     </li>
@@ -134,7 +136,7 @@
         <footer class="main-footer">
             <!-- To the right -->
             <div class="float-right d-none d-sm-inline">
-                <b>Beta Version</b> 1.1.3
+                <b>Beta Version</b> 1.1.4
             </div>
             <!-- Default to the left -->
             <strong>Copyright &copy; 2023 Vince Dale Alcantara.</strong>

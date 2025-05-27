@@ -34,9 +34,11 @@ switch (true) {
 $id = trim($_GET['id']);
 $c = 0;
 
-$query = "SELECT id, emp_no, full_name, provider FROM m_employees WHERE id = '$id'";
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$query = "SELECT id, emp_no, full_name, provider FROM m_employees WHERE id = ?";
+
+$stmt = $conn->prepare($query);
+$params = array($id);
+$stmt->execute($params);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +77,7 @@ $stmt->execute();
   </noscript>
 
   <div class="row">
-  <?php foreach($stmt -> fetchAll() as $row) { $c++;?>
+  <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $c++;?>
   <div class="col-4">
     <table class="mx-0 my-0" style="height:100%;width:100%;table-layout:fixed;">
       <tbody>

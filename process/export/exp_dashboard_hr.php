@@ -17,101 +17,143 @@ function get_shift($server_time) {
 
 function count_emp_dashboard($search_arr, $conn) {
 	$query = "SELECT count(id) AS total FROM m_employees WHERE resigned = 0";
+	$params = [];
+
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND dept = '".$search_arr['dept']."'";
+		$query = $query . " AND dept = ?";
+		$params[] = $search_arr['dept'];
 	}
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND section LIKE '".$search_arr['section']."%'";
+		$query = $query . " AND section LIKE ?";
+		$section_param = $search_arr['section'] . "%";
+		$params[] = $section_param;
 	}
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND line_no LIKE '".$search_arr['line_no']."%'";
+		$query = $query . " AND line_no LIKE ?";
+		$line_no_param = $search_arr['line_no'] . "%";
+		$params[] = $line_no_param;
 	}
 	if (!empty($search_arr['shift_group'])) {
-		$query = $query . " AND shift_group = '".$search_arr['shift_group']."'";
+		$query = $query . " AND shift_group = ?";
+		$params[] = $search_arr['shift_group'];
 	}
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+	
 	return $total;
 }
 
 function count_emp_by_provider($provider, $search_arr, $conn) {
-	$query = "SELECT count(provider) AS total FROM m_employees WHERE provider = '$provider' AND resigned = 0";
+	$query = "SELECT count(provider) AS total FROM m_employees WHERE provider = ? AND resigned = 0";
+	$params = [];
+	$params[] = $provider;
+
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND dept = '".$search_arr['dept']."'";
+		$query = $query . " AND dept = ?";
+		$params[] = $search_arr['dept'];
 	}
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND section = '".$search_arr['section']."'";
+		$query = $query . " AND section = ?";
+		$params[] = $search_arr['section'];
 	}
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND line_no = '".$search_arr['line_no']."'";
+		$query = $query . " AND line_no = ?";
+		$params[] = $search_arr['line_no'];
 	}
-	$query = $query . " AND shift_group = '".$search_arr['shift_group']."'";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+	$query = $query . " AND shift_group = ?";
+	$params[] = $search_arr['shift_group'];
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
 function count_emp_by_provider_tio($provider, $search_arr, $conn) {
 	$query = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE emp.provider = '$provider' AND emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
+			WHERE emp.provider = ? AND emp.resigned = 0 AND tio.day = ? AND emp.shift_group = ?";
+	$params = [];
+	$params[] = $provider;
+	$params[] = $search_arr['day'];
+	$params[] = $search_arr['shift_group'];
+
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
+		$query = $query . " AND emp.dept = ?";
+		$params[] = $search_arr['dept'];
 	}
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND emp.section = '".$search_arr['section']."'";
+		$query = $query . " AND emp.section = ?";
+		$params[] = $search_arr['section'];
 	}
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND emp.line_no = '".$search_arr['line_no']."'";
+		$query = $query . " AND emp.line_no = ?";
+		$params[] = $search_arr['line_no'];
 	}
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
 function count_emp_tio($search_arr, $conn) {
 	$query = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE emp.resigned = 0 AND tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
+			WHERE emp.resigned = 0 AND tio.day = ? AND emp.shift_group = ?";
+	$params = [];
+	$params[] = $search_arr['day'];
+	$params[] = $search_arr['shift_group'];
+
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
+		$query = $query . " AND emp.dept = ?";
+		$params[] = $search_arr['dept'];
 	}
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND emp.section = '".$search_arr['section']."'";
+		$query = $query . " AND emp.section = ?";
+		$params[] = $search_arr['section'];
 	}
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND emp.line_no = '".$search_arr['line_no']."'";
+		$query = $query . " AND emp.line_no = ?";
+		$params[] = $search_arr['line_no'];
 	}
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
@@ -119,32 +161,42 @@ function count_emp_lsh($search_arr, $conn) {
 	$query = "SELECT count(emp.id) AS total FROM m_employees emp
 			LEFT JOIN t_line_support_history ls
 			ON emp.emp_no = ls.emp_no";
+	$params = [];
 
-	$query = $query . " WHERE ls.day = '".$search_arr['day']."' AND ls.shift = '".$search_arr['shift']."'";
+	$query = $query . " WHERE ls.day = ? AND ls.shift = ?";
+	$params[] = $search_arr['day'];
+	$params[] = $search_arr['shift'];
 
 	if (!empty($search_arr['line_no'])) {
-		$query = $query . " AND ls.line_no_to LIKE '".$search_arr['line_no']."%'";
+		$query = $query . " AND ls.line_no_to LIKE ?";
+		$line_no_param = $search_arr['line_no'] . "%";
+		$params[] = $line_no_param;
 	}
 
-	$query = $query . " AND ls.status = 'accepted' AND emp.shift_group = '".$search_arr['shift_group']."'";
+	$query = $query . " AND ls.status = 'accepted' AND emp.shift_group = ?";
+	$params[] = $search_arr['shift_group'];
 
 	if (!empty($search_arr['dept'])) {
-		$query = $query . " AND emp.dept = '".$search_arr['dept']."'";
+		$query = $query . " AND emp.dept = ?";
+		$params[] = $search_arr['dept'];
 	}
 
 	if (!empty($search_arr['section'])) {
-		$query = $query . " AND emp.section = '".$search_arr['section']."'";
+		$query = $query . " AND emp.section = ?";
+		$params[] = $search_arr['section'];
 	}
 
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
@@ -181,9 +233,9 @@ $day = $_GET['day'];
 $shift = get_shift($server_time);
 $dept = $_GET['dept'];
 $section_label = $_GET['section'];
-$section = addslashes($section_label);
+$section = $section_label;
 $line_no_label = $_GET['line_no'];
-$line_no = addslashes($line_no_label);
+$line_no = $line_no_label;
 
 $search_arr = array(
 	"dept" => $dept,
@@ -288,10 +340,13 @@ fputcsv($f, $fields, $delimiter);
 $c = 0;
 
 $sql = "SELECT provider FROM m_providers ORDER BY id ASC";
-$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+$stmt = $conn -> prepare($sql);
 $stmt -> execute();
-if ($stmt -> rowCount() > 0) {
-	foreach($stmt -> fetchAll() as $row) {
+
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($row) {
+	do {
 		$c++;
 		
 		$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
@@ -330,7 +385,7 @@ if ($stmt -> rowCount() > 0) {
 
 		$lineData = array($c, $row['provider'], $total, $total_present, $total_absent, $attendance_percentage); 
         fputcsv($f, $lineData, $delimiter);
-	}
+	} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 }
 
 
@@ -412,10 +467,13 @@ fputcsv($f, $fields, $delimiter);
 $c = 0;
 
 $sql = "SELECT provider FROM m_providers ORDER BY id ASC";
-$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+$stmt = $conn -> prepare($sql);
 $stmt -> execute();
-if ($stmt -> rowCount() > 0) {
-	foreach($stmt -> fetchAll() as $row) {
+
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($row) {
+	do {
 		$c++;
 		
 		$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
@@ -454,7 +512,7 @@ if ($stmt -> rowCount() > 0) {
 
 		$lineData = array($c, $row['provider'], $total, $total_present, $total_absent, $attendance_percentage); 
         fputcsv($f, $lineData, $delimiter);
-	}
+	} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 }
 
 
@@ -536,10 +594,13 @@ fputcsv($f, $fields, $delimiter);
 $c = 0;
 
 $sql = "SELECT provider FROM m_providers ORDER BY id ASC";
-$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+$stmt = $conn -> prepare($sql);
 $stmt -> execute();
-if ($stmt -> rowCount() > 0) {
-	foreach($stmt -> fetchAll() as $row) {
+
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($row) {
+	do {
 		$c++;
 		
 		$total = count_emp_by_provider($row['provider'], $search_arr, $conn);
@@ -578,7 +639,7 @@ if ($stmt -> rowCount() > 0) {
 
 		$lineData = array($c, $row['provider'], $total, $total_present, $total_absent, $attendance_percentage); 
         fputcsv($f, $lineData, $delimiter);
-	}
+	} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 }
 
 

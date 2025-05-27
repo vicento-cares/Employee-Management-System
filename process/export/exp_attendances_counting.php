@@ -41,13 +41,11 @@ function count_attendance_list($search_arr, $conn) {
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
-		foreach ($results as $row) {
-			$total = intval($row['total']);
-		}
-	}else{
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
 
@@ -94,13 +92,11 @@ function count_emp_tio($search_arr, $conn) {
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
-		foreach ($results as $row) {
-			$total = intval($row['total']);
-		}
-	}else{
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
 

@@ -38,12 +38,12 @@ switch (true) {
     break;
 }
 
-$emp_no = addslashes(trim($_GET['emp_no']));
-$full_name = addslashes(trim($_GET['full_name']));
+$emp_no = trim($_GET['emp_no']);
+$full_name = trim($_GET['full_name']);
 $provider = trim($_GET['provider']);
 $dept = trim($_GET['dept']);
-$section = addslashes(trim($_GET['section']));
-$line_no = addslashes(trim($_GET['line_no']));
+$section = trim($_GET['section']);
+$line_no = trim($_GET['line_no']);
 
 $date_updated_from = '';
 if (isset($_GET['date_updated_from'])) {
@@ -68,39 +68,54 @@ $resigned = trim($_GET['resigned']);
 $c = 0;
 
 $query = "SELECT id, emp_no, full_name, provider FROM m_employees WHERE";
+$params = [];
+
 if (!empty($emp_no)) {
-  $query = $query . " emp_no LIKE '".$emp_no."%'";
+  $query = $query . " emp_no LIKE ?";
+  $emp_no_param = $emp_no ."%";
+  $params[] = $emp_no_param;
 } else {
   $query = $query . " emp_no != ''";
 }
 if (!empty($full_name)) {
-  $query = $query . " AND full_name LIKE '$full_name%'";
+  $query = $query . " AND full_name LIKE ?";
+  $full_name_param = $full_name ."%";
+  $params[] = $full_name_param;
 }
 if (!empty($provider)) {
-  $query = $query . " AND provider = '$provider'";
+  $query = $query . " AND provider = ?";
+  $params[] = $provider;
 }
 if (!empty($dept)) {
-  $query = $query . " AND dept = '$dept'";
+  $query = $query . " AND dept = ?";
+  $params[] = $dept;
 }
 if (!empty($section)) {
-  $query = $query . " AND section LIKE '$section%'";
+  $query = $query . " AND section LIKE ?";
+  $section_param = $section ."%";
+  $params[] = $section_param;
 }
 if (!empty($line_no)) {
-  $query = $query . " AND line_no LIKE '$line_no%'";
+  $query = $query . " AND line_no LIKE ?";
+  $line_no_param = $line_no ."%";
+  $params[] = $line_no_param;
 }
 
 if (!empty($date_updated_from) && !empty($date_updated_to)) {
-  $query = $query . " AND date_updated BETWEEN '$date_updated_from' AND '$date_updated_to'";
+  $query = $query . " AND date_updated BETWEEN ? AND ?";
+  $params[] = $date_updated_from;
+  $params[] = $date_updated_to;
 }
 
 if ($resigned != '') {
   if ($resigned == 1 || $resigned == 0) {
-    $query = $query . " AND resigned = '$resigned'";
+    $query = $query . " AND resigned = ?";
+    $params[] = $resigned;
   }
 }
 
-$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -139,7 +154,7 @@ $stmt->execute();
   </noscript>
 
   <div class="row">
-  <?php foreach($stmt -> fetchAll() as $row) { $c++;?>
+  <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { $c++;?>
   <div class="col-4">
     <table class="mx-0 my-0" style="height:100%;width:100%;table-layout:fixed;">
       <tbody>

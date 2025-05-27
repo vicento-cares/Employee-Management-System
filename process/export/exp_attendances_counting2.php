@@ -8,65 +8,91 @@ require('../conn.php');
 function count_attendance_list2($search_arr, $conn) {
 	$sql = "SELECT count(emp_no) AS total 
 		FROM m_employees
-		WHERE shift_group = '".$search_arr['shift_group']."'";
+		WHERE shift_group = ?";
+	$params = [];
+	$params[] = $search_arr['shift_group'];
+
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND dept LIKE '".$search_arr['dept']."%'";
+		$sql = $sql . " AND dept LIKE ?";
+		$dept_param = $search_arr['dept'] . "%";
+		$params[] = $dept_param;
 	} else {
 		$sql = $sql . " AND dept != ''";
 	}
 	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND section LIKE '".$search_arr['section']."%'";
+		$sql = $sql . " AND section LIKE ?";
+		$section_param = $search_arr['section'] . "%";
+		$params[] = $section_param;
 	}
 	if ($search_arr['line_no'] == 'No Line') {
 		$sql = $sql . " AND line_no IS NULL";
 	} else if (!empty($search_arr['line_no'])) {
-		$sql = $sql . " AND line_no LIKE '".$search_arr['line_no']."%'";
+		$sql = $sql . " AND line_no LIKE ?";
+		$line_no_param = $search_arr['line_no'] . "%";
+		$params[] = $line_no_param;
 	} else {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '".$search_arr['day']."')";
+	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = $row['total'];
-		}
-	}else{
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = $row['total'];
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
 function count_emp_tio2($search_arr, $conn) {
 	$sql = "SELECT count(emp.emp_no) AS total FROM m_employees emp
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no
-			WHERE tio.day = '".$search_arr['day']."' AND emp.shift_group = '".$search_arr['shift_group']."'";
+			WHERE tio.day = ? AND emp.shift_group = ?";
+	$params = [];
+	$params[] = $search_arr['day'];
+	$params[] = $search_arr['shift_group'];
+
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND emp.dept LIKE '".$search_arr['dept']."%'";
+		$sql = $sql . " AND emp.dept LIKE ?";
+		$dept_param = $search_arr['dept'] . "%";
+		$params[] = $dept_param;
 	} else {
 		$sql = $sql . " AND emp.dept != ''";
 	}
 	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND emp.section LIKE '".$search_arr['section']."%'";
+		$sql = $sql . " AND emp.section LIKE ?";
+		$section_param = $search_arr['section'] . "%";
+		$params[] = $section_param;
 	}
 	if ($search_arr['line_no'] == 'No Line') {
 		$sql = $sql . " AND emp.line_no IS NULL";
 	} else if (!empty($search_arr['line_no'])) {
-		$sql = $sql . " AND emp.line_no LIKE '".$search_arr['line_no']."%'";
+		$sql = $sql . " AND emp.line_no LIKE ?";
+		$line_no_param = $search_arr['line_no'] . "%";
+		$params[] = $line_no_param;
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '".$search_arr['day']."')";
-	$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$total = intval($row['total']);
-		}
-	}else{
+	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $search_arr['day'];
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		$total = intval($row['total']);
+	} else {
 		$total = 0;
 	}
+
 	return $total;
 }
 
@@ -136,31 +162,40 @@ $results = array();
 $sql = "SELECT ISNULL(process, 'No Process') AS process1, 
 	COUNT(emp_no) AS total 
 	FROM m_employees 
-	WHERE shift_group = '$shift_group'";
+	WHERE shift_group = ?";
+$params = [];
+$params[] = $shift_group;
+
 if (!empty($dept)) {
-	$sql = $sql . " AND dept LIKE '$dept%'";
+	$sql = $sql . " AND dept LIKE ?";
+	$dept_param = $dept . "%";
+	$params[] = $dept_param;
 } else {
 	$sql = $sql . " AND dept != ''";
 }
 if (!empty($section)) {
-	$sql = $sql . " AND section LIKE '$section%'";
+	$sql = $sql . " AND section LIKE ?";
+	$section_param = $section . "%";
+	$params[] = $section_param;
 }
 if ($line_no == 'No Line') {
     $sql = $sql . " AND line_no IS NULL";
 } else if (!empty($line_no)) {
-    $sql = $sql . " AND line_no LIKE '$line_no%'";
+    $sql = $sql . " AND line_no LIKE ?";
+	$line_no_param = $line_no . "%";
+	$params[] = $line_no_param;
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= '$day')";
+$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+$params[] = $day;
 $sql = $sql . " GROUP BY process";
 
-$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
-if ($stmt->rowCount() > 0) {
-	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-		array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
-	}
+$stmt = $conn->prepare($sql);
+$stmt->execute(params: $params);
+
+while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+	array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
 }
 
 //MySQL
@@ -176,37 +211,47 @@ $sql = "SELECT ISNULL(emp.process, 'No Process') AS process,
 	FROM t_time_in_out tio 
 	LEFT JOIN m_employees emp 
 	ON tio.emp_no = emp.emp_no 
-	WHERE tio.day = '$day' AND shift_group = '$shift_group'";
+	WHERE tio.day = ? AND shift_group = ?";
+$params = [];
+$params[] = $day;
+$params[] = $shift_group;
+
 if (!empty($dept)) {
-	$sql = $sql . " AND emp.dept LIKE '$dept%'";
+	$sql = $sql . " AND emp.dept LIKE ?";
+	$dept_param = $dept . "%";
+	$params[] = $dept_param;
 } else {
 	$sql = $sql . " AND emp.dept != ''";
 }
 if (!empty($section)) {
-	$sql = $sql . " AND emp.section LIKE '$section%'";
+	$sql = $sql . " AND emp.section LIKE ?";
+	$section_param = $section . "%";
+	$params[] = $section_param;
 }
 if ($line_no == 'No Line') {
     $sql = $sql . " AND line_no IS NULL";
 } else if (!empty($line_no)) {
-    $sql = $sql . " AND line_no LIKE '$line_no%'";
+    $sql = $sql . " AND line_no LIKE ?";
+	$line_no_param = $line_no . "%";
+	$params[] = $line_no_param;
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= '$day')";
+$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$params[] = $day;
 $sql = $sql . " GROUP BY emp.process";
 
-$stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt->execute();
-if ($stmt->rowCount() > 0) {
-	while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-		foreach ($results as &$result) {
-			if ($result['process'] == $row['process']) {
-				$result['total_present'] = $row['total_present'];
-				break; // exit the loop once you've found and updated the process
-			}
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+
+while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
+	foreach ($results as &$result) {
+		if ($result['process'] == $row['process']) {
+			$result['total_present'] = $row['total_present'];
+			break; // exit the loop once you've found and updated the process
 		}
-		unset($result); // unset reference to last element
 	}
+	unset($result); // unset reference to last element
 }
 
 // Output each row of the data, format line as csv and write to file pointer 
@@ -235,5 +280,3 @@ header('Content-Disposition: attachment; filename="' . $filename . '";');
 fpassthru($f); 
 
 $conn = null;
-
-?>

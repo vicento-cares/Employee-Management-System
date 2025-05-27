@@ -15,64 +15,62 @@ if ($method == 'check_user_login_req_waiting') {
     $stmt = $conn_portal->prepare($sql);
     $stmt->execute();
 
-    if ($stmt->rowCount() > 0) {
-        foreach($stmt->fetchALL() as $request) {
-            // MySQL
-            // $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE BINARY emp_no = ? AND resigned = 0";
-            // MS SQL Server
-            $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND resigned = 0";
-            $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-            $params = array($request['emp_no']);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // MySQL
+        // $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE BINARY emp_no = ? AND resigned = 0";
+        // MS SQL Server
+        $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND resigned = 0";
+        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+        $params = array($request['emp_no']);
+        $stmt->execute($params);
+
+        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $sql = "UPDATE t_user_login_req 
+                SET full_name = ?, dept = ?, position = ?, date_hired = ?, 
+                address = ?, contact_no = ?, emp_status = ?, req_status = ? 
+                WHERE emp_no = ?";
+            $stmt = $conn_portal->prepare($sql);
+            $params = array($row['full_name'], $row['dept'], $row['position'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], 1, $request['emp_no']);
             $stmt->execute($params);
-
-            $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-
-            if ($row) {
-                $sql = "UPDATE t_user_login_req 
-                    SET full_name = ?, dept = ?, position = ?, date_hired = ?, 
-                    address = ?, contact_no = ?, emp_status = ?, req_status = ? 
-                    WHERE emp_no = ?";
-                $stmt = $conn_portal->prepare($sql);
-                $params = array($row['full_name'], $row['dept'], $row['position'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], 1, $request['emp_no']);
-                $stmt->execute($params);
-                if (!$stmt->execute($params)) {
-                    $message = 'failed';
-                }
-            } else {
-                $sql = "UPDATE t_user_login_req 
-                    SET req_status = ? 
-                    WHERE emp_no = ?";
-                $stmt = $conn_portal->prepare($sql);
-                $params = array(2, $request['emp_no']);
-                if (!$stmt->execute($params)) {
-                    $message = 'failed';
-                }
+            if (!$stmt->execute($params)) {
+                $message = 'failed';
             }
-
-            $req_count++;
-
-            // if ($row) {
-            //     $response_arr = array(
-            //         "emp_no" => $row['emp_no'],
-            //         "full_name" => $row['full_name'],
-            //         "dept" => $row['dept'],
-            //         "position" => $row['position'],
-            //         "date_hired" => $row['date_hired'],
-            //         "address" => $row['address'],
-            //         "contact_no" => $row['contact_no'],
-            //         "emp_status" => $row['emp_status'],
-            //         "req_status" => 1,
-            //         "message" => 'success'
-            //     );
-            // } else {
-            //     $response_arr = array(
-            //         "req_status" => 2,
-            //         "message" => 'success'
-            //     );
-            // }
+        } else {
+            $sql = "UPDATE t_user_login_req 
+                SET req_status = ? 
+                WHERE emp_no = ?";
+            $stmt = $conn_portal->prepare($sql);
+            $params = array(2, $request['emp_no']);
+            if (!$stmt->execute($params)) {
+                $message = 'failed';
+            }
         }
-    }
 
+        $req_count++;
+
+        // if ($row) {
+        //     $response_arr = array(
+        //         "emp_no" => $row['emp_no'],
+        //         "full_name" => $row['full_name'],
+        //         "dept" => $row['dept'],
+        //         "position" => $row['position'],
+        //         "date_hired" => $row['date_hired'],
+        //         "address" => $row['address'],
+        //         "contact_no" => $row['contact_no'],
+        //         "emp_status" => $row['emp_status'],
+        //         "req_status" => 1,
+        //         "message" => 'success'
+        //     );
+        // } else {
+        //     $response_arr = array(
+        //         "req_status" => 2,
+        //         "message" => 'success'
+        //     );
+        // }
+    }
+    
     $response_arr = [
         "req_count" => $req_count,
         "message" => $message
@@ -96,47 +94,45 @@ if ($method == 'check_leave_form_req_waiting') {
     $stmt = $conn_portal->prepare($sql);
     $stmt->execute();
 
-    if ($stmt->rowCount() > 0) {
-        foreach($stmt->fetchALL() as $request) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
-            $clinic_leave_status_arr = array('SL','Paternity','SSS Benefits','Maternity','Sickness','Others');
-            $leave_form_status = '';
-            if (in_array($request['leave_type'], $clinic_leave_status_arr)) {
-                $leave_form_status = 'clinic';
-            } else {
-                $leave_form_status = 'pending';
-            }
-
-            $leave_form_id = date("ymdh");
-            $rand = substr(md5(microtime()),rand(0,26),5);
-            $leave_form_id = 'LAF-'.$leave_form_id;
-            $leave_form_id = $leave_form_id.''.$rand;
-
-            $sql = "INSERT INTO t_leave_form 
-                    (leave_form_id, emp_no, date_filed, address, contact_no, 
-                    leave_type, leave_date_from, leave_date_to, total_leave_days, 
-                    irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) 
-                    VALUES 
-                    (?, ?, ?, ?, ?, 
-                    ?, ?, ?, ?, 
-                    ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $params = array($leave_form_id, $request['emp_no'], $request['date_filed'], $request['address'], $request['contact_no'], 
-                    $request['leave_type'], $request['leave_date_from'], $request['leave_date_to'], $request['total_leave_days'], 
-                    $request['irt_phone_call'], $request['irt_letter'], $request['irb'], $request['reason'], $request['issued_by'], $leave_form_status);
-            if (!$stmt->execute($params)) {
-                $message = 'failed';
-            }
-
-            $sql = "DELETE FROM t_leave_form_req WHERE id = ?";
-            $stmt = $conn_portal->prepare($sql);
-            $params = array($request['id']);
-            if (!$stmt->execute($params)) {
-                $message = 'failed';
-            }
-
-            $req_count++;
+        $clinic_leave_status_arr = array('SL','Paternity','SSS Benefits','Maternity','Sickness','Others');
+        $leave_form_status = '';
+        if (in_array($request['leave_type'], $clinic_leave_status_arr)) {
+            $leave_form_status = 'clinic';
+        } else {
+            $leave_form_status = 'pending';
         }
+
+        $leave_form_id = date("ymdh");
+        $rand = substr(md5(microtime()),rand(0,26),5);
+        $leave_form_id = 'LAF-'.$leave_form_id;
+        $leave_form_id = $leave_form_id.''.$rand;
+
+        $sql = "INSERT INTO t_leave_form 
+                (leave_form_id, emp_no, date_filed, address, contact_no, 
+                leave_type, leave_date_from, leave_date_to, total_leave_days, 
+                irt_phone_call, irt_letter, irb, reason, issued_by, leave_form_status) 
+                VALUES 
+                (?, ?, ?, ?, ?, 
+                ?, ?, ?, ?, 
+                ?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $params = array($leave_form_id, $request['emp_no'], $request['date_filed'], $request['address'], $request['contact_no'], 
+                $request['leave_type'], $request['leave_date_from'], $request['leave_date_to'], $request['total_leave_days'], 
+                $request['irt_phone_call'], $request['irt_letter'], $request['irb'], $request['reason'], $request['issued_by'], $leave_form_status);
+        if (!$stmt->execute($params)) {
+            $message = 'failed';
+        }
+
+        $sql = "DELETE FROM t_leave_form_req WHERE id = ?";
+        $stmt = $conn_portal->prepare($sql);
+        $params = array($request['id']);
+        if (!$stmt->execute($params)) {
+            $message = 'failed';
+        }
+
+        $req_count++;
     }
 
     $response_arr = [
