@@ -106,6 +106,17 @@
             </p>
           </a>
         </li>
+
+        <!-- revisions: jay. quick export button of osh voting -->
+        <li class="nav-item">
+          <a href="osh_rep_download.php" class="nav-link">
+            <i class="fas fa-download"></i>
+            <p>
+              Download OSH Report
+            </p>
+          </a>
+        </li>
+
         <?php include 'logout.php'; ?>
       </ul>
     </nav>
