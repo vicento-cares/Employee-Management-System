@@ -56,6 +56,11 @@ if (!isset($_SESSION['emp_no'])) {
       object-fit: contain; /* Ensure the whole image is visible */
       object-position: center; /* Center the image within the container */
     }
+    .osh_employee_picture_img_tag {
+      width: 100%; /* Fixed width */
+      object-fit: contain; /* Ensure the whole image is visible */
+      object-position: center; /* Center the image within the container */
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
