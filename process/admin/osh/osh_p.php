@@ -42,7 +42,8 @@ if ($method == 'check_emp_no_osh') {
                 ON osh.emp_no = emp.emp_no 
 			WHERE tio.emp_no = ? 
 			AND tio.day = ? 
-			AND tio.shift = ?";
+			AND tio.shift = ?
+			AND provider = 'FAS'";
 
 	$params = [
 		$emp_no,

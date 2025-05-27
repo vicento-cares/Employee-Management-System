@@ -50,7 +50,7 @@ const check_emp_no_osh = () => {
 					document.getElementById("full_name_osh").value = '';
 					Swal.fire({
 						icon: 'info',
-						title: 'No Time In',
+						title: 'No Time In And/Or Provider is not FAS',
 						text: 'Information',
 						showConfirmButton: false,
 						timer: 1000
