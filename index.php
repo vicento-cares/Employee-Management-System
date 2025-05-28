@@ -81,6 +81,7 @@
                             <li><a href="viewer/line_support.php" class="dropdown-item">Line Support</a></li>
                             <li><a href="viewer/time_out_counting.php" class="dropdown-item">Time Out Counting</a></li>
                             <li><a href="viewer/certification.php" class="dropdown-item">Employee Process Certification</a></li>
+                            <li><a href="viewer/non_compliance.php" class="dropdown-item">Non Compliance</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

@@ -55,6 +55,12 @@
                             <?php } else { ?>
                             <li><a href="certification.php" class="dropdown-item">Employee Process Certification</a></li>
                             <?php } ?>
+
+                            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/viewer/non_compliance.php") { ?>
+                            <li><a href="non_compliance.php" class="dropdown-item active">Non Compliance</a></li>
+                            <?php } else { ?>
+                            <li><a href="non_compliance.php" class="dropdown-item">Non Compliance</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

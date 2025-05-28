@@ -21,6 +21,8 @@
     <script src="../plugins/sweetalert2/dist/sweetalert2.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
+    <!-- Apexcharts -->
+    <script src="../plugins/apexcharts/3.22.2/js/apexcharts.min.js"></script>
 
     <noscript>We are facing Script issues. Kindly enable JavaScript</noscript>
 
