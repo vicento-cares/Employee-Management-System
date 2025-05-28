@@ -17,7 +17,7 @@ $columns = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($columns) {
     // Write the column names to the CSV
     // fputcsv($output, array_keys($columns));
-    fputcsv($output, ['id', 'voter_id', 'candidate']);
+    fputcsv($output, ['id', 'voter_id', 'candidate', 'date_voted']);
     // Write the data rows to the CSV
     fputcsv($output, $columns);
     
@@ -30,4 +30,4 @@ if ($columns) {
 // Close the output stream
 fclose($output);
 exit();
-?>
+
