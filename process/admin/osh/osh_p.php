@@ -33,6 +33,8 @@ if ($method == 'check_emp_no_osh') {
 	$shift = get_shift($server_time);
 	$day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
+	$section = $_SESSION['section'];
+
 	$sql = "SELECT 
                 emp.full_name, tio.time_out, COALESCE(osh.emp_no, NULL) AS emp_no_osh
 			FROM m_employees emp
@@ -55,7 +57,8 @@ if ($method == 'check_emp_no_osh') {
 		$sql = $sql . " AND emp.line_no = ?";
 		$params[] = $line_no;
 	} else {
-		$sql = $sql . " AND (emp.line_no IS NULL OR emp.line_no = '')";
+		$sql = $sql . " AND emp.section = ?";
+		$params[] = $section;
 	}
 
 	$stmt = $conn -> prepare($sql);
