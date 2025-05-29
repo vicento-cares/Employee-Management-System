@@ -233,6 +233,32 @@ function removeBomUtf8($s)
     }
 }
 
+// parse Date
+function parseDate($date_sample) {
+    // Define an array of possible date formats
+    $formats = [
+        'm/d/Y', // MM/DD/YYYY
+        'd/m/Y', // DD/MM/YYYY
+        'Y-m-d', // YYYY-MM-DD
+        'm-d-Y', // MM-DD-YYYY
+        'd-m-Y', // DD-MM-YYYY
+        'Y/m/d', // YYYY/MM/DD
+        'd/m/y', // DD/MM/YY
+        'm/d/y', // MM/DD/YY
+        // Add more formats as needed
+    ];
+
+    foreach ($formats as $format) {
+        $dateTime = DateTime::createFromFormat($format, $date_sample);
+        if ($dateTime) {
+            return $dateTime; // Return the DateTime object
+        }
+    }
+
+    // If no format matched, return an error or handle it as needed
+    return "Invalid date format: " . htmlspecialchars($date_sample);
+}
+
 function check_csv($file, $conn)
 {
     // READ FILE
@@ -591,14 +617,28 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     $resigned = '';
 
                     if (!empty($date_hired)) {
-                        $dateh = str_replace('/', '-', $date_hired);
-                        $date_hired = date("Y-m-d", strtotime($dateh));
+                        $result = parseDate($date_hired);
+
+                        // Check if the result is a DateTime object or an error message
+                        if ($result instanceof DateTime) {
+                            $date_hired = $result->format('Y-m-d'); // Outputs: 2025-05-28
+                        } else {
+                            echo "Parse Date Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+                            exit();
+                        }
                     }
 
                     if (!empty($resigned_date)) {
-                        $rdate = str_replace('/', '-', $resigned_date);
-                        $resigned_date = date("Y-m-d", strtotime($rdate));
-                        $resigned = 1;
+                        $result = parseDate($resigned_date);
+
+                        // Check if the result is a DateTime object or an error message
+                        if ($result instanceof DateTime) {
+                            $resigned_date = $result->format('Y-m-d'); // Outputs: 2025-05-28
+                            $resigned = 1;
+                        } else {
+                            echo "Parse Date Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+                            exit();
+                        }
                     } else {
                         $resigned = 0;
                     }
