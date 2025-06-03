@@ -62,8 +62,8 @@ function count_account_list($search_arr, $conn) {
 }
 
 if ($method == 'count_account_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -83,7 +83,7 @@ if ($method == 'count_account_list') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = addslashes($_POST['role']);
+	$role = $_POST['role'];
 	
 	$search_arr = array(
 		"emp_no" => $emp_no,
@@ -98,8 +98,8 @@ if ($method == 'count_account_list') {
 }
 
 if ($method == 'account_list_last_page') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -119,7 +119,7 @@ if ($method == 'account_list_last_page') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = addslashes($_POST['role']);
+	$role = $_POST['role'];
 
 	$search_arr = array(
 		"emp_no" => $emp_no,
@@ -141,8 +141,8 @@ if ($method == 'account_list_last_page') {
 }
 
 if ($method == 'account_list') {
-	$emp_no = addslashes($_POST['emp_no']);
-	$full_name = addslashes($_POST['full_name']);
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
 
 	if (!isset($_POST['dept'])) {
 		$dept = '';
@@ -162,7 +162,7 @@ if ($method == 'account_list') {
 		$line_no = $_POST['line_no'];
 	}
 
-	$role = addslashes($_POST['role']);
+	$role = $_POST['role'];
 
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
@@ -222,10 +222,10 @@ if ($method == 'account_list') {
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
 
-	$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-	if (count($results) > 0) {
-		foreach($results as $row){
+	if ($row) {
+		do {
 			$c++;
 			if (isset($_SESSION['emp_no_hr'])) {
 				echo '<tr>';
@@ -246,8 +246,8 @@ if ($method == 'account_list') {
 				echo '<td>'.$row['shift_group'].'</td>';
 				echo '<td>'.strtoupper($row['role']).'</td>';
 			echo '</tr>';
-		}
-	}else{
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
 		echo '<tr>';
 			echo '<td colspan="7" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
@@ -256,32 +256,47 @@ if ($method == 'account_list') {
 
 if ($method == 'register_account') {
 	$full_name = trim($_POST['full_name']);
-	$emp_no = addslashes(trim($_POST['emp_no']));
+	$emp_no = trim($_POST['emp_no']);
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
 	$line_no = trim($_POST['line_no']);
 	$shift_group = trim($_POST['shift_group']);
 	$role = trim($_POST['role']);
 
-	$check = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no'";
-	$stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
+	$check = "SELECT id FROM m_accounts WHERE emp_no = ?";
+	$stmt = $conn->prepare($check);
+	$params = array($emp_no);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
 		echo 'Already Exist';
-	}else{
+	} else {
 		$stmt = NULL;
-		$query = "INSERT INTO m_accounts (emp_no, full_name, dept, section, line_no, shift_group, role) VALUES ('$emp_no','$full_name','$dept','$section','$line_no','$shift_group','$role')";
+
+		$query = "INSERT INTO m_accounts 
+						(emp_no, full_name, dept, section, line_no, shift_group, role) 
+					VALUES 
+						(?, ?, ?, ?, ?, ?, ?)";
+		
 		$stmt = $conn->prepare($query);
-		if ($stmt->execute()) {
+		$params = array($emp_no, $full_name, $dept, $section, $line_no, $shift_group, $role);
+
+		if ($stmt->execute($params)) {
 			$stmt = NULL;
-			$query = "INSERT INTO t_notif_line_support (emp_no) VALUES ('$emp_no')";
+
+			$query = "INSERT INTO t_notif_line_support (emp_no) VALUES (?)";
+
 			$stmt = $conn->prepare($query);
-			if ($stmt->execute()) {
+			$params = array($emp_no);
+
+			if ($stmt->execute($params)) {
 				echo 'success';
 			} else {
 				echo 'error';
 			}
-		}else{
+		} else {
 			echo 'error';
 		}
 	}
@@ -289,7 +304,7 @@ if ($method == 'register_account') {
 
 if ($method == 'update_account') {
 	$id = $_POST['id'];
-	$emp_no = addslashes(trim($_POST['emp_no']));
+	$emp_no = trim($_POST['emp_no']);
 	$full_name = trim($_POST['full_name']);
 	$dept = trim($_POST['dept']);
 	$section = trim($_POST['section']);
@@ -297,18 +312,36 @@ if ($method == 'update_account') {
 	$shift_group = trim($_POST['shift_group']);
 	$role = trim($_POST['role']);
 
-	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' AND full_name = '$full_name' AND dept = '$dept' AND section = '$section' AND line_no = '$line_no'";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
+	$query = "SELECT id FROM m_accounts 
+				WHERE emp_no = ? AND 
+					full_name = ? AND 
+					dept = ? AND 
+					section = ? AND 
+					line_no = ?";
+	
+	$stmt = $conn->prepare($query);
+	$params = array($emp_no, $full_name, $dept, $section, $line_no);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
 		echo 'duplicate';
-	}else{
+	} else {
 		$stmt = NULL;
-		$query = "UPDATE m_accounts SET emp_no = '$emp_no', full_name = '$full_name', dept = '$dept', section = '$section', line_no = '$line_no', shift_group = '$shift_group', role = '$role' WHERE id = '$id'";
+
+		$query = "UPDATE m_accounts 
+					SET emp_no = ?, full_name = ?, 
+					dept = ?, section = ?, line_no = ?, 
+					shift_group = ?, role = ? 
+					WHERE id = ?";
+
 		$stmt = $conn->prepare($query);
-		if ($stmt->execute()) {
+		$params = array($emp_no, $full_name, $dept, $section, $line_no, $shift_group, $role, $id);
+		
+		if ($stmt->execute($params)) {
 			echo 'success';
-		}else{
+		} else {
 			echo 'error';
 		}
 	}
@@ -318,25 +351,34 @@ if ($method == 'delete_account') {
 	$id = $_POST['id'];
 	$emp_no = '';
 
-	$query = "SELECT emp_no FROM m_accounts WHERE id = '$id'";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach($stmt->fetchALL() as $row){
-			$emp_no = $row['emp_no'];
-		}
+	$query = "SELECT emp_no FROM m_accounts WHERE id = ?";
 
-		$query = "DELETE FROM m_accounts WHERE id = '$id'";
+	$stmt = $conn->prepare($query);
+	$params = array($id);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		$emp_no = $row['emp_no'];
+		
+		$query = "DELETE FROM m_accounts WHERE id = ?";
+		
 		$stmt = $conn->prepare($query);
-		if ($stmt->execute()) {
-			$query = "DELETE FROM t_notif_line_support WHERE emp_no = '$emp_no'";
+		$params = array($id);
+
+		if ($stmt->execute($params)) {
+			$query = "DELETE FROM t_notif_line_support WHERE emp_no = ?";
+
 			$stmt = $conn->prepare($query);
-			if ($stmt->execute()) {
+			$params = array($emp_no);
+
+			if ($stmt->execute($params)) {
 				echo 'success';
-			}else{
+			} else {
 				echo 'error';
 			}
-		}else{
+		} else {
 			echo 'error';
 		}
 	} else {
@@ -345,12 +387,17 @@ if ($method == 'delete_account') {
 }
 
 if ($method == 'admin_verification') {
-	$emp_no = addslashes(trim($_POST['emp_no']));
+	$emp_no = trim($_POST['emp_no']);
 
-	$query = "SELECT id FROM m_accounts WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
+	$query = "SELECT id FROM m_accounts WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS";
+
+	$stmt = $conn->prepare($query);
+	$params = array($emp_no);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
 		if ($_SESSION['emp_no'] == $emp_no) {
 			echo 'success';
 		} else {
@@ -362,4 +409,3 @@ if ($method == 'admin_verification') {
 }
 
 $conn = NULL;
-?>

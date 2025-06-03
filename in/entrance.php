@@ -28,10 +28,11 @@ function get_line_no_office($conn) {
           FROM m_access_locations
           WHERE dept NOT IN ('PD1','PD2') AND ip = '' 
           ORDER BY line_no ASC";
-  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+  $stmt = $conn -> prepare($sql);
   $stmt -> execute();
+  
   while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      array_push($data, $row['line_no']);
+    array_push($data, $row['line_no']);
   }
   
   return $data;
@@ -66,25 +67,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $not_office_employee = '';
 
       try {
-        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
-        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-        $stmt -> execute();
+        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
+                FROM m_employees WHERE emp_no = ? AND resigned = 0";
+        $stmt = $conn -> prepare($sql);
+        $params = array($emp_no);
+        $stmt -> execute($params);
 
-        if ($stmt -> rowCount() > 0) {
-          while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-            $full_name = $row['full_name'];
-            $provider = $row['provider'];
-            $dept = $row['dept'];
-            $section = $row['section'];
-            $sub_section = $row['sub_section'];
-            $line_no = $row['line_no'];
-            $line_process = $row['process'];
-            $shift_group = $row['shift_group'];
-            $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-            // Added Temporarily
-            if(empty($full_name)) {
-              $full_name = ' ';
-            }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+          $full_name = $row['full_name'];
+          $provider = $row['provider'];
+          $dept = $row['dept'];
+          $section = $row['section'];
+          $sub_section = $row['sub_section'];
+          $line_no = $row['line_no'];
+          $line_process = $row['process'];
+          $shift_group = $row['shift_group'];
+          $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+          // Added Temporarily
+          if(empty($full_name)) {
+            $full_name = ' ';
           }
 
           // Check Line No if listed as Support/Office Line No.
@@ -99,20 +102,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
               $day = $server_date_only;
             }
-            $sql = "SELECT id, shift FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day'";
-            $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-            $stmt -> execute();
-            if ($stmt -> rowCount() < 1) {
-              $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+            $sql = "SELECT id, shift FROM t_time_in_out WHERE emp_no = ? AND day = ?";
+            $stmt = $conn -> prepare($sql);
+            $params = array($emp_no, $day);
+            $stmt -> execute($params);
+
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row) {
+              $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) 
+                        VALUES (?, ?, ?, ?)";
               $stmt = $conn -> prepare($sql);
-              $stmt -> execute();
+              $params = array($emp_no, $day, $shift, $ip);
+              $stmt -> execute($params);
             } else {
-              $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+              $sql = "UPDATE t_time_in_out 
+                      SET time_in = ? 
+                      WHERE emp_no = ? AND day = ? AND shift = ?";
               $stmt = $conn -> prepare($sql);
-              $stmt -> execute();
+              $params = array($server_date_time, $emp_no, $day, $shift);
+              $stmt -> execute($params);
             }
           }
-
         } else {
           $unregistered = true;
         }

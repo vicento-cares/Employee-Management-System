@@ -27,14 +27,15 @@ function get_shift_inverse($server_time) {
 
 function check_ip_access_location($ip, $conn) {
   $line_no = '';
-  $sql = "SELECT line_no FROM m_access_locations WHERE ip = '$ip'";
-  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-  $stmt -> execute();
+  $sql = "SELECT line_no FROM m_access_locations WHERE ip = ?";
+  $stmt = $conn -> prepare($sql);
+  $params = array($ip);
+  $stmt -> execute($params);
 
-  if ($stmt -> rowCount() > 0) {
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      $line_no = $row['line_no'];
-    }
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($row) {
+    $line_no = $row['line_no'];
   } else {
     $line_no = 'Unregistered IP: '.$ip.'! Call IT Personnel Immediately!';
   }
@@ -69,25 +70,27 @@ if (!isset($_SESSION['emp_no'])) {
   //$wrong_shift_group = '';
   $already_time_in = '';
 
-  $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
-  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-  $stmt -> execute();
+  $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
+          FROM m_employees WHERE emp_no = ? AND resigned = 0";
+  $stmt = $conn -> prepare($sql);
+  $params = array($emp_no);
+  $stmt -> execute($params);
 
-  if ($stmt -> rowCount() > 0) {
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      $full_name = $row['full_name'];
-      $provider = $row['provider'];
-      $dept = $row['dept'];
-      $section = $row['section'];
-      $sub_section = $row['sub_section'];
-      $line_no = $row['line_no'];
-      $line_process = $row['process'];
-      $shift_group = $row['shift_group'];
-      $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-      // Added Temporarily
-      if(empty($full_name)) {
-        $full_name = ' ';
-      }
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($row) { 
+    $full_name = $row['full_name'];
+    $provider = $row['provider'];
+    $dept = $row['dept'];
+    $section = $row['section'];
+    $sub_section = $row['sub_section'];
+    $line_no = $row['line_no'];
+    $line_process = $row['process'];
+    $shift_group = $row['shift_group'];
+    $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+    // Added Temporarily
+    if(empty($full_name)) {
+      $full_name = ' ';
     }
 
     /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
@@ -111,17 +114,22 @@ if (!isset($_SESSION['emp_no'])) {
       } else {
         $day = $server_date_only;
       }
-      $sql = "SELECT id FROM t_time_in_out WHERE emp_no = '$emp_no' AND day = '$day'";
-      $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-      $stmt -> execute();
+      $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ?";
+      $stmt = $conn -> prepare($sql);
+      $params = array($emp_no, $day);
+      $stmt -> execute($params);
       if ($stmt -> rowCount() < 1) {
-        $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES ('$emp_no', '$day', '$shift', '$ip')";
+        $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES (?, ?, ?, ?)";
         $stmt = $conn -> prepare($sql);
-        $stmt -> execute();
+        $params = array($emp_no, $day, $shift, $ip);
+        $stmt -> execute($params);
       } else {
-        $sql = "UPDATE t_time_in_out SET time_in = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+        $sql = "UPDATE t_time_in_out 
+                SET time_in = ? 
+                WHERE emp_no = ? AND day = ? AND shift = ?";
         $stmt = $conn -> prepare($sql);
-        $stmt -> execute();
+        $params = array($server_date_time, $emp_no, $day, $shift);
+        $stmt -> execute($params);
       }
     }
   } else {

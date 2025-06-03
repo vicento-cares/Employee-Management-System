@@ -33,17 +33,20 @@ function check_time_out_sa($server_time, $emp_no, $day, $shift, $conn) {
 
   $allow_time_out = false;
 
-  $sql = "SELECT out_5, out_6, out_7, out_8 FROM t_shuttle_allocation WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
-  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-  $stmt -> execute();
+  $sql = "SELECT out_5, out_6, out_7, out_8 
+          FROM t_shuttle_allocation 
+          WHERE emp_no = ? AND day = ? AND shift = ?";
+  $stmt = $conn -> prepare($sql);
+  $params = array($emp_no, $day, $shift);
+  $stmt -> execute($params);
 
-  if ($stmt -> rowCount() > 0) {
-    while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      $out_5 = $row['out_5'];
-      $out_6 = $row['out_6'];
-      $out_7 = $row['out_7'];
-      $out_8 = $row['out_8'];
-    }
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($row) {
+    $out_5 = $row['out_5'];
+    $out_6 = $row['out_6'];
+    $out_7 = $row['out_7'];
+    $out_8 = $row['out_8'];
 
     if ($shift == 'DS') {
       $out_5_start_time = '15:00:00';
@@ -91,9 +94,11 @@ function check_time_out_sa($server_time, $emp_no, $day, $shift, $conn) {
 }
 
 function set_time_out($server_date_time, $emp_no, $day, $shift, $conn) {
-  $sql = "UPDATE t_time_in_out SET time_out = '$server_date_time' WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift'";
+  $sql = "UPDATE t_time_in_out SET time_out = ? 
+          WHERE emp_no = ? AND day = ? AND shift = ?";
   $stmt = $conn -> prepare($sql);
-  $stmt -> execute();
+  $params = array($server_date_time, $emp_no, $day, $shift);
+  $stmt -> execute($params);
 }
 
 function get_line_no_office($conn) {
@@ -103,10 +108,12 @@ function get_line_no_office($conn) {
           FROM m_access_locations
           WHERE dept NOT IN ('PD1','PD2') AND ip = '' 
           ORDER BY line_no ASC";
-  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+
+  $stmt = $conn -> prepare($sql);
   $stmt -> execute();
+
   while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-      array_push($data, $row['line_no']);
+    array_push($data, $row['line_no']);
   }
   
   return $data;
@@ -141,25 +148,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $not_office_employee = '';
 
       try {
-        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees WHERE emp_no = '$emp_no' AND resigned = 0";
-        $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-        $stmt -> execute();
+        $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group FROM m_employees 
+                WHERE emp_no = ? AND resigned = 0";
+        $stmt = $conn -> prepare($sql);
+        $params = array($emp_no);
+        $stmt -> execute($params);
 
-        if ($stmt -> rowCount() > 0) {
-          while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
-            $full_name = $row['full_name'];
-            $provider = $row['provider'];
-            $dept = $row['dept'];
-            $section = $row['section'];
-            $sub_section = $row['sub_section'];
-            $line_no = $row['line_no'];
-            $line_process = $row['process'];
-            $shift_group = $row['shift_group'];
-            $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-            // Added Temporarily
-            if(empty($full_name)) {
-              $full_name = ' ';
-            }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+          $full_name = $row['full_name'];
+          $provider = $row['provider'];
+          $dept = $row['dept'];
+          $section = $row['section'];
+          $sub_section = $row['sub_section'];
+          $line_no = $row['line_no'];
+          $line_process = $row['process'];
+          $shift_group = $row['shift_group'];
+          $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+          // Added Temporarily
+          if(empty($full_name)) {
+            $full_name = ' ';
           }
 
           // Check Line No if listed as Support/Office Line No.
@@ -172,7 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
             // MS SQL Server
             $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
-            $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+            $stmt = $conn -> prepare($sql);
             $params = array($emp_no, $server_date_only);
             $stmt -> execute($params);
 
@@ -184,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
               // MS SQL Server
               $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
-              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+              $stmt = $conn -> prepare($sql);
               $params = array($emp_no, $server_date_only_yesterday);
               $stmt -> execute($params);
 
@@ -209,11 +218,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               $shift = get_shift($server_time);
 
               $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
-              $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+              $stmt = $conn -> prepare($sql);
               $params = array($emp_no, $server_date_only, $shift);
               $stmt -> execute($params);
 
-              if ($stmt -> rowCount() < 1) {
+              $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+              if (!$row) {
                 $no_time_in = true;
               } else {
                 $already_time_out = true;

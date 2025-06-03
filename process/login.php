@@ -13,15 +13,19 @@ function get_access_location_by_ip($ip, $conn) {
 
     $response_arr = array();
 
-    $sql = "SELECT dept, section, line_no FROM m_access_locations WHERE ip = '$ip'";
-    $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-    $stmt->execute();
-    if ($stmt->rowCount() > 0) {
-        foreach($stmt->fetchALL() as $x){
-            $dept = $x['dept'];
-            $section = $x['section'];
-            $line_no = $x['line_no'];
-        }
+    $sql = "SELECT dept, section, line_no FROM m_access_locations WHERE ip = ?";
+
+    $stmt = $conn->prepare($sql);
+    $params = array($ip);
+    $stmt->execute($params);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        $dept = $row['dept'];
+        $section = $row['section'];
+        $line_no = $row['line_no'];
+        
         $can_access = true;
     }
 
@@ -86,7 +90,7 @@ if (isset($_POST['login_btn'])) {
     // REMOTE IP ADDRESS
     $ip = $_SERVER['REMOTE_ADDR'];
 
-    $emp_no = addslashes($_POST['emp_no']);
+    $emp_no = $_POST['emp_no'];
 
     // CHECK IP
     $response_arr = get_access_location_by_ip($ip, $conn);
@@ -97,19 +101,25 @@ if (isset($_POST['login_btn'])) {
         // MySQL
         // $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE BINARY emp_no = '$emp_no'";
         // MS SQL Server
-        $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role FROM m_accounts WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS";
-        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-        $stmt->execute();
-        if ($stmt->rowCount() > 0) {
-            foreach($stmt->fetchALL() as $x){
-                $emp_no = $x['emp_no'];
-                $full_name = $x['full_name'];
-                $dept = $x['dept'];
-                $section = $x['section'];
-                $line_no = $x['line_no'];
-                //$shift_group = $x['shift_group'];
-                $role = $x['role'];
-            }
+        $check = "SELECT emp_no, full_name, dept, section, line_no, shift_group, role 
+                    FROM m_accounts 
+                    WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS";
+
+        $stmt = $conn->prepare($check);
+        $params = array($emp_no);
+        $stmt->execute($params);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $emp_no = $row['emp_no'];
+            $full_name = $row['full_name'];
+            $dept = $row['dept'];
+            $section = $row['section'];
+            $line_no = $row['line_no'];
+            //$shift_group = $row['shift_group'];
+            $role = $row['role'];
+            
             if ($role == 'admin') {
                 $_SESSION['emp_no'] = $emp_no;
                 $_SESSION['full_name'] = $full_name;
@@ -175,4 +185,3 @@ if (isset($_POST['Logout'])) {
     session_destroy();
     header('location:/emp_mgt/admin');
 }
-?>

@@ -6,7 +6,7 @@ session_start();
 include 'conn.php';
 
 if (isset($_POST['login_btn'])) {
-    $emp_no = addslashes($_POST['emp_no']);
+    $emp_no = $_POST['emp_no'];
 
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
@@ -14,25 +14,31 @@ if (isset($_POST['login_btn'])) {
         // MySQL
         // $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_hr_accounts WHERE BINARY emp_no = '$emp_no' AND role = 'hr'";
         // MS SQL Server
-        $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_hr_accounts WHERE emp_no = '$emp_no' AND role = 'hr' COLLATE SQL_Latin1_General_CP1_CS_AS";
-        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-        $stmt->execute();
-        if ($stmt->rowCount() > 0) {
-            foreach($stmt->fetchALL() as $x){
-                $emp_no = $x['emp_no'];
-                $full_name = $x['full_name'];
-                $dept = $x['dept'];
-                $section = $x['section'];
-                $line_no = $x['line_no'];
-                $role = $x['role'];
-                $_SESSION['emp_no_hr'] = $emp_no;
-                $_SESSION['full_name'] = $full_name;
-                $_SESSION['dept'] = $dept;
-                $_SESSION['section'] = $section;
-                $_SESSION['line_no'] = $line_no;
-                $_SESSION['role'] = $role;
-                header('location: home.php');
-            }
+        $check = "SELECT emp_no, full_name, dept, section, line_no, role 
+                    FROM m_hr_accounts 
+                    WHERE emp_no = ? AND role = 'hr' COLLATE SQL_Latin1_General_CP1_CS_AS";
+        
+        $stmt = $conn->prepare($check);
+        $params = array($emp_no);
+        $stmt->execute($params);
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $emp_no = $row['emp_no'];
+            $full_name = $row['full_name'];
+            $dept = $row['dept'];
+            $section = $row['section'];
+            $line_no = $row['line_no'];
+            $role = $row['role'];
+
+            $_SESSION['emp_no_hr'] = $emp_no;
+            $_SESSION['full_name'] = $full_name;
+            $_SESSION['dept'] = $dept;
+            $_SESSION['section'] = $section;
+            $_SESSION['line_no'] = $line_no;
+            $_SESSION['role'] = $role;
+            header('location: home.php');
         } else {
             echo '<script>alert("Sign In Failed. Maybe an incorrect credential or account not found")</script>';
         }
@@ -44,4 +50,3 @@ if (isset($_POST['Logout'])) {
     session_destroy();
     header('location:/emp_mgt/hr');
 }
-?>

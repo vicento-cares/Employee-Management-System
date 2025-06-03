@@ -7,7 +7,7 @@ include 'conn.php';
 
 if (isset($_POST['login_btn'])) {
 
-    $emp_no = addslashes($_POST['emp_no']);
+    $emp_no = $_POST['emp_no'];
 
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
@@ -18,27 +18,27 @@ if (isset($_POST['login_btn'])) {
         $check = "
             SELECT emp_no, full_name, dept, section, line_no, shift_group, role 
             FROM m_control_area_accounts 
-            WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS
+            WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS
             UNION
             SELECT emp_no, full_name, dept, section, line_no, shift_group, role 
             FROM m_accounts 
-            WHERE emp_no = '$emp_no' COLLATE SQL_Latin1_General_CP1_CS_AS
+            WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS
         ";
         $stmt = $conn->prepare($check);
-        $stmt->execute();
+        $params = array($emp_no, $emp_no);
+        $stmt->execute($params);
         
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (count($results) > 0) {
-			foreach ($results as $row) {
-                $emp_no = $row['emp_no'];
-                $full_name = $row['full_name'];
-                $dept = $row['dept'];
-                $section = $row['section'];
-                $line_no = $row['line_no'];
-                $shift_group = $row['shift_group'];
-                $role = $row['role'];
-            }
+        if ($row) {
+            $emp_no = $row['emp_no'];
+            $full_name = $row['full_name'];
+            $dept = $row['dept'];
+            $section = $row['section'];
+            $line_no = $row['line_no'];
+            $shift_group = $row['shift_group'];
+            $role = $row['role'];
+
             $_SESSION['emp_no_control_area'] = $emp_no;
             $_SESSION['full_name'] = $full_name;
             $_SESSION['dept'] = $dept;
