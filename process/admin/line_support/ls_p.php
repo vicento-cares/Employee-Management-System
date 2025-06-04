@@ -275,26 +275,66 @@ if ($method == 'delete_single_added_line_support') {
 	echo 'success';
 }
 
+// Direct Accepted Status when save all set line support on line_no_from
 if ($method == 'save_line_support') {
 	$line_support_id = $_POST['line_support_id'];
 
-	$sql = "UPDATE t_line_support SET status = 'pending' WHERE line_support_id = ?";
+	$isTransactionActive = false;
 
-	$stmt = $conn -> prepare($sql);
-	$params = array($line_support_id);
-	$stmt -> execute($params);
+	try {
+		if (!$isTransactionActive) {
+			$conn->beginTransaction();
+			$isTransactionActive = true;
+		}
 
-	$sql = "SELECT line_no_to FROM t_line_support WHERE line_support_id = ? ORDER BY id DESC";
+		// $sql = "UPDATE t_line_support SET status = 'pending' WHERE line_support_id = ?";
+		$sql = "UPDATE t_line_support SET status = 'accepted' WHERE line_support_id = ?";
 
-	$stmt = $conn -> prepare($sql);
-	$params = array($line_support_id);
-	$stmt -> execute($params);
+		$stmt = $conn -> prepare($sql);
+		$params = array($line_support_id);
+		$stmt -> execute($params);
 
-	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		update_notif_line_support($row['line_no_to'], 'pending', $conn);
+		$sql = "INSERT INTO t_line_support_history 
+					(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) 
+				SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_by AS set_status_by, set_by_no AS set_status_by_no, status 
+				FROM t_line_support 
+				WHERE line_support_id = ?";
+
+		$stmt = $conn -> prepare($sql);
+		$params = array($line_support_id);
+		$stmt -> execute($params);
+
+		$sql = "DELETE FROM t_line_support WHERE line_support_id = ?";
+
+		$stmt = $conn -> prepare($sql);
+		$params = array($line_support_id);
+		$stmt -> execute($params);
+
+		$sql = "SELECT line_no_to FROM t_line_support_history WHERE line_support_id = ? ORDER BY id DESC";
+
+		$stmt = $conn -> prepare($sql);
+		$params = array($line_support_id);
+		$stmt -> execute($params);
+
+		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			update_notif_line_support($row['line_no_to'], 'accepted', $conn);
+		}
+
+		$conn->commit();
+		$isTransactionActive = false;
+
+		echo 'success';
+	} catch (Exception $e) {
+		if ($isTransactionActive) {
+			$conn->rollBack();
+			$isTransactionActive = false;
+		}
+
+		echo 'Failed. Please Try Again or Call IT Personnel Immediately!: ' . $e->getMessage();
+
+		$conn = null;
+		exit();
 	}
-
-	echo 'success';
 }
 
 if ($method == 'get_pending_line_support') {
@@ -353,6 +393,7 @@ if ($method == 'get_pending_line_support') {
 	}
 }
 
+// Depreciated
 if ($method == 'reject_line_support') {
 	$id = $_POST['id'];
 	$line_support_id = '';
@@ -405,6 +446,7 @@ if ($method == 'reject_line_support') {
 	echo 'success';
 }
 
+// Depreciated
 if ($method == 'accept_line_support') {
 	$id = $_POST['id'];
 	$line_support_id = '';
@@ -686,37 +728,37 @@ if ($method == 'get_line_support_history') {
 }
 
 if ($method == 'get_line_support') {
-	$day = $_POST['day'];
+	$day_from = $_POST['day_from'];
+	$day_to = $_POST['day_to'];
 	$shift = $_POST['shift'];
 	$emp_no = $_POST['emp_no'];
 	$full_name = $_POST['full_name'];
 	$line_no_from_search = $_POST['line_no_from'];
 	$line_no_to_search = $_POST['line_no_to'];
-	$status = $_POST['status'];
 
 	$c = 0;
 	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-teal', 'modal-trigger bg-danger', 'modal-trigger bg-purple', 'modal-trigger bg-orange');
 	$row_class = $row_class_arr[0];
 
-	$table = "t_line_support_history";
-	if ($status == "0") {
-		$table = "t_line_support";
-	}
-
-	$sql = "SELECT 
-				ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, 
+	$sql = "SELECT TOP (1000) 
+				ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.section, emp.process, 
 				ls.day, ls.shift, emp.shift_group, ls.line_no_from, ls.line_no_to, 
-				ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated
-			FROM $table ls 
-			LEFT JOIN m_employees emp
-			ON ls.emp_no = emp.emp_no
-			WHERE ls.day = ? AND 
-				ls.shift = ?";
+				ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated, 
+				pic.file_url 
+			FROM t_line_support_history ls 
+			LEFT JOIN m_employees emp ON ls.emp_no = emp.emp_no 
+			LEFT JOIN m_employee_pictures pic ON ls.emp_no = pic.emp_no 
+			WHERE (ls.day >= ? AND ls.day <= ?)";
 	
 	$params = [
-		$day,
-		$shift
+		$day_from,
+		$day_to
 	];
+
+	if (!empty($shift)) {
+		$sql = $sql . " AND ls.shift = ?";
+		$params[] = $shift;
+	}
 
 	if (!empty($emp_no)) {
 		$sql = $sql . " AND ls.emp_no LIKE ?";
@@ -725,7 +767,7 @@ if ($method == 'get_line_support') {
 	}
 
 	if (!empty($full_name)) {
-		$sql = $sql . " AND ls.full_name LIKE ?";
+		$sql = $sql . " AND emp.full_name LIKE ?";
 		$full_name_param = $full_name . "%";
 		$params[] = $full_name_param;
 	}
@@ -742,13 +784,7 @@ if ($method == 'get_line_support') {
 		$params[] = $line_no_to_search;
 	}
 
-	if ($status == "1") {
-		$sql = $sql . " AND ls.status = 'accepted'";
-	} else if ($status == "3") {
-		$sql = $sql . " AND ls.status = 'rejected'";
-	} else if ($status == "0") {
-		$sql = $sql . " AND ls.status = 'pending'";
-	}
+	$sql = $sql . " AND ls.status = 'accepted'";
 
 	$sql = $sql . " ORDER BY ls.date_updated DESC";
 
@@ -760,30 +796,33 @@ if ($method == 'get_line_support') {
 		
 		if ($row['status'] == 'accepted') {
 			$row_class = $row_class_arr[1];
-		} else if ($row['status'] == 'rejected') {
-			$row_class = $row_class_arr[3];
-		} else if ($row['status'] == 'pending') {
-			$row_class = $row_class_arr[5];
 		} else {
 			$row_class = $row_class_arr[0];
 		}
 		echo '<tr class="'.$row_class.'">';
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$row['emp_no'].'</td>';
-		echo '<td>'.$row['full_name'].'</td>';
-		echo '<td>'.$row['dept'].'</td>';
-		echo '<td>'.$row['process'].'</td>';
-		echo '<td>'.$row['day'].'</td>';
-		echo '<td>'.$row['shift'].'</td>';
-		echo '<td>'.$row['shift_group'].'</td>';
-		echo '<td>'.$row['line_no_from'].'</td>';
-		echo '<td>'.$row['line_no_to'].'</td>';
-		echo '<td>'.$row['set_by'].'</td>';
-		echo '<td>'.$row['set_by_no'].'</td>';
-		echo '<td>'.$row['set_status_by'].'</td>';
-		echo '<td>'.$row['set_status_by_no'].'</td>';
-		echo '<td>'.$row['status'].'</td>';
-		echo '<td>'.$row['date_updated'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$c.'</td>';
+		$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+		if (!empty($row['file_url'])) {
+			echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol."172.25.116.188:3000".$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
+		} else {
+			echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
+		}
+		echo '<td style="vertical-align: middle;">'.$row['day'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['process'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['line_no_from'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['line_no_to'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['set_by'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['set_by_no'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['set_status_by'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['set_status_by_no'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['status'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['date_updated'].'</td>';
 		echo '</tr>';
 	}
 }

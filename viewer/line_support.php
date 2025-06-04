@@ -43,15 +43,12 @@ include 'plugins/navbar/viewer_navbar.php';
                                 <div class="card-body">
                                 <div class="row mb-2">
                                     <div class="col-sm-3">
-                                    <label>Day</label>
-                                    <input type="date" class="form-control" id="ls_day_search">
+                                    <label>Date From</label>
+                                    <input type="date" class="form-control" id="ls_day_from_search">
                                     </div>
                                     <div class="col-sm-3">
-                                    <label>Shift</label>
-                                    <select class="form-control" id="ls_shift_search" style="width: 100%;" required>
-                                        <option selected value="DS">Day Shift - (DS)</option>
-                                        <option value="NS">Night Shift - (NS)</option>
-                                    </select>
+                                    <label>Date To</label>
+                                    <input type="date" class="form-control" id="ls_day_to_search">
                                     </div>
                                     <div class="col-sm-2">
                                     <label>Employee No.</label>
@@ -76,11 +73,11 @@ include 'plugins/navbar/viewer_navbar.php';
                                     </select>
                                     </div>
                                     <div class="col-sm-2">
-                                    <label>Status</label>
-                                    <select class="form-control" id="ls_status_search" style="width: 100%;" required>
-                                        <option selected value="0">Pending</option>
-                                        <option value="1">Accepted Support</option>
-                                        <option value="3">Rejected Support</option>
+                                    <label>Shift</label>
+                                    <select class="form-control" id="ls_shift_search" style="width: 100%;" required>
+                                        <option selected value="">All Shift</option>
+                                        <option value="DS">Day Shift - (DS)</option>
+                                        <option value="NS">Night Shift - (NS)</option>
                                     </select>
                                     </div>
                                     <div class="col-sm-2">
@@ -90,26 +87,6 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <div class="col-sm-2">
                                     <label>&nbsp;</label>
                                     <button type="button" class="btn bg-gray-dark btn-block" onclick="get_line_support()"><i class="fas fa-search"></i> Search</button>
-                                    </div>
-                                </div>
-                                <div id="accordion_line_support_legend">
-                                    <div class="card shadow">
-                                    <div class="card-header">
-                                        <h4 class="card-title w-100">
-                                        <a class="d-block w-100 text-dark" data-toggle="collapse" href="#collapseOneLineSupportLegend">
-                                            Line Support Legend
-                                        </a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseOneLineSupportLegend" class="collapse" data-parent="#accordion_line_support_legend">
-                                        <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-sm-4 col-lg-4 p-1 bg-orange"><center>Pending</center></div>
-                                            <div class="col-sm-4 col-lg-4 p-1 bg-success"><center>Accepted Support</center></div>
-                                            <div class="col-sm-4 col-lg-4 p-1 bg-danger"><center>Rejected Support</center></div>
-                                        </div>
-                                        </div>
-                                    </div>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
@@ -122,13 +99,15 @@ include 'plugins/navbar/viewer_navbar.php';
                                     <thead style="text-align: center;">
                                         <tr>
                                         <th>#</th>
-                                        <th>Employee No.</th>
-                                        <th>Full Name</th>
-                                        <th>Department</th>
-                                        <th>Process</th>
+                                        <th>Picture</th>
                                         <th>Day</th>
                                         <th>Shift</th>
                                         <th>Shift Group</th>
+                                        <th>Employee No.</th>
+                                        <th>Full Name</th>
+                                        <th>Department</th>
+                                        <th>Section</th>
+                                        <th>Process</th>
                                         <th>From Line No.</th>
                                         <th>Supported Line No.</th>
                                         <th>Set By</th>
