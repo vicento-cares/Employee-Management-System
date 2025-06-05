@@ -80,6 +80,10 @@ if (!isset($_SESSION['emp_no'])) {
 
   if ($row) { 
     $full_name = $row['full_name'];
+
+    if ($full_name = 'Maranan, Vhina O.') {
+      $full_name = 'Maranan, Vhien O.';
+    }
     $provider = $row['provider'];
     $dept = $row['dept'];
     $section = $row['section'];
