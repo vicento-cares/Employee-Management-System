@@ -449,4 +449,127 @@ if ($method == 'update_skill_level') {
 	}
 }
 
+if ($method == 'get_line_support_certification') {
+	$emp_no = $_POST['emp_no'];
+	
+	$c = 0;
+
+	$query = "WITH LatestAuthInitial AS (
+					SELECT emp_id, auth_no, MAX(auth_year) AS latest_auth_year
+					FROM [qualif].[dbo].[t_i_process] 
+					WHERE i_status = 'Approved'
+					GROUP BY emp_id, auth_no
+				),
+	
+			RankedAuthInitial AS (
+				SELECT emp.dept, emp.line_no, emp.section, 
+						a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
+						a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
+						b.fullname, b.agency, b.emp_id, 
+						sl.id AS skill_level_id, sl.skill_level, 
+						ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn
+				FROM [qualif].[dbo].[t_i_process] a 
+				LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
+				LEFT JOIN m_employees emp ON a.emp_id = emp.emp_no 
+				LEFT JOIN m_skill_level sl ON a.emp_id = sl.emp_no AND a.process = sl.process 
+				JOIN LatestAuthInitial la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
+				WHERE a.i_status = 'Approved'";
+
+	$params = [];
+
+	$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+	$params[] = $emp_no;
+	$params[] = $emp_no;
+
+	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
+
+	$query .= "),";
+
+	$query .= " LatestAuthFinal AS (
+					SELECT emp_id, auth_no, MAX(auth_year) AS latest_auth_year
+					FROM [qualif].[dbo].[t_f_process] 
+					WHERE i_status = 'Approved'
+					GROUP BY emp_id, auth_no
+				),
+	
+			RankedAuthFinal AS (
+				SELECT emp.dept, emp.line_no, emp.section, 
+						a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
+						a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
+						b.fullname, b.agency, b.emp_id, 
+						sl.id AS skill_level_id, sl.skill_level, 
+						ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn
+				FROM [qualif].[dbo].[t_f_process] a 
+				LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
+				LEFT JOIN m_employees emp ON a.emp_id = emp.emp_no 
+				LEFT JOIN m_skill_level sl ON a.emp_id = sl.emp_no AND a.process = sl.process 
+				JOIN LatestAuthFinal la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
+				WHERE a.i_status = 'Approved'";
+
+	$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+	$params[] = $emp_no;
+	$params[] = $emp_no;
+
+	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
+
+	$query .= ")";
+
+	$query .= " SELECT *
+				FROM RankedAuthInitial 
+				WHERE rn = 1 
+				UNION ALL  
+				SELECT *
+				FROM RankedAuthFinal 
+				WHERE rn = 1 
+				ORDER BY process ASC, fullname ASC, auth_year DESC";
+
+	$stmt = $conn->prepare($query);
+
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	// Check if rows are returned
+	if ($row) {
+		do {
+			$c++;
+
+			$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
+
+			echo '<tr>';
+			
+			echo '<td>' . $c . '</td>';
+			echo '<td>' . htmlspecialchars($row['process']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['auth_no']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['auth_year']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['date_authorized']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['expire_date']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['fullname']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['emp_id']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['batch']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['dept']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['section']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['line_no']) . '</td>';
+			if (!empty($row['skill_level'])) {
+				echo '<td>Level ' . htmlspecialchars($row['skill_level']) . '</td>';
+			} else {
+				echo '<td>' . htmlspecialchars($row['skill_level']) . '</td>';
+			}
+			echo '<td>' . htmlspecialchars($row['remarks']) . '</td>';
+			if ($row['r_status'] == 'Approved') {
+				echo '<td>' . htmlspecialchars($row['r_of_cancellation']) . '</td>';
+				echo '<td>' . htmlspecialchars($row['d_of_cancellation']) . '</td>';
+			} else {
+				echo '<td></td>';
+				echo '<td></td>';
+			}
+			echo '</tr>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
+		echo '<tr>';
+		echo '<td style="text-align:center;" colspan="4">No Result</td>';
+		echo '</tr>';
+	}
+}
+
 $conn = NULL;

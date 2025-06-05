@@ -129,4 +129,71 @@
             });
         }
     }
+
+    const get_line_support_details = param => {
+        var string = param.split('~!~');
+        var emp_no = string[0];
+        var full_name = string[1];
+        var dept = string[2];
+        var section = string[3];
+        var line_no_from = string[4];
+        var line_process = string[5];
+
+        document.getElementById("emp_no_lsd").innerHTML = emp_no;
+        document.getElementById("full_name_lsd").innerHTML = full_name;
+        document.getElementById("dept_lsd").innerHTML = dept;
+        document.getElementById("section_lsd").innerHTML = section;
+        document.getElementById("line_no_lsd").innerHTML = line_no_from;
+        document.getElementById("process_lsd").innerHTML = line_process;
+        
+        $.ajax({
+            url: '../process/viewer/certification/cert_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_line_support_certification',
+                emp_no: emp_no
+            },
+            beforeSend: (jqXHR, settings) => {
+                var loading = `<tr id="loading"><td colspan="16" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("certificationData").innerHTML = loading;
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            },
+            success: function (response) {
+                document.getElementById("certificationData").innerHTML = response;
+                let table_rows = parseInt(document.getElementById("certificationData").childNodes.length);
+                document.getElementById("count_view_lsd").innerHTML = `Count: ${table_rows}`;
+            }
+        });
+    }
+
+    const export_line_support_certification = (table_id, separator = ',') => {
+        // Select rows from table_id
+        var rows = document.querySelectorAll('table#' + table_id + ' tr');
+        // Construct csv
+        var csv = [];
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll('td, th');
+            for (var j = 0; j < cols.length; j++) {
+                var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+                data = data.replace(/"/g, '""');
+                // Push escaped string
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(separator));
+        }
+        var csv_string = csv.join('\n');
+        // Download it
+        var filename = 'EmpMgtSys_LineSupportCertificationList';
+        filename += '_' + new Date().toLocaleDateString() + '.csv';
+        var link = document.createElement('a');
+        link.style.display = 'none';
+        link.setAttribute('target', '_blank');
+        link.setAttribute('href', 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(csv_string));
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>

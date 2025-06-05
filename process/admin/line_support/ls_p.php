@@ -799,7 +799,15 @@ if ($method == 'get_line_support') {
 		} else {
 			$row_class = $row_class_arr[0];
 		}
-		echo '<tr class="'.$row_class.'">';
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" 
+				data-toggle="modal" data-target="#line_support_details" 
+				onclick="get_line_support_details(&quot;'.
+				$row['emp_no'].'~!~'.
+				$row['full_name'].'~!~'.
+				$row['dept'].'~!~'.
+				$row['section'].'~!~'.
+				$row['line_no_from'].'~!~'.
+				$row['process'].'&quot;)">';
 		echo '<td style="vertical-align: middle;">'.$c.'</td>';
 		$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 		if (!empty($row['file_url'])) {

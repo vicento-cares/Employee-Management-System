@@ -137,4 +137,5 @@ include 'plugins/navbar/viewer_navbar.php';
 <?php
 include 'plugins/footer.php';
 include 'plugins/js/line_support_script.php';
+include '../modals/line_support_details.php';
 ?>
