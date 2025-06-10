@@ -166,6 +166,27 @@
                 document.getElementById("count_view_lsd").innerHTML = `Count: ${table_rows}`;
             }
         });
+
+        $.ajax({
+            url: '../process/admin/line_support/ls_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_employee_line_support_history',
+                emp_no: emp_no
+            },
+            beforeSend: (jqXHR, settings) => {
+                var loading = `<tr id="loading"><td colspan="16" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("lineSupportHistoryData").innerHTML = loading;
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            },
+            success: function (response) {
+                document.getElementById("lineSupportHistoryData").innerHTML = response;
+                let table_rows = parseInt(document.getElementById("lineSupportHistoryData").childNodes.length);
+                document.getElementById("count_view_lsd2").innerHTML = `Count: ${table_rows}`;
+            }
+        });
     }
 
     const export_line_support_certification = (table_id, separator = ',') => {

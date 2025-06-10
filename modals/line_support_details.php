@@ -91,6 +91,48 @@
             <tbody id="certificationData" style="text-align: center;"></tbody>
           </table>
         </div>
+        <div class="row">
+          <div class="col-sm-9">
+            <div class="form-group mb-0">
+              <label>Line Support History Table</label>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <button type="button" class="btn bg-success btn-block" onclick="export_line_support_certification('lineSupportHistoryTable')"><i class="fas fa-download"></i> Export History</button>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-2">
+            <span id="count_view_lsd2"></span>
+          </div>
+        </div>
+        <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+          <table id="lineSupportHistoryTable" class="table table-sm table-head-fixed text-nowrap table-hover">
+            <thead style="text-align: center;">
+                <tr>
+                <th>#</th>
+                <th>Picture</th>
+                <th>Day</th>
+                <th>Shift</th>
+                <th>Shift Group</th>
+                <th>Employee No.</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Section</th>
+                <th>Process</th>
+                <th>From Line No.</th>
+                <th>Supported Line No.</th>
+                <th>Set By</th>
+                <th>Set By No.</th>
+                <th>Accepted / Rejected By</th>
+                <th>Accepted / Rejected By No.</th>
+                <th>Status</th>
+                <th>Date Updated</th>
+                </tr>
+            </thead>
+            <tbody id="lineSupportHistoryData" style="text-align: center;"></tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-footer bg-light">
         <button type="button" class="btn bg-dark" data-dismiss="modal" data-toggle="modal">Close</button>
