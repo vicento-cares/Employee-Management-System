@@ -94,7 +94,7 @@ fputcsv($f, $fields, $delimiter);
 	WHERE";*/
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
-	tio.shift, tio.time_in, tio.time_out, tio.ip
+	tio.shift, FORMAT(tio.time_in, 'HH:mm:ss') as time_in, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE emp.shift_group = ?";

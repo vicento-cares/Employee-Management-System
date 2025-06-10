@@ -192,7 +192,7 @@ $params[] = $day;
 $sql = $sql . " GROUP BY process";
 
 $stmt = $conn->prepare($sql);
-$stmt->execute(params: $params);
+$stmt->execute($params);
 
 while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
 	array_push($results, array('process' => $row['process1'], 'total_present' => 0, 'total' => $row['total']));
