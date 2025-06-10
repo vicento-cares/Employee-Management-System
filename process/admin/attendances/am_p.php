@@ -72,7 +72,7 @@ if ($method == 'month_attendance_mon') {
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
-                    emp.dept IN ('PD1', 'PD2', 'QA') AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
                     emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section
@@ -134,7 +134,7 @@ if ($method == 'month_attendance_mon') {
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
-                    emp.dept IN ('PD1', 'PD2', 'QA') AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
                     emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section
@@ -201,7 +201,7 @@ if ($method == 'month_attendance_mon') {
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
-                    emp.dept IN ('PD1', 'PD2', 'QA') AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
                     emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section

@@ -228,6 +228,14 @@ if ($method == 'get_month_section_no_time_out_chart') {
         'First Process' => '#007bff', // Blue
         'Secondary 1 Process' => '#6c757d', // Gray
         'Secondary 2 Process' => '#20c997', // Teal
+        'Section 1' => '#f8bbd0', // Light Pink
+        'Section 2' => '#28a745', // Success
+        'Section 3' => '#ffc107', // Warning
+        'Section 4' => '#e83e8c', // Dark Pink
+        'Section 5' => '#fd7e14', // orange
+        'Section 6' => '#007bff', // Blue / Primary
+        'Section 7' => '#dc3545', // Danger
+        'Section 8' => '#8a2be2', // violet
     );
 
     $data = [];
@@ -685,6 +693,14 @@ if ($method == 'get_month_section_no_time_out_search_chart') {
         'First Process' => '#007bff', // Blue
         'Secondary 1 Process' => '#6c757d', // Gray
         'Secondary 2 Process' => '#20c997', // Teal
+        'Section 1' => '#f8bbd0', // Light Pink
+        'Section 2' => '#28a745', // Success
+        'Section 3' => '#ffc107', // Warning
+        'Section 4' => '#e83e8c', // Dark Pink
+        'Section 5' => '#fd7e14', // orange
+        'Section 6' => '#007bff', // Blue / Primary
+        'Section 7' => '#dc3545', // Danger
+        'Section 8' => '#8a2be2', // violet
     );
 
     $data = [];

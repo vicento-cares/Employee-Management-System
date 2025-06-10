@@ -100,7 +100,7 @@ if ($method == 'load_osh_candidates') {
 		FROM osh_candidates 
 		WHERE voting_category = 
     		CASE 
-        		WHEN (SELECT dept FROM m_employees WHERE emp_no = @emp_no) IN ('PD1', 'PD2') 
+        		WHEN (SELECT dept FROM m_employees WHERE emp_no = @emp_no) IN ('PD1', 'PD2', 'PD3') 
         		THEN 'PD' 
         		WHEN (SELECT dept FROM m_employees WHERE emp_no = @emp_no) IN ('QA')
 				THEN 'QA'

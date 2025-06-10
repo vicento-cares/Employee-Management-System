@@ -26,7 +26,7 @@ function get_line_no_office($conn) {
 
   $sql = "SELECT line_no
           FROM m_access_locations
-          WHERE dept NOT IN ('PD1','PD2') AND ip = '' 
+          WHERE dept NOT IN ('PD1','PD2','PD3') AND ip = '' 
           ORDER BY line_no ASC";
   $stmt = $conn -> prepare($sql);
   $stmt -> execute();
