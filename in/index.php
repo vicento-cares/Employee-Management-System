@@ -118,7 +118,10 @@ if (!isset($_SESSION['emp_no'])) {
       $stmt = $conn -> prepare($sql);
       $params = array($emp_no, $day);
       $stmt -> execute($params);
-      if ($stmt -> rowCount() < 1) {
+      
+      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if (!$row) { 
         $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES (?, ?, ?, ?)";
         $stmt = $conn -> prepare($sql);
         $params = array($emp_no, $day, $shift, $ip);
