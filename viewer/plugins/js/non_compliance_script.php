@@ -924,7 +924,7 @@
 
         setTimeout(() => {
             get_emp_monthly_no_time_out_chart(1);
-        }, 250);
+        }, 500);
         non_compliance_details_list(1);
         past_no_time_out_record_list(1);
     }
@@ -949,7 +949,7 @@
 
         setTimeout(() => {
             get_emp_monthly_no_time_out_chart(2);
-        }, 250);
+        }, 500);
         non_compliance_details_list(2);
         past_no_time_out_record_list(2);
     }
