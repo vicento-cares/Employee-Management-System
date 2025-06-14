@@ -2,7 +2,107 @@
     // Global Variables for Realtime Count
     var realtime_count_emp_dashboard;
 
+    // Charts
+    let daily_absent_rate_chart;
+
+    const count_od = () => {
+        $.ajax({
+            url: '../process/hr/dashboard/dash_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'count_od'
+            },
+            success: function (response) {
+                try {
+                    let response_array = JSON.parse(response);
+                    $('#od_present_ds').html(`<b>${response_array.od_present_ds}</b>`);
+                    $('#od_present_ns').html(`<b>${response_array.od_present_ns}</b>`);
+                    $('#od_present_total').html(`<b>${response_array.od_present_total}</b>`);
+                    $('#od_registered_total').html(`<b>${response_array.od_registered_total}</b>`);
+                    $('#od_absent_rate').html(`<b>${response_array.od_absent_rate}</b>`);
+                } catch (e) {
+                    console.log(response);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: `Error: ${response}`,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
+    const get_daily_absent_rate_chart = () => {
+		$.ajax({
+			url: '../process/hr/dashboard/dash_p.php',
+			type: 'POST',
+			cache: false,
+			dataType: 'json', 
+            data: {
+                method: 'get_daily_absent_rate_chart'
+			},
+			success: response => {
+				console.log(response.categories);
+				console.log(response.data);
+				console.log(response.colorMap);
+
+				// Define Bootstrap 4 colors
+				const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+				// Convert the data object to an array
+				const seriesData = response.data.map(item => {
+					return {
+						name: item.name,
+						data: Object.values(item.data)
+					};
+				});
+
+				let ctx = document.querySelector("#daily_absent_rate_chart");
+
+				var options = {
+					chart: {
+						type: 'line',
+						height: 300
+					},
+					series: seriesData,
+					colors: bootstrapColors,
+					xaxis: {
+						categories: response.categories
+					},
+					title: {
+						text: `Daily Absent Rate Trend`,
+						align: 'left'
+					},
+					stroke: {
+						curve: 'smooth'
+					},
+					markers: {
+						size: 5
+					},
+					tooltip: {
+						shared: true,
+						intersect: false
+					}
+				};
+
+				// Destroy previous chart instance before creating a new one
+				if (daily_absent_rate_chart) {
+					daily_absent_rate_chart.destroy();
+				}
+
+				daily_absent_rate_chart = new ApexCharts(ctx, options);
+				daily_absent_rate_chart.render();
+			}
+		});
+	}
+
     $(document).ready(function () {
+        count_od();
+        get_daily_absent_rate_chart();
+
         fetch_dept_dropdown();
         // fetch_group_dropdown();
         fetch_section_dropdown();
