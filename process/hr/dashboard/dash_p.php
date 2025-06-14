@@ -143,7 +143,7 @@ if ($method == 'count_emp_dashboard') {
 				FROM 
 					m_employees
 				WHERE 
-					resigned = 0 $where_clause 
+					(resigned_date IS NULL OR resigned_date >= @Day) $where_clause 
 
 				UNION ALL
 
@@ -158,7 +158,7 @@ if ($method == 'count_emp_dashboard') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.emp_no = emp.emp_no
 				WHERE 
-					emp.resigned = 0 AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					tio.day = @Day $where_clause 
 
 				UNION ALL
@@ -174,7 +174,7 @@ if ($method == 'count_emp_dashboard') {
 				LEFT JOIN 
 					t_line_support_history ls ON ls.emp_no = emp.emp_no
 				WHERE 
-					emp.resigned = 0 AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					ls.day = @Day $where_clause 
 			)
 
