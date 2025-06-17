@@ -132,7 +132,7 @@
 
     // reload employee picture
     const reload_employee_picture = () => {
-        var emp_no = document.getElementById('emp_no_lsd').value;
+        var emp_no = document.getElementById('emp_no_lsd').innerHTML;
 
         $.ajax({
             url:'../process/hr/employees/employee_picture_p.php',
@@ -162,8 +162,6 @@
         document.getElementById("section_lsd").innerHTML = section;
         document.getElementById("line_no_lsd").innerHTML = line_no_from;
         document.getElementById("process_lsd").innerHTML = line_process;
-
-        reload_employee_picture();
         
         $.ajax({
             url: '../process/viewer/certification/cert_p.php',
@@ -206,6 +204,8 @@
                 document.getElementById("count_view_lsd2").innerHTML = `Count: ${table_rows}`;
             }
         });
+
+        reload_employee_picture();
     }
 
     const export_line_support_certification = (table_id, separator = ',') => {
