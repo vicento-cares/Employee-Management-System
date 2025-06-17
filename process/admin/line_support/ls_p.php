@@ -839,17 +839,13 @@ if ($method == 'get_employee_line_support_history') {
 	$emp_no = $_POST['emp_no'];
 
 	$c = 0;
-	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-teal', 'modal-trigger bg-danger', 'modal-trigger bg-purple', 'modal-trigger bg-orange');
-	$row_class = $row_class_arr[0];
 
 	$sql = "SELECT TOP (1000) 
-				ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.section, emp.process, 
-				ls.day, ls.shift, emp.shift_group, ls.line_no_from, ls.line_no_to, 
-				ls.set_by, ls.set_by_no, ls.set_status_by, ls.set_status_by_no, ls.status, ls.date_updated, 
-				pic.file_url 
+				emp.full_name, 
+				ls.day, ls.shift, emp.shift_group, ls.line_no_to, 
+				ls.set_by, ls.set_by_no, ls.date_updated 
 			FROM t_line_support_history ls 
 			LEFT JOIN m_employees emp ON ls.emp_no = emp.emp_no 
-			LEFT JOIN m_employee_pictures pic ON ls.emp_no = pic.emp_no 
 			WHERE ls.emp_no LIKE ?";
 	$params = [];
 
@@ -865,39 +861,18 @@ if ($method == 'get_employee_line_support_history') {
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		$c++;
-		
-		if ($row['status'] == 'accepted') {
-			$row_class = $row_class_arr[1];
-		} else {
-			$row_class = $row_class_arr[0];
-		}
 
-		echo '<tr class="'.$row_class.'">';
+		echo '<tr>';
 		echo '<td style="vertical-align: middle;">'.$c.'</td>';
-		
-		$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-		if (!empty($row['file_url'])) {
-			echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol."172.25.116.188:3000".$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
-		} else {
-			echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
-		}
-
 		echo '<td style="vertical-align: middle;">'.$row['day'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['process'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['line_no_from'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['line_no_to'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['set_by'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['set_by_no'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['set_status_by'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['set_status_by_no'].'</td>';
-		echo '<td style="vertical-align: middle;">'.$row['status'].'</td>';
+		echo '<td style="vertical-align: middle;"></td>';
 		echo '<td style="vertical-align: middle;">'.$row['date_updated'].'</td>';
+		echo '<td style="vertical-align: middle;"></td>';
 		echo '</tr>';
 	}
 }

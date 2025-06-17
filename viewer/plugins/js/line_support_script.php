@@ -130,6 +130,23 @@
         }
     }
 
+    // reload employee picture
+    const reload_employee_picture = () => {
+        var emp_no = document.getElementById('emp_no_lsd').value;
+
+        $.ajax({
+            url:'../process/hr/employees/employee_picture_p.php',
+            type:'POST',
+            cache:false,
+            data:{
+                method:'reload_employee_picture',
+                emp_no:emp_no
+            },success:function(response){
+                document.getElementById('employee_picture_img_tag').src = response;
+            }
+        });
+    }
+
     const get_line_support_details = param => {
         var string = param.split('~!~');
         var emp_no = string[0];
@@ -145,6 +162,8 @@
         document.getElementById("section_lsd").innerHTML = section;
         document.getElementById("line_no_lsd").innerHTML = line_no_from;
         document.getElementById("process_lsd").innerHTML = line_process;
+
+        reload_employee_picture();
         
         $.ajax({
             url: '../process/viewer/certification/cert_p.php',

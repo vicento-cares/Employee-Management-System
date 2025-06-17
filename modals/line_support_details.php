@@ -9,6 +9,11 @@
         </button>
       </div>
       <div class="modal-body">
+        <div class="row mb-2">
+          <div class="col-sm-4">
+            <img class="update_employee_picture_img_tag" id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
+          </div>
+        </div>
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group mb-0">
@@ -111,23 +116,15 @@
             <thead style="text-align: center;">
                 <tr>
                 <th>#</th>
-                <th>Picture</th>
                 <th>Day</th>
-                <th>Shift</th>
                 <th>Shift Group</th>
-                <th>Employee No.</th>
-                <th>Full Name</th>
-                <th>Department</th>
-                <th>Section</th>
-                <th>Process</th>
-                <th>From Line No.</th>
+                <th>Shift</th>
                 <th>Supported Line No.</th>
                 <th>Set By</th>
                 <th>Set By No.</th>
-                <th>Accepted / Rejected By</th>
-                <th>Accepted / Rejected By No.</th>
-                <th>Status</th>
+                <th>Skill Level</th>
                 <th>Date Updated</th>
+                <th>Elapsed Time</th>
                 </tr>
             </thead>
             <tbody id="lineSupportHistoryData" style="text-align: center;"></tbody>
