@@ -10,49 +10,51 @@
       </div>
       <div class="modal-body">
         <div class="row mb-2">
-          <div class="col-sm-4">
+          <div class="col-sm-2">
             <img class="update_employee_picture_img_tag" id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
           </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Employee No. : </label>
-              <span id="emp_no_lsd" class="ml-2"></span>
+          <div class="col-sm-8">
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="form-group mb-0">
+                  <label>Employee No. : </label>
+                  <span id="emp_no_lsd" class="ml-2"></span>
+                </div>
+              </div>
+              <div class="col-sm-7">
+                <div class="form-group mb-0">
+                  <label>Full Name : </label>
+                  <span id="full_name_lsd" class="ml-2"></span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Full Name : </label>
-              <span id="full_name_lsd" class="ml-2"></span>
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="form-group mb-0">
+                  <label>Department : </label>
+                  <span id="dept_lsd" class="ml-2"></span>
+                </div>
+              </div>
+              <div class="col-sm-7">
+                <div class="form-group mb-0">
+                  <label>Section : </label>
+                  <span id="section_lsd" class="ml-2"></span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Department : </label>
-              <span id="dept_lsd" class="ml-2"></span>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Section : </label>
-              <span id="section_lsd" class="ml-2"></span>
-            </div>
-          </div>
-        </div>
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Line No. : </label>
-              <span id="line_no_lsd" class="ml-2"></span>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="form-group mb-0">
-              <label>Process : </label>
-              <span id="process_lsd" class="ml-2"></span>
+            <div class="row">
+              <div class="col-sm-5">
+                <div class="form-group mb-0">
+                  <label>Line No. : </label>
+                  <span id="line_no_lsd" class="ml-2"></span>
+                </div>
+              </div>
+              <div class="col-sm-7">
+                <div class="form-group mb-0">
+                  <label>Process : </label>
+                  <span id="process_lsd" class="ml-2"></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
