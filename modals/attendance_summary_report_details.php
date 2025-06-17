@@ -65,10 +65,16 @@
                 </div>
                 <hr>
                 <div class="row mb-2">
-                    <div class="col-sm-4 offset-sm-8">
+                    <div class="col-sm-2 offset-sm-8">
                         <div class="form-group mb-0">
                             <label>Percentage : </label>
                             <span id="attendance_percentage_asrd" class="ml-2"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group mb-0">
+                            <label>Absent Rate : </label>
+                            <span id="absent_rate_asrd" class="ml-2"></span>
                         </div>
                     </div>
                 </div>

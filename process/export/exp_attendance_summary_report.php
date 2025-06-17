@@ -79,7 +79,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('#', 'Shift Group', 'Department', 'Section', 'Line No.', 'Total MP', 'Present', 'Absent', 'Percentage');
+$fields = array('#', 'Shift Group', 'Department', 'Section', 'Line No.', 'Total MP', 'Present', 'Absent', 'Percentage', 'Absent Rate');
 fputcsv($f, $fields, $delimiter);
 
 //MS SQL Server
@@ -95,7 +95,10 @@ $sql = "WITH AttendanceData AS (
 				FORMAT(CASE 
 					WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
 					ELSE 0 
-				END, 'N2') AS attendance_percentage,
+				END, 'N2') AS attendance_percentage, 
+				FORMAT(
+					((NULLIF(COUNT(emp.emp_no), 0) - CAST(COUNT(tio.emp_no) AS FLOAT)) * 100) / NULLIF(COUNT(emp.emp_no), 0)
+					, 'N2') AS absent_rate, 
 				0 AS table_order
 			FROM 
 				m_employees emp 
@@ -180,7 +183,10 @@ $sql = $sql . " AND
 				FORMAT(CASE 
 					WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
 					ELSE 0 
-				END, 'N2') AS attendance_percentage,
+				END, 'N2') AS attendance_percentage, 
+				FORMAT(
+					((NULLIF(SUM(total), 0) - CAST(SUM(total_present) AS FLOAT)) * 100) / NULLIF(SUM(total), 0)
+					, 'N2') AS absent_rate, 
 				1 AS table_order
 			FROM 
 				AttendanceData
@@ -208,7 +214,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		$row['total'],
 		$row['total_present'],
 		$row['total_absent'],
-		$row['attendance_percentage']
+		$row['attendance_percentage'],
+		$row['absent_rate']
 	);
 	fputcsv($f, $lineData, $delimiter);
 }

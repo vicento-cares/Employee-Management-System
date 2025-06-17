@@ -986,7 +986,10 @@ if ($method == 'get_attendance_summary_report') {
 					FORMAT(CASE 
 						WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
 						ELSE 0 
-					END, 'N2') AS attendance_percentage,
+					END, 'N2') AS attendance_percentage, 
+					FORMAT(
+							((NULLIF(COUNT(emp.emp_no), 0) - CAST(COUNT(tio.emp_no) AS FLOAT)) * 100) / NULLIF(COUNT(emp.emp_no), 0)
+							, 'N2') AS absent_rate, 
 					0 AS table_order
 				FROM 
 					m_employees emp 
@@ -1071,7 +1074,10 @@ if ($method == 'get_attendance_summary_report') {
 					FORMAT(CASE 
 						WHEN SUM(total) > 0 THEN (SUM(total_present) * 100.0 / SUM(total)) 
 						ELSE 0 
-					END, 'N2') AS attendance_percentage,
+					END, 'N2') AS attendance_percentage, 
+					FORMAT(
+							((NULLIF(SUM(total), 0) - CAST(SUM(total_present) AS FLOAT)) * 100) / NULLIF(SUM(total), 0)
+							, 'N2') AS absent_rate, 
 					1 AS table_order
 				FROM 
 					AttendanceData
@@ -1118,7 +1124,8 @@ if ($method == 'get_attendance_summary_report') {
 				.'~!~'.$row['total']
 				.'~!~'.$row['total_present']
 				.'~!~'.$row['total_absent']
-				.'~!~'.$row['attendance_percentage'].'&quot;)">';
+				.'~!~'.$row['attendance_percentage']
+				.'~!~'.$row['absent_rate'].'&quot;)">';
 			
 		echo '<td>'.$c_label.'</td>';
 		echo '<td'.$total_class.'>'.$row['shift_group'].'</td>';
@@ -1129,6 +1136,7 @@ if ($method == 'get_attendance_summary_report') {
 		echo '<td'.$total_class.'>'.$row['total_present'].'</td>';
 		echo '<td'.$total_class.'>'.$row['total_absent'].'</td>';
 		echo '<td'.$total_class.'>'.$row['attendance_percentage'].'%</td>';
+		echo '<td'.$total_class.'>'.$row['absent_rate'].'%</td>';
 
 		echo '</tr>';
 	}
@@ -1181,7 +1189,10 @@ if ($method == 'get_multiple_attendance_summary_report') {
 				FORMAT(CASE 
 					WHEN COUNT(emp.emp_no) > 0 THEN (COUNT(tio.emp_no) * 100.0 / COUNT(emp.emp_no)) 
 					ELSE 0 
-				END, 'N2') AS attendance_percentage,
+				END, 'N2') AS attendance_percentage, 
+				FORMAT(
+					((NULLIF(COUNT(emp.emp_no), 0) - CAST(COUNT(tio.emp_no) AS FLOAT)) * 100) / NULLIF(COUNT(emp.emp_no), 0)
+					, 'N2') AS absent_rate, 
 				dr.ReportDate AS day
 			FROM 
 				DateRange dr
@@ -1243,6 +1254,7 @@ if ($method == 'get_multiple_attendance_summary_report') {
 				<th>Present</th>
 				<th>Absent</th>
 				<th>Percentage</th>
+				<th>Absent Rate</th>
 				</tr>
 			</thead>
 			<tbody id="multipleAttendanceSummaryReportData" style="text-align: center;">';
@@ -1259,6 +1271,7 @@ if ($method == 'get_multiple_attendance_summary_report') {
 		echo '<td>'.$row['total_present'].'</td>';
 		echo '<td>'.$row['total_absent'].'</td>';
 		echo '<td>'.$row['attendance_percentage'].'%</td>';
+		echo '<td>'.$row['absent_rate'].'%</td>';
 
 		echo '</tr>';
 	}

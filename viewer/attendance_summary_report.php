@@ -126,6 +126,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                         <th>Present</th>
                                         <th>Absent</th>
                                         <th>Percentage</th>
+                                        <th>Absent Rate</th>
                                         </tr>
                                     </thead>
                                     <tbody id="attendanceSummaryReportData" style="text-align: center;">

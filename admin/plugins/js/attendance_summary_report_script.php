@@ -418,6 +418,7 @@
         var total_present = string[6];
         var total_absent = string[7];
         var attendance_percentage = string[8];
+        var absent_rate = string[9];
 
         document.getElementById('day_asrd').innerHTML = day;
         document.getElementById('shift_group_asrd').innerHTML = shift_group;
@@ -428,6 +429,7 @@
         document.getElementById('present_asrd').innerHTML = total_present;
         document.getElementById('absent_asrd').innerHTML = total_absent;
         document.getElementById('attendance_percentage_asrd').innerHTML = `${attendance_percentage}%`;
+        document.getElementById('absent_rate_asrd').innerHTML = `${absent_rate}%`;
 
         document.getElementById('counting_view_present').innerHTML = total_present;
         document.getElementById('counting_view_absent').innerHTML = total_absent;
