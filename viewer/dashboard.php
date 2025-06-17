@@ -76,6 +76,12 @@ include 'plugins/navbar/viewer_navbar.php';
                                 </div>
                                 <div class="col-8" id="daily_absent_rate_chart"></div>
                             </div>
+                            <div class="row ml-2 mb-2">
+                                <div class="form-group mb-0">
+                                    <label><b>Daily Absent Rate Trend by Providers</b></label>
+                                </div>
+                            </div>
+                            <div class="row" id="daily_absent_rate_provider_chart"></div>
                         </div>
                         <!-- /.card-body -->
                     </div>

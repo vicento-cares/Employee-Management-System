@@ -583,4 +583,101 @@ if ($method == 'get_daily_absent_rate_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data]);
 }
 
+if ($method == 'get_daily_absent_rate_provider_chart') {
+	$color_map = array(
+        'GOLDENHAND' => '#3d9970', // Olive Green
+        'ONE SOURCE' => '#ffc107', // Yellow
+        'FAS' => '#007bff', // Blue
+        'PKIMT' => '#001f3f', // Navy Blue
+        'MAXIM' => '#17a2b8', // Cyan
+        'ADD EVEN' => '#8a2be2', // Violet
+		'MEGATREND' => '#3c8dbc', // Light Blue
+    );
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+        DECLARE @Year INT = YEAR(GETDATE());  -- Get the current year
+        DECLARE @Month INT = MONTH(GETDATE()); -- Get the current month
+
+        WITH DateRange AS (
+            SELECT 
+                DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+            FROM 
+                master.dbo.spt_values
+            WHERE 
+                type = 'P' AND 
+                number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+        		DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
+        )
+
+        SELECT 
+            CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date, 
+			emp.provider, 
+            CAST(
+                CASE 
+                    WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+                    ELSE 0 
+                END AS DECIMAL(10, 2)
+            ) AS absent_rate
+        FROM 
+            DateRange dr
+        LEFT JOIN 
+            m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+        LEFT JOIN 
+            t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+        GROUP BY 
+            dr.report_date, emp.provider 
+        ORDER BY 
+            dr.report_date ASC, emp.provider ASC;
+    ";
+
+	$stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    // Initialize an array to hold the counts for each section
+    $absentRates = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		// Add unique report_date to categories
+		if (!in_array($row['report_date'], $categories)) {
+			$categories[] = $row['report_date'];
+		}
+
+		if (!empty($row['provider'])) {
+			// Create a unique key for provider
+			$provider = $row['provider'];
+
+			// Extract the report_date as a DateTime object
+			$reportDate = new DateTime($row['report_date']);
+			$dateString = $reportDate->format('Y-m-d'); // Use a standard date format
+
+			// Initialize the absentRates for this provider if it doesn't exist
+			if (!isset($absentRates[$provider])) {
+				$absentRates[$provider] = [];
+			}
+
+			// Update the count for the specified status
+			if (!isset($absentRates[$provider][$dateString])) {
+				$absentRates[$provider][$dateString] = 0; // Initialize if not set
+			}
+			
+			// Increment the absent rate for the specific date
+			$absentRates[$provider][$dateString] += floatval($row['absent_rate']); // Use absent_rate for counts
+		}
+	}
+
+    // Create the final data structure
+    foreach ($absentRates as $provider => $counts) {
+        $data[] = [
+            'name' => $provider,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $color_map]);
+}
+
 $conn = NULL;

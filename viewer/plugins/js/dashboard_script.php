@@ -99,9 +99,81 @@
 		});
 	}
 
+    const get_daily_absent_rate_provider_chart = () => {
+        $.ajax({
+            url: '../process/hr/dashboard/dash_p.php',
+            type: 'POST',
+            cache: false,
+            dataType: 'json', 
+            data: {
+                method: 'get_daily_absent_rate_provider_chart'
+            },
+            success: response => {
+                console.log(response.categories);
+                console.log(response.data);
+                console.log(response.colorMap);
+
+                // Clear previous charts
+                const chartContainer = document.querySelector("#daily_absent_rate_provider_chart");
+                chartContainer.innerHTML = ''; // Clear existing charts
+
+                // Loop through each provider and create a chart
+                response.data.forEach((item, index) => {
+                    // Create a new column div for each chart
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-6'; // Adjust this class to control the number of charts per row
+                    colDiv.style.marginBottom = '20px'; // Add some spacing
+
+                    // Create a new canvas element for the chart
+                    const canvas = document.createElement('div');
+                    canvas.id = `chart-${index}`; // Unique ID for each chart
+                    colDiv.appendChild(canvas); // Append the canvas to the column div
+
+                    // Append the column div to the chart container
+                    chartContainer.appendChild(colDiv);
+
+                    // Prepare the chart options
+                    const options = {
+                        chart: {
+                            type: 'line',
+                            height: 300
+                        },
+                        series: [{
+                            name: item.name,
+                            data: Object.values(item.data)
+                        }],
+                        colors: [response.colorMap[item.name] || '#dc3545'], // Use color from colorMap or default
+                        xaxis: {
+                            categories: response.categories
+                        },
+                        title: {
+                            text: `${item.name} Daily Absent Rate Trend`,
+                            align: 'left'
+                        },
+                        stroke: {
+                            curve: 'smooth'
+                        },
+                        markers: {
+                            size: 5
+                        },
+                        tooltip: {
+                            shared: true,
+                            intersect: false
+                        }
+                    };
+
+                    // Create and render the chart
+                    const chart = new ApexCharts(canvas, options);
+                    chart.render();
+                });
+            }
+        });
+    }
+
     $(document).ready(function () {
         count_od();
         get_daily_absent_rate_chart();
+        get_daily_absent_rate_provider_chart();
 
         fetch_dept_dropdown();
         // fetch_group_dropdown();
