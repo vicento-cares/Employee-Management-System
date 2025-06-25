@@ -134,6 +134,14 @@ if (!isset($_SESSION['emp_no'])) {
         $params = array($server_date_time, $emp_no, $day, $shift);
         $stmt -> execute($params);
       }
+
+      // Shift Update
+      $sql = "UPDATE m_employees 
+              SET shift = ? 
+              WHERE emp_no = ?";
+      $stmt = $conn -> prepare($sql);
+      $params = array($shift, $emp_no);
+      $stmt -> execute($params);
     }
   } else {
     $unregistered = true;
