@@ -41,6 +41,35 @@ include 'plugins/navbar/viewer_navbar.php';
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-sm-2">
+                                    <label>Attendance Date</label>
+                                    <input type="date" class="form-control" id="od_date_search" required>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label>Department</label>
+                                    <select id="od_dept_search" class="form-control">
+                                        <option value="">Select Department</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label>Section</label>
+                                    <select id="od_section_search" class="form-control">
+                                        <option value="">Select Section</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <label>Line No.</label>
+                                    <select id="od_line_no_search" class="form-control">
+                                        <option value="">Select Line No.</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 offset-sm-2">
+                                    <label>&nbsp;</label>
+                                    <button type="button" class="btn bg-gray-dark btn-block"
+                                        onclick="count_od()"><i class="fas fa-search"></i> Search</button>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-4">
                                     <table class="table table-bordered table-black-white">
@@ -61,14 +90,14 @@ include 'plugins/navbar/viewer_navbar.php';
                                             </tr>
                                             <tr>
                                                 <td>Registered Employees</td>
-                                                <td></td>
-                                                <td></td>
+                                                <td id="od_registered_ds"></td>
+                                                <td id="od_registered_ns"></td>
                                                 <td id="od_registered_total">0</td>
                                             </tr>
                                             <tr>
                                                 <td>Absent Rate</td>
-                                                <td></td>
-                                                <td></td>
+                                                <td id="od_absent_rate_ds"></td>
+                                                <td id="od_absent_rate_ns"></td>
                                                 <td id="od_absent_rate">0</td>
                                             </tr>
                                         </tbody>

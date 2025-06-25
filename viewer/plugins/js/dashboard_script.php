@@ -6,12 +6,21 @@
     let daily_absent_rate_chart;
 
     const count_od = () => {
+        let day = document.getElementById('od_date_search').value;
+        let dept = document.getElementById('od_dept_search').value;
+        let section = document.getElementById('od_section_search').value;
+        let line_no = document.getElementById('od_line_no_search').value;
+
         $.ajax({
             url: '../process/hr/dashboard/dash_p.php',
             type: 'POST',
             cache: false,
             data: {
-                method: 'count_od'
+                method: 'count_od',
+                day: day,
+                dept: dept,
+                section: section,
+                line_no: line_no
             },
             success: function (response) {
                 try {
@@ -19,8 +28,20 @@
                     $('#od_present_ds').html(`<b>${response_array.od_present_ds}</b>`);
                     $('#od_present_ns').html(`<b>${response_array.od_present_ns}</b>`);
                     $('#od_present_total').html(`<b>${response_array.od_present_total}</b>`);
+                    $('#od_registered_ds').html(`<b>${response_array.od_registered_ds}</b>`);
+                    $('#od_registered_ns').html(`<b>${response_array.od_registered_ns}</b>`);
                     $('#od_registered_total').html(`<b>${response_array.od_registered_total}</b>`);
+                    $('#od_absent_rate_ds').html(`<b>${response_array.od_absent_rate_ds}</b>`);
+                    $('#od_absent_rate_ns').html(`<b>${response_array.od_absent_rate_ns}</b>`);
                     $('#od_absent_rate').html(`<b>${response_array.od_absent_rate}</b>`);
+
+                    sessionStorage.setItem('emp_mgt_od_day_search', day);
+                    sessionStorage.setItem('emp_mgt_od_dept_search', dept);
+                    sessionStorage.setItem('emp_mgt_od_section_search', section);
+                    sessionStorage.setItem('emp_mgt_od_line_no_search', line_no);
+
+                    get_daily_absent_rate_chart();
+                    get_daily_absent_rate_provider_chart();
                 } catch (e) {
                     console.log(response);
                     Swal.fire({
@@ -36,13 +57,22 @@
     }
 
     const get_daily_absent_rate_chart = () => {
+        let day = sessionStorage.getItem('emp_mgt_od_day_search');
+        let dept = sessionStorage.getItem('emp_mgt_od_dept_search');
+        let section = sessionStorage.getItem('emp_mgt_od_section_search');
+        let line_no = sessionStorage.getItem('emp_mgt_od_line_no_search');
+
 		$.ajax({
 			url: '../process/hr/dashboard/dash_p.php',
 			type: 'POST',
 			cache: false,
 			dataType: 'json', 
             data: {
-                method: 'get_daily_absent_rate_chart'
+                method: 'get_daily_absent_rate_chart',
+                day: day,
+                dept: dept,
+                section: section,
+                line_no: line_no
 			},
 			success: response => {
 				console.log(response.categories);
@@ -100,13 +130,22 @@
 	}
 
     const get_daily_absent_rate_provider_chart = () => {
+        let day = sessionStorage.getItem('emp_mgt_od_day_search');
+        let dept = sessionStorage.getItem('emp_mgt_od_dept_search');
+        let section = sessionStorage.getItem('emp_mgt_od_section_search');
+        let line_no = sessionStorage.getItem('emp_mgt_od_line_no_search');
+
         $.ajax({
             url: '../process/hr/dashboard/dash_p.php',
             type: 'POST',
             cache: false,
             dataType: 'json', 
             data: {
-                method: 'get_daily_absent_rate_provider_chart'
+                method: 'get_daily_absent_rate_provider_chart',
+                day: day,
+                dept: dept,
+                section: section,
+                line_no: line_no
             },
             success: response => {
                 console.log(response.categories);
@@ -171,12 +210,12 @@
     }
 
     $(document).ready(function () {
-        count_od();
-        get_daily_absent_rate_chart();
-        get_daily_absent_rate_provider_chart();
+        setTimeout(() => {
+            document.getElementById('od_date_search').value = '<?= $server_date_only ?>';
+            count_od();
+        }, 1000);
 
         fetch_dept_dropdown();
-        // fetch_group_dropdown();
         fetch_section_dropdown();
         fetch_line_dropdown();
 
@@ -226,21 +265,8 @@
                 method: 'fetch_dept_dropdown'
             },
             success: function (response) {
+                $('#od_dept_search').html(response);
                 $('#dept_master_search').html(response);
-            }
-        });
-    }
-
-    const fetch_group_dropdown = () => {
-        $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
-            type: 'POST',
-            cache: false,
-            data: {
-                method: 'fetch_group_dropdown'
-            },
-            success: function (response) {
-                $('#group_master_search').html(response);
             }
         });
     }
@@ -254,6 +280,7 @@
                 method: 'fetch_section_dropdown'
             },
             success: function (response) {
+                $('#od_section_search').html(response);
                 $('#section_master_search').html(response);
             }
         });
@@ -268,6 +295,7 @@
                 method: 'fetch_line_dropdown'
             },
             success: function (response) {
+                $('#od_line_no_search').html(response);
                 $('#line_no_master_search').html(response);
             }
         });
