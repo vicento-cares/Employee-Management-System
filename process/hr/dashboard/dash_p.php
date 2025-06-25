@@ -110,13 +110,13 @@ if ($method == 'count_emp_dashboard') {
 	$params[] = $day;
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND dept = ?";
+		$where_clause = $where_clause . " AND emp.dept = ?";
 	}
 	if (!empty($section)) {
-		$where_clause = $where_clause . " AND section LIKE ?";
+		$where_clause = $where_clause . " AND emp.section LIKE ?";
 	}
 	if (!empty($line_no)) {
-		$where_clause = $where_clause . " AND line_no LIKE ?";
+		$where_clause = $where_clause . " AND emp.line_no LIKE ?";
 	}
 
 	for ($i = 0; $i < 3; $i++) {
@@ -135,15 +135,15 @@ if ($method == 'count_emp_dashboard') {
 
 	$query .= " WITH EmployeeCounts AS (
 				SELECT 
-					COUNT(CASE WHEN shift_group = 'A' THEN 1 END) AS a,
-					COUNT(CASE WHEN shift_group = 'B' THEN 1 END) AS b,
-					COUNT(CASE WHEN shift_group = 'ADS' THEN 1 END) AS ads,
+					COUNT(CASE WHEN emp.shift_group = 'A' THEN 1 END) AS a,
+					COUNT(CASE WHEN emp.shift_group = 'B' THEN 1 END) AS b,
+					COUNT(CASE WHEN emp.shift_group = 'ADS' THEN 1 END) AS ads,
 					COUNT(id) AS total,
 					'Total' AS count_label
 				FROM 
-					m_employees
+					m_employees emp 
 				WHERE 
-					(resigned_date IS NULL OR resigned_date >= @Day) $where_clause 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) $where_clause 
 
 				UNION ALL
 
@@ -384,19 +384,53 @@ if ($method == 'count_emp_provider_dashboard') {
 }
 
 if ($method == 'count_od') {
+	$day = $_POST['day'];
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 
-	$query = "DECLARE @Day NVARCHAR(255) = GETDATE();
+	$where_clause = "";
 
-			WITH EmployeeCounts AS (
+	$query = "DECLARE @Day NVARCHAR(255) = ?;";
+
+	$params = [];
+
+	$params[] = $day;
+
+	if (!empty($dept)) {
+		$where_clause = $where_clause . " AND emp.dept = ?";
+	}
+	if (!empty($section)) {
+		$where_clause = $where_clause . " AND emp.section LIKE ?";
+	}
+	if (!empty($line_no)) {
+		$where_clause = $where_clause . " AND emp.line_no LIKE ?";
+	}
+
+	for ($i = 0; $i < 3; $i++) {
+		if (!empty($dept)) {
+			$params[] = $dept;
+		}
+		if (!empty($section)) {
+			$section_search = $section . "%";
+			$params[] = $section_search;
+		}
+		if (!empty($line_no)) {
+			$line_no_search = $line_no . "%";
+			$params[] = $line_no_search;
+		}
+	}
+
+	$query .= "WITH EmployeeCounts AS (
 				SELECT 
-					0 AS ds,
-					0 AS ns,
+					COUNT(CASE WHEN emp.shift = 'DS' THEN 1 END) AS ds, 
+					COUNT(CASE WHEN emp.shift = 'NS' THEN 1 END) AS ns, 
 					COUNT(id) AS total,
 					'Total' AS count_label
 				FROM 
-					m_employees
+					m_employees emp 
 				WHERE 
-					(resigned_date IS NULL OR resigned_date >= @Day) 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) $where_clause
 
 				UNION ALL
 
@@ -411,7 +445,7 @@ if ($method == 'count_od') {
 					t_time_in_out tio ON tio.emp_no = emp.emp_no
 				WHERE 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
-					tio.day = @Day 
+					tio.day = @Day $where_clause
 
 				UNION ALL
 
@@ -426,7 +460,7 @@ if ($method == 'count_od') {
 					t_line_support_history ls ON ls.emp_no = emp.emp_no
 				WHERE 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
-					ls.day = @Day 
+					ls.day = @Day $where_clause
 			)
 
 			SELECT 
@@ -440,8 +474,8 @@ if ($method == 'count_od') {
 			UNION ALL
 
 			SELECT 
-				0 AS ds,
-				0 AS ns,
+				CAST(ec1.ds AS INT) - CAST(ec2.ds AS INT) AS ds, 
+				CAST(ec1.ns AS INT) - CAST(ec2.ns AS INT) AS ns, 
 				CAST(ec1.total AS INT) - CAST(ec2.total AS INT) AS total,
 				'Absent' AS count_label
 			FROM 
@@ -455,8 +489,8 @@ if ($method == 'count_od') {
 			UNION ALL
 
 			SELECT 
-				0 AS ds,
-				0 AS ns,
+				ROUND((CAST(ec2.ds AS FLOAT) / NULLIF(ec1.ds, 0)) * 100, 2) AS ds, 
+				ROUND((CAST(ec2.ns AS FLOAT) / NULLIF(ec1.ns, 0)) * 100, 2) AS ns, 
 				ROUND((CAST(ec2.total AS FLOAT) / NULLIF(ec1.total, 0)) * 100, 2) AS total,
 				'Attendance Percentage' AS count_label
 			FROM 
@@ -470,8 +504,8 @@ if ($method == 'count_od') {
 			UNION ALL
 
 			SELECT 
-				0 AS ds,
-				0 AS ns,
+				ROUND(((CAST(ec1.ds AS FLOAT) - CAST(ec2.ds AS FLOAT)) * 100) / NULLIF(ec1.ds, 0), 2) AS ds, 
+				ROUND(((CAST(ec1.ns AS FLOAT) - CAST(ec2.ns AS FLOAT)) * 100) / NULLIF(ec1.ns, 0), 2) AS ns, 
 				ROUND(((CAST(ec1.total AS FLOAT) - CAST(ec2.total AS FLOAT)) * 100) / NULLIF(ec1.total, 0), 2) AS total,
 				'Absent Rate' AS count_label
 			FROM 
@@ -484,13 +518,15 @@ if ($method == 'count_od') {
 			";
 
 	$stmt = $conn->prepare($query);
-	$stmt->execute();
+	$stmt->execute($params);
 
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($row) {
 		do {
 			if ($row['count_label'] == 'Total') {
+				$od_registered_ds = intval($row['ds']);
+				$od_registered_ns = intval($row['ns']);
 				$od_registered_total = intval($row['total']);
 			}
 			if ($row['count_label'] == 'Present') {
@@ -499,17 +535,23 @@ if ($method == 'count_od') {
 				$od_present_total = intval($row['total']);
 			}
 			if ($row['count_label'] == 'Absent Rate') {
+				$od_absent_rate_ds = floatval($row['ds']);
+				$od_absent_rate_ns = floatval($row['ns']);
 				$od_absent_rate = floatval($row['total']);
 			}
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	}
 
 	$response_arr = array(
+		'od_registered_ds' => $od_registered_ds,
+		'od_registered_ns' => $od_registered_ns,
 		'od_registered_total' => $od_registered_total,
-		'od_present_total' => $od_present_total,
-		'od_absent_rate' => $od_absent_rate,
 		'od_present_ds' => $od_present_ds,
-		'od_present_ns' => $od_present_ns
+		'od_present_ns' => $od_present_ns,
+		'od_present_total' => $od_present_total,
+		'od_absent_rate_ds' => $od_absent_rate_ds,
+		'od_absent_rate_ns' => $od_absent_rate_ns,
+		'od_absent_rate' => $od_absent_rate
 	);
 
 	//header('Content-Type: application/json; charset=utf-8');
@@ -520,43 +562,86 @@ if ($method == 'get_daily_absent_rate_chart') {
     $data = [];
     $categories = [];
 
-    $sql = "
-        DECLARE @Year INT = YEAR(GETDATE());  -- Get the current year
-        DECLARE @Month INT = MONTH(GETDATE()); -- Get the current month
+	$day = $_POST['day'];
 
-        WITH DateRange AS (
-            SELECT 
-                DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-            FROM 
-                master.dbo.spt_values
-            WHERE 
-                type = 'P' AND 
-                number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-        		DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
-        )
+	// Create a DateTime object from the date string
+    $od_date = new DateTime($day);
 
-        SELECT 
-            CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date,
-            CAST(
-                CASE 
-                    WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
-                    ELSE 0 
-                END AS DECIMAL(10, 2)
-            ) AS absent_rate
-        FROM 
-            DateRange dr
-        LEFT JOIN 
-            m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
-        LEFT JOIN 
-            t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
-        GROUP BY 
-            dr.report_date 
-        ORDER BY 
-            dr.report_date ASC;
-    ";
+    // Extract year and month
+    $year = $od_date->format("Y"); // Get the year in YYYY format
+    $month = $od_date->format("n"); // Get the month in numeric format (1-12)
+
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
+
+	$where_clause = "WHERE emp.dept != ''";
+
+	$sql = "
+        DECLARE @Year INT = ?;  -- Get year
+        DECLARE @Month INT = ?; -- Get month";
+	
+	$params = [
+		$year,
+		$month
+	];
+
+	if (!empty($dept)) {
+		$where_clause = $where_clause . " AND emp.dept = ?";
+	}
+	if (!empty($section)) {
+		$where_clause = $where_clause . " AND emp.section LIKE ?";
+	}
+	if (!empty($line_no)) {
+		$where_clause = $where_clause . " AND emp.line_no LIKE ?";
+	}
+
+	if (!empty($dept)) {
+		$params[] = $dept;
+	}
+	if (!empty($section)) {
+		$section_search = $section . "%";
+		$params[] = $section_search;
+	}
+	if (!empty($line_no)) {
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
+	}
+
+    $sql .= "
+			WITH DateRange AS (
+				SELECT 
+					DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+				FROM 
+					master.dbo.spt_values
+				WHERE 
+					type = 'P' AND 
+					number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+					DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
+			)
+
+			SELECT 
+				CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date,
+				CAST(
+					CASE 
+						WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+						ELSE 0 
+					END AS DECIMAL(10, 2)
+				) AS absent_rate
+			FROM 
+				DateRange dr
+			LEFT JOIN 
+				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+			LEFT JOIN 
+				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+			$where_clause 
+			GROUP BY 
+				dr.report_date 
+			ORDER BY 
+				dr.report_date ASC;";
 
     $stmt = $conn->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($params);
 
     // Initialize an array to hold the absent rates for each date
     $absentRates = [];
@@ -597,44 +682,87 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
     $data = [];
     $categories = [];
 
-    $sql = "
-        DECLARE @Year INT = YEAR(GETDATE());  -- Get the current year
-        DECLARE @Month INT = MONTH(GETDATE()); -- Get the current month
+	$day = $_POST['day'];
 
-        WITH DateRange AS (
-            SELECT 
-                DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-            FROM 
-                master.dbo.spt_values
-            WHERE 
-                type = 'P' AND 
-                number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-        		DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
-        )
+	// Create a DateTime object from the date string
+    $od_date = new DateTime($day);
 
-        SELECT 
-            CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date, 
-			emp.provider, 
-            CAST(
-                CASE 
-                    WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
-                    ELSE 0 
-                END AS DECIMAL(10, 2)
-            ) AS absent_rate
-        FROM 
-            DateRange dr
-        LEFT JOIN 
-            m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
-        LEFT JOIN 
-            t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
-        GROUP BY 
-            dr.report_date, emp.provider 
-        ORDER BY 
-            dr.report_date ASC, emp.provider ASC;
-    ";
+    // Extract year and month
+    $year = $od_date->format("Y"); // Get the year in YYYY format
+    $month = $od_date->format("n"); // Get the month in numeric format (1-12)
+
+	$dept = $_POST['dept'];
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
+
+	$where_clause = "WHERE emp.dept != ''";
+
+	$sql = "
+        DECLARE @Year INT = ?;  -- Get year
+        DECLARE @Month INT = ?; -- Get month";
+	
+	$params = [
+		$year,
+		$month
+	];
+
+	if (!empty($dept)) {
+		$where_clause = $where_clause . " AND emp.dept = ?";
+	}
+	if (!empty($section)) {
+		$where_clause = $where_clause . " AND emp.section LIKE ?";
+	}
+	if (!empty($line_no)) {
+		$where_clause = $where_clause . " AND emp.line_no LIKE ?";
+	}
+
+	if (!empty($dept)) {
+		$params[] = $dept;
+	}
+	if (!empty($section)) {
+		$section_search = $section . "%";
+		$params[] = $section_search;
+	}
+	if (!empty($line_no)) {
+		$line_no_search = $line_no . "%";
+		$params[] = $line_no_search;
+	}
+
+    $sql .= "
+			WITH DateRange AS (
+				SELECT 
+					DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+				FROM 
+					master.dbo.spt_values
+				WHERE 
+					type = 'P' AND 
+					number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+					DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
+			)
+
+			SELECT 
+				CONVERT(VARCHAR(10), dr.report_date, 120) AS report_date, 
+				emp.provider, 
+				CAST(
+					CASE 
+						WHEN COUNT(emp.emp_no) > 0 THEN ((COUNT(emp.emp_no) - COUNT(tio.emp_no)) * 100.0 / COUNT(emp.emp_no)) 
+						ELSE 0 
+					END AS DECIMAL(10, 2)
+				) AS absent_rate
+			FROM 
+				DateRange dr
+			LEFT JOIN 
+				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+			LEFT JOIN 
+				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
+			$where_clause 
+			GROUP BY 
+				dr.report_date, emp.provider 
+			ORDER BY 
+				dr.report_date ASC, emp.provider ASC;";
 
 	$stmt = $conn->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($params);
 
     // Initialize an array to hold the counts for each section
     $absentRates = [];
