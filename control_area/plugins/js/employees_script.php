@@ -84,6 +84,7 @@
             },
             success: function (response) {
                 $('#line_no_master_search').html(response);
+                $('#line_no_lshift').html(response);
             }
         });
     }
@@ -696,5 +697,55 @@
         var provider = sessionStorage.getItem('provider_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
         window.open('../process/print/print_employees.php?emp_no=' + emp_no + "&full_name=" + full_name + '&provider=' + provider + '&line_no=' + line_no, '_blank');
+    }
+
+    const clear_line_shifting_details = () => {
+        document.getElementById('line_no_lshift').value = '';
+        document.getElementById('shift_lshift').value = '';
+    }
+
+	$("#set_line_shifting").on('hidden.bs.modal', e => {
+        clear_line_shifting_details();
+    });
+
+    document.getElementById('set_line_shifting_form').addEventListener('submit', e => {
+        e.preventDefault();
+        set_line_shifting();
+    });
+
+    const set_line_shifting = () => {
+        var line_no = document.getElementById('line_no_lshift').value;
+        var shift = document.getElementById('shift_lshift').value;
+
+        $.ajax({
+            url: '../process/admin/shifting/shift_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'set_line_shifting',
+                line_no: line_no,
+                shift: shift
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succesfully Recorded!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    load_employees(1);
+                    $('#set_line_shifting').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            }
+        });
     }
 </script>

@@ -1,0 +1,37 @@
+<?php 
+session_set_cookie_params(0, "/emp_mgt");
+session_name("emp_mgt");
+session_start();
+
+include '../../conn.php';
+
+$method = $_POST['method'];
+
+// Shifting
+
+if ($method == 'set_line_shifting') {
+	if (isset($_SESSION['dept'])) {
+		$dept = $_SESSION['dept'];
+		$section = $_SESSION['section'];
+		$line_no = $_POST['line_no'];
+		$shift = $_POST['shift'];
+
+		if (!empty($line_no)) {
+			$query = "UPDATE m_employees SET shift = ? WHERE dept = ? AND section = ? AND line_no = ?";
+			$stmt = $conn->prepare($query);
+			$params = array($shift, $dept, $section, $line_no);
+
+			if ($stmt->execute($params)) {
+				echo 'success';
+			} else {
+				echo 'error';
+			}
+		} else {
+			echo 'Empty Line No. Please select Line No. Again';
+		}
+	} else {
+		echo 'Session Expired. Please re-login your account.';
+	}
+}
+
+$conn = NULL;

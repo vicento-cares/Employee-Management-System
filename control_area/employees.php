@@ -78,7 +78,10 @@
                 </div>
               </div>
               <div class="row mb-4">
-                <div class="col-sm-2 offset-sm-8">
+                <div class="col-sm-2">
+                  <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#set_line_shifting"><i class="fas fa-check"></i> Line Shifting</button>
+                </div>
+                <div class="col-sm-2 offset-sm-6">
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="load_employees(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
                 <div class="col-sm-2">

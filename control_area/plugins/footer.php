@@ -8,6 +8,7 @@
 <?php
 //MODALS
 include '../modals/logout_modal.php';
+include '../modals/set_line_shifting.php';
 include '../modals/view_employee_control_area.php';
 include '../modals/update_skill_level.php';
 ?>
