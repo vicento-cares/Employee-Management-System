@@ -3,6 +3,8 @@
     var load_employees_ajax_in_process = false;
 
     $(document).ready(function () {
+        fetch_line_dropdown_search();
+
         fetch_dept_dropdown();
         fetch_group_dropdown();
         fetch_section_dropdown();
@@ -67,6 +69,24 @@
         if (next_page <= last_page && total > 0) {
             load_employees(next_page);
         }
+    }
+
+    const fetch_line_dropdown_search = () => {
+        let section = '<?=$_SESSION['section']?>';
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#line_no_master_search').html(response);
+                $('#line_no_lshift').html(response);
+            }
+        });
     }
 
     const fetch_dept_dropdown = () => {
@@ -302,6 +322,7 @@
         var emp_no = sessionStorage.getItem('emp_no_master_search');
         var full_name = sessionStorage.getItem('full_name_master_search');
         var provider = sessionStorage.getItem('provider_master_search');
+        var line_no = sessionStorage.getItem('line_no_master_search');
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
             type: 'POST',
@@ -310,7 +331,8 @@
                 method: 'count_employee_list',
                 emp_no: emp_no,
                 full_name: full_name,
-                provider: provider
+                provider: provider,
+                line_no: line_no
             },
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -331,6 +353,7 @@
         var emp_no = sessionStorage.getItem('emp_no_master_search');
         var full_name = sessionStorage.getItem('full_name_master_search');
         var provider = sessionStorage.getItem('provider_master_search');
+        var line_no = sessionStorage.getItem('line_no_master_search');
         var current_page = parseInt(sessionStorage.getItem('list_of_employees_table_pagination'));
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
@@ -340,7 +363,8 @@
                 method: 'employee_list_last_page',
                 emp_no: emp_no,
                 full_name: full_name,
-                provider: provider
+                provider: provider,
+                line_no: line_no
             },
             success: function (response) {
                 sessionStorage.setItem('last_page', response);
@@ -366,19 +390,23 @@
         var emp_no = document.getElementById('emp_no_master_search').value;
         var full_name = document.getElementById('full_name_master_search').value;
         var provider = document.getElementById('provider_master_search').value;
+        var line_no = document.getElementById('line_no_master_search').value;
 
         var emp_no1 = sessionStorage.getItem('emp_no_master_search');
         var full_name1 = sessionStorage.getItem('full_name_master_search');
         var provider1 = sessionStorage.getItem('provider_master_search');
+        var line_no1 = sessionStorage.getItem('line_no_master_search');
 
         if (current_page > 1) {
             switch (true) {
                 case emp_no !== emp_no1:
                 case full_name !== full_name1:
                 case provider !== provider1:
+                case line_no !== line_no1:
                     emp_no = emp_no1;
                     full_name = full_name1;
                     provider = provider1;
+                    line_no = line_no1;
                     break;
                 default:
             }
@@ -386,6 +414,7 @@
             sessionStorage.setItem('emp_no_master_search', emp_no);
             sessionStorage.setItem('full_name_master_search', full_name);
             sessionStorage.setItem('provider_master_search', provider);
+            sessionStorage.setItem('line_no_master_search', line_no);
         }
 
         // Set the flag to true as we're starting an AJAX call
@@ -400,6 +429,7 @@
                 emp_no: emp_no,
                 full_name: full_name,
                 provider: provider,
+                line_no: line_no,
                 resigned: 0,
                 current_page: current_page
             },
@@ -463,6 +493,7 @@
         // var group = string[21];
         var sub_section = string[22];
         var skill_level = string[23];
+        var shift = string[24];
 
         document.getElementById('id_employee_master_update').value = id;
         document.getElementById('emp_no_master_update').value = emp_no;
@@ -490,6 +521,7 @@
         document.getElementById('process_master_update').value = line_process;
         document.getElementById('sub_section_master_update').value = sub_section;
         document.getElementById('skill_level_master_update').value = skill_level;
+        document.getElementById('shift_master_update').value = shift;
 
         fetch_line_dropdown(2);
 
@@ -520,6 +552,7 @@
         var line_process = document.getElementById('process_master_update').value;
         var sub_section = document.getElementById('sub_section_master_update').value;
         var skill_level = document.getElementById('skill_level_master_update').value;
+        var shift = document.getElementById('shift_master_update').value;
 
         var emp_js_s_master_update = document.getElementById("emp_js_s_master_update");
         var emp_js_s_no = emp_js_s_master_update.value;
@@ -589,6 +622,7 @@
                     position: position,
                     date_hired: date_hired,
                     provider: provider,
+                    shift: shift,
                     shift_group: shift_group,
                     address: address,
                     contact_no: contact_no,
@@ -661,6 +695,59 @@
         var emp_no = sessionStorage.getItem('emp_no_master_search');
         var full_name = sessionStorage.getItem('full_name_master_search');
         var provider = sessionStorage.getItem('provider_master_search');
-        window.open('../process/print/print_employees.php?emp_no=' + emp_no + "&full_name=" + full_name + '&provider=' + provider, '_blank');
+        var line_no = sessionStorage.getItem('line_no_master_search');
+        window.open('../process/print/print_employees.php?emp_no=' + emp_no + "&full_name=" + full_name + '&provider=' + provider + '&line_no=' + line_no, '_blank');
+    }
+
+    const clear_line_shifting_details = () => {
+        document.getElementById('line_no_lshift').value = '';
+        document.getElementById('shift_lshift').value = '';
+    }
+
+	$("#set_line_shifting").on('hidden.bs.modal', e => {
+        clear_line_shifting_details();
+    });
+
+    document.getElementById('set_line_shifting_form').addEventListener('submit', e => {
+        e.preventDefault();
+        set_line_shifting();
+    });
+
+    const set_line_shifting = () => {
+        var line_no = document.getElementById('line_no_lshift').value;
+        var shift_group = document.getElementById('shift_group_lshift').value;
+        var shift = document.getElementById('shift_lshift').value;
+
+        $.ajax({
+            url: '../process/admin/shifting/shift_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'set_line_shifting',
+                line_no: line_no,
+                shift_group: shift_group,
+                shift: shift
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succesfully Recorded!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    load_employees(1);
+                    $('#set_line_shifting').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            }
+        });
     }
 </script>

@@ -79,6 +79,8 @@
 				console.log(response.data);
 				console.log(response.colorMap);
 
+                document.getElementById('daily_absent_rate_chart').innerHTML = '';
+
 				// Define Bootstrap 4 colors
 				const bootstrapColors = ['#dc3545']; // Added a color for the line chart
 

@@ -69,14 +69,22 @@
                     <option value="ONE SOURCE">ONE SOURCE</option>
                     <option value="MEGATREND">MEGATREND</option>
                     <option value="ADD EVEN">ADD EVEN</option>
+                    <option value="GOLDENHAND">GOLDENHAND</option>
                   </select>
                 </div>
+                <div class="col-sm-4">
+                  <label>Line No:</label>
+                  <select id="line_no_master_search" class="form-control" onchange="load_employees(1)"></select>
+                </div>
+              </div>
+              <div class="row mb-4">
                 <div class="col-sm-2">
-                  <label>&nbsp;</label>
+                  <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#set_line_shifting"><i class="fas fa-check"></i> Line Shifting</button>
+                </div>
+                <div class="col-sm-2 offset-sm-6">
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="load_employees(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
                 <div class="col-sm-2">
-                  <label>&nbsp;</label>
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="print_employees()"><i class="fas fa-print"></i> Print</button>
                 </div>
               </div>
