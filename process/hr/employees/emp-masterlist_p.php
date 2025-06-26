@@ -202,7 +202,7 @@ if ($method == 'fetch_line_dropdown') {
 	$params = [];
 
 	if (!empty($section)) {
-		if ($section != 'QA') {
+		if ($section != 'QC') {
 			$sql = $sql . " WHERE section = ?";
 			$params[] = $section;
 		}
