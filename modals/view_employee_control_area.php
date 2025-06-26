@@ -89,23 +89,18 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-3">
-            <label>Provider:</label>
-            <select id="provider_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
-              <option value="">Select Provider</option>
-              <option value="ADD EVEN">ADD EVEN</option>
-              <option value="FAS">FAS</option>
-              <option value="GOLDENHAND">GOLDENHAND</option>
-              <option value="MAXIM">MAXIM</option>
-              <option value="MEGATREND">MEGATREND</option>
-              <option value="ONE SOURCE">ONE SOURCE</option>
-              <option value="PKIMT">PKIMT</option>
+          <div class="col-2">
+            <label>Shift:</label>
+            <select id="shift_master_update" class="form-control" style="height:45px; border: 1px solid black;">
+              <option value="" disabled>Select Shift</option>
+              <option value="DS">DS</option>
+              <option value="NS">NS</option>
             </select>
           </div>
-          <div class="col-2">
+          <div class="col-3">
             <label>Shift Group:</label>
             <select id="shift_group_master_update" class="form-control" style="height:45px; border: 1px solid black;">
-              <option value="">Select Shift Group</option>
+              <option value="" disabled>Select Shift Group</option>
               <option value="A">A</option>
               <option value="B">B</option>
               <option value="ADS">ADS</option>
@@ -135,7 +130,20 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-12">
+          <div class="col-3">
+            <label>Provider:</label>
+            <select id="provider_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+              <option value="">Select Provider</option>
+              <option value="ADD EVEN">ADD EVEN</option>
+              <option value="FAS">FAS</option>
+              <option value="GOLDENHAND">GOLDENHAND</option>
+              <option value="MAXIM">MAXIM</option>
+              <option value="MEGATREND">MEGATREND</option>
+              <option value="ONE SOURCE">ONE SOURCE</option>
+              <option value="PKIMT">PKIMT</option>
+            </select>
+          </div>
+          <div class="col-9">
             <label>Address:</label>
             <input type="text" id="address_master_update" class="form-control" autocomplete="off" style="height:45px; border: 1px solid black;" disabled>
           </div>

@@ -76,6 +76,11 @@ $provider = trim($_GET['provider']);
 $dept = $_SESSION['dept'];
 $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
+
+if (isset($_GET['line_no'])) {
+  $line_no = trim($_GET['line_no']);
+}
+
 $c = 0;
 
 $search_arr = array(
@@ -120,6 +125,9 @@ $params[] = $dept;
 $params[] = $section;
 
 if (!empty($_SESSION['line_no'])) {
+  $query = $query . " AND line_no = ?";
+  $params[] = $line_no;
+} else if (!empty($line_no)) {
   $query = $query . " AND line_no = ?";
   $params[] = $line_no;
 }
