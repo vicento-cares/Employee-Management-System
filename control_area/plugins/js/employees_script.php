@@ -715,6 +715,7 @@
 
     const set_line_shifting = () => {
         var line_no = document.getElementById('line_no_lshift').value;
+        var shift_group = document.getElementById('shift_group_lshift').value;
         var shift = document.getElementById('shift_lshift').value;
 
         $.ajax({
@@ -724,6 +725,7 @@
             data: {
                 method: 'set_line_shifting',
                 line_no: line_no,
+                shift_group: shift_group,
                 shift: shift
             }, success: function (response) {
                 if (response == 'success') {

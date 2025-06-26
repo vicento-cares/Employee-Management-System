@@ -11,13 +11,22 @@
       <div class="modal-body">
         <form id="set_line_shifting_form">
           <div class="row">
-            <div class="col-sm-8">
+            <div class="col-sm-6">
               <label>Line No.</label><label style="color: red;">*</label>
               <select id="line_no_lshift" class="form-control" required>
                 <option selected disabled value="">Select Line</option>
               </select>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-3">
+              <label>Shift Group:</label><label style="color: red;">*</label>
+              <select id="shift_group_lshift" class="form-control" required>
+                <option value="" selected disabled>Select Shift Group</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="ADS">ADS</option>
+              </select>
+            </div>
+            <div class="col-sm-3">
               <label>Shift:</label><label style="color: red;">*</label>
               <select id="shift_lshift" class="form-control" required>
                 <option value="" selected disabled>Select Shift</option>
