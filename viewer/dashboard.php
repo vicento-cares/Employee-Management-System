@@ -103,14 +103,22 @@ include 'plugins/navbar/viewer_navbar.php';
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="col-8" id="daily_absent_rate_chart"></div>
+                                <div class="col-8" id="daily_absent_rate_chart" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                    <div class="spinner-border text-dark" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row ml-2 mb-2">
                                 <div class="form-group mb-0">
                                     <label><b>Daily Absent Rate Trend by Providers</b></label>
                                 </div>
                             </div>
-                            <div class="row" id="daily_absent_rate_provider_chart"></div>
+                            <div class="row" id="daily_absent_rate_provider_chart" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                                <div class="spinner-border text-dark" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
                         </div>
                         <!-- /.card-body -->
                     </div>
