@@ -72,8 +72,8 @@ function get_sections($conn)
         array_push($data, $row['section']);
     }
 
-    //QA
-    array_push($data, "QA");
+    //QA QC section
+    array_push($data, "QC");
 
     return $data;
 }
