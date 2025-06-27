@@ -104,6 +104,9 @@
 					xaxis: {
 						categories: response.categories
 					},
+                    yaxis: {
+                        max: 50
+                    },
 					title: {
 						text: `Daily Absent Rate Trend`,
 						align: 'left'
@@ -186,6 +189,9 @@
                         colors: [response.colorMap[item.name] || '#dc3545'], // Use color from colorMap or default
                         xaxis: {
                             categories: response.categories
+                        },
+                        yaxis: {
+                            max: 50
                         },
                         title: {
                             text: `${item.name} Daily Absent Rate Trend`,
