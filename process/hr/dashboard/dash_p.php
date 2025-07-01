@@ -398,7 +398,11 @@ if ($method == 'count_od') {
 	$params[] = $day;
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";
@@ -587,7 +591,11 @@ if ($method == 'get_daily_absent_rate_chart') {
 	];
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";
@@ -707,7 +715,11 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
 	];
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";

@@ -128,6 +128,7 @@ if ($method == 'fetch_dept_dropdown') {
     if ($row) {
 		echo '<option selected value="">Select Department</option>';
 		echo '<option value="">All</option>';
+		echo '<option value="PD">All PD</option>';
 		do {
 			echo '<option value="'.htmlspecialchars($row['dept']).'">'.htmlspecialchars($row['dept']).'</option>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
