@@ -199,6 +199,14 @@
                             showConfirmButton: false,
                             timer: 1000
                         });
+                    } else if (response == 'No Certification') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No Certification on Process to Support',
+                            text: 'Information',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
                     } else {
                         try {
                             let response_array = JSON.parse(response);
@@ -253,6 +261,150 @@
                 } else {
                     document.getElementById("btnSaveLineSupport").setAttribute('disabled', true);
                 }
+            }
+        });
+    }
+
+    const edit_single_added_line_support = el => {
+        var id = el.dataset.id;
+        var emp_no = el.dataset.emp_no;
+
+        document.getElementById('lsd_id').value = id;
+        document.getElementById('lsd_emp_no').value = emp_no;
+
+        const startTimeInput = document.getElementById('lsd_start_date');
+        const endTimeInput = document.getElementById('lsd_end_date');
+
+        // Set default time to 00 minutes
+        const currentTime = new Date();
+        const hours = String(currentTime.getHours()).padStart(2, '0'); // Get current hours
+        const defaultTime = `${hours}:00`; // Set minutes to 00
+
+        startTimeInput.value = defaultTime; // Set default value for start time
+        endTimeInput.value = defaultTime; // Set default value for end time
+
+        $('#set_line_support_details').modal('show');
+    }
+
+    document.getElementById('lsd_category').addEventListener('change', e => {
+        e.preventDefault();
+
+        const emp_no = document.getElementById('lsd_emp_no').value;
+
+        // Get the current element value
+        const category = e.target.value;
+
+        // You can now use category as needed
+        console.log(category);
+
+        $.ajax({
+            url: '../process/admin/line_support/ls_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_assigned_process_dropdown',
+                category: category,
+                emp_no: emp_no
+            },
+            success: function (response) {
+                $("#lsd_assigned_process").html(response);
+            }
+        });
+
+        $.ajax({
+            url: '../process/admin/line_support/ls_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_assigned_station_dropdown',
+                category: category
+            },
+            success: function (response) {
+                $("#lsd_assigned_station").html(response);
+            }
+        });
+    });
+
+    document.getElementById('lsd_assigned_station').addEventListener('change', e => {
+        e.preventDefault();
+
+        // Get the current element value
+        const assigned_station = e.target.value;
+
+        // You can now use assigned_station as needed
+        console.log(assigned_station);
+
+        if (assigned_station == 'N/A') {
+            document.getElementById('lsd_assigned_station_no').disabled = true;
+        } else {
+            document.getElementById('lsd_assigned_station_no').disabled = false;
+        }
+    });
+
+    const clear_line_support_details = () => {
+        document.getElementById('lsd_id').value = '';
+        document.getElementById('lsd_assigned_process').value = '';
+        document.getElementById('lsd_category').value = '';
+        document.getElementById('lsd_assigned_station').value = '';
+        document.getElementById('lsd_assigned_station_no').disabled = false;
+        document.getElementById('lsd_assigned_station_no').value = '';
+        document.getElementById('lsd_start_date').value = '';
+        document.getElementById('lsd_end_date').value = '';
+    }
+
+	$("#set_line_support_details").on('hidden.bs.modal', e => {
+        clear_line_support_details();
+    });
+
+    document.getElementById('set_line_support_details_form').addEventListener('submit', e => {
+        e.preventDefault();
+        set_line_support_details();
+    });
+
+    const set_line_support_details = () => {
+        var id = document.getElementById('lsd_id').value;
+        var assigned_process = document.getElementById('lsd_assigned_process').value;
+        var assigned_station = document.getElementById('lsd_assigned_station').value;
+        var assigned_station_no = document.getElementById('lsd_assigned_station_no').value;
+        var start_date = document.getElementById('lsd_start_date').value;
+        var end_date = document.getElementById('lsd_end_date').value;
+
+        document.getElementById('btnSaveLineSupportDetails').disabled = true;
+
+        $.ajax({
+            url: '../process/admin/line_support/ls_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'set_line_support_details',
+                id: id,
+                assigned_process: assigned_process,
+                assigned_station: assigned_station,
+                assigned_station_no: assigned_station_no,
+                start_date: start_date,
+                end_date: end_date
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Saved Succesfully!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    get_added_line_support();
+                    $('#set_line_support_details').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+
+                document.getElementById('btnSaveLineSupportDetails').disabled = false;
             }
         });
     }

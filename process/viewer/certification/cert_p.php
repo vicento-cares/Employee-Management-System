@@ -464,6 +464,10 @@ if ($method == 'get_line_support_certification') {
 			RankedAuthInitial AS (
 				SELECT emp.dept, emp.line_no, emp.section, 
 						a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
+						CASE 
+							WHEN a.expire_date < GETDATE() THEN 'Expired'
+							ELSE 'Active'
+						END AS status, 
 						a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
 						b.fullname, b.agency, b.emp_id, 
 						sl.id AS skill_level_id, sl.skill_level, 
@@ -495,6 +499,10 @@ if ($method == 'get_line_support_certification') {
 			RankedAuthFinal AS (
 				SELECT emp.dept, emp.line_no, emp.section, 
 						a.batch, a.process, a.auth_no, a.auth_year, a.date_authorized, a.expire_date, 
+						CASE 
+							WHEN a.expire_date < GETDATE() THEN 'Expired'
+							ELSE 'Active'
+						END AS status, 
 						a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
 						b.fullname, b.agency, b.emp_id, 
 						sl.id AS skill_level_id, sl.skill_level, 
@@ -534,9 +542,9 @@ if ($method == 'get_line_support_certification') {
 		do {
 			$c++;
 
-			$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
+			$row_class = ($row['status'] == 'Expired') ? " bg-danger" : "";
 
-			echo '<tr>';
+			echo '<tr class="'.$row_class.'">';
 			
 			echo '<td>' . $c . '</td>';
 			echo '<td>' . htmlspecialchars($row['process']) . '</td>';
@@ -544,6 +552,7 @@ if ($method == 'get_line_support_certification') {
 			echo '<td>' . htmlspecialchars($row['auth_year']) . '</td>';
 			echo '<td>' . htmlspecialchars($row['date_authorized']) . '</td>';
 			echo '<td>' . htmlspecialchars($row['expire_date']) . '</td>';
+			echo '<td>' . htmlspecialchars($row['status']) . '</td>';
 			echo '<td>' . htmlspecialchars($row['fullname']) . '</td>';
 			echo '<td>' . htmlspecialchars($row['emp_id']) . '</td>';
 			echo '<td>' . htmlspecialchars($row['batch']) . '</td>';

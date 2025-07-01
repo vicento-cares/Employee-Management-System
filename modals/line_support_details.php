@@ -83,6 +83,7 @@
                 <th>Authorization Year</th>
                 <th>Date Authorized</th>
                 <th>Expire&nbsp;Date</th>
+                <th>Status</th>
                 <th>Employee Name</th>
                 <th>Employee No.</th>
                 <th>Batch No.</th>
@@ -122,11 +123,15 @@
                 <th>Shift Group</th>
                 <th>Shift</th>
                 <th>Supported Line No.</th>
+                <th>Assigned Process</th>
+                <th>Skill Level</th>
+                <th>Assigned Station</th>
                 <th>Set By</th>
                 <th>Set By No.</th>
-                <th>Skill Level</th>
-                <th>Date Updated</th>
                 <th>Elapsed Time</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Date Updated</th>
                 </tr>
             </thead>
             <tbody id="lineSupportHistoryData" style="text-align: center;"></tbody>
