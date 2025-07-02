@@ -715,6 +715,13 @@
 
     const set_line_shifting = () => {
         var line_no = document.getElementById('line_no_lshift').value;
+
+        if (line_no == '') {
+            var selectLineNo = document.getElementById('line_no_lshift');
+            var selectedLineNo = selectLineNo.options[selectLineNo.selectedIndex];
+            line_no = selectedLineNo.innerHTML;
+        }
+        
         var shift_group = document.getElementById('shift_group_lshift').value;
         var shift = document.getElementById('shift_lshift').value;
 

@@ -18,9 +18,21 @@ if ($method == 'set_line_shifting') {
 		$shift_group = $_POST['shift_group'];
 
 		if (!empty($line_no)) {
-			$query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ? AND line_no = ?";
+			$query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
+
+			$params = [
+				$shift, 
+				$shift_group, 
+				$dept, 
+				$section
+			];
+
+			if ($line_no != 'All') {
+				$query .= " AND line_no = ?";
+				$params[] = $line_no;
+			}
+
 			$stmt = $conn->prepare($query);
-			$params = array($shift, $shift_group, $dept, $section, $line_no);
 
 			if ($stmt->execute($params)) {
 				echo 'success';

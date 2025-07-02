@@ -398,7 +398,11 @@ if ($method == 'count_od') {
 	$params[] = $day;
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";
@@ -430,7 +434,8 @@ if ($method == 'count_od') {
 				FROM 
 					m_employees emp 
 				WHERE 
-					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) $where_clause
+					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
+					emp.shift IS NOT NULL $where_clause
 
 				UNION ALL
 
@@ -575,7 +580,7 @@ if ($method == 'get_daily_absent_rate_chart') {
 	$section = $_POST['section'];
 	$line_no = $_POST['line_no'];
 
-	$where_clause = "WHERE emp.dept != ''";
+	$where_clause = "WHERE emp.dept != '' AND emp.shift IS NOT NULL";
 
 	$sql = "
         DECLARE @Year INT = ?;  -- Get year
@@ -587,7 +592,11 @@ if ($method == 'get_daily_absent_rate_chart') {
 	];
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";
@@ -695,7 +704,7 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
 	$section = $_POST['section'];
 	$line_no = $_POST['line_no'];
 
-	$where_clause = "WHERE emp.dept != ''";
+	$where_clause = "WHERE emp.dept != '' AND emp.shift IS NOT NULL";
 
 	$sql = "
         DECLARE @Year INT = ?;  -- Get year
@@ -707,7 +716,11 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
 	];
 
 	if (!empty($dept)) {
-		$where_clause = $where_clause . " AND emp.dept = ?";
+		if ($dept == 'PD') {
+			$where_clause = $where_clause . " AND emp.dept IN ('PD1', 'PD2', 'PD3')";
+		} else {
+			$where_clause = $where_clause . " AND emp.dept = ?";
+		}
 	}
 	if (!empty($section)) {
 		$where_clause = $where_clause . " AND emp.section LIKE ?";
