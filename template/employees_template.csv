@@ -1,2 +1,2 @@
-﻿Employee No.,Full Name,Department,Section,Sub Section,Line No.,Process,Position,Provider,Shift Group,Gender,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned
-Ex: 23-12345,"Dela Cruz, Juan P.",PD2,"FAP1 Suzuki","Suzuki Final",5101,Assy,Associate,FAS,A or B or ADS,M or F,2023/12/01,"Lipa City, Batangas",9123456789,Probationary or Regular,Lipa Malapit,23-24680,23-13579,23-97531,N/A or 2024-12-01
+﻿Employee No.,Full Name,Department,Section,Sub Section,Line No.,Process,Position,Provider,Shift,Shift Group,Gender,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned
+Ex: 23-12345,"Dela Cruz, Juan P.",PD2,"FAP1 Suzuki","Suzuki Final",5101,Assy,Associate,FAS,DS or NS,A or B or ADS,M or F,2023/12/01,"Lipa City, Batangas",9123456789,Probationary or Regular,Lipa Malapit,23-24680,23-13579,23-97531,N/A or 2024-12-01
