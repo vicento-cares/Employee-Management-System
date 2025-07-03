@@ -384,9 +384,9 @@ if ($method == 'set_line_support') {
 	$table_name = '';
 
 	if ($check_line_no_to > 0) {
-		$table_name = '[qualif].[dbo].[t_i_process]';
-	} else {
 		$table_name = '[qualif].[dbo].[t_f_process]';
+	} else {
+		$table_name = '[qualif].[dbo].[t_i_process]';
 	}
 
 	$sql = "SELECT process 
