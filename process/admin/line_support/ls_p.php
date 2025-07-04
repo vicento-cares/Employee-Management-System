@@ -449,6 +449,9 @@ if ($method == 'get_added_line_support') {
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		$c++;
+
+		$assigned_station = $row['assigned_station'] . ' ' . $row['assigned_station_no'];
+
 		echo '<tr id="added_'.$row['id'].'">';
 		echo '<td>'.$c.'</td>';
 		echo '<td>'.$row['emp_no'].'</td>';
@@ -461,7 +464,7 @@ if ($method == 'get_added_line_support') {
 		echo '<td>'.$row['line_no_to'].'</td>';
 		echo '<td>'.$row['assigned_process'].'</td>';
 		echo '<td>'.$row['skill_level'].'</td>';
-		echo '<td>'.$row['assigned_station'].'</td>';
+		echo '<td>'.$assigned_station.'</td>';
 		echo '<td>'.$row['start_date'].'</td>';
 		echo '<td>'.$row['end_date'].'</td>';
 		echo '<td><center><i class="fas fa-pencil-alt" style="cursor:pointer;" data-emp_no="'.$row['emp_no'].'" data-id="'.$row['id'].'" onclick="edit_single_added_line_support(this);"></i></center></td>';
