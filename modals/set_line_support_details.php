@@ -36,8 +36,8 @@
               </select>
             </div>
             <div class="col-sm-3">
-              <label class="mb-2">Assigned Station No:</label>
-              <input type="text" id="lsd_assigned_station_no" class="form-control" maxlength="100" autocomplete="off">
+              <label class="mb-2">Assigned Station No:</label><label style="color: red;">*</label>
+              <input type="text" id="lsd_assigned_station_no" class="form-control" maxlength="100" autocomplete="off" required>
             </div>
           </div>
           <div class="row mb-2">

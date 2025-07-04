@@ -336,8 +336,10 @@
 
         if (assigned_station == 'N/A') {
             document.getElementById('lsd_assigned_station_no').disabled = true;
+            document.getElementById('lsd_assigned_station_no').required = false;
         } else {
             document.getElementById('lsd_assigned_station_no').disabled = false;
+            document.getElementById('lsd_assigned_station_no').required = true;
         }
     });
 
