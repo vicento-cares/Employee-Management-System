@@ -18,6 +18,7 @@ include '../modals/update_shuttle_route.php';
 include '../modals/leave_form_pending.php';
 include '../modals/leave_form_history.php';
 include '../modals/set_line_support.php';
+include '../modals/set_line_support_details.php';
 include '../modals/pending_line_support.php';
 include '../modals/line_support_history.php';
 include '../modals/admin_verification.php';

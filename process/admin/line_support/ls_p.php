@@ -78,6 +78,156 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 	}
 }
 
+if ($method == 'get_assigned_process_dropdown') {
+	$category = $_POST['category'];
+	$emp_no = $_POST['emp_no'];
+
+	$table_name = '';
+
+	if ($category == 'Initial') {
+		$table_name = '[qualif].[dbo].[t_i_process]';
+	} else if ($category == 'Final') {
+		$table_name = '[qualif].[dbo].[t_f_process]';
+	}
+
+	$sql = "SELECT process 
+			FROM $table_name 
+			WHERE (emp_id = ? OR emp_id_old = ?) 
+			GROUP BY process";
+
+	$params = [
+		$emp_no,
+		$emp_no
+	];
+	
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+	
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		echo '<option selected value="">Select Process</option>';
+		do {
+			echo '<option value="'.htmlspecialchars($row['process']).'">'.htmlspecialchars($row['process']).'</option>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
+		echo '<option disabled selected value="">Select Process</option>';
+	}
+}
+
+if ($method == 'get_assigned_station_dropdown') {
+	$category = $_POST['category'];
+
+	$sql = "SELECT assigned_station FROM m_assigned_stations WHERE category = ? ORDER BY assigned_station ASC";
+	$stmt = $conn -> prepare($sql);
+	$params = array($category);
+	$stmt -> execute($params);
+
+	echo '<option selected value="">Select Assigned Station</option>';
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		echo '<option value="'.htmlspecialchars($row['assigned_station']).'">'.htmlspecialchars($row['assigned_station']).'</option>';
+	}
+}
+
+if ($method == 'set_line_support_details') {
+	$id = $_POST['id'];
+	$assigned_process = $_POST['assigned_process'];
+	$assigned_station = $_POST['assigned_station'];
+	$assigned_station_no = $_POST['assigned_station_no'];
+	$start_date = $_POST['start_date'];
+	$end_date = $_POST['end_date'];
+
+	$shift = get_shift($server_time);
+
+	$valid_dates = false;
+
+	if ($start_date >= '06:00' && $start_date < '18:00' && $shift == 'DS') {
+		if ($end_date >= '07:00' && $end_date <= '18:00') {
+			if ($start_date < $end_date) {
+				$valid_dates = true;
+			}
+		}
+	} else if ($start_date >= '18:00' && $start_date <= '23:59' && $shift == 'NS') {
+    	if ($end_date >= '19:00' && $end_date <= '23:59') {
+			if ($start_date < $end_date) {
+				$valid_dates = true;
+			}
+		} else if ($end_date >= '00:00' && $end_date <= '06:00') {
+			$valid_dates = true;	
+		}
+	} else if ($start_date >= '00:00' && $start_date < '06:00' && $shift == 'NS') {
+		if ($end_date >= '01:00' && $end_date <= '06:00') {
+			if ($start_date < $end_date) {
+				$valid_dates = true;
+			}
+		}
+	}
+
+	if ($valid_dates) {
+		// Combine date and time (Temporary)
+		if ($shift == 'DS') {
+			$start_date = $server_date_only . ' ' . $start_date . ':00';
+			$end_date = $server_date_only . ' ' . $end_date . ':00';
+		} else if ($shift == 'NS') {
+			if ($start_date >= '18:00' && $start_date <= '23:59') {
+				if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+					$start_date = $server_date_only . ' ' . $start_date . ':00';
+				} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+					$start_date = $server_date_only_yesterday . ' ' . $start_date . ':00';
+				}
+			} else if ($start_date >= '00:00' && $start_date < '06:00') {
+				if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+					$start_date = $server_date_only_tomorrow . ' ' . $start_date . ':00';
+				} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+					$start_date = $server_date_only . ' ' . $start_date . ':00';
+				}
+			}
+			if ($end_date >= '19:00' && $end_date <= '23:59') {
+				if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+					$end_date = $server_date_only_tomorrow . ' ' . $end_date . ':00';
+				} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+					$end_date = $server_date_only_yesterday . ' ' . $end_date . ':00';
+				}
+			} else if ($end_date >= '00:00' && $end_date <= '06:00') {
+				if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+					$end_date = $server_date_only_tomorrow . ' ' . $end_date . ':00';
+				} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+					$end_date = $server_date_only . ' ' . $end_date . ':00';
+				}
+			}
+		}
+
+		$sql = "UPDATE ls 
+				SET 
+					ls.skill_level = COALESCE(sl.skill_level, '0'), 
+					ls.assigned_process = COALESCE(sl.process, ?), 
+					ls.assigned_station = ?, 
+					ls.assigned_station_no = ?, 
+					ls.start_date = ?, 
+					ls.end_date = ? 
+				FROM 
+					t_line_support ls 
+				LEFT JOIN 
+					m_skill_level sl ON ls.emp_no = sl.emp_no  -- Only join on emp_no
+				WHERE 
+					ls.id = ?  -- Replace with the appropriate ID value
+					AND (sl.process = ? OR sl.process IS NULL);  -- Replace with the appropriate process value
+				";
+		$stmt = $conn -> prepare($sql);
+		$params = array(
+			$assigned_process, $assigned_station, $assigned_station_no, 
+			$start_date, $end_date, $id, $assigned_process 
+		);
+		if ($stmt->execute($params)) {
+			echo 'success';
+		} else {
+			echo 'error';
+		}
+	} else {
+		echo 'Please set start and end date correctly.';
+	}
+}
+
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
 	$line_no = $_SESSION['line_no'];
@@ -168,66 +318,116 @@ if ($method == 'set_line_support') {
 	$shift = get_shift($server_time);
 	$day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
-	$sql = "SELECT id FROM t_line_support WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'added'";
+	// Check Duplicates
+	$sql = "SELECT id FROM t_line_support 
+			WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'added'";
 	$stmt = $conn -> prepare($sql);
 	$params = array($day, $shift, $emp_no);
 	$stmt -> execute($params);
 
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$row) {
-		$sql = "SELECT id FROM t_line_support WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'pending'";
-		$stmt = $conn -> prepare($sql);
-		$params = array($day, $shift, $emp_no);
-		$stmt -> execute($params);
-
-		$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    	if (!$row) {
-			$sql = "SELECT id FROM t_line_support_history WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'accepted'";
-			$stmt = $conn -> prepare($sql);
-			$params = array($day, $shift, $emp_no);
-			$stmt -> execute($params);
-
-			$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    		if (!$row) {
-				$sql = "SELECT id FROM t_time_in_out WHERE day = ? AND shift = ? AND emp_no = ? AND time_out IS NULL";
-				$stmt = $conn -> prepare($sql);
-				$params = array($day, $shift, $emp_no);
-				$stmt -> execute($params);
-
-				$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    			if ($row) {
-					$set_by = $_SESSION['full_name'];
-					$set_by_no = $_SESSION['emp_no'];
-
-					$sql = "INSERT INTO t_line_support 
-								(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) 
-							VALUES 
-								(?, ?, ?, ?, ?, ?, ?, ?)";
-					$stmt = $conn -> prepare($sql);
-					$params = array($line_support_id, $emp_no, $day, $shift, $line_no_from, $line_no_to, $set_by, $set_by_no);
-					$stmt -> execute($params);
-
-					$response_arr = array(
-				        'line_support_id' => $line_support_id,
-				        'message' => 'success'
-				    );
-					echo json_encode($response_arr, JSON_FORCE_OBJECT);
-				} else {
-					echo 'Already Time Out';
-				}
-			} else {
-				echo 'Already Supported';
-			}
-		} else {
-			echo 'Already Set';
-		}
-	} else {
+	if ($row) {
 		echo 'Duplicate';
+		$conn = null;
+		exit();
 	}
+
+	// Check Already Set
+	$sql = "SELECT id FROM t_line_support 
+			WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'pending'";
+	$stmt = $conn -> prepare($sql);
+	$params = array($day, $shift, $emp_no);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		echo 'Already Set';
+		$conn = null;
+		exit();
+	}
+
+	// Check Already Supported
+	$sql = "SELECT id FROM t_line_support_history 
+			WHERE day = ? AND shift = ? AND emp_no = ? AND status = 'accepted'";
+	$stmt = $conn -> prepare($sql);
+	$params = array($day, $shift, $emp_no);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		echo 'Already Supported';
+		$conn = null;
+		exit();
+	}
+
+	// Check Already Time Out
+	$sql = "SELECT id FROM t_time_in_out 
+			WHERE day = ? AND shift = ? AND emp_no = ? AND time_out IS NULL";
+	$stmt = $conn -> prepare($sql);
+	$params = array($day, $shift, $emp_no);
+	$stmt -> execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if (!$row) {
+		echo 'Already Time Out';
+		$conn = null;
+		exit();
+	}
+
+	// Check No Certification
+	$check_line_no_to = intval($line_no_to);
+
+	$table_name = '';
+
+	if ($check_line_no_to > 0) {
+		$table_name = '[qualif].[dbo].[t_f_process]';
+	} else {
+		$table_name = '[qualif].[dbo].[t_i_process]';
+	}
+
+	$sql = "SELECT process 
+			FROM $table_name 
+			WHERE (emp_id = ? OR emp_id_old = ?) 
+			GROUP BY process";
+
+	$params = [
+		$emp_no,
+		$emp_no
+	];
+	
+	$stmt = $conn -> prepare($sql);
+	$stmt -> execute($params);
+	
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if (!$row) {
+		echo 'No Certification';
+		$conn = null;
+		exit();
+	}
+
+	// Proceed to add line support
+	$set_by = $_SESSION['full_name'];
+	$set_by_no = $_SESSION['emp_no'];
+
+	$sql = "INSERT INTO t_line_support 
+				(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no) 
+			VALUES 
+				(?, ?, ?, ?, ?, ?, ?, ?)";
+	$stmt = $conn -> prepare($sql);
+	$params = array($line_support_id, $emp_no, $day, $shift, $line_no_from, $line_no_to, $set_by, $set_by_no);
+	$stmt -> execute($params);
+
+	$response_arr = array(
+		'line_support_id' => $line_support_id,
+		'message' => 'success'
+	);
+
+	echo json_encode($response_arr, JSON_FORCE_OBJECT);
 }
 
 if ($method == 'get_added_line_support') {
@@ -235,7 +435,8 @@ if ($method == 'get_added_line_support') {
 	$c = 0;
 	$sql = "SELECT 
 				ls.id, ls.line_support_id, ls.emp_no, emp.full_name, emp.dept, emp.process, 
-				ls.day, ls.shift, emp.shift_group, ls.line_no_to
+				ls.day, ls.shift, emp.shift_group, ls.line_no_to, ls.assigned_process, ls.skill_level, 
+				ls.assigned_station, ls.assigned_station_no, ls.start_date, ls.end_date 
 			FROM t_line_support ls 
 			LEFT JOIN m_employees emp
 			ON ls.emp_no = emp.emp_no
@@ -248,6 +449,9 @@ if ($method == 'get_added_line_support') {
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		$c++;
+
+		$assigned_station = $row['assigned_station'] . ' ' . $row['assigned_station_no'];
+
 		echo '<tr id="added_'.$row['id'].'">';
 		echo '<td>'.$c.'</td>';
 		echo '<td>'.$row['emp_no'].'</td>';
@@ -258,6 +462,12 @@ if ($method == 'get_added_line_support') {
 		echo '<td>'.$row['shift'].'</td>';
 		echo '<td>'.$row['shift_group'].'</td>';
 		echo '<td>'.$row['line_no_to'].'</td>';
+		echo '<td>'.$row['assigned_process'].'</td>';
+		echo '<td>'.$row['skill_level'].'</td>';
+		echo '<td>'.$assigned_station.'</td>';
+		echo '<td>'.$row['start_date'].'</td>';
+		echo '<td>'.$row['end_date'].'</td>';
+		echo '<td><center><i class="fas fa-pencil-alt" style="cursor:pointer;" data-emp_no="'.$row['emp_no'].'" data-id="'.$row['id'].'" onclick="edit_single_added_line_support(this);"></i></center></td>';
 		echo '<td><center><i class="fas fa-trash" style="cursor:pointer;" data-line_support_id="'.$row['line_support_id'].'" data-id="'.$row['id'].'" onclick="delete_single_added_line_support(this);"></i></center></td>';
 		echo '</tr>';
 	}
@@ -295,8 +505,15 @@ if ($method == 'save_line_support') {
 		$stmt -> execute($params);
 
 		$sql = "INSERT INTO t_line_support_history 
-					(line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_status_by, set_status_by_no, status) 
-				SELECT line_support_id, emp_no, day, shift, line_no_from, line_no_to, set_by, set_by_no, set_by AS set_status_by, set_by_no AS set_status_by_no, status 
+					(line_support_id, emp_no, day, shift, line_no_from, line_no_to, 
+					assigned_process, skill_level, assigned_station, assigned_station_no, 
+					set_by, set_by_no, set_status_by, set_status_by_no, 
+					status, start_date, end_date) 
+				SELECT 
+					line_support_id, emp_no, day, shift, line_no_from, line_no_to, 
+					assigned_process, skill_level, assigned_station, assigned_station_no, 
+					set_by, set_by_no, set_by AS set_status_by, set_by_no AS set_status_by_no, 
+					status, start_date, end_date 
 				FROM t_line_support 
 				WHERE line_support_id = ?";
 
@@ -841,9 +1058,38 @@ if ($method == 'get_employee_line_support_history') {
 	$c = 0;
 
 	$sql = "SELECT TOP (1000) 
-				emp.full_name, 
-				ls.day, ls.shift, emp.shift_group, ls.line_no_to, 
-				ls.set_by, ls.set_by_no, ls.date_updated 
+				emp.full_name, emp.shift_group, 
+				ls.day, ls.shift, ls.line_no_to, 
+				ls.assigned_process, ls.skill_level, ls.assigned_station, ls.assigned_station_no, 
+				ls.start_date, ls.end_date, 
+				ls.set_by, ls.set_by_no, ls.date_updated, 
+				CASE 
+					WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) < 1 THEN '< 1 min' 
+					ELSE 
+						-- Build the elapsed time string conditionally
+						LTRIM(
+							CASE 
+								WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) / 1440 > 0 THEN 
+									CAST(DATEDIFF(MINUTE, ls.start_date, ls.end_date) / 1440 AS VARCHAR(10)) + ' day' + 
+									CASE WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) / 1440 <> 1 THEN 's' ELSE '' END + 
+									CASE WHEN (DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 1440) / 60 > 0 OR DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 60 > 0 THEN ', ' ELSE '' END
+								ELSE '' 
+							END +
+							CASE 
+								WHEN (DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 1440) / 60 > 0 THEN 
+									CAST((DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 1440) / 60 AS VARCHAR(10)) + ' hour' + 
+									CASE WHEN (DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 1440) / 60 <> 1 THEN 's' ELSE '' END + 
+									CASE WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 60 > 0 THEN ', ' ELSE '' END
+								ELSE '' 
+							END +
+							CASE 
+								WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 60 > 0 THEN 
+									CAST(DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 60 AS VARCHAR(10)) + ' min' + 
+									CASE WHEN DATEDIFF(MINUTE, ls.start_date, ls.end_date) % 60 <> 1 THEN 's' ELSE '' END 
+								ELSE '' 
+							END
+						) 
+				END AS elapsed_time 
 			FROM t_line_support_history ls 
 			LEFT JOIN m_employees emp ON ls.emp_no = emp.emp_no 
 			WHERE ls.emp_no LIKE ?";
@@ -862,17 +1108,23 @@ if ($method == 'get_employee_line_support_history') {
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		$c++;
 
+		$assigned_station = $row['assigned_station'] . ' ' . $row['assigned_station_no'];
+
 		echo '<tr>';
 		echo '<td style="vertical-align: middle;">'.$c.'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['day'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['line_no_to'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['assigned_process'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['skill_level'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$assigned_station.'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['set_by'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['set_by_no'].'</td>';
-		echo '<td style="vertical-align: middle;"></td>';
+		echo '<td style="vertical-align: middle;">'.$row['elapsed_time'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['start_date'].'</td>';
+		echo '<td style="vertical-align: middle;">'.$row['end_date'].'</td>';
 		echo '<td style="vertical-align: middle;">'.$row['date_updated'].'</td>';
-		echo '<td style="vertical-align: middle;"></td>';
 		echo '</tr>';
 	}
 }
