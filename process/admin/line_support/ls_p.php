@@ -197,26 +197,48 @@ if ($method == 'set_line_support_details') {
 			}
 		}
 
-		$sql = "UPDATE ls 
-				SET 
-					ls.skill_level = COALESCE(sl.skill_level, '0'), 
-					ls.assigned_process = COALESCE(sl.process, ?), 
-					ls.assigned_station = ?, 
-					ls.assigned_station_no = ?, 
-					ls.start_date = ?, 
-					ls.end_date = ? 
-				FROM 
-					t_line_support ls 
-				LEFT JOIN 
-					m_skill_level sl ON ls.emp_no = sl.emp_no  -- Only join on emp_no
-				WHERE 
-					ls.id = ?  -- Replace with the appropriate ID value
-					AND (sl.process = ? OR sl.process IS NULL);  -- Replace with the appropriate process value
-				";
+		$skill_level = 0;
+
+		$sql = "SELECT sl.skill_level 
+				FROM t_line_support ls 
+				LEFT JOIN m_skill_level sl ON ls.emp_no = sl.emp_no  -- Only join on emp_no
+				WHERE ls.id = ? AND sl.process = ?";
+		$stmt = $conn -> prepare($sql);
+		$params = array($id, $assigned_process);
+		$stmt->execute($params);
+
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		if ($row) {
+			$skill_level = intval($row['skill_level']);
+		}
+
+		// $sql = "UPDATE ls 
+		// 		SET 
+		// 			ls.skill_level = COALESCE(sl.skill_level, '0'), 
+		// 			ls.assigned_process = COALESCE(sl.process, ?), 
+		// 			ls.assigned_station = ?, 
+		// 			ls.assigned_station_no = ?, 
+		// 			ls.start_date = ?, 
+		// 			ls.end_date = ? 
+		// 		FROM 
+		// 			t_line_support ls 
+		// 		LEFT JOIN 
+		// 			m_skill_level sl ON ls.emp_no = sl.emp_no  -- Only join on emp_no
+		// 		WHERE 
+		// 			ls.id = ?  -- Replace with the appropriate ID value
+		// 			AND (sl.process = ? OR sl.process IS NULL);  -- Replace with the appropriate process value
+		// 		";
+
+		$sql = "UPDATE t_line_support 
+				SET skill_level = ?, assigned_process = ?, 
+					assigned_station = ?, assigned_station_no = ?, 
+					start_date = ?, end_date = ? 
+				WHERE id = ?";
 		$stmt = $conn -> prepare($sql);
 		$params = array(
-			$assigned_process, $assigned_station, $assigned_station_no, 
-			$start_date, $end_date, $id, $assigned_process 
+			$skill_level, $assigned_process, $assigned_station, $assigned_station_no, 
+			$start_date, $end_date, $id 
 		);
 		if ($stmt->execute($params)) {
 			echo 'success';
