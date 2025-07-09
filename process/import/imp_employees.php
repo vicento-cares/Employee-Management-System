@@ -850,7 +850,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                                 (emp_no, full_name, dept, section, sub_section, line_no, process, shift_group, 
                                 date_hired, resigned_date, 
                                 car_model, shift, position, provider, gender, address, contact_no, emp_status, shuttle_route, 
-                                emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, emp_ack, amp_ack_no, 
+                                emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, emp_ack, emp_ack_no, 
                                 reason, mp_analysis_code, ref_eff, class_eff, resigned) 
                                 VALUES (?, ?";
                         $params1 = [
