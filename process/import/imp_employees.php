@@ -279,6 +279,7 @@ function check_csv($file, $conn)
     $process_arr = get_process($conn);
     $position_arr = get_positions($conn);
     $provider_arr = get_providers($conn);
+    $shift_arr = array('DS', 'NS');
     $shift_group_arr = array('A', 'B', 'ADS');
     $shuttle_route_arr = get_shuttle_routes($conn);
     $gender_arr = array('M', 'F');
@@ -294,7 +295,7 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     $notExistsDeptArr = array();
     $notExistsSectionArr = array();
@@ -303,6 +304,7 @@ function check_csv($file, $conn)
     $notExistsProcessArr = array();
     $notExistsPositionArr = array();
     $notExistsProviderArr = array();
+    $notExistsShiftArr = array();
     $notExistsShiftGroupArr = array();
     $notExistsShuttleRouteArr = array();
     $notExistsGenderArr = array();
@@ -318,8 +320,8 @@ function check_csv($file, $conn)
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    $valid_first_line = "Employee No.,Full Name,Department,Section,Sub Section,Line No.,Process,Position,Provider,Shift Group,Gender,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Jr. Staff or Staff,Supervisor,Approver,Date Resigned";
-    $valid_first_line2 = '"Employee No.","Full Name",Department,Section,"Sub Section","Line No.",Process,Position,Provider,"Shift Group",Gender,"Date Hired",Address,"Contact No.","Employment Status","Shuttle Route","Jr. Staff or Staff",Supervisor,Approver,"Date Resigned"';
+    $valid_first_line = "Employee No.,Full Name,Department,Section,Car Model,Process,Line No.,Specific Process,MP Analysis Code,Reference for Efficiency,Classification for Efficiency,Position,Provider,Shift,Shift Group,Gender,Date Hired,Address,Contact No.,Employment Status,Shuttle Route,Reason,Jr. Staff or Staff (Clerk),Supervisor/AM,AM/SM/DDM/DM,Approver(HR),Date Resigned";
+    $valid_first_line2 = '"Employee No.","Full Name",Department,Section,"Car Model",Process,"Line No.","Specific Process","MP Analysis Code","Reference for Efficiency","Classification for Efficiency",Position,Provider,Shift,"Shift Group",Gender,"Date Hired",Address,"Contact No.","Employment Status","Shuttle Route",Reason,"Jr. Staff or Staff (Clerk)",Supervisor/AM,AM/SM/DDM/DM,Approver(HR),"Date Resigned"';
     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
         while (($line = fgetcsv($csvFile)) !== false) {
             // Check if the row is blank or consists only of whitespace
@@ -333,22 +335,29 @@ function check_csv($file, $conn)
             $full_name = custom_trim($line[1]);
             $dept = custom_trim($line[2]);
             $section = custom_trim($line[3]);
-            $sub_section = custom_trim($line[4]);
-            $line_no = custom_trim($line[5]);
-            $process = custom_trim($line[6]);
-            $position = custom_trim($line[7]);
-            $provider = custom_trim($line[8]);
-            $shift_group = custom_trim($line[9]);
-            $gender = custom_trim($line[10]);
-            $date_hired = custom_trim($line[11]);
-            $address = custom_trim($line[12]);
-            $contact_no = custom_trim($line[13]);
-            $emp_status = custom_trim($line[14]);
-            $shuttle_route = custom_trim($line[15]);
-            $emp_js_s_no = custom_trim($line[16]);
-            $emp_sv_no = custom_trim($line[17]);
-            $emp_approver_no = custom_trim($line[18]);
-            $resigned_date = custom_trim($line[19]);
+            $car_model = custom_trim($line[4]);
+            $sub_section = custom_trim($line[5]);
+            $line_no = custom_trim($line[6]);
+            $process = custom_trim($line[7]);
+            $mp_analysis_code = custom_trim($line[8]);
+            $ref_eff = custom_trim($line[9]);
+            $class_eff = custom_trim($line[10]);
+            $position = custom_trim($line[11]);
+            $provider = custom_trim($line[12]);
+            $shift = custom_trim($line[13]);
+            $shift_group = custom_trim($line[14]);
+            $gender = custom_trim($line[15]);
+            $date_hired = custom_trim($line[16]);
+            $address = custom_trim($line[17]);
+            $contact_no = custom_trim($line[18]);
+            $emp_status = custom_trim($line[19]);
+            $shuttle_route = custom_trim($line[20]);
+            $reason = custom_trim($line[21]);
+            $emp_js_s_no = custom_trim($line[22]);
+            $emp_sv_no = custom_trim($line[23]);
+            $emp_approver_no = custom_trim($line[24]);
+            $emp_ack_no = custom_trim($line[25]);
+            $resigned_date = custom_trim($line[26]);
 
             $date_hired_valid = str_replace('/', '-', $date_hired);
             $is_valid_date_hired = validate_date($date_hired_valid);
@@ -420,60 +429,67 @@ function check_csv($file, $conn)
                     array_push($notExistsProviderArr, $check_csv_row);
                 }
             }
+            if (!empty($shift)) {
+                if (!in_array($shift, $shift_arr)) {
+                    $hasError = 1;
+                    $row_valid_arr[7] = 1;
+                    array_push($notExistsShiftArr, $check_csv_row);
+                }
+            }
             if (!empty($shift_group)) {
                 if (!in_array($shift_group, $shift_group_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[7] = 1;
+                    $row_valid_arr[8] = 1;
                     array_push($notExistsShiftGroupArr, $check_csv_row);
                 }
             }
             /*if (!in_array($shuttle_route, $shuttle_route_arr)) {
                 $hasError = 1;
-                $row_valid_arr[8] = 1;
+                $row_valid_arr[9] = 1;
                 array_push($notExistsShuttleRouteArr, $check_csv_row);
             }
             if (!in_array($gender, $gender_arr)) {
                 $hasError = 1;
-                $row_valid_arr[9] = 1;
+                $row_valid_arr[10] = 1;
                 array_push($notExistsGenderArr, $check_csv_row);
             }
             if (!in_array($emp_status, $emp_status_arr)) {
                 $hasError = 1;
-                $row_valid_arr[10] = 1;
+                $row_valid_arr[11] = 1;
                 array_push($notExistsEmpStatusArr, $check_csv_row);
             }
             if (!empty($date_hired)) {
                 if ($is_valid_date_hired == false) {
                     $hasError = 1;
-                    $row_valid_arr[11] = 1;
+                    $row_valid_arr[12] = 1;
                     array_push($notValidDateHiredArr, $check_csv_row);
                 }
             }
             if (!empty($resigned_date)) {
                 if ($is_valid_resigned_date == false) {
                     $hasError = 1;
-                    $row_valid_arr[12] = 1;
+                    $row_valid_arr[13] = 1;
                     array_push($notValidResignedDateArr, $check_csv_row);
                 }
             }
             if (!empty($emp_js_s_no)) {
                 if (!in_array($emp_js_s_no, $emp_js_s_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[13] = 1;
+                    $row_valid_arr[14] = 1;
                     array_push($notExistsEmpJsSNoArr, $check_csv_row);
                 }
             }
             if (!empty($emp_sv_no)) {
                 if (!in_array($emp_sv_no, $emp_sv_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[14] = 1;
+                    $row_valid_arr[15] = 1;
                     array_push($notExistsEmpSvNoArr, $check_csv_row);
                 }
             }
             if (!empty($emp_approver_no)) {
                 if (!in_array($emp_approver_no, $emp_approver_no_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[15] = 1;
+                    $row_valid_arr[16] = 1;
                     array_push($notExistsEmpAppNoArr, $check_csv_row);
                 }
             }*/
@@ -520,30 +536,33 @@ function check_csv($file, $conn)
             $message = $message . 'Provider doesn\'t exists on row/s ' . implode(", ", $notExistsProviderArr) . '. ';
         }
         if ($row_valid_arr[7] == 1) {
-            $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
+            $message = $message . 'Shift doesn\'t exists on row/s ' . implode(", ", $notExistsShiftArr) . '. ';
         }
         if ($row_valid_arr[8] == 1) {
-            $message = $message . 'Shuttle Route doesn\'t exists on row/s ' . implode(", ", $notExistsShuttleRouteArr) . '. ';
+            $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
         }
         if ($row_valid_arr[9] == 1) {
-            $message = $message . 'Gender doesn\'t exists on row/s ' . implode(", ", $notExistsGenderArr) . '. ';
+            $message = $message . 'Shuttle Route doesn\'t exists on row/s ' . implode(", ", $notExistsShuttleRouteArr) . '. ';
         }
         if ($row_valid_arr[10] == 1) {
-            $message = $message . 'Employment Status doesn\'t exists on row/s ' . implode(", ", $notExistsEmpStatusArr) . '. ';
+            $message = $message . 'Gender doesn\'t exists on row/s ' . implode(", ", $notExistsGenderArr) . '. ';
         }
         if ($row_valid_arr[11] == 1) {
-            $message = $message . 'Invalid Date Hired on row/s ' . implode(", ", $notValidDateHiredArr) . '. ';
+            $message = $message . 'Employment Status doesn\'t exists on row/s ' . implode(", ", $notExistsEmpStatusArr) . '. ';
         }
         if ($row_valid_arr[12] == 1) {
-            $message = $message . 'Invalid Resigned Date on row/s ' . implode(", ", $notValidResignedDateArr) . '. ';
+            $message = $message . 'Invalid Date Hired on row/s ' . implode(", ", $notValidDateHiredArr) . '. ';
         }
         if ($row_valid_arr[13] == 1) {
-            $message = $message . 'Jr. Staff or Staff Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpJsSNoArr) . '. ';
+            $message = $message . 'Invalid Resigned Date on row/s ' . implode(", ", $notValidResignedDateArr) . '. ';
         }
         if ($row_valid_arr[14] == 1) {
-            $message = $message . 'Supervisor Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpSvNoArr) . '. ';
+            $message = $message . 'Jr. Staff or Staff Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpJsSNoArr) . '. ';
         }
         if ($row_valid_arr[15] == 1) {
+            $message = $message . 'Supervisor Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpSvNoArr) . '. ';
+        }
+        if ($row_valid_arr[16] == 1) {
             $message = $message . 'Approver Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpAppNoArr) . '. ';
         }
 
@@ -598,22 +617,29 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     $full_name = custom_trim($line[1]);
                     $dept = custom_trim($line[2]);
                     $section = custom_trim($line[3]);
-                    $sub_section = custom_trim($line[4]);
-                    $line_no = custom_trim($line[5]);
-                    $process = custom_trim($line[6]);
-                    $position = custom_trim($line[7]);
-                    $provider = custom_trim($line[8]);
-                    $shift_group = custom_trim($line[9]);
-                    $gender = strtoupper(custom_trim($line[10]));
-                    $date_hired = custom_trim($line[11]);
-                    $address = custom_trim($line[12]);
-                    $contact_no = custom_trim($line[13]);
-                    $emp_status = custom_trim($line[14]);
-                    $shuttle_route = custom_trim($line[15]);
-                    $emp_js_s_no = custom_trim($line[16]);
-                    $emp_sv_no = custom_trim($line[17]);
-                    $emp_approver_no = custom_trim($line[18]);
-                    $resigned_date = custom_trim($line[19]);
+                    $car_model = custom_trim($line[4]);
+                    $sub_section = custom_trim($line[5]);
+                    $line_no = custom_trim($line[6]);
+                    $process = custom_trim($line[7]);
+                    $mp_analysis_code = custom_trim($line[8]);
+                    $ref_eff = custom_trim($line[9]);
+                    $class_eff = custom_trim($line[10]);
+                    $position = custom_trim($line[11]);
+                    $provider = custom_trim($line[12]);
+                    $shift = custom_trim($line[13]);
+                    $shift_group = custom_trim($line[14]);
+                    $gender = strtoupper(custom_trim($line[15]));
+                    $date_hired = custom_trim($line[16]);
+                    $address = custom_trim($line[17]);
+                    $contact_no = custom_trim($line[18]);
+                    $emp_status = custom_trim($line[19]);
+                    $shuttle_route = custom_trim($line[20]);
+                    $reason = custom_trim($line[21]);
+                    $emp_js_s_no = custom_trim($line[22]);
+                    $emp_sv_no = custom_trim($line[23]);
+                    $emp_approver_no = custom_trim($line[24]);
+                    $emp_ack_no = custom_trim($line[25]);
+                    $resigned_date = custom_trim($line[26]);
                     $resigned = '';
 
                     if (!empty($date_hired)) {
@@ -712,12 +738,15 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $sql = $sql . ", resigned_date = NULL";
                         }
 
-                        $sql = $sql . ",position = ?, provider = ?, gender = ?, 
+                        $sql = $sql . ", car_model = ?, shift = ?, position = ?, provider = ?, gender = ?, 
                                 address = ?, contact_no = ?, emp_status = ?,  
                                 shuttle_route = ?, emp_js_s = ?, emp_js_s_no = ?, emp_sv = ?, emp_sv_no = ?, 
-                                emp_approver = ?,emp_approver_no = ?,
+                                emp_approver = ?, emp_approver_no = ?, emp_ack = ?, emp_ack_no = ?, 
+                                reason = ?, mp_analysis_code = ?, ref_eff = ?, class_eff = ?, 
                                 resigned = ? WHERE id = ?";
                         $params2 = [
+                            $car_model,
+                            $shift,
                             $position,
                             $provider,
                             $gender,
@@ -731,6 +760,12 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $emp_sv_no,
                             '',
                             $emp_approver_no,
+                            '',
+                            $emp_ack_no,
+                            $reason,
+                            $mp_analysis_code,
+                            $ref_eff,
+                            $class_eff,
                             $resigned,
                             $id
                         ];
@@ -740,82 +775,83 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                         $stmt = $conn->prepare($sql);
 
                         if ($stmt->execute($params)) {
-                            $query = "UPDATE m_control_area_accounts SET";
-                            $params = [];
+                            // $query = "UPDATE m_control_area_accounts SET";
+                            // $params = [];
 
-                            if (!empty($dept)) {
-                                $query = $query . " dept = ?";
-                                $params[] = $dept;
-                            } else {
-                                $query = $query . " dept = ''";
-                            }
-                            if (!empty($section)) {
-                                $query = $query . ", section = ?";
-                                $params[] = $section;
-                            } else {
-                                $query = $query . ", section = NULL";
-                            }
-                            if (!empty($line_no)) {
-                                $query = $query . ", line_no = ?";
-                                $params[] = $line_no;
-                            } else {
-                                $query = $query . ", line_no = NULL";
-                            }
-                            if (!empty($shift_group)) {
-                                $query = $query . ", shift_group = ?";
-                                $params[] = $shift_group;
-                            } else {
-                                $query = $query . ", shift_group = 'ADS'";
-                            }
+                            // if (!empty($dept)) {
+                            //     $query = $query . " dept = ?";
+                            //     $params[] = $dept;
+                            // } else {
+                            //     $query = $query . " dept = ''";
+                            // }
+                            // if (!empty($section)) {
+                            //     $query = $query . ", section = ?";
+                            //     $params[] = $section;
+                            // } else {
+                            //     $query = $query . ", section = NULL";
+                            // }
+                            // if (!empty($line_no)) {
+                            //     $query = $query . ", line_no = ?";
+                            //     $params[] = $line_no;
+                            // } else {
+                            //     $query = $query . ", line_no = NULL";
+                            // }
+                            // if (!empty($shift_group)) {
+                            //     $query = $query . ", shift_group = ?";
+                            //     $params[] = $shift_group;
+                            // } else {
+                            //     $query = $query . ", shift_group = 'ADS'";
+                            // }
 
-                            $query = $query . " WHERE emp_no = ?";
-                            $params[] = $emp_no;
+                            // $query = $query . " WHERE emp_no = ?";
+                            // $params[] = $emp_no;
 
-                            $stmt = $conn->prepare($query);
+                            // $stmt = $conn->prepare($query);
 
-                            if ($stmt->execute($params)) {
-                                $query = "UPDATE m_accounts SET";
-                                $params = [];
+                            // if ($stmt->execute($params)) {
+                            //     $query = "UPDATE m_accounts SET";
+                            //     $params = [];
 
-                                if (!empty($dept)) {
-                                    $query = $query . " dept = ?";
-                                    $params[] = $dept;
-                                } else {
-                                    $query = $query . " dept = ''";
-                                }
-                                if (!empty($section)) {
-                                    $query = $query . ", section = ?";
-                                    $params[] = $section;
-                                } else {
-                                    $query = $query . ", section = NULL";
-                                }
-                                if (!empty($line_no)) {
-                                    $query = $query . ", line_no = ?";
-                                    $params[] = $line_no;
-                                } else {
-                                    $query = $query . ", line_no = NULL";
-                                }
-                                if (!empty($shift_group)) {
-                                    $query = $query . ", shift_group = ?";
-                                    $params[] = $shift_group;
-                                } else {
-                                    $query = $query . ", shift_group = 'ADS'";
-                                }
+                            //     if (!empty($dept)) {
+                            //         $query = $query . " dept = ?";
+                            //         $params[] = $dept;
+                            //     } else {
+                            //         $query = $query . " dept = ''";
+                            //     }
+                            //     if (!empty($section)) {
+                            //         $query = $query . ", section = ?";
+                            //         $params[] = $section;
+                            //     } else {
+                            //         $query = $query . ", section = NULL";
+                            //     }
+                            //     if (!empty($line_no)) {
+                            //         $query = $query . ", line_no = ?";
+                            //         $params[] = $line_no;
+                            //     } else {
+                            //         $query = $query . ", line_no = NULL";
+                            //     }
+                            //     if (!empty($shift_group)) {
+                            //         $query = $query . ", shift_group = ?";
+                            //         $params[] = $shift_group;
+                            //     } else {
+                            //         $query = $query . ", shift_group = 'ADS'";
+                            //     }
 
-                                $query = $query . " WHERE emp_no = ?";
-                                $params[] = $emp_no;
+                            //     $query = $query . " WHERE emp_no = ?";
+                            //     $params[] = $emp_no;
 
-                                $stmt = $conn->prepare($query);
+                            //     $stmt = $conn->prepare($query);
 
-                                $stmt->execute($params);
-                            }
+                            //     $stmt->execute($params);
+                            // }
                         }
                     } else {
                         $sql = "INSERT INTO m_employees
                                 (emp_no, full_name, dept, section, sub_section, line_no, process, shift_group, 
                                 date_hired, resigned_date, 
-                                position, provider, gender, address, contact_no, emp_status, shuttle_route, 
-                                emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, resigned) 
+                                car_model, shift, position, provider, gender, address, contact_no, emp_status, shuttle_route, 
+                                emp_js_s, emp_js_s_no, emp_sv, emp_sv_no, emp_approver, emp_approver_no, emp_ack, amp_ack_no, 
+                                reason, mp_analysis_code, ref_eff, class_eff, resigned) 
                                 VALUES (?, ?";
                         $params1 = [
                             $emp_no,
@@ -879,9 +915,12 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $sql = $sql . ", NULL";
                         }
 
-                        $sql = $sql . ", ?, ?, ?, ?, ?, ?, ?, 
-                                        ?, ?, ?, ?, ?, ?, ?)";
+                        $sql = $sql . ", ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                                        ?, ?, ?, ?, ?, ?, ?, ?, 
+                                        ?, ?, ?, ?, ?)";
                         $params2 = [
+                            $car_model,
+                            $shift,
                             $position,
                             $provider,
                             $gender,
@@ -895,6 +934,12 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $emp_sv_no,
                             '',
                             $emp_approver_no,
+                            '',
+                            $emp_ack_no,
+                            $reason,
+                            $mp_analysis_code,
+                            $ref_eff,
+                            $class_eff,
                             $resigned
                         ];
 
