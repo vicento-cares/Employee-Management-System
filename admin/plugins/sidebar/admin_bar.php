@@ -46,32 +46,6 @@
             </p>
           </a>
         </li>
-        <?php if ($_SESSION['role'] == 'admin' && $_SESSION['dept'] == '') { ?>
-          <li class="nav-item">
-            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/admin/accounts.php") { ?>
-            <a href="accounts.php" class="nav-link active">
-            <?php } else { ?>
-            <a href="accounts.php" class="nav-link">
-            <?php } ?>
-              <i class="nav-icon fas fa-user-cog"></i>
-              <p>
-                Account Management
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/admin/employees.php") { ?>
-            <a href="employees.php" class="nav-link active">
-            <?php } else { ?>
-            <a href="employees.php" class="nav-link">
-            <?php } ?>
-              <i class="nav-icon fas fa-user"></i>
-              <p>
-                Employee Masterlist
-              </p>
-            </a>
-          </li>
-        <?php } ?>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/admin/attendances.php") { ?>
           <a href="attendances.php" class="nav-link active">
