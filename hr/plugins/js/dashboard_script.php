@@ -241,6 +241,7 @@
                 method: 'fetch_dept_dropdown'
             },
             success: function (response) {
+                $('#od_dept_search').html(response);
                 $('#dept_master_search').html(response);
             }
         });
@@ -255,6 +256,7 @@
                 method: 'fetch_section_dropdown'
             },
             success: function (response) {
+                $('#od_section_search').html(response);
                 $('#section_master_search').html(response);
             }
         });
@@ -269,6 +271,7 @@
                 method: 'fetch_line_dropdown'
             },
             success: function (response) {
+                $('#od_line_no_search').html(response);
                 $('#line_no_master_search').html(response);
             }
         });
