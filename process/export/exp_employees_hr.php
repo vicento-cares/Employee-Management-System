@@ -101,10 +101,10 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Line No.', 'Position', 'Provider', 'Gender', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Jr. Staff or Staff', 'Supervisor', 'Approver', 'Date Resigned'); 
+$fields = array('Employee No.', 'Full Name', 'Department', 'Section', 'Car Model', 'Process', 'Line No.', 'Specific Process', 'MP Analysis Code', 'Reference for Efficiency', 'Classification for Efficiency', 'Position', 'Provider', 'Shift', 'Shift Group', 'Gender', 'Date Hired', 'Address', 'Contact No.', 'Employment Status', 'Shuttle Route', 'Reason', 'Jr. Staff or Staff (Clerk)', 'Supervisor/AM', 'AM/SM/DDM/DM', 'Approver(HR)', 'Date Resigned'); 
 fputcsv($f, $fields, $delimiter); 
 
-$query = "SELECT emp_no, full_name, dept, section, line_no, process, position, provider, gender, shift_group, date_hired, address, contact_no, emp_status, shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned_date FROM m_employees WHERE";
+$query = "SELECT emp_no, full_name, dept, section, car_model, sub_section, line_no, process, mp_analysis_code, ref_eff, class_eff, position, provider, shift, shift_group, gender, date_hired, address, contact_no, emp_status, shuttle_route, reason, emp_js_s_no, emp_sv_no, emp_approver_no, emp_ack_no, resigned_date FROM m_employees WHERE";
 $params = [];
 
 if (!empty($search_multiple_employee_arr)) {
@@ -168,7 +168,35 @@ if ($row) {
     // Output each row of the data, format line as csv and write to file pointer 
     do {
 
-        $lineData = array($row['emp_no'], $row['full_name'], $row['dept'], $row['section'], $row['line_no'], $row['position'], $row['provider'], $row['gender'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], $row['shuttle_route'], $row['emp_js_s_no'], $row['emp_sv_no'], $row['emp_approver_no'], $row['resigned_date']); 
+        $lineData = array(
+          $row['emp_no'], 
+          $row['full_name'], 
+          $row['dept'], 
+          $row['section'], 
+          $row['car_model'], 
+          $row['sub_section'], 
+          $row['line_no'], 
+          $row['process'], 
+          $row['mp_analysis_code'], 
+          $row['ref_eff'], 
+          $row['class_eff'], 
+          $row['position'], 
+          $row['provider'], 
+          $row['shift'], 
+          $row['shift_group'], 
+          $row['gender'], 
+          $row['date_hired'], 
+          $row['address'], 
+          $row['contact_no'], 
+          $row['emp_status'], 
+          $row['shuttle_route'], 
+          $row['reason'], 
+          $row['emp_js_s_no'], 
+          $row['emp_sv_no'], 
+          $row['emp_approver_no'], 
+          $row['emp_ack_no'], 
+          $row['resigned_date']
+        ); 
         fputcsv($f, $lineData, $delimiter); 
 	    
     } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));

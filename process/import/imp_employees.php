@@ -521,13 +521,13 @@ function check_csv($file, $conn)
             $message = $message . 'Section doesn\'t exists on row/s ' . implode(", ", $notExistsSectionArr) . '. ';
         }
         if ($row_valid_arr[2] == 1) {
-            $message = $message . 'Sub Section doesn\'t exists row/s ' . implode(", ", $notExistsSubSectionArr) . '. ';
+            $message = $message . 'Process (Sub Section) doesn\'t exists row/s ' . implode(", ", $notExistsSubSectionArr) . '. ';
         }
         if ($row_valid_arr[3] == 1) {
             $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. ';
         }
         if ($row_valid_arr[4] == 1) {
-            $message = $message . 'Process doesn\'t exists row/s ' . implode(", ", $notExistsProcessArr) . '. ';
+            $message = $message . 'Specific Process (Process) doesn\'t exists row/s ' . implode(", ", $notExistsProcessArr) . '. ';
         }
         if ($row_valid_arr[5] == 1) {
             $message = $message . 'Position doesn\'t exists on row/s ' . implode(", ", $notExistsPositionArr) . '. ';
