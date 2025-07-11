@@ -28,7 +28,7 @@
           <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#new_employee"><i class="fas fa-plus-circle"></i> Register Employee</button>
         </div>
         <div class="col-sm-2">
-          <a class="btn btn-dark btn-block" href="../template/employees_template.csv"><i class="fas fa-download"></i> Download Template</a>
+          <a class="btn btn-dark btn-block" href="../template/employees_template.csv?v=<?php echo time(); ?>"><i class="fas fa-download"></i> Download Template</a>
         </div>
         <div class="col-sm-2">
           <button type="button" class="btn btn-warning btn-block btn-file">
