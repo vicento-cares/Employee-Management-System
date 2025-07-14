@@ -165,7 +165,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           $line_no = $row['line_no'];
           $line_process = $row['process'];
           $shift_group = $row['shift_group'];
-          $concat_details = $dept . '\\' . $section . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+          $concat_details = $dept . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
           // Added Temporarily
           if(empty($full_name)) {
             $full_name = ' ';
@@ -277,6 +277,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     .timeout-label {
       color: #343a40;
     }
+    /* Employee Picture Style */
+    .update_employee_picture_img_tag {
+        width: 100px; /* Fixed width */
+        height: 100px; /* Fixed height */
+        object-fit: contain; /* Ensure the whole image is visible */
+        object-position: center; /* Center the image within the container */
+    }
+    .attendances_employee_picture_img_tag {
+        width: 75px; /* Fixed width */
+        height: 75px; /* Fixed height */
+        object-fit: contain; /* Ensure the whole image is visible */
+        object-position: center; /* Center the image within the container */
+    }
   </style>
 </head>
 
@@ -352,14 +365,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       } else if (!empty($allow_time_out)) {
     ?>
       <div class="card mt-2">
-        <div class="card-body timeout-label">
-          <p class="m-0 p-1 text-center">Employee No: <b><?=$emp_no?></b></p>
-          <p class="m-0 p-1 text-center">Name: <b><?=$full_name?></b></p>
-          <p class="m-0 p-1 text-center">Provider: <b><?=$provider?></b></p>
-          <p class="m-0 p-1 text-center">Line No: <b><?=$line_no?></b></p>
-          <p class="m-0 p-1 text-center">Details: <b><?=$concat_details?></b></p>
-          <p class="m-0 p-1 text-center">Shift Group: <b><?=$shift_group?></b></p>
-          <p class="m-0 p-1 text-center">Time Out: <b><?=$server_time_a?></b></p>
+        <div class="card-body timeout-label p-2">
+          <div class="row">
+            <p class="m-0 p-1 text-center" style="font-size: 0.9em;">Disclaimer: <i>If wrong or no picture appear, please concern to respective <b>control area</b></i></p>
+          </div>
+          <div class="row">
+            <div class="col-4">
+              <img class="update_employee_picture_img_tag" src="http://172.25.116.188:3000/uploads/emp_mgt/employee_picture/<?=$emp_no?>.png" alt="<?=$emp_no?>" height="75" width="75">
+            </div>
+            <div class="col-8 px-0">
+              <p class="m-0 px-0" style="font-size: 0.9em;">Employee No: <b><?=$emp_no?></b></p>
+              <p class="m-0 px-0" style="font-size: 0.9em;">Name: <b><?=$full_name?></b></p>
+              <p class="m-0 px-0" style="font-size: 0.9em;">Provider: <b><?=$provider?></b></p>
+              <p class="m-0 px-0" style="font-size: 0.9em;">Line No: <b><?=$line_no?></b></p>
+              <p class="m-0 px-0" style="font-size: 0.9em;">Shift Group: <b><?=$shift_group?></b></p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <p class="m-0 p-1 text-center" style="font-size: 0.9em;">Details: <b><?=$concat_details?></b></p>
+              <p class="m-0 p-0 text-center" style="font-size: 1.5em;">Time Out: <b><?=$server_time_a?></b></p>
+            </div>
+          </div>
         </div>
       </div>
     <?php 
