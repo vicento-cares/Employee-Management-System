@@ -701,7 +701,9 @@
 
     const clear_line_shifting_details = () => {
         document.getElementById('line_no_lshift').value = '';
+        document.getElementById('shift_group_lshift').value = '';
         document.getElementById('shift_lshift').value = '';
+        document.getElementById('schedule_date_lshift').value = '';
     }
 
 	$("#set_line_shifting").on('hidden.bs.modal', e => {
@@ -724,6 +726,7 @@
         
         var shift_group = document.getElementById('shift_group_lshift').value;
         var shift = document.getElementById('shift_lshift').value;
+        var schedule_date = document.getElementById('schedule_date_lshift').value;
 
         $.ajax({
             url: '../process/admin/shifting/shift_p.php',
@@ -733,13 +736,14 @@
                 method: 'set_line_shifting',
                 line_no: line_no,
                 shift_group: shift_group,
-                shift: shift
+                shift: shift,
+                schedule_date: schedule_date
             }, success: function (response) {
                 if (response == 'success') {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Succesfully Recorded!!!',
-                        text: 'Success',
+                        title: 'Line Shifting',
+                        text: 'Line Shifting Scheduled Successfully!',
                         showConfirmButton: false,
                         timer: 1000
                     });

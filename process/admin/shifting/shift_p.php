@@ -16,21 +16,42 @@ if ($method == 'set_line_shifting') {
 		$line_no = $_POST['line_no'];
 		$shift = $_POST['shift'];
 		$shift_group = $_POST['shift_group'];
+		$schedule_date = $_POST['schedule_date'];
 
 		if (!empty($line_no)) {
-			$query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
+			// $query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
+
+			// $params = [
+			// 	$shift, 
+			// 	$shift_group, 
+			// 	$dept, 
+			// 	$section
+			// ];
+
+			// if ($line_no != 'All') {
+			// 	$query .= " AND line_no = ?";
+			// 	$params[] = $line_no;
+			// }
+
+			// $stmt = $conn->prepare($query);
+
+			// if ($stmt->execute($params)) {
+			// 	echo 'success';
+			// } else {
+			// 	echo 'error';
+			// }
+
+			$query = "INSERT INTO t_line_shifting (dept, section, line_no, shift, shift_group, schedule_date) 
+						VALUES (?, ?, ?, ?, ?, ?)";
 
 			$params = [
+				$dept, 
+				$section,
+				$line_no,
 				$shift, 
 				$shift_group, 
-				$dept, 
-				$section
+				$schedule_date
 			];
-
-			if ($line_no != 'All') {
-				$query .= " AND line_no = ?";
-				$params[] = $line_no;
-			}
 
 			$stmt = $conn->prepare($query);
 

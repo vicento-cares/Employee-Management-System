@@ -52,10 +52,12 @@ function get_shift($server_time) {
 
 <script>
   // AJAX IN PROGRESS GLOBAL VARS
+  var check_line_shifting_schedule_ajax_in_process = false;
   var check_user_login_req_waiting_ajax_in_process = false;
   var check_leave_form_req_waiting_ajax_in_process = false;
 
   // Global Variables for Realtime Count
+  var realtime_check_line_shifting_schedule;
   var realtime_check_user_login_req_waiting;
   var realtime_check_leave_form_req_waiting;
 
@@ -64,6 +66,11 @@ function get_shift($server_time) {
   setInterval(() => {
 		window.location.reload();
 	}, 1000 * 60 * 60);
+
+  const recursive_realtime_check_line_shifting_schedule = () => {
+    check_line_shifting_schedule();
+    realtime_check_line_shifting_schedule = setTimeout(recursive_realtime_check_line_shifting_schedule, 60000);
+  }
 
   const recursive_realtime_check_user_login_req_waiting = () => {
     check_user_login_req_waiting();
@@ -82,8 +89,9 @@ function get_shift($server_time) {
     sessionStorage.setItem("empMgtServerDateTimeObject", serverDateTimeObject);
 
     setInterval(realtime, 1000);
-    recursive_realtime_check_user_login_req_waiting();
-    recursive_realtime_check_leave_form_req_waiting();
+    setTimeout(recursive_realtime_check_line_shifting_schedule, 1000);
+    // recursive_realtime_check_user_login_req_waiting();
+    // recursive_realtime_check_leave_form_req_waiting();
   });
 
   document.addEventListener('visibilitychange', function() {
@@ -165,6 +173,30 @@ function get_shift($server_time) {
         } catch (e) {
           console.log(response);
         }
+      }
+    });
+  }
+
+  const check_line_shifting_schedule = () => {
+    // If an AJAX call is already in progress, return immediately
+    if (check_line_shifting_schedule_ajax_in_process) {
+      return;
+    }
+
+    // Set the flag to true as we're starting an AJAX call
+    check_line_shifting_schedule_ajax_in_process = true;
+
+    $.ajax({
+      url: 'emsp_cron.php',
+      type: 'POST',
+      cache: false,
+      data: {
+        method: 'check_line_shifting_schedule'
+      },
+      success: (response) => {
+        console.log(response);
+        // Set the flag back to false as the AJAX call has completed
+        check_line_shifting_schedule_ajax_in_process = false;
       }
     });
   }

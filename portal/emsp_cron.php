@@ -1,10 +1,62 @@
 <?php
+include '../process/server_date_time.php';
 require '../process/conn.php';
-require '../process/conn_portal.php';
+// require '../process/conn_portal.php';
 
 $method = $_POST['method'];
 
-// Login
+// Check Line Shifting Schedule
+if ($method == 'check_line_shifting_schedule') {
+    $req_count = 0;
+    $message = 'success';
+
+    $schedule_date = $server_date_time . " 06:00:00";
+
+    $sql = "SELECT * FROM t_line_shifting WHERE schedule_date = ? AND is_reflected = 0";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$schedule_date]);
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
+
+        $params = [
+            $row['shift'], 
+            $row['shift_group'], 
+            $row['dept'], 
+            $row['section']
+        ];
+
+        if ($row['line_no'] != 'All') {
+            $query .= " AND line_no = ?";
+            $params[] = $row['line_no'];
+        }
+
+        $stmt = $conn->prepare($query);
+
+        if ($stmt->execute($params)) {
+            $query = "UPDATE t_line_shifting SET is_reflected = 1 WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$row['id']]);
+
+            if (!$stmt->execute($params)) {
+                $message = 'failed';
+            }
+        } else {
+            $message = 'failed';
+        }
+
+        $req_count++;
+    }
+
+    $response_arr = [
+        "req_count" => $req_count,
+        "message" => $message
+    ];
+
+    // header('Content-Type: application/json; charset=utf-8');
+	// echo json_encode($response_arr, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo json_encode($response_arr);
+}
 
 // Check User Login Req Waiting
 if ($method == 'check_user_login_req_waiting') {
@@ -20,7 +72,7 @@ if ($method == 'check_user_login_req_waiting') {
         // $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE BINARY emp_no = ? AND resigned = 0";
         // MS SQL Server
         $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND resigned = 0";
-        $stmt = $conn->prepare($check, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+        $stmt = $conn->prepare($check);
         $params = array($request['emp_no']);
         $stmt->execute($params);
 

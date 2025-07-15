@@ -10,7 +10,7 @@
       </div>
       <div class="modal-body">
         <form id="set_line_shifting_form">
-          <div class="row">
+          <div class="row mb-2">
             <div class="col-sm-6">
               <label>Line No.</label><label style="color: red;">*</label>
               <select id="line_no_lshift" class="form-control" required>
@@ -33,6 +33,12 @@
                 <option value="DS">DS</option>
                 <option value="NS">NS</option>
               </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <label>Schedule Date (Exactly 6:00 AM)</label><label style="color: red;">*</label>
+              <input type="date" id="schedule_date_lshift" class="form-control" min="<?=$server_date_only_tomorrow?>" required>
             </div>
           </div>
           <br>
