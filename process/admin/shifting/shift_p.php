@@ -229,6 +229,7 @@ if ($method == 'line_shifting_schedule_list') {
 			echo '<tr>';
 
 			echo '<td>'.$c.'</td>';
+			echo '<td>'.$row['schedule_date'].'</td>';
 			echo '<td>'.$row['dept'].'</td>';
 			echo '<td>'.$row['section'].'</td>';
 			echo '<td>'.$row['line_no'].'</td>';

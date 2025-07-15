@@ -12,7 +12,7 @@ if ($method == 'check_line_shifting_schedule') {
 
     $schedule_date = date('Y-m-d', strtotime($server_date_time)) . " 06:00:00";
 
-    $sql = "SELECT * FROM t_line_shifting WHERE schedule_date = ? AND is_reflected = 0";
+    $sql = "SELECT * FROM t_line_shifting WHERE schedule_date <= ? AND is_reflected = 0";
     $stmt = $conn->prepare($sql);
     $stmt->execute([$schedule_date]);
 

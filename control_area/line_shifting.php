@@ -71,6 +71,7 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Schedule Date</th>
                       <th>Department</th>
                       <th>Section</th>
                       <th>Line No.</th>
