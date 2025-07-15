@@ -1035,20 +1035,14 @@ if ($method == 'update_employee') {
 	if (!empty($dept)) {
 		$query = $query . ", dept = ?";
 		$params1[] = $dept;
-	} else {
-		$query = $query . ", dept = NULL";
 	}
 	if (!empty($section)) {
 		$query = $query . ", section = ?";
 		$params1[] = $section;
-	} else {
-		$query = $query . ", section = NULL";
 	}
 	if (!empty($line_no)) {
 		$query = $query . ", line_no = ?";
 		$params1[] = $line_no;
-	} else {
-		$query = $query . ", line_no = NULL";
 	}
 
 	if (!empty($date_hired)) {
@@ -1100,14 +1094,10 @@ if ($method == 'update_employee') {
 		if (!empty($dept)) {
 			$query = $query . " dept = ?";
 			$params[] = $dept;
-		} else {
-			$query = $query . " dept = ''";
 		}
 		if (!empty($section)) {
 			$query = $query . ", section = ?";
 			$params[] = $section;
-		} else {
-			$query = $query . ", section = NULL";
 		}
 		if (!empty($line_no)) {
 			$query = $query . ", line_no = ?";
@@ -1115,11 +1105,6 @@ if ($method == 'update_employee') {
 		} else {
 			$query = $query . ", line_no = NULL";
 		}
-		// if (!empty($shift_group)) {
-		// 	$query = $query . ", shift_group = '$shift_group'";
-		// } else {
-		// 	$query = $query . ", shift_group = NULL";
-		// }
 
 		$query = $query . " WHERE emp_no = ?";
 		$params[] = $emp_no;
@@ -1132,26 +1117,15 @@ if ($method == 'update_employee') {
 			if (!empty($dept)) {
 				$query = $query . " dept = ?";
 				$params[] = $dept;
-			} else {
-				$query = $query . " dept = ''";
 			}
 			if (!empty($section)) {
 				$query = $query . ", section = ?";
 				$params[] = $section;
-			} else {
-				$query = $query . ", section = NULL";
 			}
 			if (!empty($line_no)) {
 				$query = $query . ", line_no = ?";
 				$params[] = $line_no;
-			} else {
-				$query = $query . ", line_no = NULL";
 			}
-			// if (!empty($shift_group)) {
-			// 	$query = $query . ", shift_group = '$shift_group'";
-			// } else {
-			// 	$query = $query . ", shift_group = NULL";
-			// }
 
 			$query = $query . " WHERE emp_no = ?";
 			$params[] = $emp_no;
@@ -1165,7 +1139,7 @@ if ($method == 'update_employee') {
 		} else {
 			echo 'error';
 		}
-	}else{
+	} else {
 		echo 'error';
 	}
 }
@@ -1214,14 +1188,10 @@ if ($method == 'update_employee_advanced') {
 	if (!empty($dept)) {
 		$query = $query . ", dept = ?";
 		$params1[] = $dept;
-	} else {
-		$query = $query . ", dept = 'Undefined'";
 	}
 	if (!empty($section)) {
 		$query = $query . ", section = ?";
 		$params1[] = $section;
-	} else {
-		$query = $query . ", section = 'Undefined'";
 	}
 	if (!empty($sub_section)) {
 		$query = $query . ", sub_section = ?";
@@ -1250,15 +1220,11 @@ if ($method == 'update_employee_advanced') {
 	if (!empty($skill_level)) {
 		$query = $query . ", skill_level = ?";
 		$params1[] = $skill_level;
-	} else {
-		$query = $query . ", skill_level = NULL";
 	}
 
 	if (!empty($date_hired)) {
 		$query = $query . ", date_hired = ?";
 		$params1[] = $date_hired;
-	} else {
-		$query = $query . ", date_hired = NULL";
 	}
 
 	$query = $query . ", position = ?, provider = ?, gender = ?, 
@@ -1297,14 +1263,10 @@ if ($method == 'update_employee_advanced') {
 		if (!empty($dept)) {
 			$query = $query . " dept = ?";
 			$params[] = $dept;
-		} else {
-			$query = $query . " dept = ''";
 		}
 		if (!empty($section)) {
 			$query = $query . ", section = ?";
 			$params[] = $section;
-		} else {
-			$query = $query . ", section = NULL";
 		}
 		if (!empty($line_no)) {
 			$query = $query . ", line_no = ?";
@@ -1315,8 +1277,6 @@ if ($method == 'update_employee_advanced') {
 		if (!empty($shift_group)) {
 			$query = $query . ", shift_group = ?";
 			$params[] = $shift_group;
-		} else {
-			$query = $query . ", shift_group = NULL";
 		}
 
 		$query = $query . " WHERE emp_no = ?";
@@ -1330,26 +1290,18 @@ if ($method == 'update_employee_advanced') {
 			if (!empty($dept)) {
 				$query = $query . " dept = ?";
 				$params[] = $dept;
-			} else {
-				$query = $query . " dept = ''";
 			}
 			if (!empty($section)) {
 				$query = $query . ", section = ?";
 				$params[] = $section;
-			} else {
-				$query = $query . ", section = NULL";
 			}
 			if (!empty($line_no)) {
 				$query = $query . ", line_no = ?";
 				$params[] = $line_no;
-			} else {
-				$query = $query . ", line_no = NULL";
 			}
 			if (!empty($shift_group)) {
 				$query = $query . ", shift_group = ?";
 				$params[] = $shift_group;
-			} else {
-				$query = $query . ", shift_group = NULL";
 			}
 
 			$query = $query . " WHERE emp_no = ?";

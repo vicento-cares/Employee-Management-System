@@ -37,7 +37,7 @@
             </select>
           </div>
           <div class="col-8">
-            <label>Sub Section:</label>
+            <label>Process (Sub Section):</label>
             <select id="sub_section_master_update" class="form-control" onchange="" style="height:45px; border: 1px solid black;">
               <option value="">Select Sub Section</option>
             </select>
@@ -72,7 +72,7 @@
             </select>
           </div>
           <div class="col-5">
-            <label>Process:</label>
+            <label>Specific Process:</label>
             <select id="process_master_update" class="form-control" style="height:45px; border: 1px solid black;">
               <option value="">Select Process</option>
             </select>
@@ -118,6 +118,7 @@
               <option value="Padre Garcia">Padre Garcia</option>
               <option value="Rosario">Rosario</option>
               <option value="San Jose">San Jose</option>
+              <option value="San Lucas">San Lucas</option>
               <option value="San Pablo via Lipa">San Pablo via Lipa</option>
               <option value="San Pablo via Sto. Tomas">San Pablo via Sto. Tomas</option>
               <option value="Sta. Teresita">Sta. Teresita</option>

@@ -8,9 +8,6 @@
 <?php
 //MODALS
 include '../modals/logout_modal.php';
-include '../modals/new_account.php';
-include '../modals/update_account.php';
-include '../modals/view_employee.php';
 include '../modals/absence_details.php';
 include '../modals/attendance_summary_report_details.php';
 include '../modals/absence_details2.php';
