@@ -5,6 +5,9 @@
     $(document).ready(function () {
         fetch_line_dropdown_search();
         load_line_shifting_schedules(1);
+        setInterval(() => {
+            load_line_shifting_schedules(1);
+        }, 60000);
     });
 
     // Table Responsive Scroll Event for Load More
@@ -54,7 +57,7 @@
         var shift_group = sessionStorage.getItem('shift_group_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
         $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
+            url: '../process/admin/shifting/shift_p.php',
             type: 'POST',
             cache: false,
             data: {
@@ -84,7 +87,7 @@
         var line_no = sessionStorage.getItem('line_no_master_search');
         var current_page = parseInt(sessionStorage.getItem('list_of_lshiftsched_table_pagination'));
         $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
+            url: '../process/admin/shifting/shift_p.php',
             type: 'POST',
             cache: false,
             data: {
@@ -143,7 +146,7 @@
         load_line_shifting_schedules_ajax_in_process = true;
 
         $.ajax({
-            url: '../process/hr/employees/emp-masterlist_p.php',
+            url: '../process/admin/shifting/shift_p.php',
             type: 'POST',
             cache: false,
             data: {
@@ -155,12 +158,6 @@
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
-                var loading = `<tr id="loading"><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
-                if (current_page == 1) {
-                    document.getElementById("list_of_lshiftsched").innerHTML = loading;
-                } else {
-                    $('#list_of_lshiftsched_table tbody').append(loading);
-                }
                 jqXHR.url = settings.url;
                 jqXHR.type = settings.type;
             },
@@ -191,19 +188,17 @@
         var id = el.dataset.id;
 
         Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to confirm deletion!",
+            title: 'Cancel Schedule?',
+            text: "This will delete schedule record",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-
-            denyButtonColor: '#f80',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
             confirmButtonText: 'Yes',
         }).then((confirm_delete_line_shifting_schedule_form) => {
             if (confirm_delete_line_shifting_schedule_form.value) {
                 $.ajax({
-                    url: '../process/hr/employees/emp-masterlist_p.php',
+                    url: '../process/admin/shifting/shift_p.php',
                     type: 'POST',
                     cache: false,
                     data: {
@@ -213,8 +208,8 @@
                         if (response == 'success') {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Succesfully Recorded!!!',
-                                text: 'Success',
+                                title: 'Line Shifting',
+                                text: 'Line Shifting Schedule Cancelled',
                                 showConfirmButton: false,
                                 timer: 1000
                             });
@@ -282,7 +277,7 @@
                         showConfirmButton: false,
                         timer: 1000
                     });
-                    load_employees(1);
+                    load_line_shifting_schedules(1);
                     $('#set_line_shifting').modal('hide');
                 } else {
                     Swal.fire({

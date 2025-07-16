@@ -27,7 +27,9 @@ if ($method == 'set_line_shifting') {
 	$line_no = $_POST['line_no'];
 	$shift = $_POST['shift'];
 	$shift_group = $_POST['shift_group'];
-	$schedule_date = $_POST['schedule_date'];
+	$schedule_date_draft = $_POST['schedule_date'];
+
+	$schedule_date = date('Y-m-d', strtotime($schedule_date_draft)) . " 06:00:00";
 
 	// $query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
 
@@ -75,7 +77,7 @@ if ($method == 'set_line_shifting') {
 function count_line_shifting_schedule_list($search_arr, $conn) {
 	$query = "SELECT count(id) AS total 
 				FROM t_line_shifting 
-				WHERE dept = ? AND section = ? AND is_reflected = 0";
+				WHERE dept = ? AND section = ?";
 	$params = [
 		$search_arr['dept'],
 		$search_arr['section']
@@ -189,9 +191,15 @@ if ($method == 'line_shifting_schedule_list') {
 
 	$c = $page_first_result;
 
-	$query = "SELECT id, dept, section, line_no, shift_group, shift 
+	$query = "SELECT 
+					id, dept, section, line_no, shift_group, shift, schedule_date, is_reflected, 
+					CASE 
+						WHEN GETDATE() > schedule_date THEN 'reflected'
+						WHEN ABS(DATEDIFF(SECOND, schedule_date, GETDATE())) <= 600 THEN 'yes' 
+						ELSE 'no' 
+					END AS is_near_10_mins
 				FROM t_line_shifting 
-				WHERE dept = ? AND section = ? AND is_reflected = 0";
+				WHERE dept = ? AND section = ?";
 
 	$params = [
 		$dept, 
@@ -226,7 +234,13 @@ if ($method == 'line_shifting_schedule_list') {
 		do {
 			$c++;
 
-			echo '<tr>';
+			$row_class = "";
+
+			if ($row['is_reflected'] == 1) {
+				$row_class = "bg-success";
+			}
+
+			echo '<tr class="'.$row_class.'">';
 
 			echo '<td>'.$c.'</td>';
 			echo '<td>'.$row['schedule_date'].'</td>';
@@ -235,14 +249,20 @@ if ($method == 'line_shifting_schedule_list') {
 			echo '<td>'.$row['line_no'].'</td>';
 			echo '<td>'.$row['shift_group'].'</td>';
 			echo '<td>'.$row['shift'].'</td>';
-			
-			echo '<td><center><i class="fas fa-trash" style="cursor:pointer;" data-id="'.$row['id'].'" onclick="delete_line_shifting_schedule(this);"></i></center></td>';
+
+			if ($row['is_reflected'] == 1) {
+				echo '<td><center><i class="fas fa-check"></i></center></td>';
+			} else if ($row['is_near_10_mins'] == 'yes') {
+				echo '<td><center><i class="fas fa-sync"></i></center></td>';
+			} else {
+				echo '<td><center><i class="fas fa-trash" style="cursor:pointer;" data-id="'.$row['id'].'" onclick="delete_line_shifting_schedule(this);"></i></center></td>';
+			}
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<tr>';
-			echo '<td colspan="7" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="8" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }

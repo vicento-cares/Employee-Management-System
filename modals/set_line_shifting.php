@@ -35,13 +35,18 @@
               </select>
             </div>
           </div>
-          <div class="row">
+          <div class="row mb-2">
             <div class="col-sm-12">
               <label>Schedule Date (Exactly 6:00 AM)</label><label style="color: red;">*</label>
               <input type="date" id="schedule_date_lshift" class="form-control" min="<?=$server_date_only_tomorrow?>" required>
             </div>
           </div>
-          <br>
+          <div class="row">
+            <div class="col-sm-12 callout callout-warning">
+              <h5>Note:</h5>
+              <i>If scheduling will set on <b>Night Shift (12 AM - 5 AM)</b>, current date is <b>not available</b>. Please set line shifting schedule early!</i>
+            </div>
+          </div>
           <hr>
           <div class="row">
             <div class="col-12">

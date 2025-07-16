@@ -66,6 +66,20 @@
                   <select id="line_no_master_search" class="form-control" onchange="load_line_shifting_schedules(1)"></select>
                 </div>
               </div>
+              <div class="row mb-2">
+                <div class="form-group mb-0 px-2">
+                  <label><b>Line Shifting Schedule Status Legend</b></label>
+                </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-sm-6 col-lg-6 p-1 border"><center>Scheduled</center></div>
+                <div class="col-sm-6 col-lg-6 p-1 border bg-success"><center>Reflected</center></div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-sm-6 col-lg-4 p-1"><center><i class="fas fa-trash mr-2"></i>Cancel Schedule Enabled</center></div>
+                <div class="col-sm-6 col-lg-4 p-1"><center><i class="fas fa-sync mr-2"></i>Cancel Schedule Disabled, 10 mins before reflect</center></div>
+                <div class="col-sm-6 col-lg-4 p-1"><center><i class="fas fa-check mr-2"></i>Reflected</center></div>
+              </div>
               <div id="list_of_lshiftsched_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
                 <table id="list_of_lshiftsched_table" class="table table-sm table-head-fixed text-nowrap table-hover">
                   <thead style="text-align: center;">

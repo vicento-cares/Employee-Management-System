@@ -17,7 +17,7 @@ if ($method == 'check_line_shifting_schedule') {
     $stmt->execute([$schedule_date]);
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $query = "UPDATE m_employees SET shift = ? WHERE shift_group = ?, dept = ? AND section = ?";
+        $sql = "UPDATE m_employees SET shift = ? WHERE shift_group = ? AND dept = ? AND section = ?";
 
         $params = [
             $row['shift'], 
@@ -27,18 +27,18 @@ if ($method == 'check_line_shifting_schedule') {
         ];
 
         if ($row['line_no'] != 'All') {
-            $query .= " AND line_no = ?";
+            $sql .= " AND line_no = ?";
             $params[] = $row['line_no'];
         }
 
-        $stmt = $conn->prepare($query);
+        $stmt1 = $conn->prepare($sql);
 
-        if ($stmt->execute($params)) {
-            $query = "UPDATE t_line_shifting SET is_reflected = 1 WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$row['id']]);
+        if ($stmt1->execute($params)) {
+            $id = intval($row['id']);
+            $sql = "UPDATE t_line_shifting SET is_reflected = 1 WHERE id = ?";
+            $stmt1 = $conn->prepare($sql);
 
-            if (!$stmt->execute($params)) {
+            if (!$stmt1->execute([$id])) {
                 $message = 'failed';
             }
         } else {
@@ -72,30 +72,29 @@ if ($method == 'check_user_login_req_waiting') {
         // $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE BINARY emp_no = ? AND resigned = 0";
         // MS SQL Server
         $check = "SELECT emp_no, full_name, dept, position, date_hired, address, contact_no, emp_status FROM m_employees WHERE emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND resigned = 0";
-        $stmt = $conn->prepare($check);
+        $stmt1 = $conn->prepare($check);
         $params = array($request['emp_no']);
-        $stmt->execute($params);
+        $stmt1->execute($params);
 
-        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+        $row = $stmt1 -> fetch(PDO::FETCH_ASSOC);
 
         if ($row) {
             $sql = "UPDATE t_user_login_req 
                 SET full_name = ?, dept = ?, position = ?, date_hired = ?, 
                 address = ?, contact_no = ?, emp_status = ?, req_status = ? 
                 WHERE emp_no = ?";
-            $stmt = $conn_portal->prepare($sql);
+            $stmt1 = $conn_portal->prepare($sql);
             $params = array($row['full_name'], $row['dept'], $row['position'], $row['date_hired'], $row['address'], $row['contact_no'], $row['emp_status'], 1, $request['emp_no']);
-            $stmt->execute($params);
-            if (!$stmt->execute($params)) {
+            if (!$stmt1->execute($params)) {
                 $message = 'failed';
             }
         } else {
             $sql = "UPDATE t_user_login_req 
                 SET req_status = ? 
                 WHERE emp_no = ?";
-            $stmt = $conn_portal->prepare($sql);
+            $stmt1 = $conn_portal->prepare($sql);
             $params = array(2, $request['emp_no']);
-            if (!$stmt->execute($params)) {
+            if (!$stmt1->execute($params)) {
                 $message = 'failed';
             }
         }
@@ -169,18 +168,18 @@ if ($method == 'check_leave_form_req_waiting') {
                 (?, ?, ?, ?, ?, 
                 ?, ?, ?, ?, 
                 ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
+        $stmt1 = $conn->prepare($sql);
         $params = array($leave_form_id, $request['emp_no'], $request['date_filed'], $request['address'], $request['contact_no'], 
                 $request['leave_type'], $request['leave_date_from'], $request['leave_date_to'], $request['total_leave_days'], 
                 $request['irt_phone_call'], $request['irt_letter'], $request['irb'], $request['reason'], $request['issued_by'], $leave_form_status);
-        if (!$stmt->execute($params)) {
+        if (!$stmt1->execute($params)) {
             $message = 'failed';
         }
 
         $sql = "DELETE FROM t_leave_form_req WHERE id = ?";
-        $stmt = $conn_portal->prepare($sql);
+        $stmt1 = $conn_portal->prepare($sql);
         $params = array($request['id']);
-        if (!$stmt->execute($params)) {
+        if (!$stmt1->execute($params)) {
             $message = 'failed';
         }
 
