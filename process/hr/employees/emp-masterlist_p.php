@@ -90,6 +90,30 @@ function count_employee_list($search_arr, $conn) {
 			$params[] = $search_arr['date_updated_from'];
 			$params[] = $search_arr['date_updated_to'];
 		}
+
+		// Control Area Search
+		if (!empty($search_arr['shift'])) {
+			if ($search_arr['shift'] == 'No Shift') {
+				$search_arr['shift'] = '';
+			}
+			$query = $query . " AND shift = ?";
+			$params[] = $search_arr['shift'];
+		}
+		if (!empty($search_arr['shift_group'])) {
+			if ($search_arr['shift_group'] == 'No Shift Group') {
+				$search_arr['shift_group'] = '';
+			}
+			$query = $query . " AND shift_group = ?";
+			$params[] = $search_arr['shift_group'];
+		}
+		if (!empty($search_arr['process'])) {
+			$query = $query . " AND process = ?";
+			$params[] = $search_arr['process'];
+		}
+		if (!empty($search_arr['sub_section'])) {
+			$query = $query . " AND sub_section = ?";
+			$params[] = $search_arr['sub_section'];
+		}
 	
 		if ($search_arr['resigned'] != '') {
 			$query = $query . " AND resigned = '".$search_arr['resigned']."'";
@@ -449,6 +473,29 @@ if ($method == 'count_employee_list') {
 		$line_no = $_POST['line_no'];
 	}
 
+	// Control Area Search
+
+	if (!isset($_POST['shift'])) {
+		$shift = '';
+	} else {
+		$shift = $_POST['shift'];
+	}
+	if (!isset($_POST['shift_group'])) {
+		$shift_group = '';
+	} else {
+		$shift_group = $_POST['shift_group'];
+	}
+	if (!isset($_POST['process'])) {
+		$process = '';
+	} else {
+		$process = $_POST['process'];
+	}
+	if (!isset($_POST['sub_section'])) {
+		$sub_section = '';
+	} else {
+		$sub_section = $_POST['sub_section'];
+	}
+
 	if (!isset($_POST['resigned'])) {
 		$resigned = '';
 	} else {
@@ -467,6 +514,10 @@ if ($method == 'count_employee_list') {
 		"dept" => $dept,
 		"section" => $section,
 		"line_no" => $line_no,
+		"shift" => $shift,
+		"shift_group" => $shift_group,
+		"process" => $process,
+		"sub_section" => $sub_section,
 		"date_updated_from" => $date_updated_from,
 		"date_updated_to" => $date_updated_to,
 		"resigned" => $resigned,
@@ -523,6 +574,29 @@ if ($method == 'employee_list_last_page') {
 		$line_no = $_POST['line_no'];
 	}
 
+	// Control Area Search
+
+	if (!isset($_POST['shift'])) {
+		$shift = '';
+	} else {
+		$shift = $_POST['shift'];
+	}
+	if (!isset($_POST['shift_group'])) {
+		$shift_group = '';
+	} else {
+		$shift_group = $_POST['shift_group'];
+	}
+	if (!isset($_POST['process'])) {
+		$process = '';
+	} else {
+		$process = $_POST['process'];
+	}
+	if (!isset($_POST['sub_section'])) {
+		$sub_section = '';
+	} else {
+		$sub_section = $_POST['sub_section'];
+	}
+
 	if (!isset($_POST['resigned'])) {
 		$resigned = '';
 	} else {
@@ -541,6 +615,10 @@ if ($method == 'employee_list_last_page') {
 		"dept" => $dept,
 		"section" => $section,
 		"line_no" => $line_no,
+		"shift" => $shift,
+		"shift_group" => $shift_group,
+		"process" => $process,
+		"sub_section" => $sub_section,
 		"date_updated_from" => $date_updated_from,
 		"date_updated_to" => $date_updated_to,
 		"resigned" => $resigned,
@@ -603,6 +681,29 @@ if ($method == 'employee_list') {
 		$line_no = '';
 	} else {
 		$line_no = $_POST['line_no'];
+	}
+
+	// Control Area Search
+
+	if (!isset($_POST['shift'])) {
+		$shift = '';
+	} else {
+		$shift = $_POST['shift'];
+	}
+	if (!isset($_POST['shift_group'])) {
+		$shift_group = '';
+	} else {
+		$shift_group = $_POST['shift_group'];
+	}
+	if (!isset($_POST['process'])) {
+		$process = '';
+	} else {
+		$process = $_POST['process'];
+	}
+	if (!isset($_POST['sub_section'])) {
+		$sub_section = '';
+	} else {
+		$sub_section = $_POST['sub_section'];
 	}
 
 	if (!isset($_POST['resigned'])) {
@@ -704,6 +805,30 @@ if ($method == 'employee_list') {
 				$line_no_search = $line_no . "%";
 				$params[] = $line_no_search;
 			}
+		}
+
+		// Control Area Search
+		if (!empty($shift)) {
+			if ($shift == 'No Shift') {
+				$shift = '';
+			}
+			$query = $query . " AND shift = ?";
+			$params[] = $shift;
+		}
+		if (!empty($shift_group)) {
+			if ($shift == 'No Shift Group') {
+				$shift_group = '';
+			}
+			$query = $query . " AND shift_group = ?";
+			$params[] = $shift_group;
+		}
+		if (!empty($process)) {
+			$query = $query . " AND process = ?";
+			$params[] = $process;
+		}
+		if (!empty($sub_section)) {
+			$query = $query . " AND sub_section = ?";
+			$params[] = $sub_section;
 		}
 	
 		if (!empty($date_updated_from) && !empty($date_updated_to)) {

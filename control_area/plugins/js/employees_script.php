@@ -145,6 +145,7 @@
             success: function (response) {
                 $('#sub_section_master').html(response);
                 $('#sub_section_master_update').html(response);
+                $('#sub_section_master_search').html(response);
             }
         });
     }
@@ -235,6 +236,7 @@
             success: function (response) {
                 $('#process_master').html(response);
                 $('#process_master_update').html(response);
+                $('#process_master_search').html(response);
             }
         });
     }
@@ -323,6 +325,11 @@
         var full_name = sessionStorage.getItem('full_name_master_search');
         var provider = sessionStorage.getItem('provider_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
+        var shift = sessionStorage.getItem('shift_master_search');
+        var shift_group = sessionStorage.getItem('shift_group_master_search');
+        var process = sessionStorage.getItem('process_master_search');
+        var sub_section = sessionStorage.getItem('sub_section_master_search');
+
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
             type: 'POST',
@@ -332,7 +339,11 @@
                 emp_no: emp_no,
                 full_name: full_name,
                 provider: provider,
-                line_no: line_no
+                line_no: line_no,
+                shift: shift,
+                shift_group: shift_group,
+                process: process,
+                sub_section: sub_section
             },
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -354,7 +365,12 @@
         var full_name = sessionStorage.getItem('full_name_master_search');
         var provider = sessionStorage.getItem('provider_master_search');
         var line_no = sessionStorage.getItem('line_no_master_search');
+        var shift = sessionStorage.getItem('shift_master_search');
+        var shift_group = sessionStorage.getItem('shift_group_master_search');
+        var process = sessionStorage.getItem('process_master_search');
+        var sub_section = sessionStorage.getItem('sub_section_master_search');
         var current_page = parseInt(sessionStorage.getItem('list_of_employees_table_pagination'));
+
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
             type: 'POST',
@@ -364,7 +380,11 @@
                 emp_no: emp_no,
                 full_name: full_name,
                 provider: provider,
-                line_no: line_no
+                line_no: line_no,
+                shift: shift,
+                shift_group: shift_group,
+                process: process,
+                sub_section: sub_section
             },
             success: function (response) {
                 sessionStorage.setItem('last_page', response);
@@ -391,11 +411,19 @@
         var full_name = document.getElementById('full_name_master_search').value;
         var provider = document.getElementById('provider_master_search').value;
         var line_no = document.getElementById('line_no_master_search').value;
+        var shift = document.getElementById('shift_master_search').value;
+        var shift_group = document.getElementById('shift_group_master_search').value;
+        var process = document.getElementById('process_master_search').value;
+        var sub_section = document.getElementById('sub_section_master_search').value;
 
         var emp_no1 = sessionStorage.getItem('emp_no_master_search');
         var full_name1 = sessionStorage.getItem('full_name_master_search');
         var provider1 = sessionStorage.getItem('provider_master_search');
         var line_no1 = sessionStorage.getItem('line_no_master_search');
+        var shift1 = sessionStorage.getItem('shift_master_search');
+        var shift_group1 = sessionStorage.getItem('shift_group_master_search');
+        var process1 = sessionStorage.getItem('process_master_search');
+        var sub_section1 = sessionStorage.getItem('sub_section_master_search');
 
         if (current_page > 1) {
             switch (true) {
@@ -403,10 +431,18 @@
                 case full_name !== full_name1:
                 case provider !== provider1:
                 case line_no !== line_no1:
+                case shift !== shift1:
+                case shift_group !== shift_group1:
+                case process !== process1:
+                case sub_section !== sub_section1:
                     emp_no = emp_no1;
                     full_name = full_name1;
                     provider = provider1;
                     line_no = line_no1;
+                    shift = shift1;
+                    shift_group = shift_group1;
+                    process = process1;
+                    sub_section = sub_section1;
                     break;
                 default:
             }
@@ -415,6 +451,10 @@
             sessionStorage.setItem('full_name_master_search', full_name);
             sessionStorage.setItem('provider_master_search', provider);
             sessionStorage.setItem('line_no_master_search', line_no);
+            sessionStorage.setItem('shift_master_search', shift);
+            sessionStorage.setItem('shift_group_master_search', shift_group);
+            sessionStorage.setItem('process_master_search', process);
+            sessionStorage.setItem('sub_section_master_search', sub_section);
         }
 
         // Set the flag to true as we're starting an AJAX call
@@ -430,6 +470,10 @@
                 full_name: full_name,
                 provider: provider,
                 line_no: line_no,
+                shift: shift,
+                shift_group: shift_group,
+                process: process,
+                sub_section: sub_section,
                 resigned: 0,
                 current_page: current_page
             },
@@ -465,6 +509,26 @@
             // Set the flag back to false as the AJAX call has completed
             load_employees_ajax_in_process = false;
         });
+    }
+
+    const export_employees = () => {
+        var emp_no = sessionStorage.getItem('emp_no_master_search');
+        var full_name = sessionStorage.getItem('full_name_master_search');
+        var provider = sessionStorage.getItem('provider_master_search');
+        var line_no = sessionStorage.getItem('line_no_master_search');
+        var shift = sessionStorage.getItem('shift_master_search');
+        var shift_group = sessionStorage.getItem('shift_group_master_search');
+        var process = sessionStorage.getItem('process_master_search');
+        var sub_section = sessionStorage.getItem('sub_section_master_search');
+        
+        window.open('../process/export/exp_employees_control.php?emp_no=' + emp_no 
+                    + "&full_name=" + full_name 
+                    + '&provider=' + provider  
+                    + '&line_no=' + line_no 
+                    + '&shift=' + shift 
+                    + '&shift_group=' + shift_group 
+                    + '&process=' + process 
+                    + '&sub_section=' + sub_section, '_blank');
     }
 
     const get_employees_details = (param) => {

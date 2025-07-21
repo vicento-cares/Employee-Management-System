@@ -50,7 +50,7 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <div class="row mb-4">
+              <div class="row mb-2">
                 <div class="col-sm-2">
                   <label>Employee No.</label>
                   <input type="text" class="form-control" id="emp_no_master_search" placeholder="Search" autocomplete="off" maxlength="255">
@@ -78,8 +78,43 @@
                 </div>
               </div>
               <div class="row mb-4">
-                <div class="col-sm-2 offset-sm-8">
-                  <button type="button" class="btn bg-gray-dark btn-block" onclick="load_employees(1)"><i class="fas fa-search"></i> Search</button>
+                <div class="col-sm-2">
+                  <label>Shift:</label>
+                  <select id="shift_master_search" class="form-control" onchange="load_employees(1)">
+                    <option value="">Select Shift</option>
+                    <option value="DS">DS</option>
+                    <option value="NS">NS</option>
+                    <option value="No Shift">No Shift</option>
+                  </select>
+                </div>
+                <div class="col-sm-2">
+                  <label>Shift Group:</label>
+                  <select id="shift_group_master_search" class="form-control" onchange="load_employees(1)">
+                    <option value="">Select Shift Group</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="ADS">ADS</option>
+                    <option value="No Shift Group">No Shift Group</option>
+                  </select>
+                </div>
+                <div class="col-sm-4">
+                  <label>Specific Process:</label>
+                  <select id="process_master_search" class="form-control" onchange="load_employees(1)"></select>
+                </div>
+                <div class="col-sm-4">
+                  <label>Process (Sub Section):</label>
+                  <select id="sub_section_master_search" class="form-control" onchange="load_employees(1)"></select>
+                </div>
+              </div>
+              <div class="row mb-4">
+                <!-- <div class="col-sm-2 offset-sm-4">
+                  <button type="button" class="btn bg-yellow btn-block"><i class="fas fa-upload"></i> Update via Import</button>
+                </div> -->
+                <div class="col-sm-2 offset-sm-6">
+                  <button type="button" class="btn bg-gray-dark btn-block" onclick="export_employees()"><i class="fas fa-download"></i> Export</button>
+                </div>
+                <div class="col-sm-2">
+                  <button type="button" class="btn bg-green btn-block" onclick="load_employees(1)"><i class="fas fa-search"></i> Search</button>
                 </div>
                 <div class="col-sm-2">
                   <button type="button" class="btn bg-gray-dark btn-block" onclick="print_employees()"><i class="fas fa-print"></i> Print</button>
