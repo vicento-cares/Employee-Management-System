@@ -33,7 +33,8 @@ function count_attendance_list($search_arr, $conn) {
 		$line_no_param = $search_arr['line_no'] . "%";
 		$params[] = $line_no_param;
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 	
 	$stmt = $conn->prepare($sql);
@@ -78,7 +79,8 @@ function count_attendance_list2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 	
 	$stmt = $conn->prepare($sql);
@@ -121,7 +123,8 @@ function count_emp_tio($search_arr, $conn) {
 		$line_no_param = $search_arr['line_no'] . "%";
 		$params[] = $line_no_param;
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 
 	$stmt = $conn->prepare($sql);
@@ -343,7 +346,8 @@ if ($method == 'get_attendance_list') {
 		$line_no_param = $line_no . "%";
 		$params[] = $line_no_param;
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $day;
 	$params[] = $day;
 	$sql = $sql . " ORDER BY emp.emp_no ASC";
 
@@ -613,7 +617,8 @@ if ($method == 'get_attendance_list2') {
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $day;
 	$params[] = $day;
 	$sql = $sql . " ORDER BY emp.full_name ASC";
 
@@ -784,10 +789,11 @@ if ($method == 'get_attendance_list_counting') {
 	}
 
 	$sql = $sql . " AND 
-						(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+						(emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
 					GROUP BY 
 						emp.process";
 	
+	$params[] = $day;
 	$params[] = $day;
 
 	$stmt = $conn->prepare($sql);
@@ -1054,7 +1060,7 @@ if ($method == 'get_attendance_summary_report') {
 	}
 
 	$sql = $sql . " AND 
-						(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+						(emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
 					GROUP BY 
 						emp.dept, emp.section, emp.line_no, emp.shift_group 
 				)
@@ -1084,6 +1090,7 @@ if ($method == 'get_attendance_summary_report') {
 				ORDER BY 
 					table_order ASC, shift_group ASC";
 	
+	$params[] = $day;
 	$params[] = $day;
 
 	$stmt = $conn->prepare($sql);
@@ -1197,7 +1204,7 @@ if ($method == 'get_multiple_attendance_summary_report') {
 			FROM 
 				DateRange dr
 			LEFT JOIN 
-				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
+				m_employees emp ON (emp.date_hired <= dr.ReportDate) AND (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
 			LEFT JOIN 
 				t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.ReportDate
 			WHERE 
