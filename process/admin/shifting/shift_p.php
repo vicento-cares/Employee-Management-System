@@ -251,7 +251,11 @@ if ($method == 'line_shifting_schedule_list') {
 			echo '<td>'.$row['shift'].'</td>';
 
 			if ($row['is_reflected'] == 1) {
+				// Success Reflection
 				echo '<td><center><i class="fas fa-check"></i></center></td>';
+			} else if ($row['is_near_10_mins'] == 'reflected') {
+				// Fail Reflection
+				echo '<td><center><i class="fas fa-times"></i></center></td>';
 			} else if ($row['is_near_10_mins'] == 'yes') {
 				echo '<td><center><i class="fas fa-sync"></i></center></td>';
 			} else {
