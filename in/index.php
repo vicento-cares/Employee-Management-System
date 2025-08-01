@@ -6,22 +6,52 @@ session_start();
 include '../process/conn.php';
 
 function get_shift($server_time) {
-  if ($server_time >= '05:00:00' && $server_time < '17:00:00') {
+  if ($server_time >= '04:00:00' && $server_time < '16:00:00') {
     return 'DS';
-  } else if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+  } else if ($server_time >= '16:00:00' && $server_time <= '23:59:59') {
     return 'NS';
-  } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+  } else if ($server_time >= '00:00:00' && $server_time < '04:00:00') {
     return 'NS';
   }
 }
 
 function get_shift_inverse($server_time) {
-  if ($server_time >= '05:00:00' && $server_time < '17:00:00') {
+  if ($server_time >= '04:00:00' && $server_time < '16:00:00') {
     return 'NS';
-  } else if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+  } else if ($server_time >= '16:00:00' && $server_time <= '23:59:59') {
     return 'DS';
-  } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+  } else if ($server_time >= '00:00:00' && $server_time < '04:00:00') {
     return 'DS';
+  }
+}
+
+function is_time_in_range($server_time) {
+  if ($server_time >= '04:00:00' && $server_time < '05:55:00') {
+    return true;
+  } else if ($server_time >= '16:00:00' && $server_time < '17:55:00') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function is_time_in_2_range($server_time) {
+  if ($server_time >= '09:30:00' && $server_time < '11:30:00') {
+    return true;
+  } else if ($server_time >= '21:30:00' && $server_time < '23:30:00') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function is_time_in_range_error($server_time) {
+  if ($server_time >= '05:55:00' && $server_time < '09:30:00') {
+    return true;
+  } else if ($server_time >= '17:55:00' && $server_time < '21:30:00') {
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -70,75 +100,80 @@ if (!isset($_SESSION['emp_no'])) {
   //$wrong_shift_group = '';
   $already_time_in = '';
 
-  $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
-          FROM m_employees WHERE emp_no = ? AND resigned = 0";
-  $stmt = $conn -> prepare($sql);
-  $params = array($emp_no);
-  $stmt -> execute($params);
+  // Time In Range Check Condition
+  if (is_time_in_range($server_time) || is_time_in_2_range($server_time)) {
+    $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
+            FROM m_employees WHERE emp_no = ? AND resigned = 0";
+    $stmt = $conn -> prepare($sql);
+    $params = array($emp_no);
+    $stmt -> execute($params);
 
-  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  if ($row) { 
-    $full_name = $row['full_name'];
-    $provider = $row['provider'];
-    $dept = $row['dept'];
-    $section = $row['section'];
-    $sub_section = $row['sub_section'];
-    $line_no = $row['line_no'];
-    $line_process = $row['process'];
-    $shift_group = $row['shift_group'];
-    $concat_details = $dept . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-    // Added Temporarily
-    if(empty($full_name)) {
-      $full_name = ' ';
-    }
+    if ($row) { 
+      $full_name = $row['full_name'];
+      $provider = $row['provider'];
+      $dept = $row['dept'];
+      $section = $row['section'];
+      $sub_section = $row['sub_section'];
+      $line_no = $row['line_no'];
+      $line_process = $row['process'];
+      $shift_group = $row['shift_group'];
+      $concat_details = $dept . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+      // Added Temporarily
+      if(empty($full_name)) {
+        $full_name = ' ';
+      }
 
-    /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-      $wrong_scanning = true;
-    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-      $wrong_scanning = true;
-    } else if (empty($shift_group) || empty($_SESSION['shift_group'])) {
-      $wrong_shift_group = true;
-    } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
-      $wrong_shift_group = true;
-    } else {*/
+      /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+        $wrong_scanning = true;
+      } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+        $wrong_scanning = true;
+      } else if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+        $wrong_shift_group = true;
+      } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
+        $wrong_shift_group = true;
+      } else {*/
 
-    if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-      $wrong_scanning = true;
-    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-      $wrong_scanning = true;
+      if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+        $wrong_scanning = true;
+      } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+        $wrong_scanning = true;
+      } else {
+        // Set Day (Revised 2024-01-10)
+        if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+          $day = $server_date_only_yesterday;
+        } else {
+          $day = $server_date_only;
+        }
+
+        $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ?";
+        $stmt = $conn -> prepare($sql);
+        $params = array($emp_no, $day);
+        $stmt -> execute($params);
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) { 
+          // Time In
+          $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES (?, ?, ?, ?)";
+          $stmt = $conn -> prepare($sql);
+          $params = array($emp_no, $day, $shift, $ip);
+          $stmt -> execute($params);
+        } else {
+          // Time In 2
+          $sql = "UPDATE t_time_in_out 
+                  SET time_in = ? 
+                  WHERE emp_no = ? AND day = ? AND shift = ?";
+          $stmt = $conn -> prepare($sql);
+          $params = array($server_date_time, $emp_no, $day, $shift);
+          $stmt -> execute($params);
+        }
+      }
     } else {
-      // Set Day (Revised 2024-01-10)
-      if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
-        $day = $server_date_only_yesterday;
-      } else {
-        $day = $server_date_only;
-      }
-      $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ?";
-      $stmt = $conn -> prepare($sql);
-      $params = array($emp_no, $day);
-      $stmt -> execute($params);
-      
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-      if (!$row) { 
-        $sql = "INSERT INTO t_time_in_out (emp_no, day, shift, ip) VALUES (?, ?, ?, ?)";
-        $stmt = $conn -> prepare($sql);
-        $params = array($emp_no, $day, $shift, $ip);
-        $stmt -> execute($params);
-      } else {
-        $sql = "UPDATE t_time_in_out 
-                SET time_in = ? 
-                WHERE emp_no = ? AND day = ? AND shift = ?";
-        $stmt = $conn -> prepare($sql);
-        $params = array($server_date_time, $emp_no, $day, $shift);
-        $stmt -> execute($params);
-      }
+      $unregistered = true;
     }
-  } else {
-    $unregistered = true;
   }
-  $_POST['emp_no'] = NULL;
 }
 ?>
 <!DOCTYPE html>
@@ -268,8 +303,26 @@ if (!isset($_SESSION['emp_no'])) {
           <p class="login-box-msg"><b>Time Out Failed. Unregistered or Resigned</b></p>
         </div>
       </div>
+    <?php
+      } else if (!is_time_in_range($server_time) && is_time_in_range_error($server_time) && isset($_POST['emp_no'])) {
+    ?>
+      <div class="card mt-2">
+        <div class="card-body">
+          <p class="login-box-msg"><b>Time In Failed. Time In on Incoming Time Range must follow! (4 AM/PM to 5:55 AM/PM)</b></p>
+        </div>
+      </div>
+    <?php
+      } else if (!is_time_in_2_range($server_time) && isset($_POST['emp_no'])) {
+    ?>
+      <div class="card mt-2">
+        <div class="card-body">
+          <p class="login-box-msg"><b>Time In 2 Failed. Time In on 1 Hour Break Time Range must follow! (9:30 AM/PM to 11:30 AM/PM)</b></p>
+        </div>
+      </div>
     <?php 
     }
+
+    $_POST['emp_no'] = NULL;
     ?>
   </div>
 </body>
@@ -351,11 +404,11 @@ if (!isset($_SESSION['emp_no'])) {
 
     var shift = document.getElementById('shift_label').innerHTML;
 
-    if (hours >= 5 && hours < 17) {
+    if (hours >= 4 && hours < 16) {
       shift = 'DS';
-    } else if (hours >= 17 && hours <= 23) {
+    } else if (hours >= 16 && hours <= 23) {
       shift = 'NS';
-    } else if (hours >= 0 && hours < 5) {
+    } else if (hours >= 0 && hours < 4) {
       shift = 'NS';
     }
 

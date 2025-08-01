@@ -6,11 +6,11 @@ session_start();
 include '../process/conn.php';
 
 function get_shift($server_time) {
-  if ($server_time >= '05:00:00' && $server_time < '17:00:00') {
+  if ($server_time >= '07:00:00' && $server_time < '19:00:00') {
     return 'DS';
-  } else if ($server_time >= '17:00:00' && $server_time <= '23:59:59') {
+  } else if ($server_time >= '19:00:00' && $server_time <= '23:59:59') {
     return 'NS';
-  } else if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+  } else if ($server_time >= '00:00:00' && $server_time < '07:00:00') {
     return 'NS';
   }
 }
@@ -30,6 +30,28 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     return $server_date_only;
   } else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
     return $server_date_only_yesterday;
+  }
+}
+
+function is_time_out_range($server_time) {
+  if ($server_time >= '03:00:00' && $server_time < '03:20:00') {
+    return true;
+  } else if ($server_time >= '04:00:00' && $server_time <= '04:20:00') {
+    return true;
+  } else if ($server_time >= '05:00:00' && $server_time < '05:20:00') {
+    return true;
+  } else if ($server_time >= '06:00:00' && $server_time < '06:20:00') {
+    return true;
+  } else if ($server_time >= '15:00:00' && $server_time < '15:20:00') {
+    return true;
+  } else if ($server_time >= '16:00:00' && $server_time <= '16:20:00') {
+    return true;
+  } else if ($server_time >= '17:00:00' && $server_time < '17:20:00') {
+    return true;
+  } else if ($server_time >= '18:00:00' && $server_time < '18:20:00') {
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -148,120 +170,122 @@ if (!isset($_SESSION['emp_no'])) {
   $already_time_out = '';
   $allow_time_out = '';
 
-  $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
-          FROM m_employees WHERE emp_no = ? AND resigned = 0";
-  $stmt = $conn -> prepare($sql);
-  $params = array($emp_no);
-  $stmt -> execute($params);
+  // Time Out Range Check Condition
+  if (is_time_out_range($server_time)) {
+    $sql = "SELECT full_name, provider, dept, section, sub_section, process, line_no, shift_group 
+            FROM m_employees WHERE emp_no = ? AND resigned = 0";
+    $stmt = $conn -> prepare($sql);
+    $params = array($emp_no);
+    $stmt -> execute($params);
 
-  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  if ($row) {
-    $full_name = $row['full_name'];
-    $provider = $row['provider'];
-    $dept = $row['dept'];
-    $section = $row['section'];
-    $sub_section = $row['sub_section'];
-    $line_no = $row['line_no'];
-    $line_process = $row['process'];
-    $shift_group = $row['shift_group'];
-    $concat_details = $dept . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
-    // Added Temporarily
-    if(empty($full_name)) {
-      $full_name = ' ';
-    }
-  
-    if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-      $shift = get_shift_line_support($server_time);
-      $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
-
-      // Line Support Query
-      // MySQL
-      // $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
-      // MS SQL Server
-      $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = ? AND day = ? AND shift = ? AND status = 'accepted' ORDER BY date_updated DESC";
-      $stmt = $conn -> prepare($sql);
-      $params = array($emp_no, $day, $shift);
-      $stmt -> execute($params);
-
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-      if (!$row) {
-        $wrong_scanning = true;
+    if ($row) {
+      $full_name = $row['full_name'];
+      $provider = $row['provider'];
+      $dept = $row['dept'];
+      $section = $row['section'];
+      $sub_section = $row['sub_section'];
+      $line_no = $row['line_no'];
+      $line_process = $row['process'];
+      $shift_group = $row['shift_group'];
+      $concat_details = $dept . '\\' . $section . '\\' . $sub_section . '\\' . $line_no . '\\' . $line_process;
+      // Added Temporarily
+      if(empty($full_name)) {
+        $full_name = ' ';
       }
-    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-      $wrong_scanning = true;
-    }
+    
+      if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+        $shift = get_shift_line_support($server_time);
+        $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
 
-    /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
-      $wrong_scanning = true;
-    } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
-      $wrong_scanning = true;
-    } else {*/
-    if ($wrong_scanning != true) {
-      /*if (empty($shift_group) || empty($_SESSION['shift_group'])) {
-        $wrong_shift_group = true;
-      } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
-        $wrong_shift_group = true;
-      } else {*/
-      // MySQL
-      // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
-      // MS SQL Server
-      $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
-      $stmt = $conn -> prepare($sql);
-      $params = array($emp_no, $server_date_only);
-      $stmt -> execute($params);
-
-      $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-
-      // Check first query result
-      if (!$row) {
+        // Line Support Query
         // MySQL
-        // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+        // $sql = "SELECT id FROM t_line_support_history WHERE emp_no = '$emp_no' AND day = '$day' AND shift = '$shift' AND status = 'accepted' ORDER BY date_updated DESC LIMIT 1";
         // MS SQL Server
-        $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+        $sql = "SELECT TOP 1 id FROM t_line_support_history WHERE emp_no = ? AND day = ? AND shift = ? AND status = 'accepted' ORDER BY date_updated DESC";
         $stmt = $conn -> prepare($sql);
-        $params = array($emp_no, $server_date_only_yesterday);
-        $stmt -> execute($params);
-
-        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-      }
-
-      // Check first or second query result
-      if ($row) {
-        $day = $row['day'];
-        $shift = $row['shift'];
-
-        // Check Shuttle Allocation for Time Out
-        /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
-        if ($allow_time_out == true) {
-          set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-        }*/
-
-        // Temporary Allow Timeout W/O Shuttle Allocation
-        $allow_time_out = true;
-        set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
-      } else {
-        $shift = get_shift($server_time);
-
-        $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
-        $stmt = $conn -> prepare($sql);
-        $params = array($emp_no, $server_date_only, $shift);
+        $params = array($emp_no, $day, $shift);
         $stmt -> execute($params);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$row) {
-          $no_time_in = true;
+          $wrong_scanning = true;
+        }
+      } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+        $wrong_scanning = true;
+      }
+
+      /*if (!empty($line_no) && !empty($_SESSION['line_no']) && $_SESSION['line_no'] != $line_no) {
+        $wrong_scanning = true;
+      } else if (empty($line_no) && !empty($_SESSION['line_no'])) {
+        $wrong_scanning = true;
+      } else {*/
+      if ($wrong_scanning != true) {
+        /*if (empty($shift_group) || empty($_SESSION['shift_group'])) {
+          $wrong_shift_group = true;
+        } else if (!empty($shift_group) && !empty($_SESSION['shift_group']) && $_SESSION['shift_group'] != $shift_group) {
+          $wrong_shift_group = true;
+        } else {*/
+        // MySQL
+        // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+        // MS SQL Server
+        $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND time_out IS NULL ORDER BY date_updated DESC";
+        $stmt = $conn -> prepare($sql);
+        $params = array($emp_no, $server_date_only);
+        $stmt -> execute($params);
+
+        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+        // Check first query result
+        if (!$row) {
+          // MySQL
+          // $sql = "SELECT day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC LIMIT 1";
+          // MS SQL Server
+          $sql = "SELECT TOP 1 day, shift FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = 'NS' AND time_out IS NULL ORDER BY date_updated DESC";
+          $stmt = $conn -> prepare($sql);
+          $params = array($emp_no, $server_date_only_yesterday);
+          $stmt -> execute($params);
+
+          $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+        }
+
+        // Check first or second query result
+        if ($row) {
+          $day = $row['day'];
+          $shift = $row['shift'];
+
+          // Check Shuttle Allocation for Time Out
+          /*$allow_time_out = check_time_out_sa($server_time, $emp_no, $day, $shift, $conn);
+          if ($allow_time_out == true) {
+            set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
+          }*/
+
+          // Temporary Allow Timeout W/O Shuttle Allocation
+          $allow_time_out = true;
+          set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
         } else {
-          $already_time_out = true;
+          $shift = get_shift($server_time);
+
+          $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
+          $stmt = $conn -> prepare($sql);
+          $params = array($emp_no, $server_date_only, $shift);
+          $stmt -> execute($params);
+
+          $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+          if (!$row) {
+            $no_time_in = true;
+          } else {
+            $already_time_out = true;
+          }
         }
       }
+    } else {
+      $unregistered = true;
     }
-  } else {
-    $unregistered = true;
   }
-  $_POST['emp_no'] = NULL;
 }
 ?>
 <!DOCTYPE html>
@@ -411,7 +435,17 @@ if (!isset($_SESSION['emp_no'])) {
         </div>
       </div>
     <?php
+      } else if (!is_time_out_range($server_time) && isset($_POST['emp_no'])) {
+    ?>
+      <div class="card mt-2">
+        <div class="card-body timeout-label">
+          <p class="login-box-msg"><b>Time Out Failed. Time Out on Outgoing Time Range must follow! (Ex: 3 AM/PM to 3:20 AM/PM - 20 Mins)</b></p>
+        </div>
+      </div>
+    <?php
     }
+
+    $_POST['emp_no'] = NULL;
     ?>
   </div>
 </body>
