@@ -57,7 +57,40 @@ if ($method == 'get_pending_leave_forms') {
 			$row_class = $row_class_arr[0];
 		}
 
-		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_pending" onclick="get_pending_leave_forms_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'&quot;)">';
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_pending" 
+					onclick="get_pending_leave_forms_details(&quot;'.
+					$row['leave_form_id'].'~!~'.
+					$row['emp_no'].'~!~'.
+					$row['date_filed'].'~!~'.
+					$row['address'].'~!~'.
+					$row['contact_no'].'~!~'.
+					$row['leave_type'].'~!~'.
+					$row['leave_date_from'].'~!~'.
+					$row['leave_date_to'].'~!~'.
+					$row['total_leave_days'].'~!~'.
+					$row['irt_phone_call'].'~!~'.
+					$row['irt_letter'].'~!~'.
+					$row['irb'].'~!~'.
+					$row['reason'].'~!~'.
+					$row['issued_by'].'~!~'.
+					$row['js_s'].'~!~'.
+					$row['sv'].'~!~'.
+					$row['approver'].'~!~'.
+					$row['sl_r1_1_hrs'].'~!~'.
+					$row['sl_r1_1_date'].'~!~'.
+					$row['sl_r1_1_time_in'].'~!~'.
+					$row['sl_r1_1_time_out'].'~!~'.
+					$row['sl_r1_2_days'].'~!~'.
+					$row['sl_r1_3_date'].'~!~'.
+					$row['sl_rc_1_days'].'~!~'.
+					$row['sl_rc_2_from'].'~!~'.
+					$row['sl_rc_2_to'].'~!~'.
+					$row['sl_rc_3_oc'].'~!~'.
+					$row['sl_rc_4_hm'].'~!~'.
+					$row['sl_rc_mgh'].'~!~'.
+					$row['sl_r2'].'~!~'.
+					$row['sl_dr_name'].'~!~'.
+					$row['sl_dr_date'].'&quot;)">';
 
 		echo '<td>'.$c.'</td>';
 		echo '<td>'.$row['date_filed'].'</td>';
@@ -136,7 +169,41 @@ if ($method == 'get_leave_forms_history') {
 			$row_class = $row_class_arr[0];
 		}
 
-		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" onclick="get_leave_forms_history_details(&quot;'.$row['leave_form_id'].'~!~'.$row['emp_no'].'~!~'.$row['date_filed'].'~!~'.$row['address'].'~!~'.$row['contact_no'].'~!~'.$row['leave_type'].'~!~'.$row['leave_date_from'].'~!~'.$row['leave_date_to'].'~!~'.$row['total_leave_days'].'~!~'.$row['irt_phone_call'].'~!~'.$row['irt_letter'].'~!~'.$row['irb'].'~!~'.$row['reason'].'~!~'.$row['issued_by'].'~!~'.$row['js_s'].'~!~'.$row['sv'].'~!~'.$row['approver'].'~!~'.$row['sl_r1_1_hrs'].'~!~'.$row['sl_r1_1_date'].'~!~'.$row['sl_r1_1_time_in'].'~!~'.$row['sl_r1_1_time_out'].'~!~'.$row['sl_r1_2_days'].'~!~'.$row['sl_r1_3_date'].'~!~'.$row['sl_rc_1_days'].'~!~'.$row['sl_rc_2_from'].'~!~'.$row['sl_rc_2_to'].'~!~'.$row['sl_rc_3_oc'].'~!~'.$row['sl_rc_4_hm'].'~!~'.$row['sl_rc_mgh'].'~!~'.$row['sl_r2'].'~!~'.$row['sl_dr_name'].'~!~'.$row['sl_dr_date'].'~!~'.$row['leave_form_status'].'&quot;)">';
+		echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#leave_form_history" 
+					onclick="get_leave_forms_history_details(&quot;'.
+					$row['leave_form_id'].'~!~'.
+					$row['emp_no'].'~!~'.
+					$row['date_filed'].'~!~'.
+					$row['address'].'~!~'.
+					$row['contact_no'].'~!~'.
+					$row['leave_type'].'~!~'.
+					$row['leave_date_from'].'~!~'.
+					$row['leave_date_to'].'~!~'.
+					$row['total_leave_days'].'~!~'.
+					$row['irt_phone_call'].'~!~'.
+					$row['irt_letter'].'~!~'.
+					$row['irb'].'~!~'.
+					$row['reason'].'~!~'.
+					$row['issued_by'].'~!~'.
+					$row['js_s'].'~!~'.
+					$row['sv'].'~!~'.
+					$row['approver'].'~!~'.
+					$row['sl_r1_1_hrs'].'~!~'.
+					$row['sl_r1_1_date'].'~!~'.
+					$row['sl_r1_1_time_in'].'~!~'.
+					$row['sl_r1_1_time_out'].'~!~'.
+					$row['sl_r1_2_days'].'~!~'.
+					$row['sl_r1_3_date'].'~!~'.
+					$row['sl_rc_1_days'].'~!~'.
+					$row['sl_rc_2_from'].'~!~'.
+					$row['sl_rc_2_to'].'~!~'.
+					$row['sl_rc_3_oc'].'~!~'.
+					$row['sl_rc_4_hm'].'~!~'.
+					$row['sl_rc_mgh'].'~!~'.
+					$row['sl_r2'].'~!~'.
+					$row['sl_dr_name'].'~!~'.
+					$row['sl_dr_date'].'~!~'.
+					$row['leave_form_status'].'&quot;)">';
 
 		echo '<td>'.$c.'</td>';
 		echo '<td>'.$row['date_filed'].'</td>';

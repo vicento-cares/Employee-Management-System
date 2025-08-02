@@ -79,15 +79,18 @@
                 <label>Type of Leave</label><label style="color: red;">*</label>
                 <select class="form-control" id="leave_type_leave" style="width: 100%;" required>
                   <option disabled selected value="">Select Type</option>
-                  <option value="VL">VL</option>
-                  <option value="SL">SL</option>
-                  <option value="LWOP">LWOP</option>
-                  <option value="RD">RD</option>
-                  <option value="Paternity">Paternity</option>
-                  <option value="SSS Benefits">SSS Benefits</option>
-                  <option value="Maternity">Maternity</option>
-                  <option value="Sickness">Sickness</option>
-                  <option value="Others">Others</option>
+                  <option value="BL">BEREAVEMENT LEAVE</option>
+                  <option value="CL">COMPENSATORY OFF/LEAVE</option>
+                  <option value="EL">EMERGENCY LEAVE</option>
+                  <option value="M1">MATERNITY LEAVE</option>
+                  <option value="NW">NO WORK(COMPANY INITIATED)</option>
+                  <option value="PL">PATERNITY LEAVE</option>
+                  <option value="RE">REJECTED LEAVE</option>
+                  <option value="SL">SICK LEAVE</option>
+                  <option value="SP">SOLO PARENT LEAVE</option>
+                  <option value="UL">UNPAID LEAVE</option>
+                  <option value="VL">VACATION LEAVE</option>
+                  <option value="LY">LOYALTY LEAVE</option>
                 </select>
               </div>
             </div>
