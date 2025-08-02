@@ -210,7 +210,7 @@
         }
     });
 
-    const set_out = time => {
+    const set_out = () => {
         var time = sessionStorage.getItem('set_out');
         var arr = [];
         document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
@@ -255,8 +255,8 @@
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error !!!',
-                            text: 'Error',
+                            title: 'Shuttle Route Update Failed',
+                            text: 'Error: ' + response,
                             showConfirmButton: false,
                             timer: 1000
                         });

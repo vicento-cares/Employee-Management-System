@@ -7,6 +7,18 @@ include '../../conn.php';
 
 $method = $_POST['method'];
 
+function check_sa_submission_time ($server_time) {
+	if ($server_time >= '06:00:00' && $server_time < '13:30:00') {
+		return true;
+	} else if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+		return true;
+	} else if ($server_time >= '00:00:00' && $server_time < '01:30:00') {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 // Shuttle Allocation
 
 // Get Shuttle Route Dropdown
@@ -56,29 +68,49 @@ if ($method == 'get_shuttle_allocation') {
 
 	$c = 0;
 
-	$sql = "SELECT 
-				emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shuttle_route AS emp_shuttle_route, 
-				tio.id AS tio_id, tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
-				sa.id AS sa_id, sa.out_5, sa.out_6, sa.out_7, sa.out_8, sa.day AS sa_day, sa.shift AS sa_shift, sa.shuttle_route AS sa_shuttle_route
+	$sql = "DECLARE @Day DATE = ?;
+			DECLARE @ShiftGroup VARCHAR(50) = ?;
+			DECLARE @Dept VARCHAR(50) = ?;
+
+			WITH TimeInOut AS (
+				SELECT 
+					id, emp_no, time_in, day, shift 
+				FROM t_time_in_out 
+				WHERE day = @Day
+			),
+			ShuttleAllocation AS (
+				SELECT 
+					id, emp_no, out_5, out_6, out_7, out_8, day, shift, shuttle_route 
+				FROM t_shuttle_allocation 
+				WHERE day = @Day
+			)
+			SELECT 
+				emp.provider, 
+				emp.emp_no, 
+				emp.full_name, 
+				emp.dept, 
+				emp.section, 
+				emp.line_no, 
+				emp.shuttle_route AS emp_shuttle_route, 
+				tio.id AS tio_id, 
+				tio.time_in, 
+				tio.day AS time_in_day, 
+				tio.shift AS time_in_shift, 
+				sa.id AS sa_id, 
+				sa.out_5, 
+				sa.out_6, 
+				sa.out_7, 
+				sa.out_8, 
+				sa.day AS sa_day, 
+				sa.shift AS sa_shift, 
+				sa.shuttle_route AS sa_shuttle_route
 			FROM m_employees emp
-			LEFT JOIN 
-				(
-					SELECT 
-						id, emp_no, time_in, day, shift 
-					FROM t_time_in_out 
-					WHERE day = ? 
-				) AS tio ON tio.emp_no = emp.emp_no
-			LEFT JOIN 
-				(
-					SELECT 
-						id, emp_no, out_5, out_6, out_7, out_8, day, shift, shuttle_route 
-					FROM t_shuttle_allocation 
-					WHERE day = ? 
-				) AS sa ON sa.emp_no = emp.emp_no
-			WHERE emp.shift_group = ? AND emp.dept = ?";
+			LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
+			LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
+			WHERE emp.shift_group = @ShiftGroup 
+			AND emp.dept = @Dept";
 			
 	$params = [
-		$day,
 		$day,
 		$shift_group,
 		$dept
@@ -115,7 +147,10 @@ if ($method == 'get_shuttle_allocation') {
 		if (empty($row['out_5']) && empty($row['out_6']) && empty($row['out_7']) && empty($row['out_8'])) {
 			echo '<td>'.$row['emp_shuttle_route'].'</td>';
 		} else {
-			echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" onclick="get_shuttle_allocation_details(&quot;'.$row['sa_id'].'~!~'.$row['sa_shuttle_route'].'&quot;)">'.$row['sa_shuttle_route'].'</td>';
+			echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" 
+						onclick="get_shuttle_allocation_details(&quot;'.
+						$row['sa_id'].'~!~'.
+						$row['sa_shuttle_route'].'&quot;)">'.$row['sa_shuttle_route'].'</td>';
 		}
 
 		echo '<td>'.$row['out_5'].'</td>';
@@ -177,6 +212,12 @@ if ($method == 'get_shuttle_allocation_total') {
 }
 
 if ($method == 'set_out') {
+	if (!check_sa_submission_time($server_time)) {
+		echo 'Set Shuttle Allocation Time Range must follow! (6 AM/PM to 1:29:59 AM/PM)';
+		$conn = null;
+		exit();
+	}
+
 	$arr = [];
 	$arr = $_POST['arr'];
 	$time = $_POST['time'];
