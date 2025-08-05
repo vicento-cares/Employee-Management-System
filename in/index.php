@@ -26,6 +26,10 @@ function get_shift_inverse($server_time) {
 }
 
 function is_time_in_range($server_time) {
+  // jay: feature reverted after discussion with maam juliet
+  // they need an indication of late employees, so they still need to let them barcode?
+  // condition confusing: final conclusion is to keep the original non-reverted code
+  return true;
   if ($server_time >= '04:00:00' && $server_time < '05:55:00') {
     return true;
   } else if ($server_time >= '16:00:00' && $server_time < '17:55:00') {
@@ -36,6 +40,8 @@ function is_time_in_range($server_time) {
 }
 
 function is_time_in_2_range($server_time) {
+  // jay: see duplicate discussion
+  return true;
   if ($server_time >= '09:30:00' && $server_time < '11:30:00') {
     return true;
   } else if ($server_time >= '21:30:00' && $server_time < '23:30:00') {
@@ -46,6 +52,8 @@ function is_time_in_2_range($server_time) {
 }
 
 function is_time_in_range_error($server_time) {
+  // jay: see duplicate discussion
+  return false;
   if ($server_time >= '05:55:00' && $server_time < '09:30:00') {
     return true;
   } else if ($server_time >= '17:55:00' && $server_time < '21:30:00') {
