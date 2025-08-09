@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
@@ -7,7 +7,8 @@ include '../../conn.php';
 
 $method = $_POST['method'];
 
-function check_sa_submission_time ($server_time) {
+function check_sa_submission_time($server_time)
+{
 	if ($server_time >= '06:00:00' && $server_time < '13:30:00') {
 		return true;
 	} else if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
@@ -25,15 +26,15 @@ function check_sa_submission_time ($server_time) {
 if ($method == 'fetch_shuttle_route_dropdown') {
 	$sql = "SELECT shuttle_route FROM m_shuttle_routes ORDER BY shuttle_route ASC";
 
-	$stmt = $conn -> prepare($sql);
-	$stmt -> execute();
+	$stmt = $conn->prepare($sql);
+	$stmt->execute();
 
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($row) {
+	if ($row) {
 		echo '<option selected value="">Select Shuttle Route</option>';
 		do {
-			echo '<option value="'.htmlspecialchars($row['shuttle_route']).'">'.htmlspecialchars($row['shuttle_route']).'</option>';
+			echo '<option value="' . htmlspecialchars($row['shuttle_route']) . '">' . htmlspecialchars($row['shuttle_route']) . '</option>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<option disabled selected value="">Select Shuttle Route</option>';
@@ -54,7 +55,7 @@ if ($method == 'get_shuttle_allocation_date_shift') {
 		);
 	}
 	//header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($response_arr, JSON_FORCE_OBJECT);
+	echo json_encode($response_arr, JSON_FORCE_OBJECT);
 }
 
 if ($method == 'get_shuttle_allocation') {
@@ -91,7 +92,7 @@ if ($method == 'get_shuttle_allocation') {
 				emp.dept, 
 				emp.section, 
 				emp.line_no, 
-				emp.shuttle_route AS emp_shuttle_route, 
+				COALESCE(NULLIF(emp.shuttle_route, ''), 'No Shuttle Route') AS emp_shuttle_route, 
 				tio.id AS tio_id, 
 				tio.time_in, 
 				tio.day AS time_in_day, 
@@ -103,13 +104,13 @@ if ($method == 'get_shuttle_allocation') {
 				sa.out_8, 
 				sa.day AS sa_day, 
 				sa.shift AS sa_shift, 
-				sa.shuttle_route AS sa_shuttle_route
+				COALESCE(NULLIF(sa.shuttle_route, ''), 'No Shuttle Route') AS sa_shuttle_route 
 			FROM m_employees emp
 			LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
 			LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
 			WHERE emp.shift_group = @ShiftGroup 
 			AND emp.dept = @Dept";
-			
+
 	$params = [
 		$day,
 		$shift_group,
@@ -135,28 +136,28 @@ if ($method == 'get_shuttle_allocation') {
 		echo '<tr>';
 
 		echo '<td><p class="mb-0"><label class="mb-0">
-				<input type="checkbox" class="singleCheck" value="'.$row['tio_id'].'" onclick="get_checked_length_present()" /><span></span>
+				<input type="checkbox" class="singleCheck" value="' . $row['tio_id'] . '" onclick="get_checked_length_present()" /><span></span>
 				</label></p></td>';
-		echo '<td>'.$c.'</td>';
-		echo '<td>'.$row['provider'].'</td>';
-		echo '<td>'.$row['emp_no'].'</td>';
-		echo '<td>'.$row['full_name'].'</td>';
-		echo '<td>'.$row['dept'].'</td>';
-		echo '<td>'.$row['section'].'</td>';
-		echo '<td>'.$row['line_no'].'</td>';
+		echo '<td>' . $c . '</td>';
+		echo '<td>' . $row['provider'] . '</td>';
+		echo '<td>' . $row['emp_no'] . '</td>';
+		echo '<td>' . $row['full_name'] . '</td>';
+		echo '<td>' . $row['dept'] . '</td>';
+		echo '<td>' . $row['section'] . '</td>';
+		echo '<td>' . $row['line_no'] . '</td>';
 		if (empty($row['out_5']) && empty($row['out_6']) && empty($row['out_7']) && empty($row['out_8'])) {
-			echo '<td>'.$row['emp_shuttle_route'].'</td>';
+			echo '<td>' . $row['emp_shuttle_route'] . '</td>';
 		} else {
 			echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" 
-						onclick="get_shuttle_allocation_details(&quot;'.
-						$row['sa_id'].'~!~'.
-						$row['sa_shuttle_route'].'&quot;)">'.$row['sa_shuttle_route'].'</td>';
+						onclick="get_shuttle_allocation_details(&quot;' .
+				$row['sa_id'] . '~!~' .
+				$row['sa_shuttle_route'] . '&quot;)">' . $row['sa_shuttle_route'] . '</td>';
 		}
 
-		echo '<td>'.$row['out_5'].'</td>';
-		echo '<td>'.$row['out_6'].'</td>';
-		echo '<td>'.$row['out_7'].'</td>';
-		echo '<td>'.$row['out_8'].'</td>';
+		echo '<td>' . $row['out_5'] . '</td>';
+		echo '<td>' . $row['out_6'] . '</td>';
+		echo '<td>' . $row['out_7'] . '</td>';
+		echo '<td>' . $row['out_8'] . '</td>';
 
 		echo '</tr>';
 	}
@@ -226,18 +227,19 @@ if ($method == 'set_out') {
 	foreach ($arr as $id) {
 		$sql = "SELECT 
 					tio.day, tio.shift, 
-					emp.emp_no, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.shuttle_route
+					emp.emp_no, emp.dept, emp.section, emp.line_no, emp.shift_group, 
+					COALESCE(NULLIF(emp.shuttle_route, ''), 'No Shuttle Route') AS shuttle_route 
 				FROM t_time_in_out tio
 				LEFT JOIN m_employees emp
 				ON emp.emp_no = tio.emp_no
 				WHERE tio.id = ?";
-		$stmt = $conn -> prepare($sql);
+		$stmt = $conn->prepare($sql);
 		$params = array($id);
-		$stmt -> execute($params);
+		$stmt->execute($params);
 
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    	if ($row) {
+		if ($row) {
 			$emp_no = $row['emp_no'];
 			$dept = $row['dept'];
 			$section = $row['section'];
@@ -253,17 +255,17 @@ if ($method == 'set_out') {
 					day = ? AND 
 					shift_group = ? AND 
 					(out_5 != 0 OR out_6 != 0 OR out_7 != 0 OR out_8 != 0)";
-		
-		$stmt = $conn -> prepare($sql);
+
+		$stmt = $conn->prepare($sql);
 		$params = array($emp_no, $day, $shift_group);
-		$stmt -> execute($params);
+		$stmt->execute($params);
 
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    	if ($row) {
+		if ($row) {
 			$sa_id = $row['id'];
 
-			$sql = "UPDATE t_shuttle_allocation SET out_".$time." = 1";
+			$sql = "UPDATE t_shuttle_allocation SET out_" . $time . " = 1";
 			switch ($time) {
 				case 5:
 					$sql = $sql . ", out_6 = 0, out_7 = 0, out_8 = 0";
@@ -286,7 +288,7 @@ if ($method == 'set_out') {
 		} else {
 			$set_by = $_SESSION['full_name'];
 			$sql = "INSERT INTO t_shuttle_allocation 
-						(emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_".$time.", set_by) 
+						(emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_" . $time . ", set_by) 
 					VALUES 
 						(?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
 			$stmt = $conn->prepare($sql);
@@ -314,7 +316,7 @@ if ($method == 'update_shuttle_route') {
 
 	if ($stmt->execute($params)) {
 		echo 'success';
-	}else{
+	} else {
 		echo 'error';
 	}
 }
@@ -360,11 +362,11 @@ if ($method == 'get_shuttle_allocation_per_route') {
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 		echo '<tr>';
 
-		echo '<td>'.$row['shuttle_route'].'</td>';
-		echo '<td>'.$row['total_out_5'].'</td>';
-		echo '<td>'.$row['total_out_6'].'</td>';
-		echo '<td>'.$row['total_out_7'].'</td>';
-		echo '<td>'.$row['total_out_8'].'</td>';
+		echo '<td>' . $row['shuttle_route'] . '</td>';
+		echo '<td>' . $row['total_out_5'] . '</td>';
+		echo '<td>' . $row['total_out_6'] . '</td>';
+		echo '<td>' . $row['total_out_7'] . '</td>';
+		echo '<td>' . $row['total_out_8'] . '</td>';
 
 		echo '</tr>';
 	}
