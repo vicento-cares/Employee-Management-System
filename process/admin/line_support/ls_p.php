@@ -90,15 +90,29 @@ if ($method == 'get_assigned_process_dropdown') {
 		$table_name = '[qualif].[dbo].[t_f_process]';
 	}
 
-	$sql = "SELECT process 
-			FROM $table_name 
-			WHERE (emp_id = ? OR emp_id_old = ?) 
+	$sql = "DECLARE @EmpId NVARCHAR(255) = ?;
+
+			WITH AllProcess AS (
+				SELECT process 
+				FROM $table_name 
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				UNION ALL 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_request]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_history]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_new_mp]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+			)
+			
+			SELECT process 
+			FROM AllProcess 
 			GROUP BY process";
 
-	$params = [
-		$emp_no,
-		$emp_no
-	];
+	$params[] = $emp_no;
 	
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute($params);
@@ -411,15 +425,29 @@ if ($method == 'set_line_support') {
 		$table_name = '[qualif].[dbo].[t_i_process]';
 	}
 
-	$sql = "SELECT process 
-			FROM $table_name 
-			WHERE (emp_id = ? OR emp_id_old = ?) 
+	$sql = "DECLARE @EmpId NVARCHAR(255) = ?;
+
+			WITH AllProcess AS (
+				SELECT process 
+				FROM $table_name 
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				UNION ALL 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_request]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_history]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				SELECT process 
+				FROM [trs_renewal].[dbo].[trs_renewal_new_mp]
+				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+			)
+			
+			SELECT process 
+			FROM AllProcess 
 			GROUP BY process";
 
-	$params = [
-		$emp_no,
-		$emp_no
-	];
+	$params[] = $emp_no;
 	
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute($params);
