@@ -43,12 +43,17 @@ if ($method == 'fetch_shuttle_route_dropdown') {
 
 if ($method == 'get_shuttle_allocation_date_shift') {
 	$response_arr = array();
-	if ($server_time >= '12:00:00' && $server_time <= '23:59:59') {
+	if ($server_time >= '06:00:00' && $server_time < '18:00:00') {
 		$response_arr = array(
 			'date' => $server_date_only,
 			'shift' => 'DS'
 		);
-	} else if ($server_time >= '00:00:00' && $server_time < '12:00:00') {
+	} else if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+		$response_arr = array(
+			'date' => $server_date_only,
+			'shift' => 'NS'
+		);
+	} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
 		$response_arr = array(
 			'date' => $server_date_only_yesterday,
 			'shift' => 'NS'
@@ -70,7 +75,6 @@ if ($method == 'get_shuttle_allocation') {
 	$c = 0;
 
 	$sql = "DECLARE @Day DATE = ?;
-			DECLARE @ShiftGroup VARCHAR(50) = ?;
 			DECLARE @Dept VARCHAR(50) = ?;
 
 			WITH TimeInOut AS (
@@ -84,38 +88,44 @@ if ($method == 'get_shuttle_allocation') {
 					id, emp_no, out_5, out_6, out_7, out_8, day, shift, shuttle_route 
 				FROM t_shuttle_allocation 
 				WHERE day = @Day
-			)
-			SELECT 
-				emp.provider, 
-				emp.emp_no, 
-				emp.full_name, 
-				emp.dept, 
-				emp.section, 
-				emp.line_no, 
-				COALESCE(NULLIF(emp.shuttle_route, ''), 'No Shuttle Route') AS emp_shuttle_route, 
-				tio.id AS tio_id, 
-				tio.time_in, 
-				tio.day AS time_in_day, 
-				tio.shift AS time_in_shift, 
-				sa.id AS sa_id, 
-				sa.out_5, 
-				sa.out_6, 
-				sa.out_7, 
-				sa.out_8, 
-				sa.day AS sa_day, 
-				sa.shift AS sa_shift, 
-				COALESCE(NULLIF(sa.shuttle_route, ''), 'No Shuttle Route') AS sa_shuttle_route 
-			FROM m_employees emp
-			LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
-			LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
-			WHERE emp.shift_group = @ShiftGroup 
-			AND emp.dept = @Dept";
+			),
+			ShuttleAllocationSummary AS (
+				SELECT 
+					NULL AS c,
+					emp.provider, 
+					emp.emp_no, 
+					emp.full_name, 
+					emp.dept, 
+					emp.section, 
+					emp.line_no, 
+					COALESCE(NULLIF(emp.shuttle_route, ''), 'No Shuttle Route') AS emp_shuttle_route, 
+					tio.id AS tio_id, 
+					tio.time_in, 
+					tio.day AS time_in_day, 
+					tio.shift AS time_in_shift, 
+					sa.id AS sa_id, 
+					sa.day AS sa_day, 
+					sa.shift AS sa_shift, 
+					COALESCE(NULLIF(sa.shuttle_route, ''), 'No Shuttle Route') AS sa_shuttle_route, 
+					sa.out_5, 
+					sa.out_6, 
+					sa.out_7, 
+					sa.out_8, 
+					0 AS table_order 
+				FROM m_employees emp
+				LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
+				LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
+				WHERE emp.dept = @Dept";
 
 	$params = [
 		$day,
-		$shift_group,
 		$dept
 	];
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND emp.shift_group = ?";
+		$params[] = $shift_group;
+	}
 
 	if (!empty($section)) {
 		$sql = $sql . " AND emp.section = ?";
@@ -125,28 +135,79 @@ if ($method == 'get_shuttle_allocation') {
 		$sql = $sql . " AND emp.line_no = ?";
 		$params[] = $line_no;
 	}
-	$sql = $sql . " AND tio.time_in != '' ORDER BY emp.emp_no ASC";
+	$sql = $sql . " AND tio.time_in != '' 
+				)
+				
+				SELECT * FROM ShuttleAllocationSummary
+				
+				UNION ALL
+
+				SELECT 
+					'Total MP:' AS c, 
+					NULL AS provider, 
+					NULL AS emp_no, 
+					NULL AS full_name, 
+					NULL AS dept, 
+					NULL AS section, 
+					NULL AS line_no, 
+					NULL AS emp_shuttle_route, 
+					NULL AS tio_id, 
+					NULL AS time_in, 
+					NULL AS time_in_day, 
+					NULL AS time_in_shift, 
+					NULL AS sa_id, 
+					NULL AS sa_day, 
+					NULL AS sa_shift, 
+					NULL AS sa_shuttle_route, 
+					SUM(out_5) AS out_5, 
+					SUM(out_6) AS out_6, 
+					SUM(out_7) AS out_7, 
+					SUM(out_8) AS out_8, 
+					1 AS table_order
+				FROM 
+					ShuttleAllocationSummary
+				ORDER BY 
+					table_order ASC, emp_no ASC";
 
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$c++;
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
 
-		echo '<tr>';
+		if ($row['c'] != 'Total MP:') {
+			$c++;
 
-		echo '<td><p class="mb-0"><label class="mb-0">
+			echo '<tr>';
+
+			echo '<td><p class="mb-0"><label class="mb-0">
 				<input type="checkbox" class="singleCheck" value="' . $row['tio_id'] . '" onclick="get_checked_length_present()" /><span></span>
 				</label></p></td>';
-		echo '<td>' . $c . '</td>';
+		} else {
+			$c = $row['c'];
+			$row_style = " style='background-color: black; color: white; text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+
+			echo '<tr'.$row_style.'>';
+
+			echo '<td></td>';
+		}
+
+		echo '<td'.$total_class.'>' . $c . '</td>';
+
 		echo '<td>' . $row['provider'] . '</td>';
 		echo '<td>' . $row['emp_no'] . '</td>';
 		echo '<td>' . $row['full_name'] . '</td>';
 		echo '<td>' . $row['dept'] . '</td>';
 		echo '<td>' . $row['section'] . '</td>';
 		echo '<td>' . $row['line_no'] . '</td>';
+
 		if (empty($row['out_5']) && empty($row['out_6']) && empty($row['out_7']) && empty($row['out_8'])) {
 			echo '<td>' . $row['emp_shuttle_route'] . '</td>';
+		} else if ($row['c'] == 'Total MP:') {
+			echo '<td></td>';
 		} else {
 			echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_shuttle_route" 
 						onclick="get_shuttle_allocation_details(&quot;' .
@@ -154,16 +215,16 @@ if ($method == 'get_shuttle_allocation') {
 				$row['sa_shuttle_route'] . '&quot;)">' . $row['sa_shuttle_route'] . '</td>';
 		}
 
-		echo '<td>' . $row['out_5'] . '</td>';
-		echo '<td>' . $row['out_6'] . '</td>';
-		echo '<td>' . $row['out_7'] . '</td>';
-		echo '<td>' . $row['out_8'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_8'] . '</td>';
 
 		echo '</tr>';
 	}
 }
 
-if ($method == 'get_shuttle_allocation_total') {
+if ($method == 'get_shuttle_allocation_per_route') {
 	$day = $_POST['day'];
 	//$day = '2023-07-28';
 	$shift_group = $_POST['shift_group'];
@@ -171,22 +232,27 @@ if ($method == 'get_shuttle_allocation_total') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
-	$response_arr = array();
 
-	$sql = "SELECT 
+	$sql = "WITH ShuttleAllocationSummary AS (
+			SELECT 
+				shuttle_route, 
 				sum(out_5) AS total_out_5, 
 				sum(out_6) AS total_out_6, 
 				sum(out_7) AS total_out_7, 
-				sum(out_8) AS total_out_8 
+				sum(out_8) AS total_out_8,
+				0 AS table_order  
 			FROM t_shuttle_allocation 
 			WHERE day = ? AND 
-				shift_group = ? AND 
 				dept = ?";
 	$params = [
 		$day,
-		$shift_group,
 		$dept
 	];
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND shift_group = ?";
+		$params[] = $shift_group;
+	}
 
 	if (!empty($section)) {
 		$sql = $sql . " AND section = ?";
@@ -197,19 +263,49 @@ if ($method == 'get_shuttle_allocation_total') {
 		$params[] = $line_no;
 	}
 
+	$sql = $sql . " GROUP BY shuttle_route 
+					)
+	
+					SELECT * FROM ShuttleAllocationSummary 
+					
+					UNION ALL 
+					
+					SELECT 
+						'Total MP:' AS shuttle_route, 
+						SUM(total_out_5), 
+						SUM(total_out_6), 
+						SUM(total_out_7), 
+						SUM(total_out_8), 
+						1 AS table_order 
+					FROM 
+						ShuttleAllocationSummary
+					ORDER BY 
+						table_order ASC, shuttle_route ASC";
+
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$response_arr = array(
-			'total_out_5' => $row['total_out_5'],
-			'total_out_6' => $row['total_out_6'],
-			'total_out_7' => $row['total_out_7'],
-			'total_out_8' => $row['total_out_8']
-		);
-	}
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
 
-	echo json_encode($response_arr, JSON_FORCE_OBJECT);
+		if ($row['shuttle_route'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['shuttle_route'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_8'] . '</td>';
+
+		echo '</tr>';
+	}
 }
 
 if ($method == 'set_out') {
@@ -321,30 +417,169 @@ if ($method == 'update_shuttle_route') {
 	}
 }
 
-if ($method == 'get_shuttle_allocation_per_route') {
+
+if ($method == 'get_shuttle_allocation_history') {
 	$day = $_POST['day'];
 	//$day = '2023-07-28';
 	$shift_group = $_POST['shift_group'];
+	$shift = $_POST['shift'];
 	//$shift = 'DS';
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
 
-	$sql = "SELECT 
+	$sql = "DECLARE @Day DATE = ?;
+			DECLARE @Dept VARCHAR(50) = ?;
+
+			WITH TimeInOut AS (
+				SELECT 
+					id, emp_no, time_in, day, shift 
+				FROM t_time_in_out 
+				WHERE day = @Day
+			),
+			ShuttleAllocation AS (
+				SELECT 
+					id, emp_no, out_5, out_6, out_7, out_8, day, shift, shift_group, shuttle_route 
+				FROM t_shuttle_allocation 
+				WHERE day = @Day
+			),
+			ShuttleAllocationSummary AS (
+				SELECT 
+					CAST(sa.day AS nvarchar) AS sa_day, 
+					emp.provider, 
+					emp.emp_no, 
+					emp.full_name, 
+					emp.dept, 
+					emp.section, 
+					emp.line_no, 
+					COALESCE(NULLIF(sa.shuttle_route, ''), 'No Shuttle Route') AS sa_shuttle_route, 
+					sa.out_5, 
+					sa.out_6, 
+					sa.out_7, 
+					sa.out_8, 
+					0 AS table_order 
+				FROM m_employees emp
+				LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
+				LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
+				WHERE emp.dept = @Dept";
+
+	$params = [
+		$day,
+		$dept
+	];
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND sa.shift_group = ?";
+		$params[] = $shift_group;
+	}
+	if (!empty($shift)) {
+		$sql = $sql . " AND sa.shift = ?";
+		$params[] = $shift;
+	}
+
+	if (!empty($section)) {
+		$sql = $sql . " AND emp.section = ?";
+		$params[] = $section;
+	}
+	if (!empty($line_no)) {
+		$sql = $sql . " AND emp.line_no = ?";
+		$params[] = $line_no;
+	}
+	$sql = $sql . " AND tio.time_in != '' 
+				)
+				
+				SELECT * FROM ShuttleAllocationSummary
+				
+				UNION ALL
+
+				SELECT 
+					'Total MP:' AS sa_day, 
+					NULL AS provider, 
+					NULL AS emp_no, 
+					NULL AS full_name, 
+					NULL AS dept, 
+					NULL AS section, 
+					NULL AS line_no, 
+					NULL AS sa_shuttle_route, 
+					SUM(out_5) AS out_5, 
+					SUM(out_6) AS out_6, 
+					SUM(out_7) AS out_7, 
+					SUM(out_8) AS out_8, 
+					1 AS table_order
+				FROM 
+					ShuttleAllocationSummary
+				ORDER BY 
+					table_order ASC, emp_no ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['sa_day'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['sa_day'] . '</td>';
+		echo '<td>' . $row['provider'] . '</td>';
+		echo '<td>' . $row['emp_no'] . '</td>';
+		echo '<td>' . $row['full_name'] . '</td>';
+		echo '<td>' . $row['dept'] . '</td>';
+		echo '<td>' . $row['section'] . '</td>';
+		echo '<td>' . $row['line_no'] . '</td>';
+
+		echo '<td>' . $row['sa_shuttle_route'] . '</td>';
+		
+		echo '<td'.$total_class.'>' . $row['out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_8'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
+if ($method == 'get_shuttle_allocation_history_per_route') {
+	$day = $_POST['day'];
+	//$day = '2023-07-28';
+	$shift_group = $_POST['shift_group'];
+	$shift = $_POST['shift'];
+	//$shift = 'DS';
+	$dept = $_SESSION['dept'];
+	$section = $_SESSION['section'];
+	$line_no = $_SESSION['line_no'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+			SELECT 
 				shuttle_route, 
-				sum(out_5) as total_out_5, 
-				sum(out_6) as total_out_6, 
-				sum(out_7) as total_out_7, 
-				sum(out_8) as total_out_8 
+				sum(out_5) AS total_out_5, 
+				sum(out_6) AS total_out_6, 
+				sum(out_7) AS total_out_7, 
+				sum(out_8) AS total_out_8,
+				0 AS table_order  
 			FROM t_shuttle_allocation 
 			WHERE day = ? AND 
-				shift_group = ? AND 
 				dept = ?";
 	$params = [
 		$day,
-		$shift_group,
 		$dept
 	];
+
+	if (!empty($shift_group)) {
+		$sql = $sql . " AND shift_group = ?";
+		$params[] = $shift_group;
+	}
+	if (!empty($shift)) {
+		$sql = $sql . " AND shift = ?";
+		$params[] = $shift;
+	}
 
 	if (!empty($section)) {
 		$sql = $sql . " AND section = ?";
@@ -354,19 +589,47 @@ if ($method == 'get_shuttle_allocation_per_route') {
 		$sql = $sql . " AND line_no = ?";
 		$params[] = $line_no;
 	}
-	$sql = $sql . " GROUP BY shuttle_route ORDER BY shuttle_route ASC";
+
+	$sql = $sql . " GROUP BY shuttle_route 
+					)
+	
+					SELECT * FROM ShuttleAllocationSummary 
+					
+					UNION ALL 
+					
+					SELECT 
+						'Total MP:' AS shuttle_route, 
+						SUM(total_out_5), 
+						SUM(total_out_6), 
+						SUM(total_out_7), 
+						SUM(total_out_8), 
+						1 AS table_order 
+					FROM 
+						ShuttleAllocationSummary
+					ORDER BY 
+						table_order ASC, shuttle_route ASC";
 
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		echo '<tr>';
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
 
-		echo '<td>' . $row['shuttle_route'] . '</td>';
-		echo '<td>' . $row['total_out_5'] . '</td>';
-		echo '<td>' . $row['total_out_6'] . '</td>';
-		echo '<td>' . $row['total_out_7'] . '</td>';
-		echo '<td>' . $row['total_out_8'] . '</td>';
+		if ($row['shuttle_route'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['shuttle_route'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_8'] . '</td>';
 
 		echo '</tr>';
 	}

@@ -70,19 +70,18 @@
             },
             success: function (response) {
                 $('#shuttleAllocationData').html(response);
-                let present = parseInt(document.getElementById("shuttleAllocationData").childNodes.length);
+                let present = parseInt(document.getElementById("shuttleAllocationData").childNodes.length) - 1;
                 $('#count_view_present').html(present);
                 document.getElementById("btnOut5").setAttribute('disabled', true);
                 document.getElementById("btnOut6").setAttribute('disabled', true);
                 document.getElementById("btnOut7").setAttribute('disabled', true);
                 document.getElementById("btnOut8").setAttribute('disabled', true);
                 get_shuttle_allocation_per_route();
-                get_shuttle_allocation_total();
             }
         });
     }
 
-    const get_shuttle_allocation_total = () => {
+    const get_shuttle_allocation_per_route = () => {
         let day = document.getElementById('shuttle_allocation_date').value;
         let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
         $.ajax({
@@ -90,31 +89,16 @@
             type: 'POST',
             cache: false,
             data: {
-                method: 'get_shuttle_allocation_total',
+                method: 'get_shuttle_allocation_per_route',
                 day: day,
                 shift_group: shift_group
             },
+            beforeSend: () => {
+                var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("shuttleAllocationPerRouteData").innerHTML = loading;
+            },
             success: function (response) {
-                try {
-                    let response_array = JSON.parse(response);
-                    document.getElementById('total_out_5').innerHTML = response_array.total_out_5;
-                    document.getElementById('total_out_6').innerHTML = response_array.total_out_6;
-                    document.getElementById('total_out_7').innerHTML = response_array.total_out_7;
-                    document.getElementById('total_out_8').innerHTML = response_array.total_out_8;
-                    document.getElementById('sr_total_out_5').innerHTML = response_array.total_out_5;
-                    document.getElementById('sr_total_out_6').innerHTML = response_array.total_out_6;
-                    document.getElementById('sr_total_out_7').innerHTML = response_array.total_out_7;
-                    document.getElementById('sr_total_out_8').innerHTML = response_array.total_out_8;
-                } catch (e) {
-                    console.log(response);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error !!!',
-                        text: `Error: ${response}`,
-                        showConfirmButton: false,
-                        timer: 1000
-                    });
-                }
+                $('#shuttleAllocationPerRouteData').html(response);
             }
         });
     }
@@ -324,24 +308,53 @@
         }
     }
 
-    const get_shuttle_allocation_per_route = () => {
-        let day = document.getElementById('shuttle_allocation_date').value;
-        let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
+    const get_shuttle_allocation_history = () => {
+        let day = document.getElementById('sa_date_search').value;
+        let shift_group = document.getElementById('sa_shift_group_search').value;
+        let shift = document.getElementById('sa_shift_search').value;
+
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
             cache: false,
             data: {
-                method: 'get_shuttle_allocation_per_route',
+                method: 'get_shuttle_allocation_history',
                 day: day,
-                shift_group: shift_group
+                shift_group: shift_group,
+                shift: shift
+            },
+            beforeSend: () => {
+                var loading = `<tr><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("shuttleAllocationHistoryData").innerHTML = loading;
+            },
+            success: function (response) {
+                $('#shuttleAllocationHistoryData').html(response);
+                get_shuttle_allocation_history_per_route();
+            }
+        });
+    }
+
+    const get_shuttle_allocation_history_per_route = () => {
+        let day = document.getElementById('sa_date_search').value;
+        let shift_group = document.getElementById('sa_shift_group_search').value;
+        let shift = document.getElementById('sa_shift_search').value;
+
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_shuttle_allocation_history_per_route',
+                day: day,
+                shift_group: shift_group,
+                shift: shift
             },
             beforeSend: () => {
                 var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
-                document.getElementById("shuttleAllocationPerRouteData").innerHTML = loading;
+                document.getElementById("shuttleAllocationHistoryPerRouteData").innerHTML = loading;
             },
             success: function (response) {
-                $('#shuttleAllocationPerRouteData').html(response);
+                $('#shuttleAllocationHistoryPerRouteData').html(response);
             }
         });
     }
