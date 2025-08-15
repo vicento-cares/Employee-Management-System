@@ -60,6 +60,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/shuttle_allocation.php") { ?>
+          <a href="shuttle_allocation.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="shuttle_allocation.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              Shuttle Allocation
+            </p>
+          </a>
+        </li>
         <?php include 'logout.php' ;?>
       </ul>
     </nav>

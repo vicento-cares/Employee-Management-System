@@ -192,7 +192,7 @@ if ($method == 'get_shuttle_allocation') {
 
 			echo '<tr'.$row_style.'>';
 
-			echo '<td></td>';
+			echo '<td><p class="mb-0"></p></td>';
 		}
 
 		echo '<td'.$total_class.'>' . $c . '</td>';
