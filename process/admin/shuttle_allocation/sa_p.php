@@ -20,9 +20,159 @@ function check_sa_submission_time($server_time)
 	}
 }
 
+function get_shift($server_time)
+{
+	if ($server_time >= '06:00:00' && $server_time < '18:00:00') {
+		return 'DS';
+	} else if ($server_time >= '18:00:00' && $server_time <= '23:59:59') {
+		return 'NS';
+	} else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+		return 'NS';
+	}
+}
+
 // Shuttle Allocation
 
+if ($method == 'get_shuttle_allocation_per_sr') {
+	$day = $server_date_only;
+	//$day = '2023-07-28';
+	$shift = get_shift($server_time);
+	$section = $_POST['section'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+			SELECT 
+				section, 
+				shuttle_route, 
+				sum(out_5) AS total_out_5, 
+				sum(out_6) AS total_out_6, 
+				sum(out_7) AS total_out_7, 
+				sum(out_8) AS total_out_8,
+				0 AS table_order  
+			FROM t_shuttle_allocation 
+			WHERE day = ? AND 
+				shift = ?";
+	$params = [
+		$day,
+		$shift
+	];
+
+	if (!empty($section)) {
+		$sql = $sql . " AND section = ?";
+		$params[] = $section;
+	}
+
+	$sql = $sql . " GROUP BY section, shuttle_route 
+					)
+	
+					SELECT * FROM ShuttleAllocationSummary 
+					
+					UNION ALL 
+					
+					SELECT 
+						'Total MP:' AS section, 
+						NULL AS shuttle_route, 
+						SUM(total_out_5), 
+						SUM(total_out_6), 
+						SUM(total_out_7), 
+						SUM(total_out_8), 
+						1 AS table_order 
+					FROM 
+						ShuttleAllocationSummary
+					ORDER BY 
+						table_order ASC, section ASC, shuttle_route ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['section'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td>' . $row['shuttle_route'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out_8'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
+if ($method == 'get_shuttle_allocation_per_section') {
+	$day = $server_date_only;
+	//$day = '2023-07-28';
+	$shift = get_shift($server_time);
+	$section = $_POST['section'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+			SELECT 
+				section, 
+				sum(out_5) + sum(out_6) + sum(out_7) + sum(out_8) AS total_out, 
+				0 AS table_order  
+			FROM t_shuttle_allocation 
+			WHERE day = ? AND 
+				shift = ?";
+	$params = [
+		$day,
+		$shift
+	];
+
+	if (!empty($section)) {
+		$sql = $sql . " AND section = ?";
+		$params[] = $section;
+	}
+
+	$sql = $sql . " GROUP BY section 
+					)
+	
+					SELECT * FROM ShuttleAllocationSummary 
+					
+					UNION ALL 
+					
+					SELECT 
+						'Total MP:' AS section, 
+						SUM(total_out), 
+						1 AS table_order 
+					FROM 
+						ShuttleAllocationSummary
+					ORDER BY 
+						table_order ASC, section ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['section'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['total_out'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
 // Get Shuttle Route Dropdown
+
 if ($method == 'fetch_shuttle_route_dropdown') {
 	$sql = "SELECT shuttle_route FROM m_shuttle_routes ORDER BY shuttle_route ASC";
 
@@ -71,15 +221,29 @@ if ($method == 'get_shuttle_allocation') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+	$emp_no = "";
+
+	if (isset($_POST['dept'])) {
+		$dept = $_POST['dept'];
+	}
+
+	if (isset($_POST['section'])) {
+		$section = $_POST['section'];
+	}
 
 	if (isset($_POST['line_no'])) {
 		$line_no = $_POST['line_no'];
 	}
 
+	if (isset($_POST['emp_no'])) {
+		$emp_no = $_POST['emp_no'];
+	}
+
 	$c = 0;
+	$row_class_arr = array('', 'bg-success', 'bg-info', 'bg-danger', 'bg-purple');
+	$row_class = $row_class_arr[0];
 
 	$sql = "DECLARE @Day DATE = ?;
-			DECLARE @Dept VARCHAR(50) = ?;
 
 			WITH TimeInOut AS (
 				SELECT 
@@ -119,18 +283,25 @@ if ($method == 'get_shuttle_allocation') {
 				FROM m_employees emp
 				LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
 				LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
-				WHERE emp.dept = @Dept";
+				WHERE emp.dept != ''";
 
-	$params = [
-		$day,
-		$dept
-	];
+	$params[] = $day;
+
+	if (!empty($emp_no)) {
+		$sql = $sql . " AND emp.emp_no LIKE ?";
+		$emp_no_params = $emp_no . '%';
+		$params[] = $emp_no_params;
+	}
 
 	if (!empty($shift_group)) {
 		$sql = $sql . " AND emp.shift_group = ?";
 		$params[] = $shift_group;
 	}
 
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept = ?";
+		$params[] = $dept;
+	}
 	if (!empty($section)) {
 		$sql = $sql . " AND emp.section = ?";
 		$params[] = $section;
@@ -177,14 +348,25 @@ if ($method == 'get_shuttle_allocation') {
 	$stmt->execute($params);
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$row_class = "";
 		$row_style = "";
 		$total_class = "";
 
 		if ($row['c'] != 'Total MP:') {
 			$c++;
 
-			echo '<tr>';
+			if (intval($row['out_5']) == 1) {
+				$row_class = $row_class_arr[1];
+			} else if (intval($row['out_6']) == 1) {
+				$row_class = $row_class_arr[2];
+			} else if (intval($row['out_7']) == 1) {
+				$row_class = $row_class_arr[3];
+			} else if (intval($row['out_8']) == 1) {
+				$row_class = $row_class_arr[4];
+			} else {
+				$row_class = $row_class_arr[0];
+			}
+
+			echo '<tr class="'.$row_class.'">';
 
 			echo '<td><p class="mb-0"><label class="mb-0">
 				<input type="checkbox" class="singleCheck" value="' . $row['tio_id'] . '" onclick="get_checked_length_present()" /><span></span>
@@ -236,9 +418,22 @@ if ($method == 'get_shuttle_allocation_per_route') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+	$emp_no = "";
+
+	if (isset($_POST['dept'])) {
+		$dept = $_POST['dept'];
+	}
+
+	if (isset($_POST['section'])) {
+		$section = $_POST['section'];
+	}
 
 	if (isset($_POST['line_no'])) {
 		$line_no = $_POST['line_no'];
+	}
+
+	if (isset($_POST['emp_no'])) {
+		$emp_no = $_POST['emp_no'];
 	}
 
 	$sql = "WITH ShuttleAllocationSummary AS (
@@ -250,18 +445,24 @@ if ($method == 'get_shuttle_allocation_per_route') {
 				sum(out_8) AS total_out_8,
 				0 AS table_order  
 			FROM t_shuttle_allocation 
-			WHERE day = ? AND 
-				dept = ?";
-	$params = [
-		$day,
-		$dept
-	];
+			WHERE day = ?";
+	$params[] = $day;
+
+	if (!empty($emp_no)) {
+		$sql = $sql . " AND emp_no LIKE ?";
+		$emp_no_params = $emp_no . '%';
+		$params[] = $emp_no_params;
+	}
 
 	if (!empty($shift_group)) {
 		$sql = $sql . " AND shift_group = ?";
 		$params[] = $shift_group;
 	}
 
+	if (!empty($dept)) {
+		$sql = $sql . " AND dept = ?";
+		$params[] = $dept;
+	}
 	if (!empty($section)) {
 		$sql = $sql . " AND section = ?";
 		$params[] = $section;
@@ -317,10 +518,14 @@ if ($method == 'get_shuttle_allocation_per_route') {
 }
 
 if ($method == 'set_out') {
-	if (!check_sa_submission_time($server_time)) {
-		echo 'Set Shuttle Allocation Time Range must follow! (6 AM/PM to 1:29:59 AM/PM)';
-		$conn = null;
-		exit();
+	// Check GA Account Session
+	if (!isset($_SESSION['emp_no_ga'])) {
+		// Check Submission Time Range
+		if (!check_sa_submission_time($server_time)) {
+			echo 'Set Shuttle Allocation Time Range must follow! (6 AM/PM to 1:29:59 AM/PM)';
+			$conn = null;
+			exit();
+		}
 	}
 
 	$arr = [];
@@ -435,13 +640,28 @@ if ($method == 'get_shuttle_allocation_history') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+	$emp_no = "";
+
+	if (isset($_POST['dept'])) {
+		$dept = $_POST['dept'];
+	}
+
+	if (isset($_POST['section'])) {
+		$section = $_POST['section'];
+	}
 
 	if (isset($_POST['line_no'])) {
 		$line_no = $_POST['line_no'];
 	}
 
+	if (isset($_POST['emp_no'])) {
+		$emp_no = $_POST['emp_no'];
+	}
+
+	$row_class_arr = array('', 'bg-success', 'bg-info', 'bg-danger', 'bg-purple');
+	$row_class = $row_class_arr[0];
+
 	$sql = "DECLARE @Day DATE = ?;
-			DECLARE @Dept VARCHAR(50) = ?;
 
 			WITH TimeInOut AS (
 				SELECT 
@@ -473,12 +693,16 @@ if ($method == 'get_shuttle_allocation_history') {
 				FROM m_employees emp
 				LEFT JOIN TimeInOut tio ON tio.emp_no = emp.emp_no
 				LEFT JOIN ShuttleAllocation sa ON sa.emp_no = emp.emp_no
-				WHERE emp.dept = @Dept";
+				WHERE emp.dept != ''";
 
-	$params = [
-		$day,
-		$dept
-	];
+	
+	$params[] = $day;
+
+	if (!empty($emp_no)) {
+		$sql = $sql . " AND sa.emp_no LIKE ?";
+		$emp_no_params = $emp_no . '%';
+		$params[] = $emp_no_params;
+	}
 
 	if (!empty($shift_group)) {
 		$sql = $sql . " AND sa.shift_group = ?";
@@ -489,6 +713,10 @@ if ($method == 'get_shuttle_allocation_history') {
 		$params[] = $shift;
 	}
 
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept = ?";
+		$params[] = $dept;
+	}
 	if (!empty($section)) {
 		$sql = $sql . " AND emp.section = ?";
 		$params[] = $section;
@@ -527,7 +755,6 @@ if ($method == 'get_shuttle_allocation_history') {
 	$stmt->execute($params);
 
 	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$row_class = "";
 		$row_style = "";
 		$total_class = "";
 
@@ -535,6 +762,18 @@ if ($method == 'get_shuttle_allocation_history') {
 			$row_class = "bg-black";
 			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
 			$total_class = " class='text-bold'";
+		} else {
+			if (intval($row['out_5']) == 1) {
+				$row_class = $row_class_arr[1];
+			} else if (intval($row['out_6']) == 1) {
+				$row_class = $row_class_arr[2];
+			} else if (intval($row['out_7']) == 1) {
+				$row_class = $row_class_arr[3];
+			} else if (intval($row['out_8']) == 1) {
+				$row_class = $row_class_arr[4];
+			} else {
+				$row_class = $row_class_arr[0];
+			}
 		}
 
 		echo '<tr class="'.$row_class.'"'.$row_style.'>';
@@ -567,9 +806,22 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+	$emp_no = "";
+
+	if (isset($_POST['dept'])) {
+		$dept = $_POST['dept'];
+	}
+
+	if (isset($_POST['section'])) {
+		$section = $_POST['section'];
+	}
 
 	if (isset($_POST['line_no'])) {
 		$line_no = $_POST['line_no'];
+	}
+
+	if (isset($_POST['emp_no'])) {
+		$emp_no = $_POST['emp_no'];
 	}
 
 	$sql = "WITH ShuttleAllocationSummary AS (
@@ -581,12 +833,14 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 				sum(out_8) AS total_out_8,
 				0 AS table_order  
 			FROM t_shuttle_allocation 
-			WHERE day = ? AND 
-				dept = ?";
-	$params = [
-		$day,
-		$dept
-	];
+			WHERE day = ?";
+	$params[] = $day;
+
+	if (!empty($emp_no)) {
+		$sql = $sql . " AND emp_no LIKE ?";
+		$emp_no_params = $emp_no . '%';
+		$params[] = $emp_no_params;
+	}
 
 	if (!empty($shift_group)) {
 		$sql = $sql . " AND shift_group = ?";
@@ -597,6 +851,10 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 		$params[] = $shift;
 	}
 
+	if (!empty($dept)) {
+		$sql = $sql . " AND dept = ?";
+		$params[] = $dept;
+	}
 	if (!empty($section)) {
 		$sql = $sql . " AND section = ?";
 		$params[] = $section;
