@@ -1,9 +1,28 @@
 <script type="text/javascript">
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
+        fetch_line_dropdown_search();
         fetch_shuttle_route_dropdown();
         get_shuttle_allocation_date_shift();
     });
+
+    const fetch_line_dropdown_search = () => {
+        let section = '<?=$_SESSION['section']?>';
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#shuttle_allocation_line_no').html(response);
+                $('#sa_line_no_search').html(response);
+            }
+        });
+    }
 
     const fetch_shuttle_route_dropdown = () => {
         $.ajax({
@@ -50,6 +69,7 @@
     const get_shuttle_allocation = () => {
         let day = document.getElementById('shuttle_allocation_date').value;
         let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
+        let line_no = document.getElementById('shuttle_allocation_line_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
@@ -57,7 +77,8 @@
             data: {
                 method: 'get_shuttle_allocation',
                 day: day,
-                shift_group: shift_group
+                shift_group: shift_group,
+                line_no: line_no
             },
             beforeSend: () => {
                 var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
@@ -79,6 +100,7 @@
     const get_shuttle_allocation_per_route = () => {
         let day = document.getElementById('shuttle_allocation_date').value;
         let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
+        let line_no = document.getElementById('shuttle_allocation_line_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
@@ -86,7 +108,8 @@
             data: {
                 method: 'get_shuttle_allocation_per_route',
                 day: day,
-                shift_group: shift_group
+                shift_group: shift_group,
+                line_no: line_no
             },
             beforeSend: () => {
                 var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
@@ -307,6 +330,7 @@
         let day = document.getElementById('sa_date_search').value;
         let shift_group = document.getElementById('sa_shift_group_search').value;
         let shift = document.getElementById('sa_shift_search').value;
+        let line_no = document.getElementById('sa_line_no_search').value;
 
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
@@ -316,7 +340,8 @@
                 method: 'get_shuttle_allocation_history',
                 day: day,
                 shift_group: shift_group,
-                shift: shift
+                shift: shift,
+                line_no: line_no
             },
             beforeSend: () => {
                 var loading = `<tr><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
@@ -333,6 +358,7 @@
         let day = document.getElementById('sa_date_search').value;
         let shift_group = document.getElementById('sa_shift_group_search').value;
         let shift = document.getElementById('sa_shift_search').value;
+        let line_no = document.getElementById('sa_line_no_search').value;
 
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
@@ -342,7 +368,8 @@
                 method: 'get_shuttle_allocation_history_per_route',
                 day: day,
                 shift_group: shift_group,
-                shift: shift
+                shift: shift,
+                line_no: line_no
             },
             beforeSend: () => {
                 var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;

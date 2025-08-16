@@ -39,10 +39,10 @@
             <div class="card-body">
               <div class="tab-content" id="sa-tabContent">
                 <div class="tab-pane fade show active" id="sa-1" role="tabpanel" aria-labelledby="sa-1-tab">
-                  <div class="row mb-2">
+                  <div class="row mb-4">
                     <div class="col-sm-2">
                       <label>Shuttle Allocation Date</label>
-                      <input type="date" class="form-control" id="shuttle_allocation_date" disabled>
+                      <input type="date" class="form-control" id="shuttle_allocation_date" onchange="get_shuttle_allocation()" disabled>
                     </div>
                     <div class="col-sm-2">
                       <label>Shift Group</label>
@@ -53,6 +53,10 @@
                         <option value="ADS">Shift ADS</option>
                       </select>
                     </div>
+                    <div class="col-sm-4">
+                      <label>Line No:</label>
+                      <select id="shuttle_allocation_line_no" class="form-control" onchange="get_shuttle_allocation()"></select>
+                    </div>
                     <div class="col-sm-2">
                       <label>Shift</label><br>
                       <span id="shuttle_allocation_shift"></span>
@@ -61,35 +65,29 @@
                       <label>Total Present MP</label><br>
                       <span id="count_view_present"></span>
                     </div>
-                    <div class="col-sm-2">
-                      <label>&nbsp;</label>
-                      <button type="button" class="btn bg-gray-dark btn-block" onclick="get_shuttle_allocation()"><i class="fas fa-sync"></i> Refresh</button>
-                    </div>
-                    <div class="col-sm-2">
-                      <label>&nbsp;</label>
-                      <button type="button" class="btn bg-gray-dark btn-block" onclick="export_shuttle_allocation('shuttleAllocationTable')"><i class="fas fa-download"></i> Export</button>
-                    </div>
                   </div>
                   <div class="row mb-4">
                     <div class="col-sm-1">
-                      <label>&nbsp;</label>
                       <button type="button" class="btn bg-success btn-block" id="btnOut5" onclick="verify_set_out(5)">OUT 3 😁</button>
                     </div>
                     <div class="col-sm-1">
-                      <label>&nbsp;</label>
                       <button type="button" class="btn bg-info btn-block" id="btnOut6" onclick="verify_set_out(6)">OUT 4 😑</button>
                     </div>
                     <div class="col-sm-1">
-                      <label>&nbsp;</label>
                       <button type="button" class="btn bg-danger btn-block" id="btnOut7" onclick="verify_set_out(7)">OUT 5 😠</button>
                     </div>
                     <div class="col-sm-1">
-                      <label>&nbsp;</label>
                       <button type="button" class="btn bg-purple btn-block" id="btnOut8" onclick="verify_set_out(8)">OUT 6 👻</button>
                     </div>
-                    <div class="col-sm-8 m-0 p-2 callout callout-warning">
+                    <div class="col-sm-4 m-0 p-2 callout callout-warning">
                       <h5>Note:</h5>
                       <i>Set Shuttle Allocation Time Range <b>DS (6 AM - 1:29:59 AM) & NS (6 PM - 1:29:59 PM)</b>. <br>Please set shuttle allocation within time range!</i>
+                    </div>
+                    <div class="col-sm-2">
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="get_shuttle_allocation()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                    <div class="col-sm-2">
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="export_shuttle_allocation('shuttleAllocationTable')"><i class="fas fa-download"></i> Export</button>
                     </div>
                   </div>
                   <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
@@ -180,7 +178,7 @@
                       <label>Shuttle Allocation Date</label>
                       <input type="date" class="form-control" id="sa_date_search">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                       <label>Shift Group</label>
                       <select class="form-control" id="sa_shift_group_search" style="width: 100%;" required>
                         <option selected value="">ALL</option>
@@ -189,7 +187,7 @@
                         <option value="ADS">Shift ADS</option>
                       </select>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                       <label>Shift</label>
                       <select class="form-control" id="sa_shift_search" style="width: 100%;" required>
                         <option selected value="">ALL</option>
@@ -197,7 +195,11 @@
                         <option value="NS">NS</option>
                       </select>
                     </div>
-                    <div class="col-sm-2 offset-sm-2">
+                    <div class="col-sm-4">
+                      <label>Line No:</label>
+                      <select id="sa_line_no_search" class="form-control" onchange="get_shuttle_allocation()"></select>
+                    </div>
+                    <div class="col-sm-2">
                       <label>&nbsp;</label>
                       <button type="button" class="btn bg-gray-dark btn-block" onclick="get_shuttle_allocation_history()"><i class="fas fa-search"></i> Search</button>
                     </div>

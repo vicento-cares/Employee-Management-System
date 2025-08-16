@@ -72,6 +72,10 @@ if ($method == 'get_shuttle_allocation') {
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
 
+	if (isset($_POST['line_no'])) {
+		$line_no = $_POST['line_no'];
+	}
+
 	$c = 0;
 
 	$sql = "DECLARE @Day DATE = ?;
@@ -232,6 +236,10 @@ if ($method == 'get_shuttle_allocation_per_route') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+
+	if (isset($_POST['line_no'])) {
+		$line_no = $_POST['line_no'];
+	}
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
@@ -428,6 +436,10 @@ if ($method == 'get_shuttle_allocation_history') {
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
 
+	if (isset($_POST['line_no'])) {
+		$line_no = $_POST['line_no'];
+	}
+
 	$sql = "DECLARE @Day DATE = ?;
 			DECLARE @Dept VARCHAR(50) = ?;
 
@@ -555,6 +567,10 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 	$dept = $_SESSION['dept'];
 	$section = $_SESSION['section'];
 	$line_no = $_SESSION['line_no'];
+
+	if (isset($_POST['line_no'])) {
+		$line_no = $_POST['line_no'];
+	}
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
