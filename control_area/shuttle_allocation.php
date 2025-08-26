@@ -34,10 +34,17 @@
                 <li class="nav-item">
                   <a class="nav-link" id="sa-2-tab" data-toggle="pill" href="#sa-2" role="tab" aria-controls="sa-2" aria-selected="false">Shuttle Allocation History</a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="sa-3-tab" data-toggle="pill" href="#sa-3" role="tab" aria-controls="sa-3" aria-selected="false">Weekly Shuttle Allocation</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="sa-4-tab" data-toggle="pill" href="#sa-4" role="tab" aria-controls="sa-4" aria-selected="false">Sunday & Holiday Shuttle Allocation</a>
+                </li>
               </ul>
             </div>
             <div class="card-body">
               <div class="tab-content" id="sa-tabContent">
+                <!-- Shuttle Allocation -->
                 <div class="tab-pane fade show active" id="sa-1" role="tabpanel" aria-labelledby="sa-1-tab">
                   <div class="row mb-4">
                     <div class="col-sm-2">
@@ -172,6 +179,7 @@
                     </div>
                   </div>
                 </div>
+                <!-- Shuttle Allocation History -->
                 <div class="tab-pane fade" id="sa-2" role="tabpanel" aria-labelledby="sa-2-tab">
                   <div class="row mb-4">
                     <div class="col-sm-2">
@@ -268,6 +276,238 @@
                         <!-- /.card-body -->
                       </div>
                       <!-- /.card -->
+                    </div>
+                  </div>
+                </div>
+                <!-- Weekly Shuttle Allocation -->
+                <div class="tab-pane fade" id="sa-3" role="tabpanel" aria-labelledby="sa-3-tab">
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="card card-secondary">
+                        <div class="card-header">
+                          <h5 style="text-align:center;">Weekly Filing</h5>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="card card-info" style="color:white;">
+                        <div class="card-header">
+                          <h5 style="text-align:center;">Weekly Searching</h5>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <!-- <form action="../../process/clerk/import_weekly.php"  enctype="multipart/form-data" method="POST"> -->
+                      <div class="row">
+                        <div class="col-4">
+                          <label>Date From:</label>
+                          <input type="date" name="weekly_date_from" id="weekly_date_from" class="form-control" required>
+                        </div>
+                        <div class="col-4">
+                          <label>Date To:</label>
+                          <input type="date" name="weekly_date_to" id="weekly_date_to" class="form-control" required>
+                        </div>
+                        <!-- <div class="col-4">
+                            <label>Change Shift to:</label>
+                            <select name="shift_weekly" class="form-control" required>
+                              <option value="">Select Shift</option>
+                              <option value="DS">DS</option>
+                              <option value="NS">NS</option>
+                            </select>
+                          </div> -->
+                        <div class="col-4">
+                          <label>Schedule Type</label><label style="color: red;">*</label>
+                          <select name="sched_type_weekly" id="sched_type_weekly" class="form-control" required>
+                            <option value="">Select Schedule Type</option>
+                            <option class="bg-danger" value="6:00-3:00">6:00 - 3:00</option>
+                            <!-- <option class="bg-warning" value="7:00-4:00">7:00 - 4:00</option> -->
+                            <option class="bg-success" value="7:30-6:00">7:30 - 6:00</option>
+                          </select>
+                        </div>
+                      </div>
+                      <br>
+                      <hr>
+                      <div class="row">
+                        <div class="col-12">
+                          <label>File:</label>
+                          <input type="file" name="file" id="weekly_file" class="form-control-lg" accept=".csv" required>
+                          <input type="hidden" name="set_by" id="set_by" value="<?= $_SESSION['full_name']; ?>">
+                          <input type="hidden" name="section_weekly" id="section_weekly" value="<?= $_SESSION['section']; ?>">
+                        </div>
+                      </div>
+                      <br>
+                      <hr>
+                      <div class="row">
+                        <div class="col-6">
+                          <a href="../template/Weekly Shuttle Allocation.csv?v=<?php echo time(); ?>"
+                            class="btn btn-success">Download Template</a>
+                        </div>
+                        <div class="col-6">
+                          <div class="float-right">
+                            <!-- <input type="submit" class="btn btn-primary" name="upload" value="Upload Shuttle Allocation"> -->
+                            <button type="button" class="btn btn-primary" id="btn_upload_shuttle_allocation_w" name="upload">Upload Shuttle Allocation</button>
+                          </div>
+                          <!-- </form> -->
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="row mb-2">
+                        <div class="col-3">
+                          <label>Date From:</label>
+                          <input type="date" id="weekly_date_from_search" class="form-control">
+                        </div>
+                        <div class="col-3">
+                          <label>Date To:</label>
+                          <input type="date" id="weekly_date_to_search" class="form-control">
+                        </div>
+                        <div class="col-3">
+                          <label>Shift:</label>
+                          <select id="shift_weekly_search" class="form-control" required>
+                            <option value="">Select Shift</option>
+                            <option value="DS">DS</option>
+                            <option value="NS">NS</option>
+                          </select>
+                        </div>
+                        <div class="col-3">
+                          <label>&nbsp;</label>
+                          <a href="#" class="btn btn-primary btn-block" onclick="search_weekly_filed()">Search <i
+                              class="fa fa-search"></i></a>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="card-body table-responsive p-0" style="height: 500px;">
+                            <table class="table table-head-fixed text-nowrap table-hover" id="">
+                              <thead style="text-align:center;">
+                                <th>#</th>
+                                <th>Shuttle Route</th>
+                                <th>Shift</th>
+                                <th>Total</th>
+                              </thead>
+                              <tbody id="list_of_weekly" style="text-align:center;"></tbody>
+                              <tfoot>
+                                <td colspan="3" style="text-align:right; color:red;"><b>Grand Total:</b></td>
+                                <td style="text-align:center; color:red;"><b id="grand_total_weekly"></b></td>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Sunday & Holiday Shuttle Allocation -->
+                <div class="tab-pane fade" id="sa-4" role="tabpanel" aria-labelledby="sa-4-tab">
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="card card-secondary">
+                        <div class="card-header">
+                          <h5 style="text-align:center;">Sunday / Holiday Filing</h5>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="card card-info" style="color:white;">
+                        <div class="card-header">
+                          <h5 style="text-align:center;">Sunday / Holiday Searching</h5>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <!-- <form action="../../process/clerk/import_sunday_holiday.php"  enctype="multipart/form-data" method="POST"> -->
+                      <div class="row">
+                        <div class="col-4">
+                          <label>Date:</label>
+                          <input type="date" name="sunday_holiday_date" id="sunday_holiday_date" class="form-control" required>
+                        </div>
+                        <div class="col-4">
+                          <label>Shift:</label>
+                          <select name="sunday_holiday_shift" id="sunday_holiday_shift" class="form-control" required>
+                            <option value="">Select Shift</option>
+                            <option value="DS">DS</option>
+                            <option value="NS">NS</option>
+                          </select>
+                        </div>
+                        <div class="col-4">
+                          <label>Schedule Type</label><label style="color: red;">*</label>
+                          <select name="sunday_holiday_sched_type" id="sunday_holiday_sched_type" class="form-control" required>
+                            <option value="">Select Schedule Type</option>
+                            <option class="bg-danger" value="6:00-3:00">6:00 - 3:00</option>
+                            <!-- <option class="bg-warning" value="7:00-4:00">7:00 - 4:00</option> -->
+                            <option class="bg-success" value="7:30-6:00">7:30 - 6:00</option>
+                          </select>
+                        </div>
+                      </div>
+                      <br>
+                      <hr>
+                      <div class="row">
+                        <div class="col-12">
+                          <label>File:</label>
+                          <input type="file" name="file" id="sunday_holiday_file" class="form-control-lg" accept=".csv" required>
+                          <input type="hidden" name="sunday_holiday_set_by" id="sunday_holiday_set_by" value="<?= $_SESSION['full_name']; ?>">
+                          <input type="hidden" name="sunday_holiday_sectiontotal" id="sunday_holiday_sectiontotal"
+                            value="<?= $_SESSION['section']; ?>">
+                        </div>
+                      </div>
+                      <br>
+                      <hr>
+                      <div class="row">
+                        <div class="col-6">
+                          <a href="../template/Sunday Holiday Shuttle Allocation.csv?v=<?php echo time(); ?>"
+                            class="btn btn-success">Download Template</a>
+                        </div>
+                        <div class="col-6">
+                          <div class="float-right">
+                            <!-- <input type="submit" class="btn btn-primary" name="upload" value="Upload Shuttle Allocation"> -->
+                            <button type="button" class="btn btn-primary" id="btn_upload_shuttle_allocation_sh" name="upload">Upload Shuttle Allocation</button>
+                          </div>
+                          <!-- </form> -->
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="row mb-2">
+                        <div class="col-4">
+                          <label>Date:</label>
+                          <input type="date" id="sunday_holiday_from_search" class="form-control">
+                        </div>
+                        <div class="col-4">
+                          <label>Shift:</label>
+                          <select id="sunday_holiday_shift_search" class="form-control" required>
+                            <option value="">Select Shift</option>
+                            <option value="DS">DS</option>
+                            <option value="NS">NS</option>
+                          </select>
+                        </div>
+                        <div class="col-4">
+                          <label>&nbsp;</label>
+                          <a href="#" class="btn btn-primary btn-block" onclick="search_sunday_holiday_filed()">Search <i
+                              class="fa fa-search"></i></a>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="card-body table-responsive p-0" style="height: 500px;">
+                            <table class="table table-head-fixed text-nowrap table-hover" id="">
+                              <thead style="text-align:center;">
+                                <th>#</th>
+                                <th>Shuttle Route</th>
+                                <th>Total</th>
+                              </thead>
+                              <tbody id="list_of_sunday_holiday" style="text-align:center;"></tbody>
+                              <tfoot>
+                                <td colspan="2" style="text-align:right; color:red;"><b>Grand Total:</b></td>
+                                <td style="text-align:center; color:red;"><b id="grand_total_sunday_holiday"></b></td>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

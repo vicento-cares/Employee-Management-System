@@ -59,10 +59,17 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                 <li class="nav-item">
                   <a class="nav-link" id="sa-3-tab" data-toggle="pill" href="#sa-3" role="tab" aria-controls="sa-3" aria-selected="false">Shuttle Allocation History</a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="sa-4-tab" data-toggle="pill" href="#sa-4" role="tab" aria-controls="sa-4" aria-selected="false">Weekly Shuttle Allocation Summary</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="sa-5-tab" data-toggle="pill" href="#sa-5" role="tab" aria-controls="sa-5" aria-selected="false">Sunday & Holiday Shuttle Allocation Summary</a>
+                </li>
               </ul>
             </div>
             <div class="card-body">
               <div class="tab-content" id="sa-tabContent">
+                <!-- Shuttle Allocation Summary -->
                 <div class="tab-pane fade show active" id="sa-1" role="tabpanel" aria-labelledby="sa-1-tab">
                   <div class="row mb-4">
                     <div class="col-sm-4">
@@ -161,6 +168,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                     </div>
                   </div>
                 </div>
+                <!-- Shuttle Allocation -->
                 <div class="tab-pane fade" id="sa-2" role="tabpanel" aria-labelledby="sa-2-tab">
                   <div class="row mb-2">
                     <div class="col-sm-2">
@@ -299,6 +307,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                     </div>
                   </div>
                 </div>
+                <!-- Shuttle Allocation History -->
                 <div class="tab-pane fade" id="sa-3" role="tabpanel" aria-labelledby="sa-3-tab">
                   <div class="row mb-2">
                     <div class="col-sm-2">
@@ -410,6 +419,113 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                       </div>
                       <!-- /.card -->
                     </div>
+                  </div>
+                </div>
+                <!-- Weekly Shuttle Allocation Summary -->
+                <div class="tab-pane fade" id="sa-4" role="tabpanel" aria-labelledby="sa-4-tab">
+                  <div class="row mb-4">
+                    <div class="col-sm-4">
+                      <label>Section:</label>
+                      <select id="wsa_section_search" class="form-control"></select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Date From</label>
+                      <input type="date" class="form-control" id="wsa_date_from_search">
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Date To</label>
+                      <input type="date" class="form-control" id="wsa_date_to_search">
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Shift</label>
+                      <select class="form-control" id="wsa_shift_search" style="width: 100%;" required>
+                        <option selected value="">ALL</option>
+                        <option value="DS">DS</option>
+                        <option value="NS">NS</option>
+                      </select>
+                    </div>
+                    <div class="col-2">
+                      <label>Schedule Type:</label>
+                      <select class="form-control" id="wsa_sched_type_search">
+                        <option value="">ALL</option>
+                        <option class="bg-danger" value="6:00-3:00">6:00 - 3:00</option>
+                        <!-- <option class="bg-warning" value="7:00-4:00">7:00 - 4:00</option> -->
+                        <option class="bg-success" value="7:30-6:00">7:30 - 6:00</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-sm-2 offset-sm-8">
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="get_shuttle_allocation_w()"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="col-sm-2">
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="export_shuttle_allocation('weeklyShuttleAllocationSummaryTable')"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                  </div>
+                  <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                    <table id="weeklyShuttleAllocationSummaryTable" class="table table-sm table-head-fixed text-nowrap">
+                      <thead style="text-align: center;">
+                        <tr>
+                          <th>Section</th>
+                          <th>Shuttle Route</th>
+                          <th>Shift</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="weeklyShuttleAllocationSummaryData" style="text-align: center;"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- Sunday Holiday Shuttle Allocation Summary -->
+                <div class="tab-pane fade" id="sa-5" role="tabpanel" aria-labelledby="sa-5-tab">
+                  <div class="row mb-4">
+                    <div class="col-sm-4">
+                      <label>Section:</label>
+                      <select id="shsa_section_search" class="form-control"></select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Day</label>
+                      <input type="date" class="form-control" id="shsa_day_search">
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Shift</label>
+                      <select class="form-control" id="shsa_shift_search" style="width: 100%;" required>
+                        <option selected value="">ALL</option>
+                        <option value="DS">DS</option>
+                        <option value="NS">NS</option>
+                      </select>
+                    </div>
+                    <div class="col-2">
+                      <label>Schedule Type:</label>
+                      <select class="form-control" id="shsa_sched_type_search">
+                        <option value="">ALL</option>
+                        <option class="bg-danger" value="6:00-3:00">6:00 - 3:00</option>
+                        <!-- <option class="bg-warning" value="7:00-4:00">7:00 - 4:00</option> -->
+                        <option class="bg-success" value="7:30-6:00">7:30 - 6:00</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>&nbsp;</label>
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="get_shuttle_allocation_sh()"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-sm-2 offset-sm-10">
+                      <button type="button" class="btn bg-gray-dark btn-block" onclick="export_shuttle_allocation('shShuttleAllocationSummaryTable')"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                  </div>
+                  <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                    <table id="shShuttleAllocationSummaryTable" class="table table-sm table-head-fixed text-nowrap">
+                      <thead style="text-align: center;">
+                        <tr>
+                          <th>Section</th>
+                          <th>Shuttle Route</th>
+                          <th>Shift</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="shShuttleAllocationSummaryData" style="text-align: center;"></tbody>
+                    </table>
                   </div>
                 </div>
               </div>

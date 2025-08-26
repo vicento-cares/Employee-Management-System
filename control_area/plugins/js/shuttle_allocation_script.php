@@ -380,4 +380,255 @@
             }
         });
     }
+
+    document.getElementById('btn_upload_shuttle_allocation_w').addEventListener('click', function() {
+        let sched_type_weekly_display = document.getElementById('sched_type_weekly').value;
+
+        if (sched_type_weekly_display.trim() === "") {
+            // Show an alert
+            alert("Please select a schedule type before proceeding.");
+        } else {
+            // Set the display value if not empty
+            document.getElementById("sched_type_weekly_display").innerHTML = sched_type_weekly_display;
+            // Show the modal
+            $('#set_weekly_confirm').modal('show');
+        }
+    });
+
+    const import_weekly = () => {
+        let weekly_date_from = document.getElementById('weekly_date_from').value;
+        let weekly_date_to = document.getElementById('weekly_date_to').value;
+        let sched_type_weekly = document.getElementById('sched_type_weekly').value;
+
+        if (weekly_date_from == '' || weekly_date_to == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please fill out date fields!',
+                text: 'Upload Weekly Shuttle Allocation',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (sched_type_weekly == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please select Schedule Type',
+                text: 'Upload Weekly Shuttle Allocation',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+
+            var form_data = new FormData();
+            var ins = document.getElementById('weekly_file').files.length;
+            for (var x = 0; x < ins; x++) {
+                form_data.append("file", document.getElementById('weekly_file').files[x]);
+            }
+            form_data.append("upload", 1);
+            form_data.append("weekly_date_from", document.getElementById('weekly_date_from').value);
+            form_data.append("weekly_date_to", document.getElementById('weekly_date_to').value);
+            form_data.append("sched_type_weekly", document.getElementById('sched_type_weekly').value);
+            form_data.append("set_by", document.getElementById('set_by').value);
+            form_data.append("section_weekly", document.getElementById('section_weekly').value);
+            $.ajax({
+                url: '../process/import/import_sa_w.php',
+                type: 'POST',
+                dataType: 'text',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,
+                beforeSend: () => {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Upload Weekly Shuttle Allocation in Progress...',
+                        text: 'Info',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false
+                    });
+                },
+                success: response => {
+                    setTimeout(() => {
+                        swal.close();
+                        if (response != '') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload Weekly Shuttle Allocation Error !!!',
+                                text: `Error: ${response}`,
+                                showConfirmButton: false,
+                                timer: 1000
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Upload Weekly Shuttle Allocation',
+                                text: 'Uploaded Successfully',
+                                showConfirmButton: false,
+                                timer: 1000
+                            });
+                            document.getElementById("weekly_date_from").value = '';
+                            document.getElementById("weekly_date_to").value = '';
+                            document.getElementById("sched_type_weekly").value = '';
+                            document.getElementById("weekly_file").value = '';
+                        }
+                    }, 500);
+                }
+            });
+        }
+    }
+
+    document.getElementById('btn_upload_shuttle_allocation_sh').addEventListener('click', function() {
+        let sched_type_sunday_holiday_display = document.getElementById('sunday_holiday_sched_type').value;
+
+        if (sched_type_sunday_holiday_display.trim() === "") {
+            // Show an alert
+            alert("Please select a schedule type before proceeding.");
+        } else {
+            document.getElementById("sched_type_sunday_holiday_display").innerHTML = sched_type_sunday_holiday_display;
+            // Show the modal
+            $('#set_weekly_confirm').modal('show');
+        }
+    });
+
+    const import_sunday_holiday = () => {
+        let sunday_holiday_date = document.getElementById('sunday_holiday_date').value;
+        let sunday_holiday_shift = document.getElementById('sunday_holiday_shift').value;
+        let sunday_holiday_sched_type = document.getElementById('sunday_holiday_sched_type').value;
+
+        if (sunday_holiday_date == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please fill out date fields!',
+                text: 'Upload Sunday / Holiday Shuttle Allocation',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (sunday_holiday_shift == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please select Shift',
+                text: 'Upload Sunday / Holiday Shuttle Allocation',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (sunday_holiday_sched_type == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please select Schedule Type',
+                text: 'Upload Sunday / Holiday Shuttle Allocation',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+
+            var form_data = new FormData();
+            var ins = document.getElementById('sunday_holiday_file').files.length;
+            for (var x = 0; x < ins; x++) {
+                form_data.append("file", document.getElementById('sunday_holiday_file').files[x]);
+            }
+            form_data.append("upload", 1);
+            form_data.append("sunday_holiday_date", document.getElementById('sunday_holiday_date').value);
+            form_data.append("sunday_holiday_shift", document.getElementById('sunday_holiday_shift').value);
+            form_data.append("sunday_holiday_sched_type", document.getElementById('sunday_holiday_sched_type').value);
+            form_data.append("sunday_holiday_set_by", document.getElementById('sunday_holiday_set_by').value);
+            form_data.append("sunday_holiday_sectiontotal", document.getElementById('sunday_holiday_sectiontotal').value);
+            $.ajax({
+                url: '../process/import/import_sa_sh.php',
+                type: 'POST',
+                dataType: 'text',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,
+                beforeSend: () => {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Upload Sunday / Holiday Shuttle Allocation in Progress...',
+                        text: 'Info',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false
+                    });
+                },
+                success: response => {
+                    setTimeout(() => {
+                        swal.close();
+                        if (response != '') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload Sunday / Holiday Shuttle Allocation Error !!!',
+                                text: `Error: ${response}`,
+                                showConfirmButton: false,
+                                timer: 1000
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Upload Sunday / Holiday Shuttle Allocation',
+                                text: 'Uploaded Successfully',
+                                showConfirmButton: false,
+                                timer: 1000
+                            });
+                            document.getElementById("sunday_holiday_date").value = '';
+                            document.getElementById("sunday_holiday_shift").value = '';
+                            document.getElementById("sunday_holiday_sched_type").value = '';
+                            document.getElementById("sunday_holiday_file").value = '';
+                        }
+                    }, 500);
+                }
+            });
+        }
+    }
+
+    const search_weekly_filed = () => {
+        var date_from = document.getElementById('weekly_date_from_search').value;
+        var date_to = document.getElementById('weekly_date_to_search').value;
+        var shift = document.getElementById('shift_weekly_search').value;
+
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'search_weekly_filed',
+                date_from: date_from,
+                date_to: date_to,
+                shift: shift
+            }, success: function (response) {
+                $('#list_of_weekly').html(response);
+                var weekly_total = [];
+
+                $('.weekly_total').each(function () {
+                    weekly_total.push($(this).html());
+                });
+                $('#grand_total_weekly').html(eval(weekly_total.join('+')));
+            }
+        });
+    }
+
+    const search_sunday_holiday_filed = () => {
+        var day = document.getElementById('sunday_holiday_from_search').value;
+        var shift = document.getElementById('sunday_holiday_shift_search').value;
+
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'search_sunday_holiday',
+                day: day,
+                shift: shift
+            }, success: function (response) {
+                $('#list_of_sunday_holiday').html(response);
+                var sunday_holiday_total = [];
+
+                $('.sunday_holiday_total').each(function () {
+                    sunday_holiday_total.push($(this).html());
+                });
+                $('#grand_total_sunday_holiday').html(eval(sunday_holiday_total.join('+')));
+            }
+        });
+    }
 </script>

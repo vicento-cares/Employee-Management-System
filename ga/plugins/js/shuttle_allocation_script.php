@@ -119,6 +119,8 @@
                 $('#sa_summary_section').html(response);
                 $('#shuttle_allocation_section').html(response);
                 $('#sa_section_search').html(response);
+                $('#wsa_section_search').html(response);
+                $('#shsa_section_search').html(response);
             }
         });
     }
@@ -517,6 +519,62 @@
             },
             success: function (response) {
                 $('#shuttleAllocationHistoryPerRouteData').html(response);
+            }
+        });
+    }
+
+    const get_shuttle_allocation_w = () => {
+        let section = document.getElementById('wsa_section_search').value;
+        let date_from = document.getElementById('wsa_date_from_search').value;
+        let date_to = document.getElementById('wsa_date_to_search').value;
+        let shift = document.getElementById('wsa_shift_search').value;
+        let sched_type = document.getElementById('wsa_sched_type_search').value;
+
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_shuttle_allocation_w',
+                section: section,
+                date_from: date_from,
+                date_to: date_to,
+                shift: shift,
+                sched_type: sched_type
+            },
+            beforeSend: () => {
+                var loading = `<tr><td colspan="4" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("weeklyShuttleAllocationSummaryData").innerHTML = loading;
+            },
+            success: function (response) {
+                $('#weeklyShuttleAllocationSummaryData').html(response);
+            }
+        });
+    }
+
+    const get_shuttle_allocation_sh = () => {
+        let section = document.getElementById('shsa_section_search').value;
+        let day = document.getElementById('shsa_day_search').value;
+        let shift = document.getElementById('shsa_shift_search').value;
+        let sched_type = document.getElementById('shsa_sched_type_search').value;
+
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_shuttle_allocation_sh',
+                section: section,
+                day: day,
+                shift: shift,
+                sched_type: sched_type
+            },
+            beforeSend: () => {
+                var loading = `<tr><td colspan="4" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                document.getElementById("shShuttleAllocationSummaryData").innerHTML = loading;
+            },
+            success: function (response) {
+                $('#shShuttleAllocationSummaryData').html(response);
             }
         });
     }

@@ -909,4 +909,260 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 	}
 }
 
+if ($method == 'search_weekly_filed') {
+	$date_from = $_POST['date_from'];
+	$date_to = $_POST['date_to'];
+	$shift = $_POST['shift'];
+
+	if (!isset($_SESSION['full_name'])) {
+		echo 'Session Timeout! Please re-login your account';
+		$conn = NULL;
+		exit();
+	}
+
+	$name = $_SESSION['full_name'];
+	$dept = $_SESSION['dept'];
+	$section = $_SESSION['section'];
+
+	$c = 0;
+
+	$query = "SELECT 
+					shuttle_route, shift, total_count 
+				FROM 
+					t_shuttle_allocation_w 
+				WHERE 
+					(date_from >= ? AND date_to <= ?) AND 
+					shift LIKE ? AND 
+					set_by = ? AND 
+					dept = ? AND 
+					section = ?";
+
+	$stmt = $conn->prepare($query);
+
+	$stmt->execute([
+		$date_from, 
+		$date_to, 
+		$shift . '%',
+		$name, 
+		$dept, 
+		$section
+	]);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		do {
+			$c++;
+			echo '<tr>';
+			echo '<td>' . $c . '</td>';
+			echo '<td>' . $row['shuttle_route'] . '</td>';
+			echo '<td>' . $row['shift'] . '</td>';
+			echo '<td class="weekly_total">' . $row['total_count'] . '</td>';
+			echo '</tr>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
+		echo '<tr>';
+		echo '<td colspan="4" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
+	}
+}
+
+if ($method == 'search_sunday_holiday') {
+	$dates = $_POST['dates'];
+	$shift = $_POST['shift'];
+
+	if (!isset($_SESSION['full_name'])) {
+		echo 'Session Timeout! Please re-login your account';
+		$conn = NULL;
+		exit();
+	}
+
+	$name = $_SESSION['full_name'];
+	$dept = $_SESSION['dept'];
+	$section = $_SESSION['section'];
+
+	$c = 0;
+
+	$query = "SELECT 
+					shuttle_route, total_count 
+				FROM 
+					t_shuttle_allocation_sh 
+				WHERE 
+					day = ? AND 
+					shift LIKE ? AND 
+					set_by = ? AND 
+					dept = ? AND 
+					section = ?";
+
+	$stmt = $conn->prepare($query);
+
+	$stmt->execute([
+		$dates, 
+		$shift . '%', 
+		$name, 
+		$dept, 
+		$section
+	]);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		do {
+			$c++;
+			echo '<tr>';
+			echo '<td>' . $c . '</td>';
+			echo '<td>' . $row['shuttle_route'] . '</td>';
+			echo '<td class="sunday_holiday_total">' . $row['total'] . '</td>';
+			echo '</tr>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
+		echo '<tr>';
+		echo '<td colspan="3" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
+	}
+}
+
+if ($method == 'get_shuttle_allocation_w') {
+	$date_from = $_POST['date_from'];
+	$date_to = $_POST['date_to'];
+	$shift = $_POST['shift'];
+	$section = $_POST['section'];
+	$sched_type = $_POST['sched_type'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+				SELECT 
+					section, shuttle_route, shift, total_count, 0 AS table_order 
+				FROM t_shuttle_allocation_w 
+				WHERE (date_from >= ? AND date_to <= ?)";
+	$params = [
+		$date_from, $date_to 
+	];
+
+	if (!empty($shift)) {
+		$sql = $sql . " AND shift = ?";
+		$params[] = $shift;
+	}
+
+	if (!empty($section)) {
+		$sql = $sql . " AND section LIKE ?";
+		$section_params = $section . "%";
+		$params[] = $section_params;
+	}
+
+	if (!empty($sched_type)) {
+		$sql = $sql . " AND sched_type = ?";
+		$params[] = $sched_type;
+	}
+
+	$sql = $sql . ")
+				
+				SELECT * FROM ShuttleAllocationSummary
+				
+				UNION ALL
+
+				SELECT 
+					'Total:' AS section, NULL AS shuttle_route, NULL AS shift, SUM(total_count) AS total_count, 1 AS table_order 
+				FROM 
+					ShuttleAllocationSummary
+				ORDER BY 
+					table_order ASC, section ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['section'] == 'Total:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		} else {
+			$row_class = $row_class_arr[0];
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td>' . $row['shuttle_route'] . '</td>';
+		echo '<td>' . $row['shift'] . '</td>';
+		
+		echo '<td'.$total_class.'>' . $row['total_count'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
+if ($method == 'get_shuttle_allocation_sh') {
+	$day = $_POST['day'];
+	$shift = $_POST['shift'];
+	$section = $_POST['section'];
+	$sched_type = $_POST['sched_type'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+				SELECT 
+					section, shuttle_route, shift, total_count, 0 AS table_order 
+				FROM t_shuttle_allocation_sh 
+				WHERE day = ?";
+	$params = [
+		$day 
+	];
+
+	if (!empty($shift)) {
+		$sql = $sql . " AND shift = ?";
+		$params[] = $shift;
+	}
+
+	if (!empty($section)) {
+		$sql = $sql . " AND section LIKE ?";
+		$section_params = $section . "%";
+		$params[] = $section_params;
+	}
+
+	if (!empty($sched_type)) {
+		$sql = $sql . " AND sched_type = ?";
+		$params[] = $sched_type;
+	}
+
+	$sql = $sql . ")
+				
+				SELECT * FROM ShuttleAllocationSummary
+				
+				UNION ALL
+
+				SELECT 
+					'Total:' AS section, NULL AS shuttle_route, NULL AS shift, SUM(total_count) AS total_count, 1 AS table_order 
+				FROM 
+					ShuttleAllocationSummary
+				ORDER BY 
+					table_order ASC, section ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['section'] == 'Total:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		} else {
+			$row_class = $row_class_arr[0];
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td>' . $row['shuttle_route'] . '</td>';
+		echo '<td>' . $row['shift'] . '</td>';
+		
+		echo '<td'.$total_class.'>' . $row['total_count'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
 $conn = NULL;

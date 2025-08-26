@@ -12,6 +12,8 @@ include '../modals/set_line_shifting.php';
 include '../modals/view_employee_control_area.php';
 include '../modals/update_skill_level.php';
 include '../modals/update_shuttle_route.php';
+include '../modals/set_weekly_confirm.php';
+include '../modals/set_sunday_holiday_confirm.php';
 ?>
 <!-- jQuery -->
 <script src="../plugins/jquery/dist/jquery.min.js"></script>
