@@ -163,7 +163,7 @@ if (!empty($search_multiple_asr_shift_group_arr) ||
 }
 
 $sql = $sql . " AND 
-					(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+					(emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
 				GROUP BY 
 					emp.dept, emp.section, emp.line_no, emp.shift_group 
 			)
@@ -193,6 +193,7 @@ $sql = $sql . " AND
 			ORDER BY 
 				table_order ASC, shift_group ASC";
 
+$params[] = $day;
 $params[] = $day;
 
 $stmt = $conn->prepare($sql);

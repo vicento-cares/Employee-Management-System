@@ -68,12 +68,13 @@ if ($method == 'month_attendance_mon') {
                 FROM 
                     DateRange dr
                 LEFT JOIN 
-                    m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+                    m_employees emp ON (emp.date_hired <= dr.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
                     emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
-                    emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+                    emp.section NOT IN ('CQA', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section
             )
@@ -130,12 +131,13 @@ if ($method == 'month_attendance_mon') {
                 FROM 
                     DateRange dr
                 LEFT JOIN 
-                    m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+                    m_employees emp ON (emp.date_hired <= dr.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
                     emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
-                    emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+                    emp.section NOT IN ('CQA', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section
             )
@@ -197,12 +199,13 @@ if ($method == 'month_attendance_mon') {
                 FROM 
                     DateRange dr
                 LEFT JOIN 
-                    m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+                    m_employees emp ON (emp.date_hired <= dr.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
                 LEFT JOIN 
                     t_time_in_out tio ON emp.emp_no = tio.emp_no AND tio.day = dr.report_date 
                 WHERE 
                     emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
-                    emp.section NOT IN ('CQA', 'QC', 'QA', 'QM', 'QAE') 
+                    emp.section NOT IN ('CQA', 'QA', 'QM', 'QAE') 
                 GROUP BY 
                     dr.report_date, emp.section
             )

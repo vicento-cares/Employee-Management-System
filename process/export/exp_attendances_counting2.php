@@ -33,7 +33,8 @@ function count_attendance_list2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 	}
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 	
 	$stmt = $conn->prepare($sql);
@@ -79,7 +80,8 @@ function count_emp_tio2($search_arr, $conn) {
 	} else {
 		$sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 	}
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 
 	$stmt = $conn->prepare($sql);
@@ -187,7 +189,8 @@ if ($line_no == 'No Line') {
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
+$params[] = $day;
 $params[] = $day;
 $sql = $sql . " GROUP BY process";
 
@@ -237,7 +240,8 @@ if ($line_no == 'No Line') {
 } else {
     $sql = $sql . " AND (line_no = '' OR line_no IS NULL)";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$params[] = $day;
 $params[] = $day;
 $sql = $sql . " GROUP BY emp.process";
 
