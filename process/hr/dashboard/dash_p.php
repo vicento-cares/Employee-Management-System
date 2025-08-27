@@ -143,6 +143,7 @@ if ($method == 'count_emp_dashboard') {
 				FROM 
 					m_employees emp 
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) $where_clause 
 
 				UNION ALL
@@ -158,6 +159,7 @@ if ($method == 'count_emp_dashboard') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.emp_no = emp.emp_no
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					tio.day = @Day $where_clause 
 
@@ -174,6 +176,7 @@ if ($method == 'count_emp_dashboard') {
 				LEFT JOIN 
 					t_line_support_history ls ON ls.emp_no = emp.emp_no
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					ls.day = @Day $where_clause 
 			)
@@ -434,6 +437,7 @@ if ($method == 'count_od') {
 				FROM 
 					m_employees emp 
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					emp.shift IS NOT NULL $where_clause
 
@@ -449,6 +453,7 @@ if ($method == 'count_od') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.emp_no = emp.emp_no
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					tio.day = @Day $where_clause
 
@@ -464,6 +469,7 @@ if ($method == 'count_od') {
 				LEFT JOIN 
 					t_line_support_history ls ON ls.emp_no = emp.emp_no
 				WHERE 
+					(emp.date_hired <= @Day) AND 
 					(emp.resigned_date IS NULL OR emp.resigned_date >= @Day) AND 
 					ls.day = @Day $where_clause
 			)
@@ -637,7 +643,8 @@ if ($method == 'get_daily_absent_rate_chart') {
 				FROM 
 					DateRange dr
 				LEFT JOIN 
-					m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+					m_employees emp ON (emp.date_hired <= dr.report_date) AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
 				WHERE 
 					emp.shift IS NOT NULL$where_clause 
 				GROUP BY 
@@ -652,7 +659,9 @@ if ($method == 'get_daily_absent_rate_chart') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.day = dr.report_date 
 				LEFT JOIN 
-					m_employees emp ON emp.emp_no = tio.emp_no AND (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+					m_employees emp ON emp.emp_no = tio.emp_no AND 
+					(emp.date_hired <= dr.report_date) AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
 				WHERE 
 					emp.dept != ''$where_clause 
 				GROUP BY 
@@ -790,7 +799,8 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
 				FROM 
 					DateRange dr
 				LEFT JOIN 
-					m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
+					m_employees emp ON (emp.date_hired <= dr.report_date) AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date)
 				WHERE 
         			emp.shift IS NOT NULL$where_clause 
 				GROUP BY 
@@ -806,7 +816,9 @@ if ($method == 'get_daily_absent_rate_provider_chart') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.day = dr.report_date 
 				LEFT JOIN 
-					m_employees emp ON emp.emp_no = tio.emp_no AND (emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date) 
+					m_employees emp ON emp.emp_no = tio.emp_no AND 
+					(emp.date_hired <= dr.report_date) AND 
+					(emp.resigned_date IS NULL OR emp.resigned_date >= dr.report_date) 
 				WHERE 
         			emp.dept != ''$where_clause 
 				GROUP BY 

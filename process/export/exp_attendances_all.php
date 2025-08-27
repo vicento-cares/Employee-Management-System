@@ -31,10 +31,11 @@ $sql = "SELECT
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE";
-$sql = $sql . " (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$sql = $sql . " (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 
 $params = [];
+$params[] = $day;
 $params[] = $day;
 $params[] = $day;
 
