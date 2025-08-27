@@ -311,6 +311,8 @@ function check_csv($file, $conn)
     $notExistsEmpStatusArr = array();
     $notValidDateHiredArr = array();
     $notValidResignedDateArr = array();
+    $notAllowedDateHiredArr = array();
+    $notAllowedResignedDateArr = array();
     $notExistsEmpJsSNoArr = array();
     $notExistsEmpSvNoArr = array();
     $notExistsEmpAppNoArr = array();
@@ -463,16 +465,50 @@ function check_csv($file, $conn)
                     $hasError = 1;
                     $row_valid_arr[12] = 1;
                     array_push($notValidDateHiredArr, $check_csv_row);
+                } else {
+                    $result = parseDate($date_hired);
+
+                    // Check if the result is a DateTime object or an error message
+                    if ($result instanceof DateTime) {
+                        $date_hired = $result->format('Y-m-d'); // Outputs: 2025-05-28
+                        $server_date_only = date('Y-m-d');
+                        if ($date_hired > $server_date_only) {
+                            $hasError = 1;
+                            $row_valid_arr[18] = 1;
+                            array_push($notAllowedDateHiredArr, $check_csv_row);
+                        }
+                    } else {
+                        $hasError = 1;
+                        $row_valid_arr[13] = 1;
+                        array_push($notValidDateHiredArr, $check_csv_row);
+                    }
                 }
-            }
+            }*/
             if (!empty($resigned_date)) {
                 if ($is_valid_resigned_date == false) {
                     $hasError = 1;
                     $row_valid_arr[13] = 1;
                     array_push($notValidResignedDateArr, $check_csv_row);
+                } else {
+                    $result = parseDate($resigned_date);
+
+                    // Check if the result is a DateTime object or an error message
+                    if ($result instanceof DateTime) {
+                        $resigned_date = $result->format('Y-m-d'); // Outputs: 2025-05-28
+                        $server_date_only = date('Y-m-d');
+                        if ($resigned_date > $server_date_only) {
+                            $hasError = 1;
+                            $row_valid_arr[17] = 1;
+                            array_push($notAllowedResignedDateArr, $check_csv_row);
+                        }
+                    } else {
+                        $hasError = 1;
+                        $row_valid_arr[13] = 1;
+                        array_push($notValidResignedDateArr, $check_csv_row);
+                    }
                 }
             }
-            if (!empty($emp_js_s_no)) {
+            /*if (!empty($emp_js_s_no)) {
                 if (!in_array($emp_js_s_no, $emp_js_s_no_arr)) {
                     $hasError = 1;
                     $row_valid_arr[14] = 1;
@@ -565,6 +601,12 @@ function check_csv($file, $conn)
         if ($row_valid_arr[16] == 1) {
             $message = $message . 'Approver Employee No. doesn\'t exists on row/s ' . implode(", ", $notExistsEmpAppNoArr) . '. ';
         }
+        if ($row_valid_arr[17] == 1) {
+            $message = $message . 'Advance Resigned Date is not allowed on row/s ' . implode(", ", $notAllowedResignedDateArr) . '. ';
+        }
+        // if ($row_valid_arr[18] == 1) {
+        //     $message = $message . 'Advance Date Hired is not allowed on row/s ' . implode(", ", $notAllowedDateHiredArr) . '. ';
+        // }
 
 
         if ($hasBlankError >= 1) {

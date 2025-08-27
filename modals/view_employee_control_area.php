@@ -191,7 +191,7 @@
         <div class="row">
           <div class="col-6">
             <label>Date Resigned:</label>
-            <input type="date" id="resigned_date_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <input type="date" id="resigned_date_master_update" class="form-control" style="height:45px; border: 1px solid black;" max="<?= $server_date_only ?>" disabled>
           </div>
         </div>
         <br>

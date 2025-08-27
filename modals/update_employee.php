@@ -207,7 +207,7 @@ if (empty($disabled) && empty($disabled_tc)) {
         <div class="row">
           <div class="col-6">
             <label>Date Resigned:</label>
-            <input type="date" id="resigned_date_master_update" class="form-control" style="height:45px; border: 1px solid black;" <?= $disabled_tc ?>>
+            <input type="date" id="resigned_date_master_update" class="form-control" style="height:45px; border: 1px solid black;" max="<?= $server_date_only ?>" <?= $disabled_tc ?>>
           </div>
         </div>
         <br>
