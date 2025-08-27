@@ -520,6 +520,234 @@ if ($method == 'get_line_support_certification') {
 
 	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
 
+	// Additional Checking via E-Renew System
+
+	// E-Renew System - Renewal Request
+
+	$query .= "),";
+
+	$query .= " LatestAuthRenewalReq AS (
+					SELECT 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END AS emp_id, 
+						authorization_no, 
+						MAX(YEAR(expiration_on_month)) AS latest_auth_year 
+					FROM [trs_renewal].[dbo].[trs_renewal_request] 
+					GROUP BY 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END, authorization_no
+				),
+	
+			RankedAuthRenewalReq AS (
+				SELECT emp.dept, emp.line_no, emp.section, 
+					a.batch_no AS batch, a.process, a.authorization_no AS auth_no, 
+					YEAR(a.expiration_on_month) AS auth_year, '' AS date_authorized, a.expiration_on_month AS expire_date, 
+					CASE 
+						WHEN a.expiration_on_month < GETDATE() THEN 'Expired'
+						ELSE 'Active'
+					END AS status, 
+					'' AS r_of_cancellation, '' AS d_of_cancellation, a.remarks, '' AS i_status, '' AS r_status, 
+					b.fullname, b.agency, b.emp_id, 
+					sl.id AS skill_level_id, sl.skill_level, 
+					ROW_NUMBER() OVER (
+						PARTITION BY 
+							CASE 
+								WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+								ELSE falp_id_no 
+							END, a.authorization_no ORDER BY YEAR(a.expiration_on_month) DESC
+					) AS rn
+				FROM [trs_renewal].[dbo].[trs_renewal_request] a 
+				LEFT JOIN [qualif].[dbo].[t_employee_m] b 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = b.emp_id AND 
+						a.batch_no = CASE 
+							WHEN TRY_CAST(b.batch AS INT) IS NULL THEN 0
+							ELSE TRY_CAST(b.batch AS INT)
+						END
+				LEFT JOIN m_employees emp 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = emp.emp_no 
+				LEFT JOIN m_skill_level sl 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = sl.emp_no AND a.process = sl.process 
+				JOIN LatestAuthRenewalReq la 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = la.emp_id AND a.authorization_no = la.authorization_no AND YEAR(a.expiration_on_month) = la.latest_auth_year 
+				WHERE b.id != ''";
+
+	$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+	$params[] = $emp_no;
+	$params[] = $emp_no;
+
+	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
+
+	// E-Renew System - Renewal History
+
+	$query .= "),";
+
+	$query .= " LatestAuthRenewalH AS (
+					SELECT 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END AS emp_id, 
+						authorization_no, 
+						MAX(YEAR(expiration_on_month)) AS latest_auth_year 
+					FROM [trs_renewal].[dbo].[trs_renewal_history] 
+					GROUP BY 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END, authorization_no
+				),
+	
+			RankedAuthRenewalH AS (
+				SELECT emp.dept, emp.line_no, emp.section, 
+					a.batch_no AS batch, a.process, a.authorization_no AS auth_no, 
+					YEAR(a.expiration_on_month) AS auth_year, '' AS date_authorized, a.expiration_on_month AS expire_date, 
+					CASE 
+						WHEN a.expiration_on_month < GETDATE() THEN 'Expired'
+						ELSE 'Active'
+					END AS status, 
+					'' AS r_of_cancellation, '' AS d_of_cancellation, a.remarks, '' AS i_status, '' AS r_status, 
+					b.fullname, b.agency, b.emp_id, 
+					sl.id AS skill_level_id, sl.skill_level, 
+					ROW_NUMBER() OVER (
+						PARTITION BY 
+							CASE 
+								WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+								ELSE falp_id_no 
+							END, a.authorization_no ORDER BY YEAR(a.expiration_on_month) DESC
+					) AS rn
+				FROM [trs_renewal].[dbo].[trs_renewal_history] a 
+				LEFT JOIN [qualif].[dbo].[t_employee_m] b 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = b.emp_id AND 
+						a.batch_no = CASE 
+							WHEN TRY_CAST(b.batch AS INT) IS NULL THEN 0
+							ELSE TRY_CAST(b.batch AS INT)
+						END
+				LEFT JOIN m_employees emp 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = emp.emp_no 
+				LEFT JOIN m_skill_level sl 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = sl.emp_no AND a.process = sl.process 
+				JOIN LatestAuthRenewalH la 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = la.emp_id AND a.authorization_no = la.authorization_no AND YEAR(a.expiration_on_month) = la.latest_auth_year 
+				WHERE b.id != ''";
+
+	$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+	$params[] = $emp_no;
+	$params[] = $emp_no;
+
+	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
+
+	// E-Renew System - Renewal New MP
+
+	$query .= "),";
+
+	$query .= " LatestAuthRenewalNMP AS (
+					SELECT 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END AS emp_id, 
+						authorization_no, 
+						MAX(auth_year) AS latest_auth_year 
+					FROM [trs_renewal].[dbo].[trs_renewal_new_mp] 
+					WHERE i_status = 'Approved' 
+					GROUP BY 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END, authorization_no
+				),
+	
+			RankedAuthRenewalNMP AS (
+				SELECT emp.dept, emp.line_no, emp.section, 
+					a.batch_no AS batch, a.process, a.authorization_no AS auth_no, 
+					a.auth_year, a.date_authorized, a.expiration_on_month AS expire_date, 
+					CASE 
+						WHEN a.expiration_on_month < GETDATE() THEN 'Expired'
+						ELSE 'Active'
+					END AS status, 
+					a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
+					b.fullname, b.agency, b.emp_id, 
+					sl.id AS skill_level_id, sl.skill_level, 
+					ROW_NUMBER() OVER (
+						PARTITION BY 
+							CASE 
+								WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+								ELSE falp_id_no 
+							END, a.authorization_no ORDER BY YEAR(a.expiration_on_month) DESC
+					) AS rn
+				FROM [trs_renewal].[dbo].[trs_renewal_new_mp] a 
+				LEFT JOIN [qualif].[dbo].[t_employee_m] b 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = b.emp_id AND 
+						a.batch_no = CASE 
+							WHEN TRY_CAST(b.batch AS INT) IS NULL THEN 0
+							ELSE TRY_CAST(b.batch AS INT)
+						END
+				LEFT JOIN m_employees emp 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = emp.emp_no 
+				LEFT JOIN m_skill_level sl 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = sl.emp_no AND a.process = sl.process 
+				JOIN LatestAuthRenewalNMP la 
+					ON 
+						CASE 
+							WHEN falp_id_no IS NULL OR falp_id_no = 'N/A' THEN sp_id_no 
+							ELSE falp_id_no 
+						END = la.emp_id AND a.authorization_no = la.authorization_no AND YEAR(a.expiration_on_month) = la.latest_auth_year 
+				WHERE a.i_status = 'Approved'";
+
+	$query .= " AND (b.emp_id = ? OR b.emp_id_old = ?)";
+	$params[] = $emp_no;
+	$params[] = $emp_no;
+
+	// $query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC";
+
 	$query .= ")";
 
 	$query .= " SELECT *
@@ -528,6 +756,15 @@ if ($method == 'get_line_support_certification') {
 				UNION ALL  
 				SELECT *
 				FROM RankedAuthFinal 
+				WHERE rn = 1 
+				SELECT *
+				FROM RankedAuthRenewalReq 
+				WHERE rn = 1 
+				SELECT *
+				FROM RankedAuthRenewalH 
+				WHERE rn = 1 
+				SELECT *
+				FROM RankedAuthRenewalNMP 
 				WHERE rn = 1 
 				ORDER BY process ASC, fullname ASC, auth_year DESC";
 
