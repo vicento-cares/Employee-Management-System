@@ -34,8 +34,9 @@ function count_attendance_list($search_arr, $conn) {
 		$params[] = $line_no_search;
 	}
 
-	$sql = $sql . " AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
 
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 	
 	$stmt = $conn->prepare($sql);
@@ -85,8 +86,9 @@ function count_emp_tio($search_arr, $conn) {
 		$params[] = $line_no_search;
 	}
 
-	$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
 
+	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 
 	$stmt = $conn->prepare($sql);
@@ -240,10 +242,11 @@ if (!empty($line_no)) {
 }
 
 $sql = $sql . " AND 
-					(emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
+					(emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?) 
 				GROUP BY 
 					emp.process";
 
+$params[] = $day;
 $params[] = $day;
 
 $stmt = $conn->prepare($sql);

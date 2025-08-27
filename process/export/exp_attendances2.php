@@ -87,7 +87,8 @@ if ($line_no == 'No Line') {
 } else {
     $sql = $sql . " AND (emp.line_no = '' OR emp.line_no IS NULL)";
 }
-$sql = $sql . " AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+$params[] = $day;
 $params[] = $day;
 $sql = $sql . " ORDER BY emp.emp_no ASC";
 

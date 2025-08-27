@@ -326,7 +326,7 @@ if ($method == 'get_time_out_counting') {
 				LEFT JOIN 
 					t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = @day 
 				WHERE 
-					emp.dept != '' AND (emp.resigned_date IS NULL OR emp.resigned_date >= @day)";
+					emp.dept != '' AND (emp.date_hired <= @day) AND (emp.resigned_date IS NULL OR emp.resigned_date >= @day)";
 
 	$params[] = $day;
 
@@ -566,7 +566,7 @@ if ($method == 'get_multiple_time_out_counting') {
 			FROM 
 				DateRange dr
 			LEFT JOIN 
-				m_employees emp ON (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
+				m_employees emp ON (emp.date_hired <= dr.ReportDate) AND (emp.resigned_date IS NULL OR emp.resigned_date >= dr.ReportDate)
 			LEFT JOIN 
 				t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = dr.ReportDate
 			WHERE 
