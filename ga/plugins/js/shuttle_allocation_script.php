@@ -205,7 +205,7 @@
                 emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="14" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationData").innerHTML = loading;
             },
             success: function (response) {
@@ -242,7 +242,7 @@
                 emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationPerRouteData").innerHTML = loading;
             },
             success: function (response) {
@@ -480,7 +480,7 @@
                 emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationHistoryData").innerHTML = loading;
             },
             success: function (response) {
@@ -514,7 +514,7 @@
                 emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationHistoryPerRouteData").innerHTML = loading;
             },
             success: function (response) {

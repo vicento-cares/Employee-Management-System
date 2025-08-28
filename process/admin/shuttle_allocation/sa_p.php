@@ -389,6 +389,7 @@ if ($method == 'get_shuttle_allocation') {
 		echo '<td>' . $row['dept'] . '</td>';
 		echo '<td>' . $row['section'] . '</td>';
 		echo '<td>' . $row['line_no'] . '</td>';
+		echo '<td>' . $row['emp_shuttle_route'] . '</td>';
 
 		if (empty($row['out_5']) && empty($row['out_6']) && empty($row['out_7']) && empty($row['out_8'])) {
 			echo '<td>' . $row['emp_shuttle_route'] . '</td>';
@@ -438,6 +439,8 @@ if ($method == 'get_shuttle_allocation_per_route') {
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
+				section, 
+				line_no, 
 				shuttle_route, 
 				sum(out_5) AS total_out_5, 
 				sum(out_6) AS total_out_6, 
@@ -472,7 +475,7 @@ if ($method == 'get_shuttle_allocation_per_route') {
 		$params[] = $line_no;
 	}
 
-	$sql = $sql . " GROUP BY shuttle_route 
+	$sql = $sql . " GROUP BY section, line_no, shuttle_route 
 					)
 	
 					SELECT * FROM ShuttleAllocationSummary 
@@ -480,7 +483,9 @@ if ($method == 'get_shuttle_allocation_per_route') {
 					UNION ALL 
 					
 					SELECT 
-						'Total MP:' AS shuttle_route, 
+						'Total MP:' AS section, 
+						NULL AS line_no, 
+						NULL AS shuttle_route, 
 						SUM(total_out_5), 
 						SUM(total_out_6), 
 						SUM(total_out_7), 
@@ -499,7 +504,7 @@ if ($method == 'get_shuttle_allocation_per_route') {
 		$row_style = "";
 		$total_class = "";
 
-		if ($row['shuttle_route'] == 'Total MP:') {
+		if ($row['section'] == 'Total MP:') {
 			$row_class = "bg-black";
 			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
 			$total_class = " class='text-bold'";
@@ -507,6 +512,9 @@ if ($method == 'get_shuttle_allocation_per_route') {
 
 		echo '<tr class="'.$row_class.'"'.$row_style.'>';
 
+
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['line_no'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['shuttle_route'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';
@@ -684,6 +692,7 @@ if ($method == 'get_shuttle_allocation_history') {
 					emp.dept, 
 					emp.section, 
 					emp.line_no, 
+					COALESCE(NULLIF(emp.shuttle_route, ''), 'No Shuttle Route') AS emp_shuttle_route, 
 					COALESCE(NULLIF(sa.shuttle_route, ''), 'No Shuttle Route') AS sa_shuttle_route, 
 					sa.out_5, 
 					sa.out_6, 
@@ -740,6 +749,7 @@ if ($method == 'get_shuttle_allocation_history') {
 					NULL AS dept, 
 					NULL AS section, 
 					NULL AS line_no, 
+					NULL AS emp_shuttle_route, 
 					NULL AS sa_shuttle_route, 
 					SUM(out_5) AS out_5, 
 					SUM(out_6) AS out_6, 
@@ -786,6 +796,7 @@ if ($method == 'get_shuttle_allocation_history') {
 		echo '<td>' . $row['section'] . '</td>';
 		echo '<td>' . $row['line_no'] . '</td>';
 
+		echo '<td>' . $row['emp_shuttle_route'] . '</td>';
 		echo '<td>' . $row['sa_shuttle_route'] . '</td>';
 		
 		echo '<td'.$total_class.'>' . $row['out_5'] . '</td>';
@@ -826,6 +837,8 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
+				section, 
+				line_no, 
 				shuttle_route, 
 				sum(out_5) AS total_out_5, 
 				sum(out_6) AS total_out_6, 
@@ -864,7 +877,7 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 		$params[] = $line_no;
 	}
 
-	$sql = $sql . " GROUP BY shuttle_route 
+	$sql = $sql . " GROUP BY section, line_no, shuttle_route 
 					)
 	
 					SELECT * FROM ShuttleAllocationSummary 
@@ -872,7 +885,9 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 					UNION ALL 
 					
 					SELECT 
-						'Total MP:' AS shuttle_route, 
+						'Total MP:' AS section, 
+						NULL AS line_no, 
+						NULL AS shuttle_route, 
 						SUM(total_out_5), 
 						SUM(total_out_6), 
 						SUM(total_out_7), 
@@ -891,7 +906,7 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 		$row_style = "";
 		$total_class = "";
 
-		if ($row['shuttle_route'] == 'Total MP:') {
+		if ($row['section'] == 'Total MP:') {
 			$row_class = "bg-black";
 			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
 			$total_class = " class='text-bold'";
@@ -899,6 +914,8 @@ if ($method == 'get_shuttle_allocation_history_per_route') {
 
 		echo '<tr class="'.$row_class.'"'.$row_style.'>';
 
+		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['line_no'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['shuttle_route'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';

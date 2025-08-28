@@ -66,10 +66,30 @@
         });
     }
 
+    var typingTimerSaEmpNoSearch; // Timer identifier EmpNo Search
+    var doneTypingInterval = 250; // Time in ms
+
+    // On keyup, start the countdown
+    document.getElementById("shuttle_allocation_emp_no").addEventListener('keyup', e => {
+        clearTimeout(typingTimerSaEmpNoSearch);
+        typingTimerSaEmpNoSearch = setTimeout(doneTypingGetShuttleAllocation, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("shuttle_allocation_emp_no").addEventListener('keydown', e => {
+        clearTimeout(typingTimerSaEmpNoSearch);
+    });
+
+    // User is "finished typing," do something
+    const doneTypingGetShuttleAllocation = () => {
+        get_shuttle_allocation();
+    }
+
     const get_shuttle_allocation = () => {
         let day = document.getElementById('shuttle_allocation_date').value;
         let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
         let line_no = document.getElementById('shuttle_allocation_line_no').value;
+        let emp_no = document.getElementById('shuttle_allocation_emp_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
@@ -78,10 +98,11 @@
                 method: 'get_shuttle_allocation',
                 day: day,
                 shift_group: shift_group,
-                line_no: line_no
+                line_no: line_no,
+                emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="14" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationData").innerHTML = loading;
             },
             success: function (response) {
@@ -101,6 +122,7 @@
         let day = document.getElementById('shuttle_allocation_date').value;
         let shift_group = document.getElementById('shuttle_allocation_shift_group').value;
         let line_no = document.getElementById('shuttle_allocation_line_no').value;
+        let emp_no = document.getElementById('shuttle_allocation_emp_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
@@ -109,10 +131,11 @@
                 method: 'get_shuttle_allocation_per_route',
                 day: day,
                 shift_group: shift_group,
-                line_no: line_no
+                line_no: line_no,
+                emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationPerRouteData").innerHTML = loading;
             },
             success: function (response) {
@@ -331,6 +354,7 @@
         let shift_group = document.getElementById('sa_shift_group_search').value;
         let shift = document.getElementById('sa_shift_search').value;
         let line_no = document.getElementById('sa_line_no_search').value;
+        let emp_no = document.getElementById('sa_emp_no_search').value;
 
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
@@ -341,10 +365,11 @@
                 day: day,
                 shift_group: shift_group,
                 shift: shift,
-                line_no: line_no
+                line_no: line_no,
+                emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationHistoryData").innerHTML = loading;
             },
             success: function (response) {
@@ -359,6 +384,7 @@
         let shift_group = document.getElementById('sa_shift_group_search').value;
         let shift = document.getElementById('sa_shift_search').value;
         let line_no = document.getElementById('sa_line_no_search').value;
+        let emp_no = document.getElementById('sa_emp_no_search').value;
 
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
@@ -369,10 +395,11 @@
                 day: day,
                 shift_group: shift_group,
                 shift: shift,
-                line_no: line_no
+                line_no: line_no,
+                emp_no: emp_no
             },
             beforeSend: () => {
-                var loading = `<tr><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr><td colspan="7" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 document.getElementById("shuttleAllocationHistoryPerRouteData").innerHTML = loading;
             },
             success: function (response) {

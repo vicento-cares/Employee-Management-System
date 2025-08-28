@@ -40,11 +40,11 @@
               <div class="tab-content" id="sa-tabContent">
                 <div class="tab-pane fade show active" id="sa-1" role="tabpanel" aria-labelledby="sa-1-tab">
                   <div class="row mb-2">
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                       <label>Shuttle Allocation Date</label>
                       <input type="date" class="form-control" id="shuttle_allocation_date" disabled>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                       <label>Shift Group</label>
                       <select class="form-control" id="shuttle_allocation_shift_group" onchange="get_shuttle_allocation()" style="width: 100%;">
                         <option selected value="">ALL</option>
@@ -52,6 +52,10 @@
                         <option value="B">Shift B</option>
                         <option value="ADS">Shift ADS</option>
                       </select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Employee No.</label>
+                      <input type="text" class="form-control" id="shuttle_allocation_emp_no" autocomplete="off" maxlength="255">
                     </div>
                     <div class="col-sm-2">
                       <label>Shift</label><br>
@@ -102,7 +106,8 @@
                           <th>Department</th>
                           <th>Section</th>
                           <th>Line No.</th>
-                          <th>Shuttle Route</th>
+                          <th>Original Route</th>
+                          <th>Current Route</th>
                           <th class="text-success">OUT 3</th>
                           <th class="text-info">OUT 4</th>
                           <th class="text-danger">OUT 5</th>
@@ -140,6 +145,8 @@
                             <table id="shuttleAllocationPerRouteTable" class="table table-sm table-head-fixed text-nowrap">
                               <thead style="text-align: center;">
                                 <tr>
+                                  <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>Shuttle Route</th>
                                   <th class="text-success">OUT 3</th>
                                   <th class="text-info">OUT 4</th>
@@ -149,7 +156,7 @@
                               </thead>
                               <tbody id="shuttleAllocationPerRouteData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="5" style="text-align:center;">
+                                  <td colspan="7" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -167,11 +174,11 @@
                 </div>
                 <div class="tab-pane fade" id="sa-2" role="tabpanel" aria-labelledby="sa-2-tab">
                   <div class="row mb-4">
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                       <label>Shuttle Allocation Date</label>
                       <input type="date" class="form-control" id="sa_date_search">
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                       <label>Shift Group</label>
                       <select class="form-control" id="sa_shift_group_search" style="width: 100%;" required>
                         <option selected value="">ALL</option>
@@ -180,13 +187,17 @@
                         <option value="ADS">Shift ADS</option>
                       </select>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                       <label>Shift</label>
                       <select class="form-control" id="sa_shift_search" style="width: 100%;" required>
                         <option selected value="">ALL</option>
                         <option value="DS">DS</option>
                         <option value="NS">NS</option>
                       </select>
+                    </div>
+                    <div class="col-sm-3">
+                      <label>Employee No.</label>
+                      <input type="text" class="form-control" id="sa_emp_no_search" autocomplete="off" maxlength="255">
                     </div>
                     <div class="col-sm-3">
                       <label>&nbsp;</label>
@@ -204,7 +215,8 @@
                           <th>Department</th>
                           <th>Section</th>
                           <th>Line No</th>
-                          <th>Shuttle Route</th>
+                          <th>Original Route</th>
+                          <th>Current Route</th>
                           <th class="text-success">OUT 3</th>
                           <th class="text-info">OUT 4</th>
                           <th class="text-danger">OUT 5</th>
@@ -234,6 +246,8 @@
                             <table id="shuttleAllocationHistoryPerRouteTable" class="table table-sm table-head-fixed text-nowrap">
                               <thead style="text-align: center;">
                                 <tr>
+                                  <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>Shuttle Route</th>
                                   <th class="text-success">OUT 3</th>
                                   <th class="text-info">OUT 4</th>

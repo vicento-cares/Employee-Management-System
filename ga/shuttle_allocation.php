@@ -255,7 +255,8 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                           <th>Department</th>
                           <th>Section</th>
                           <th>Line No.</th>
-                          <th>Shuttle Route</th>
+                          <th>Original Route</th>
+                          <th>Current Route</th>
                           <th class="text-success">OUT 3</th>
                           <th class="text-info">OUT 4</th>
                           <th class="text-danger">OUT 5</th>
@@ -290,6 +291,8 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                             <table id="shuttleAllocationPerRouteTable" class="table table-sm table-head-fixed text-nowrap">
                               <thead style="text-align: center;">
                                 <tr>
+                                  <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>Shuttle Route</th>
                                   <th class="text-success">OUT 3</th>
                                   <th class="text-info">OUT 4</th>
@@ -369,7 +372,8 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                           <th>Department</th>
                           <th>Section</th>
                           <th>Line No</th>
-                          <th>Shuttle Route</th>
+                          <th>Original Route</th>
+                          <th>Current Route</th>
                           <th class="text-success">OUT 3</th>
                           <th class="text-info">OUT 4</th>
                           <th class="text-danger">OUT 5</th>
@@ -404,6 +408,8 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                             <table id="shuttleAllocationHistoryPerRouteTable" class="table table-sm table-head-fixed text-nowrap">
                               <thead style="text-align: center;">
                                 <tr>
+                                  <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>Shuttle Route</th>
                                   <th class="text-success">OUT 3</th>
                                   <th class="text-info">OUT 4</th>
