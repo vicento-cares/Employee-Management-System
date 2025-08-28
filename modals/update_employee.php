@@ -156,7 +156,7 @@ if (empty($disabled) && empty($disabled_tc)) {
           </div>
           <div class="col-3">
             <label>Date Hired:</label>
-            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;">
+            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" max="<?= $server_date_only ?>">
           </div>
         </div>
         <div class="row">

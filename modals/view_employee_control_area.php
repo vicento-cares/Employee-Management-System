@@ -127,7 +127,7 @@
           </div>
           <div class="col-3">
             <label>Date Hired:</label>
-            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" disabled>
+            <input type="date" id="date_hired_master_update" class="form-control" style="height:45px; border: 1px solid black;" max="<?= $server_date_only ?>" disabled>
           </div>
         </div>
         <div class="row">

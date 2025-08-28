@@ -459,7 +459,7 @@ function check_csv($file, $conn)
                 $hasError = 1;
                 $row_valid_arr[11] = 1;
                 array_push($notExistsEmpStatusArr, $check_csv_row);
-            }
+            }*/
             if (!empty($date_hired)) {
                 if ($is_valid_date_hired == false) {
                     $hasError = 1;
@@ -483,7 +483,7 @@ function check_csv($file, $conn)
                         array_push($notValidDateHiredArr, $check_csv_row);
                     }
                 }
-            }*/
+            }
             if (!empty($resigned_date)) {
                 if ($is_valid_resigned_date == false) {
                     $hasError = 1;
@@ -604,9 +604,9 @@ function check_csv($file, $conn)
         if ($row_valid_arr[17] == 1) {
             $message = $message . 'Advance Resigned Date is not allowed on row/s ' . implode(", ", $notAllowedResignedDateArr) . '. ';
         }
-        // if ($row_valid_arr[18] == 1) {
-        //     $message = $message . 'Advance Date Hired is not allowed on row/s ' . implode(", ", $notAllowedDateHiredArr) . '. ';
-        // }
+        if ($row_valid_arr[18] == 1) {
+            $message = $message . 'Advance Date Hired is not allowed on row/s ' . implode(", ", $notAllowedDateHiredArr) . '. ';
+        }
 
 
         if ($hasBlankError >= 1) {

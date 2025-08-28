@@ -64,7 +64,7 @@
           </div>
           <div class="col-6">
             <label>Date Hired:</label>
-            <input type="date" id="date_hired_master" class="form-control" style="height:45px; border: 1px solid black;">
+            <input type="date" id="date_hired_master" class="form-control" style="height:45px; border: 1px solid black;" max="<?= $server_date_only ?>">
           </div>
         </div>
         <div class="row">
