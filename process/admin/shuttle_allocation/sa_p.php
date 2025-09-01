@@ -38,10 +38,12 @@ if ($method == 'get_shuttle_allocation_per_sr') {
 	//$day = '2023-07-28';
 	$shift = get_shift($server_time);
 	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
 				section, 
+				line_no, 
 				shuttle_route, 
 				sum(out_5) AS total_out_5, 
 				sum(out_6) AS total_out_6, 
@@ -61,7 +63,12 @@ if ($method == 'get_shuttle_allocation_per_sr') {
 		$params[] = $section;
 	}
 
-	$sql = $sql . " GROUP BY section, shuttle_route 
+	if (!empty($line_no)) {
+		$sql = $sql . " AND line_no = ?";
+		$params[] = $line_no;
+	}
+
+	$sql = $sql . " GROUP BY section, line_no, shuttle_route 
 					)
 	
 					SELECT * FROM ShuttleAllocationSummary 
@@ -70,6 +77,7 @@ if ($method == 'get_shuttle_allocation_per_sr') {
 					
 					SELECT 
 						'Total MP:' AS section, 
+						NULL AS line_no, 
 						NULL AS shuttle_route, 
 						SUM(total_out_5), 
 						SUM(total_out_6), 
@@ -79,7 +87,7 @@ if ($method == 'get_shuttle_allocation_per_sr') {
 					FROM 
 						ShuttleAllocationSummary
 					ORDER BY 
-						table_order ASC, section ASC, shuttle_route ASC";
+						table_order ASC, section ASC, line_no ASC, shuttle_route ASC";
 
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
@@ -98,6 +106,7 @@ if ($method == 'get_shuttle_allocation_per_sr') {
 		echo '<tr class="'.$row_class.'"'.$row_style.'>';
 
 		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td>' . $row['line_no'] . '</td>';
 		echo '<td>' . $row['shuttle_route'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_5'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out_6'] . '</td>';
@@ -113,10 +122,12 @@ if ($method == 'get_shuttle_allocation_per_section') {
 	//$day = '2023-07-28';
 	$shift = get_shift($server_time);
 	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
 
 	$sql = "WITH ShuttleAllocationSummary AS (
 			SELECT 
 				section, 
+				line_no, 
 				sum(out_5) + sum(out_6) + sum(out_7) + sum(out_8) AS total_out, 
 				0 AS table_order  
 			FROM t_shuttle_allocation 
@@ -132,7 +143,12 @@ if ($method == 'get_shuttle_allocation_per_section') {
 		$params[] = $section;
 	}
 
-	$sql = $sql . " GROUP BY section 
+	if (!empty($line_no)) {
+		$sql = $sql . " AND line_no = ?";
+		$params[] = $line_no;
+	}
+
+	$sql = $sql . " GROUP BY section, line_no 
 					)
 	
 					SELECT * FROM ShuttleAllocationSummary 
@@ -141,12 +157,13 @@ if ($method == 'get_shuttle_allocation_per_section') {
 					
 					SELECT 
 						'Total MP:' AS section, 
+						NULL AS line_no, 
 						SUM(total_out), 
 						1 AS table_order 
 					FROM 
 						ShuttleAllocationSummary
 					ORDER BY 
-						table_order ASC, section ASC";
+						table_order ASC, section ASC, line_no ASC";
 
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($params);
@@ -165,6 +182,7 @@ if ($method == 'get_shuttle_allocation_per_section') {
 		echo '<tr class="'.$row_class.'"'.$row_style.'>';
 
 		echo '<td'.$total_class.'>' . $row['section'] . '</td>';
+		echo '<td>' . $row['line_no'] . '</td>';
 		echo '<td'.$total_class.'>' . $row['total_out'] . '</td>';
 
 		echo '</tr>';

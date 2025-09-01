@@ -76,7 +76,11 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                       <label>Section:</label>
                       <select id="sa_summary_section" class="form-control" onchange="get_shuttle_allocation_per_sr()"></select>
                     </div>
-                    <div class="col-sm-2 offset-sm-6">
+                    <div class="col-sm-4">
+                      <label>Line No:</label>
+                      <select id="sa_summary_line_no" class="form-control" onchange="get_shuttle_allocation_per_sr()"></select>
+                    </div>
+                    <div class="col-sm-2 offset-sm-2">
                       <label>&nbsp;</label>
                       <button type="button" class="btn bg-gray-dark btn-block" onclick="export_shuttle_allocation_summary()"><i class="fas fa-download"></i> Export All</button>
                     </div>
@@ -102,6 +106,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                               <thead style="text-align: center;">
                                 <tr>
                                   <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>Shuttle Route</th>
                                   <th class="text-success">OUT 3</th>
                                   <th class="text-info">OUT 4</th>
@@ -147,6 +152,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                               <thead style="text-align: center;">
                                 <tr>
                                   <th>Section</th>
+                                  <th>Line No.</th>
                                   <th>TOTAL MP OUT</th>
                                 </tr>
                               </thead>

@@ -14,13 +14,15 @@
 
     const get_shuttle_allocation_per_sr = () => {
         let section = document.getElementById('sa_summary_section').value;
+        let line_no = document.getElementById('sa_summary_line_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
             cache: false,
             data: {
                 method: 'get_shuttle_allocation_per_sr',
-                section: section
+                section: section,
+                line_no: line_no
             },
             success: function (response) {
                 $('#shuttleAllocationPerSectionRouteData').html(response);
@@ -31,13 +33,15 @@
 
     const get_shuttle_allocation_per_section = () => {
         let section = document.getElementById('sa_summary_section').value;
+        let line_no = document.getElementById('sa_summary_line_no').value;
         $.ajax({
             url: '../process/admin/shuttle_allocation/sa_p.php',
             type: 'POST',
             cache: false,
             data: {
                 method: 'get_shuttle_allocation_per_section',
-                section: section
+                section: section,
+                line_no: line_no
             },
             success: function (response) {
                 $('#shuttleAllocationPerSectionData').html(response);
@@ -137,6 +141,7 @@
                 section: section
             },
             success: function (response) {
+                $('#sa_summary_line_no').html(response);
                 $('#shuttle_allocation_line_no').html(response);
                 $('#sa_line_no_search').html(response);
             }
