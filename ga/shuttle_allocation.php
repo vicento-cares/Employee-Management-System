@@ -54,7 +54,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                   <a class="nav-link active" id="sa-1-tab" data-toggle="pill" href="#sa-1" role="tab" aria-controls="sa-1" aria-selected="true">Shuttle Allocation Summary</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" id="sa-2-tab" data-toggle="pill" href="#sa-2" role="tab" aria-controls="sa-2" aria-selected="false">Shuttle Allocation Table</a>
+                  <a class="nav-link" id="sa-2-tab" data-toggle="pill" href="#sa-2" role="tab" aria-controls="sa-2" aria-selected="false">Outgoing Shuttle Allocation Table</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" id="sa-3-tab" data-toggle="pill" href="#sa-3" role="tab" aria-controls="sa-3" aria-selected="false">Shuttle Allocation History</a>
@@ -116,7 +116,7 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                               </thead>
                               <tbody id="shuttleAllocationPerSectionRouteData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="6" style="text-align:center;">
+                                  <td colspan="7" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>
@@ -158,7 +158,51 @@ if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
                               </thead>
                               <tbody id="shuttleAllocationPerSectionData" style="text-align: center;">
                                 <tr>
-                                  <td colspan="2" style="text-align:center;">
+                                  <td colspan="3" style="text-align:center;">
+                                    <div class="spinner-border text-dark" role="status">
+                                      <span class="sr-only">Loading...</span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <!-- /.card-body -->
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                  </div>
+                  <div class="row mb-2">
+                    <div class="col-sm-12">
+                      <div class="card card-gray-dark card-outline">
+                        <div class="card-header">
+                          <h3 class="card-title"><i class="fas fa-file-alt"></i> Shuttle Allocation Per Shuttle Route as of <?=$server_date_only_f?> <?=get_shift($server_time)?></h3>
+                          <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                              <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                              <i class="fas fa-expand"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                          <div class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                            <table id="shuttleAllocationPerShuttleRoute" class="table table-sm table-head-fixed text-nowrap">
+                              <thead style="text-align: center;">
+                                <tr>
+                                  <th>Shuttle Route</th>
+                                  <th class="text-success">OUT 3</th>
+                                  <th class="text-info">OUT 4</th>
+                                  <th class="text-danger">OUT 5</th>
+                                  <th class="text-purple">OUT 6</th>
+                                </tr>
+                              </thead>
+                              <tbody id="shuttleAllocationPerShuttleRouteData" style="text-align: center;">
+                                <tr>
+                                  <td colspan="5" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                       <span class="sr-only">Loading...</span>
                                     </div>

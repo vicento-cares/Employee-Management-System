@@ -27,6 +27,7 @@
             success: function (response) {
                 $('#shuttleAllocationPerSectionRouteData').html(response);
                 get_shuttle_allocation_per_section();
+                get_shuttle_allocation_per_route_summary();
             }
         });
     }
@@ -49,10 +50,28 @@
         });
     }
 
+    const get_shuttle_allocation_per_route_summary = () => {
+        let section = document.getElementById('sa_summary_section').value;
+        let line_no = document.getElementById('sa_summary_line_no').value;
+        $.ajax({
+            url: '../process/admin/shuttle_allocation/sa_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'get_shuttle_allocation_per_route_summary',
+                section: section,
+                line_no: line_no
+            },
+            success: function (response) {
+                $('#shuttleAllocationPerShuttleRouteData').html(response);
+            }
+        });
+    }
+
     const export_shuttle_allocation_summary = () => {
         let separator = ',';
         let day = document.getElementById('shuttle_allocation_date').value;
-        let table_id_list = ["shuttleAllocationPerSectionRoute", "shuttleAllocationPerSection"];
+        let table_id_list = ["shuttleAllocationPerSectionRoute", "shuttleAllocationPerSection", "shuttleAllocationPerShuttleRoute"];
 
         // Construct csv
         var csv = [];

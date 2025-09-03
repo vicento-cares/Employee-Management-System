@@ -29,7 +29,7 @@
             <div class="card-header p-0 border-bottom-0">
               <ul class="nav nav-tabs" id="sa-tab" role="tablist">
                 <li class="nav-item">
-                  <a class="nav-link active" id="sa-1-tab" data-toggle="pill" href="#sa-1" role="tab" aria-controls="sa-1" aria-selected="true">Shuttle Allocation Table</a>
+                  <a class="nav-link active" id="sa-1-tab" data-toggle="pill" href="#sa-1" role="tab" aria-controls="sa-1" aria-selected="true">Outgoing Shuttle Allocation Table</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" id="sa-2-tab" data-toggle="pill" href="#sa-2" role="tab" aria-controls="sa-2" aria-selected="false">Shuttle Allocation History</a>

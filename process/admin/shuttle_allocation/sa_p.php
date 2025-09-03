@@ -189,6 +189,84 @@ if ($method == 'get_shuttle_allocation_per_section') {
 	}
 }
 
+if ($method == 'get_shuttle_allocation_per_route_summary') {
+	$day = $server_date_only;
+	//$day = '2023-07-28';
+	$shift = get_shift($server_time);
+	$section = $_POST['section'];
+	$line_no = $_POST['line_no'];
+
+	$sql = "WITH ShuttleAllocationSummary AS (
+			SELECT 
+				shuttle_route, 
+				SUM(out_5) AS out_5, 
+				SUM(out_6) AS out_6, 
+				SUM(out_7) AS out_7, 
+				SUM(out_8) AS out_8, 
+				0 AS table_order  
+			FROM t_shuttle_allocation 
+			WHERE day = ? AND 
+				shift = ?";
+	$params = [
+		$day,
+		$shift
+	];
+
+	if (!empty($section)) {
+		$sql = $sql . " AND section = ?";
+		$params[] = $section;
+	}
+
+	if (!empty($line_no)) {
+		$sql = $sql . " AND line_no = ?";
+		$params[] = $line_no;
+	}
+
+	$sql = $sql . " GROUP BY shuttle_route 
+					)
+	
+					SELECT * FROM ShuttleAllocationSummary 
+					
+					UNION ALL 
+					
+					SELECT 
+						'Total MP:' AS shuttle_route, 
+						SUM(out_5) AS out_5, 
+						SUM(out_6) AS out_6, 
+						SUM(out_7) AS out_7, 
+						SUM(out_8) AS out_8, 
+						1 AS table_order 
+					FROM 
+						ShuttleAllocationSummary
+					ORDER BY 
+						table_order ASC, shuttle_route ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$row_class = "";
+		$row_style = "";
+		$total_class = "";
+
+		if ($row['shuttle_route'] == 'Total MP:') {
+			$row_class = "bg-black";
+			$row_style = " style='text-align: center; position: sticky; bottom: 0'";
+			$total_class = " class='text-bold'";
+		}
+
+		echo '<tr class="'.$row_class.'"'.$row_style.'>';
+
+		echo '<td'.$total_class.'>' . $row['shuttle_route'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_5'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_6'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_7'] . '</td>';
+		echo '<td'.$total_class.'>' . $row['out_8'] . '</td>';
+
+		echo '</tr>';
+	}
+}
+
 // Get Shuttle Route Dropdown
 
 if ($method == 'fetch_shuttle_route_dropdown') {
