@@ -983,3 +983,55 @@ PIVOT (
 
 -- Step 3: Execute the dynamic SQL
 EXEC sp_executesql @sql;
+
+
+-- Shuttle Allocation Bus and Van Count with Estimated Cost Computation Per Shift
+SELECT 
+    shuttle_route, 
+    COUNT(id) AS total_emp, 
+    CASE 
+        WHEN COUNT(id) > 0 THEN COUNT(id) / 49 
+        ELSE 0 
+    END AS expected_bus_count, 
+    COUNT(id) % 49 AS excess_emp, 
+    CASE 
+        WHEN COUNT(id) % 49 > 0 THEN CEILING(COUNT(id) % 49 / 15.0) 
+        ELSE 0 
+    END AS expected_van_count,
+    CASE 
+        WHEN COUNT(id) > 0 THEN (COUNT(id) / 49) * 1000 
+        ELSE 0 
+    END AS bus_rent_cost,
+    CASE 
+        WHEN COUNT(id) % 49 > 0 THEN CEILING(COUNT(id) % 49 / 15.0) * 500 
+        ELSE 0 
+    END AS van_rent_cost, 
+	CASE 
+        WHEN COUNT(id) % 49 > 0 THEN 
+            CASE 
+                WHEN (CEILING(COUNT(id) % 49 / 15.0) * 500) < 1000 THEN 
+                    (COUNT(id) / 49) * 1000 + CEILING(COUNT(id) % 49 / 15.0) * 500 
+                ELSE 
+                    CEILING(COUNT(id) / 49.0) * 1000 
+            END 
+        ELSE 
+            CEILING(COUNT(id) / 49.0) * 1000 
+    END AS total_rent_cost,
+    CEILING(COUNT(id) / 49.0) AS final_bus_count,
+    CASE 
+        WHEN COUNT(id) % 49 > 0 AND (CEILING(COUNT(id) % 49 / 15.0) * 500) < 1000 THEN 
+            CEILING(COUNT(id) % 49 / 15.0) 
+        ELSE 
+            0 
+    END AS final_van_count 
+FROM 
+    m_employees 
+WHERE 
+    (date_hired <= '2025-09-01') 
+    AND (resigned_date IS NULL OR resigned_date >= '2025-09-01') 
+    AND shuttle_route != '' 
+	AND dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+	AND section NOT IN ('CQA', 'QA', 'QM', 'QAE') 
+    AND shift = 'DS' 
+GROUP BY 
+    shuttle_route;
