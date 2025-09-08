@@ -91,28 +91,30 @@ if ($method == 'get_assigned_process_dropdown') {
 	}
 
 	$sql = "DECLARE @EmpId NVARCHAR(255) = ?;
-
+	
 			WITH AllProcess AS (
 				SELECT process 
 				FROM $table_name 
 				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
 				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_request]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				FROM [trs_renewal].[dbo].[trs_renewal_request] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
+				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_history]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				FROM [trs_renewal].[dbo].[trs_renewal_history] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
+				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_new_mp]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				FROM [trs_renewal].[dbo].[trs_renewal_new_mp] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
 			)
 			
 			SELECT process 
 			FROM AllProcess 
-			GROUP BY process";
+			GROUP BY process;";
 
-	$params[] = $emp_no;
+	$params = array($emp_no);
 	
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute($params);
@@ -294,6 +296,12 @@ if ($method == 'fetch_line_dropdown') {
 
 // Get Line Support Employee Dropdown
 if ($method == 'get_line_support_employee') {
+	if (!isset($_SESSION['emp_no'])) {
+		echo 'session timeout. please relogin account';
+		$conn = null;
+		exit();
+	}
+	
 	$emp_no = $_POST['emp_no'];
 	$line_no = $_SESSION['line_no'];
 	$full_name = '';
@@ -346,6 +354,12 @@ if ($method == 'get_line_support_employee') {
 }
 
 if ($method == 'set_line_support') {
+	if (!isset($_SESSION['emp_no'])) {
+		echo 'session timeout. please relogin account';
+		$conn = null;
+		exit();
+	}
+
 	$line_support_id = generate_line_support_id($_POST['line_support_id']);
 	$emp_no = $_POST['emp_no'];
 	$full_name = $_POST['full_name'];
@@ -426,28 +440,30 @@ if ($method == 'set_line_support') {
 	}
 
 	$sql = "DECLARE @EmpId NVARCHAR(255) = ?;
-
+	
 			WITH AllProcess AS (
 				SELECT process 
 				FROM $table_name 
 				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
 				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_request]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				FROM [trs_renewal].[dbo].[trs_renewal_request] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
+				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_history]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
+				FROM [trs_renewal].[dbo].[trs_renewal_history] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
+				UNION ALL 
 				SELECT process 
-				FROM [trs_renewal].[dbo].[trs_renewal_new_mp]
-				WHERE (emp_id = @EmpId OR emp_id_old = @EmpId) 
-			)
+				FROM [trs_renewal].[dbo].[trs_renewal_new_mp] 
+				WHERE (falp_id_no = @EmpId OR sp_id_no = @EmpId) 
+			) 
 			
 			SELECT process 
 			FROM AllProcess 
-			GROUP BY process";
+			GROUP BY process;";
 
-	$params[] = $emp_no;
+	$params = array($emp_no);
 	
 	$stmt = $conn -> prepare($sql);
 	$stmt -> execute($params);
@@ -605,6 +621,11 @@ if ($method == 'save_line_support') {
 }
 
 if ($method == 'get_pending_line_support') {
+	if (!isset($_SESSION['emp_no'])) {
+		echo 'session timeout. please relogin account';
+		$conn = null;
+		exit();
+	}
 	$line_no_to = $_SESSION['line_no'];
 	$line_no_from = $_SESSION['line_no'];
 	$pending_status = "";
