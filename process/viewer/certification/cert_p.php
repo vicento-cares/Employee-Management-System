@@ -753,16 +753,19 @@ if ($method == 'get_line_support_certification') {
 	$query .= " SELECT *
 				FROM RankedAuthInitial 
 				WHERE rn = 1 
-				UNION ALL  
+				UNION ALL 
 				SELECT *
 				FROM RankedAuthFinal 
 				WHERE rn = 1 
+				UNION ALL 
 				SELECT *
 				FROM RankedAuthRenewalReq 
 				WHERE rn = 1 
+				UNION ALL 
 				SELECT *
 				FROM RankedAuthRenewalH 
 				WHERE rn = 1 
+				UNION ALL 
 				SELECT *
 				FROM RankedAuthRenewalNMP 
 				WHERE rn = 1 
