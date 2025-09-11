@@ -266,11 +266,12 @@ if (!isset($_SESSION['emp_no'])) {
           $allow_time_out = true;
           set_time_out($server_date_time, $emp_no, $day, $shift, $conn);
         } else {
+          $day = get_day($server_time, $server_date_only, $server_date_only_yesterday);
           $shift = get_shift($server_time);
 
           $sql = "SELECT id FROM t_time_in_out WHERE emp_no = ? AND day = ? AND shift = ?";
           $stmt = $conn -> prepare($sql);
-          $params = array($emp_no, $server_date_only, $shift);
+          $params = array($emp_no, $day, $shift);
           $stmt -> execute($params);
 
           $row = $stmt->fetch(PDO::FETCH_ASSOC);
