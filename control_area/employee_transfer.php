@@ -55,49 +55,130 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row mb-4">
-                <div class="col-sm-2">
-                  <label>&nbsp;</label>
-                  <button type="button" class="btn btn-success btn-block" data-toggle="modal" data-target="#set_line_shifting"><i class="fas fa-check"></i> Line Shifting</button>
+                <div class="col-10">
+                  <div class="row mb-2">
+                    <div class="col-sm-4">
+                      <label>Full Name</label>
+                      <input type="text" class="form-control" id="et_full_name_search" placeholder="Search" autocomplete="off" maxlength="255">
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Employee Transfer Type:</label>
+                      <select id="et_emp_transfer_type_search" class="form-control" onchange="get_ongoing_employee_transfer()">
+                        <option value="">Select Provider</option>
+                        <option value="department">Department</option>
+                        <option value="section">Section</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Provider:</label>
+                      <select id="et_provider_search" class="form-control" onchange="get_ongoing_employee_transfer()">
+                        <option value="">Select Provider</option>
+                        <option value="FAS">FAS</option>
+                        <option value="PKIMT">PKIMT</option>
+                        <option value="MAXIM">MAXIM</option>
+                        <option value="ONE SOURCE">ONE SOURCE</option>
+                        <option value="MEGATREND">MEGATREND</option>
+                        <option value="ADD EVEN">ADD EVEN</option>
+                        <option value="GOLDENHAND">GOLDENHAND</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <label>Line No. From:</label>
+                      <select id="et_line_no_from_search" class="form-control" onchange="get_ongoing_employee_transfer()"></select>
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-sm-4">
+                      <label>Employee No:</label>
+                      <input type="text" class="form-control" id="et_emp_no_search" placeholder="Search" autocomplete="off" maxlength="255">
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Position:</label>
+                      <select id="et_position_search" class="form-control" onchange="get_ongoing_employee_transfer()">
+                        <option value="">Select Position</option>
+                        <option value="Associate">Associate</option>
+                        <option value="Jr. Staff">Jr. Staff</option>
+                        <option value="Staff">Staff</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Assistant Manager">Assistant Manager</option>
+                        <option value="Section Manager">Section Manager</option>
+                        <option value="Manager">Manager</option>
+                      </select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Department To:</label>
+                      <select id="et_dept_to_search" class="form-control" onchange="get_ongoing_employee_transfer()"></select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Section To:</label>
+                      <select id="et_section_to_search" class="form-control" onchange="get_ongoing_employee_transfer()"></select>
+                    </div>
+                    <div class="col-sm-2">
+                      <label>Line No. To:</label>
+                      <select id="et_line_no_to_search" class="form-control" onchange="get_ongoing_employee_transfer()"></select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-2">
+                      <button class="btn btn-secondary btn-block"><i class="fas fa-download mr-2"></i>Export</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-sm-2 offset-sm-2">
-                  <label>Shift:</label>
-                  <select id="shift_master_search" class="form-control" onchange="load_line_shifting_schedules(1)">
-                    <option value="" selected>All</option>
-                    <option value="DS">DS</option>
-                    <option value="NS">NS</option>
-                  </select>
-                </div>
-                <div class="col-sm-2">
-                  <label>Shift Group:</label>
-                  <select id="shift_group_master_search" class="form-control" onchange="load_line_shifting_schedules(1)">
-                    <option value="" selected>All</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="ADS">ADS</option>
-                  </select>
-                </div>
-                <div class="col-sm-4">
-                  <label>Line No:</label>
-                  <select id="line_no_master_search" class="form-control" onchange="load_line_shifting_schedules(1)"></select>
+                <div class="col-2">
+                  <div class="row">
+                    <div class="col-12">
+                      <input class="ml-4" type="checkbox" name="et_checked_by_search" id="et_checked_by_search" onclick="get_ongoing_employee_transfer()">
+                      <label for="et_checked_by_search">Checked By</label>
+                      <br>
+                      <input class="ml-4" type="checkbox" name="et_approved_by_search" id="et_approved_by_search" onclick="get_ongoing_employee_transfer()">
+                      <label for="et_approved_by_search">Approved By</label>
+                      <br>
+                      <input class="ml-4" type="checkbox" name="et_receiving_noted_by_search" id="et_receiving_noted_by_search" onclick="get_ongoing_employee_transfer()">
+                      <label for="et_receiving_noted_by_search">Receiving Noted By</label>
+                      <br>
+                      <input class="ml-4" type="checkbox" name="et_receiving_acknowledged_by_search" id="et_receiving_acknowledged_by_search" onclick="get_ongoing_employee_transfer()">
+                      <label for="et_receiving_acknowledged_by_search">Receiving Acknowledged By</label>
+                      <br>
+                      <input class="ml-4" type="checkbox" name="et_receiving_approved_by_search" id="et_receiving_approved_by_search" onclick="get_ongoing_employee_transfer()">
+                      <label for="et_receiving_approved_by_search">Receiving Approved By</label>
+                      <br>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div id="list_of_lshiftsched_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
-                <table id="list_of_lshiftsched_table" class="table table-sm table-head-fixed text-nowrap table-hover">
+              <div class="row mb-2">
+                <div class="col-sm-2">
+                  <span id="count_view"></span>
+                </div>
+              </div>
+              <div id="et_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                <table id="et_table" class="table table-sm table-head-fixed text-nowrap table-hover">
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
-                      <th>Schedule Date</th>
-                      <th>Department</th>
-                      <th>Section</th>
-                      <th>Line No.</th>
-                      <th>Shift Group</th>
-                      <th>Shift</th>
-                      <th>Action</th>
+                      <th>Date Effectivity</th>
+                      <th>Employee No.</th>
+                      <th>Employee Name</th>
+                      <th>Provider</th>
+                      <th>Position</th>
+                      <th>Transfer Type</th>
+                      <th>Department From</th>
+                      <th>Section From</th>
+                      <th>Line No. From</th>
+                      <th>Department To</th>
+                      <th>Section To</th>
+                      <th>Line No. To</th>
+                      <th>Issued By</th>
+                      <th>Checked By</th>
+                      <th>Approved By</th>
+                      <th>Receiving Noted By</th>
+                      <th>Receiving Acknowledged By</th>
+                      <th>Receiving Approved By</th>
                     </tr>
                   </thead>
-                  <tbody id="list_of_lshiftsched" style="text-align: center;">
+                  <tbody id="et_data" style="text-align: center;">
                     <tr>
-                      <td colspan="7" style="text-align:center;">
+                      <td colspan="19" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>
@@ -105,12 +186,6 @@
                     </tr>
                   </tbody>
                 </table>
-              </div>
-              <div class="d-flex justify-content-sm-end">
-                <div class="dataTables_info" id="list_of_lshiftsched_info" role="status" aria-live="polite"></div>
-              </div>
-              <div class="d-flex justify-content-sm-center">
-                <button type="button" class="btn bg-gray-dark" id="btnNextPage" style="display:none;" onclick="get_next_page()">Load more</button>
               </div>
             </div>
             <!-- /.card-body -->

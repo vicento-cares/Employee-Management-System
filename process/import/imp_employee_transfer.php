@@ -4,6 +4,8 @@ session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
+require '../lib/validate.php';
+
 function get_dept($conn)
 {
     $data = array();
@@ -311,10 +313,16 @@ try {
     }
 
     $sql = "INSERT INTO t_employee_transfer 
-                (emp_transfer_id, emp_no, emp_transfer_type, dept_to, section_to, line_no_to, emp_js_s, emp_js_s_no, reason, date_effectivity) 
+                (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                dept_from, section_from, line_no_from, 
+                dept_to, section_to, line_no_to, 
+                issued_by, issued_by_no, reason, date_effectivity) 
             VALUES ";
     $values = [];
     $placeholders = [];
+
+    $emp_transfer_batch_id = str_replace('.', '', uniqid('ET-BAT-', true));
+    $appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
     while (($line = fgetcsv($csvFile)) !== false) {
         // Check if the row is blank or consists only of whitespace
@@ -329,21 +337,45 @@ try {
         $line_no_to = $line[4];
         $date_effectivity = $line[5];
         $reason = $line[6];
-        $emp_js_s = $_SESSION['full_name'];
-        $emp_js_s_no = $_SESSION['emp_js_s_no'];
+        $issued_by = $_SESSION['full_name'];
+        $issued_by_no = $_SESSION['emp_no_control_area'];
 
-        $emp_transfer_id = str_replace('.', '', uniqid($emp_transfer_id_prefix, true));
+        if ($emp_transfer_type == 'department') {
+            $emp_transfer_id = str_replace('.', '', uniqid('HR-014-', true));
+        } else if ($emp_transfer_type == 'section') {
+            $emp_transfer_id = str_replace('.', '', uniqid('PRD-032-', true));
+        }
+
+        $dept_to = '';
+        $section_to = '';
+        $line_no_to = '';
+
+        $query = "SELECT dept, section, line_no FROM m_employees WHERE emp_no = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$emp_no]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $dept_from = $row['dept'];
+            $section_from = $row['section'];
+            $line_no_from = $row['line_no'];
+        }
 
         // Create a temporary array for the current row
         $currentValues = [
             $emp_transfer_id,
+            $emp_transfer_batch_id,
+            $appprove_key,
             $emp_no,
             $emp_transfer_type,
+            $dept_from,
+            $section_from,
+            $line_no_from,
             $dept_to,
             $section_to,
             $line_no_to,
-            $emp_js_s,
-            $emp_js_s_no,
+            $issued_by,
+            $issued_by_no,
             $reason,
             $date_effectivity
         ];
@@ -372,7 +404,10 @@ try {
             $placeholders = [];
             $values = [];
             $sql = "INSERT INTO t_employee_transfer 
-                        (emp_transfer_id, emp_no, emp_transfer_type, dept_to, section_to, line_no_to, emp_js_s, emp_js_s_no, reason, date_effectivity) 
+                        (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                        dept_to, section_to, line_no_to, 
+                        dept_from, section_from, line_no_from, 
+                        issued_by, issued_by_no, reason, date_effectivity) 
                     VALUES ";
         }
     }
@@ -385,6 +420,43 @@ try {
             $error++;
         }
     }
+
+    $send_to_emails = [];
+
+    // Get Send To Emails
+    $query = "SELECT 
+                    email 
+                FROM 
+                    m_control_area_accounts 
+                WHERE 
+                    dept = ? AND 
+                    section = ? AND 
+                    position IN ('Assistant Manager', 'Section Manager')";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$dept_from, $section_from]);
+
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $send_to_emails[] = $row['email'];
+    }
+    
+    $sendto = implode(";", $send_to_emails);
+    $email_body = approve_email($emp_transfer_batch_id, $appprove_key, $system);
+
+    $data = [
+        "system_name" => $email_code,
+        "send_to" => $sendto,
+        "cc" => "vince.dale.alcantara@furukawaelectric.com",
+        "subject" => $email_subject . " : " . "Employee Transfer Approval",
+        "body" => $email_body
+    ];
+    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
+        :system_name,
+        :send_to,
+        :cc,
+        :subject,
+        :body
+    ");
+    $stmt -> execute($data);
 
     if ($error > 0) {
         if ($isTransactionActive) {
