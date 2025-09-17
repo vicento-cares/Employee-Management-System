@@ -188,6 +188,160 @@
         });
     }
 
+    const get_employee_transfer_details = el => {
+        var id = el.dataset.id;
+        var emp_no = el.dataset.emp_no;
+        var emp_transfer_type = el.dataset.emp_transfer_type;
+        var dept_to = el.dataset.dept_to;
+        var section_to = el.dataset.section_to;
+        var line_no_to = el.dataset.line_no_to;
+        var date_effectivity = el.dataset.date_effectivity;
+        var reason = el.dataset.reason;
+
+        document.getElementById("et_id_update").value = id;
+        document.getElementById("et_emp_no_update").value = emp_no;
+        document.getElementById("et_emp_transfer_type_update").value = emp_transfer_type;
+        document.getElementById("et_dept_update").value = dept_to;
+        document.getElementById("et_section_update").value = section_to;
+        document.getElementById("et_line_no_update").value = line_no_to;
+        document.getElementById("et_date_effectivity_update").value = date_effectivity;
+        document.getElementById("et_reason_update").value = reason;
+    }
+
+    $("#update_employee_transfer").on('shown.bs.modal', e => {
+        load_et_reason_update_textarea();
+    });
+
+    const load_et_reason_update_textarea = () => {
+        setTimeout(() => {
+            var max_length = document.getElementById("et_reason_update").getAttribute("maxlength");
+            var et_reason_length = document.getElementById("et_reason_update").value.length;
+            var et_reason_count = `${et_reason_length} / ${max_length}`;
+            document.getElementById("et_reason_update_count").innerHTML = et_reason_count;
+        }, 100);
+    }
+
+    const count_et_reason_update_char = () => {
+        var max_length = document.getElementById("et_reason_update").getAttribute("maxlength");
+        var et_reason_length = document.getElementById("et_reason_update").value.length;
+        var et_reason_count = `${et_reason_length} / ${max_length}`;
+        document.getElementById("et_reason_update_count").innerHTML = et_reason_count;
+    }
+
+    // Get the form element
+    var update_employee_transfer_form = document.getElementById('update_employee_transfer_form');
+
+    // Add a submit event listener to the form
+    update_employee_transfer_form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        // Get the button that triggered the submit event
+        var button = document.activeElement;
+
+        // Check the id or name of the button
+        if (button.id === 'btnUpdateEmployeeTransfer') {
+            // Call the function for the first submit button
+            update_employee_transfer();
+        } else if (button.id === 'btnCancelEmployeeTransfer') {
+            // Call the function for the first submit button
+            cancel_employee_transfer();
+        }
+    });
+
+    const update_employee_transfer = () => {
+        var id = document.getElementById('et_id_emp_no_update').value;
+        var dept = document.getElementById('et_dept_update').value;
+        var section = document.getElementById('et_section_update').value;
+        var line_no = document.getElementById('et_line_no_update').value;
+        var date_effectivity = document.getElementById('et_date_effectivity_update').value;
+        var reason = document.getElementById('et_reason_update').value;
+
+        $.ajax({
+            url: '../process/hr/employee_transfer/et_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'update_employee_transfer',
+                id: id,
+                dept: dept,
+                section: section,
+                line_no: line_no,
+                date_effectivity: date_effectivity,
+                reason: reason
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succesfully Updated!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    document.getElementById('et_id_update').value = '';
+                    document.getElementById('et_emp_no_update').value = '';
+                    document.getElementById('et_emp_transfer_type_update').value = '';
+                    document.getElementById('et_dept_update').value = '';
+                    document.getElementById('et_section_update').value = '';
+                    document.getElementById('et_line_no_update').value = '';
+                    document.getElementById('et_date_effectivity_update').value = '';
+                    document.getElementById('et_reason_update').value = '';
+                    get_ongoing_employee_transfer();
+                    $('#update_employee_transfer').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: 'Error',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
+    const cancel_employee_transfer = () => {
+        var id = document.getElementById('et_id_emp_no_update').value;
+
+        $.ajax({
+            url: '../process/hr/employee_transfer/et_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'cancel_employee_transfer',
+                id: id
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succesfully Cancelled!!!',
+                        text: 'Success',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    document.getElementById('et_id_update').value = '';
+                    document.getElementById('et_emp_no_update').value = '';
+                    document.getElementById('et_emp_transfer_type_update').value = '';
+                    document.getElementById('et_dept_update').value = '';
+                    document.getElementById('et_section_update').value = '';
+                    document.getElementById('et_line_no_update').value = '';
+                    document.getElementById('et_date_effectivity_update').value = '';
+                    document.getElementById('et_reason_update').value = '';
+                    get_ongoing_employee_transfer();
+                    $('#update_employee_transfer').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: 'Error',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
     $("#new_employee_transfer").on('show.bs.modal', e => {
         load_et_reason_textarea();
     });
@@ -239,7 +393,7 @@
                 if (response == 'success') {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Succesfully Recorded!!!',
+                        title: 'Succesfully Added!!!',
                         text: 'Success',
                         showConfirmButton: false,
                         timer: 1000

@@ -12,6 +12,7 @@ include '../modals/set_line_shifting.php';
 include '../modals/view_employee_control_area.php';
 include '../modals/update_skill_level.php';
 include '../modals/new_employee_transfer.php';
+include '../modals/update_employee_transfer.php';
 ?>
 <!-- jQuery -->
 <script src="../plugins/jquery/dist/jquery.min.js"></script>

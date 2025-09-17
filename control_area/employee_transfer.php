@@ -65,8 +65,8 @@
                       <label>Employee Transfer Type:</label>
                       <select id="et_emp_transfer_type_search" class="form-control" onchange="get_ongoing_employee_transfer()">
                         <option value="">Select Provider</option>
-                        <option value="department">Department</option>
-                        <option value="section">Section</option>
+                        <option value="department">Department Transfer</option>
+                        <option value="section">Section Transfer</option>
                       </select>
                     </div>
                     <div class="col-sm-2">
@@ -174,11 +174,12 @@
                       <th>Receiving Noted By</th>
                       <th>Receiving Acknowledged By</th>
                       <th>Receiving Approved By</th>
+                      <th>Reason</th>
                     </tr>
                   </thead>
                   <tbody id="et_data" style="text-align: center;">
                     <tr>
-                      <td colspan="19" style="text-align:center;">
+                      <td colspan="20" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

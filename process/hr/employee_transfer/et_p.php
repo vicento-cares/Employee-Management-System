@@ -36,11 +36,15 @@ if ($method == 'get_ongoing_employee_transfer') {
 	$c = 0;
 
 	$query = "SELECT 
-					et.emp_no, et.emp_transfer_type, et.dept_to, et.section_to, et.line_no_to, 
+					et.id, et.emp_no, et.emp_transfer_type, et.dept_to, et.section_to, et.line_no_to, 
                     et.issued_by, et.checked_by, et.approved_by, 
                     et.r_noted_by, et.r_acknowledged_by, et.r_approved_by, 
                     et.reason, et.date_effectivity, 
-                    emp.full_name, emp.provider, emp.position 
+                    emp.full_name, emp.provider, emp.position, 
+                    CASE 
+                        WHEN et.date_effectivity > GETDATE() THEN 'overdue' 
+                        ELSE 'ongoing' 
+                    END AS date_effectivity_status 
 				FROM t_employee_transfer et 
                 LEFT JOIN m_employees emp ON et.emp_no = emp.emp_no 
 				WHERE et.dept_from = ? AND et.section_from = ?";
@@ -109,13 +113,13 @@ if ($method == 'get_ongoing_employee_transfer') {
 		$query = $query . " AND et.approved_by IS NOT NULL";
 	}
     if ($is_receiving_noted_by > 0) {
-		$query = $query . " AND et.receiving_noted_by IS NOT NULL";
+		$query = $query . " AND et.r_noted_by IS NOT NULL";
 	}
     if ($is_receiving_acknowledged_by > 0) {
-		$query = $query . " AND et.receiving_acknowledged_by IS NOT NULL";
+		$query = $query . " AND et.r_acknowledged_by IS NOT NULL";
 	}
     if ($is_receiving_approved_by > 0) {
-		$query = $query . " AND et.receiving_approved_by IS NOT NULL";
+		$query = $query . " AND et.r_approved_by IS NOT NULL";
 	}
 
 	$stmt = $conn->prepare($query);
@@ -127,7 +131,27 @@ if ($method == 'get_ongoing_employee_transfer') {
 		do {
 			$c++;
 
-			echo '<tr>';
+            $row_class = '';
+            $row_edit = '';
+
+            if (($row['emp_transfer_type'] == 'department' && $row['checked_by'] == '') || 
+                ($row['emp_transfer_type'] == 'section' && $row['approved_by'] == '')) {
+                $row_class = 'bg-secondary';
+                $row_edit = 'style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee_transfer" 
+                            data-id="'.$row['id'].'" 
+                            data-emp_no="'.htmlspecialchars($row['emp_no']).'" 
+                            data-emp_transfer_type="'.htmlspecialchars($row['emp_transfer_type']).'" 
+                            data-dept_to="'.htmlspecialchars($row['dept_to']).'" 
+                            data-section_to="'.htmlspecialchars($row['section_to']).'" 
+                            data-line_no_to="'.htmlspecialchars($row['line_no_to']).'" 
+                            data-date_effectivity="'.htmlspecialchars($row['date_effectivity']).'" 
+                            data-reason="'.htmlspecialchars($row['reason']).'" 
+                            onclick="get_employee_transfer_details(this)"';
+            } else if ($row['date_effectivity_status'] == 'overdue') {
+                $row_class = 'bg-danger';
+            }
+
+            echo '<tr class="'.$row_class.'" '.$row_edit.'>';
 
 			echo '<td>'.$c.'</td>';
 			echo '<td>'.$row['date_effectivity'].'</td>';
@@ -148,12 +172,13 @@ if ($method == 'get_ongoing_employee_transfer') {
             echo '<td>'.$row['r_noted_by'].'</td>';
             echo '<td>'.$row['r_acknowledged_by'].'</td>';
             echo '<td>'.$row['r_approved_by'].'</td>';
+            echo '<td>'.$row['reason'].'</td>';
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	} else {
 		echo '<tr>';
-			echo '<td colspan="19" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="20" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }
@@ -275,6 +300,54 @@ if ($method == 'submit_employee_transfer') {
     $stmt -> execute($data);
 
     echo 'success';
+}
+
+if ($method == 'update_employee_transfer') {
+    $id = $_POST['id'];
+    $dept_to = $_POST['dept'];
+    $section_to = $_POST['section'];
+    $line_no_to = $_POST['line_no'];
+    $date_effectivity = $_POST['date_effectivity'];
+    $reason = $_POST['reason'];
+
+    $query = "UPDATE 
+                t_employee_transfer 
+                SET 
+                    dept_to = ?, section_to = ?, line_no_to = ?, 
+                    reason = ?, date_effectivity = ? 
+                WHERE 
+                    id = ?";
+
+    $params = [
+        $dept_to,
+        $section_to,
+        $line_no_to,
+        $reason,
+        $date_effectivity,
+        $id
+    ];
+
+    $stmt = $conn->prepare($query);
+
+    if ($stmt->execute($params)) {
+        echo 'success';
+    } else {
+        echo 'error';
+    }
+}
+
+if ($method == 'cancel_employee_transfer') {
+    $id = $_POST['id'];
+
+    $query = "DELETE FROM t_employee_transfer WHERE id = ?";
+
+    $stmt = $conn->prepare($query);
+
+    if ($stmt->execute([$id])) {
+        echo 'success';
+    } else {
+        echo 'error';
+    }
 }
 
 $conn = null;
