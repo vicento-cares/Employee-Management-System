@@ -31,9 +31,9 @@
                     $('#od_registered_ds').html(`<b>${response_array.od_registered_ds}</b>`);
                     $('#od_registered_ns').html(`<b>${response_array.od_registered_ns}</b>`);
                     $('#od_registered_total').html(`<b>${response_array.od_registered_total}</b>`);
-                    $('#od_absent_rate_ds').html(`<b>${response_array.od_absent_rate_ds}</b>`);
-                    $('#od_absent_rate_ns').html(`<b>${response_array.od_absent_rate_ns}</b>`);
-                    $('#od_absent_rate').html(`<b>${response_array.od_absent_rate}</b>`);
+                    $('#od_absent_rate_ds').html(`<b>${response_array.od_absent_rate_ds}%</b>`);
+                    $('#od_absent_rate_ns').html(`<b>${response_array.od_absent_rate_ns}%</b>`);
+                    $('#od_absent_rate').html(`<b>${response_array.od_absent_rate}%</b>`);
 
                     sessionStorage.setItem('emp_mgt_od_day_search', day);
                     sessionStorage.setItem('emp_mgt_od_dept_search', dept);
@@ -105,7 +105,12 @@
 						categories: response.categories
 					},
                     yaxis: {
-                        max: 50
+                        max: 50,
+                        labels: {
+                            formatter: function (val) {
+                                return val.toFixed(2) + '%'; // Format to 2 decimal places and append '%'
+                            }
+                        }
                     },
 					title: {
 						text: `Daily Absent Rate Trend`,
@@ -119,7 +124,12 @@
 					},
 					tooltip: {
 						shared: true,
-						intersect: false
+						intersect: false,
+                        y: {
+                            formatter: function (val) {
+                                return val + '%'; // Append '%' to the value
+                            }
+                        }
 					}
 				};
 
@@ -191,7 +201,12 @@
                             categories: response.categories
                         },
                         yaxis: {
-                            max: 50
+                            max: 50,
+                            labels: {
+                                formatter: function (val) {
+                                    return val.toFixed(2) + '%'; // Format to 2 decimal places and append '%'
+                                }
+                            }
                         },
                         title: {
                             text: `${item.name} Daily Absent Rate Trend`,
@@ -205,7 +220,12 @@
                         },
                         tooltip: {
                             shared: true,
-                            intersect: false
+                            intersect: false,
+                            y: {
+                                formatter: function (val) {
+                                    return val + '%'; // Append '%' to the value
+                                }
+                            }
                         }
                     };
 
