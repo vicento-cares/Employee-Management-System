@@ -2,7 +2,8 @@
     $email_code = 'EMP-MGT-SYS';
     $email_subject = 'Employee Management System';
 
-    function approve_email($submission_id, $approve_key, $system) {
+    function approve_email($submission_id, $approve_key) {
+        $system = '/emp_mgt';
         return <<<HTML
             <!DOCTYPE html>
                 <html lang="en">
@@ -46,23 +47,17 @@
                         Good day, Health and Safety First!
                     </p>
                     <p>
-                        You are receiving this email because your Employee Management System account / email address has a pending document for approval.
+                        You are receiving this email because your Employee Management System account / email address has a pending employee transfer approval.
                     </p>
                     <p>
-                        To view and approve the document, please click the link below:
+                        To view and approve pending employee transfer, please click the link below:
                     </p>
                     <p>
-                        <a href="http://{$_SERVER['HTTP_HOST']}{$system}/pages/approve_document/index.php?submission_id={$submission_id}&approve_key={$approve_key}">View Document</a>
-                    </p>
-                    <p>
-                        For unregistered users, you can still approve the document via the link, you may register your email address for more access to your department's documents here:
-                    </p>
-                    <p>
-                        <a href="http://{$_SERVER['HTTP_HOST']}{$system}/pages/register/">Create an account</a>
+                        <a href="http://{$_SERVER['HTTP_HOST']}{$system}/approval/employee_transfer/index.php?submission_id={$submission_id}&approve_key={$approve_key}">View Employee Transfer</a>
                     </p>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
-                        <p>Do not share this email as it contains a custom key for approving the document under your email address.</p>
+                        <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
                         <br>
                         <p>submission_id:{$submission_id}</p>
                         <p>approve_key:{$approve_key}</p>
@@ -74,7 +69,7 @@
         HTML;
     }
 
-    function complete_approval_email($system) {
+    function complete_approval_email() {
         return <<<HTML
             <!DOCTYPE html>
                 <html lang="en">
@@ -118,11 +113,11 @@
                         Good day, Health and Safety First!
                     </p>
                     <p>
-                        You are receiving this email because a document of your department have completed its signatories and is successfully registered to the Employee Management System.
+                        You are receiving this email because an employee transfer approval have completed its signatories and is successfully transferred to destinated line on Employee Management System.
                     </p>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
-                        <p>Do not share this email as it contains a custom key for approving the document under your email address.</p>
+                        <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
                         <br>
                         <p>IT - SYSTEM GROUP</p>
                         <p>Furukawa Automotive Systems, Lima, Philippines</p>
@@ -132,7 +127,7 @@
         HTML;
     }
 
-    function complete_disapproval_email($system) {
+    function complete_disapproval_email() {
         return <<<HTML
             <!DOCTYPE html>
                 <html lang="en">
@@ -176,11 +171,11 @@
                         Good day, Health and Safety First!
                     </p>
                     <p>
-                        You are receiving this email because a document of your department have been disapproved. See more details under the Employee Management System.
+                        You are receiving this email because an employee transfer approval have been disapproved. See more details under the Employee Management System.
                     </p>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
-                        <p>Do not share this email as it contains a custom key for approving the document under your email address.</p>
+                        <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
                         <br>
                         <p>IT - SYSTEM GROUP</p>
                         <p>Furukawa Automotive Systems, Lima, Philippines</p>

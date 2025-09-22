@@ -440,7 +440,7 @@ try {
     }
     
     $sendto = implode(";", $send_to_emails);
-    $email_body = approve_email($emp_transfer_batch_id, $appprove_key, $system);
+    $email_body = approve_email($emp_transfer_batch_id, $appprove_key);
 
     $data = [
         "system_name" => $email_code,
