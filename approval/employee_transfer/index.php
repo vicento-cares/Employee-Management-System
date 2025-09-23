@@ -246,6 +246,8 @@
                                             <?php 
                                             $c = 0;
                                             foreach ($submission_data as &$row) {
+                                                $c++;
+
                                                 echo '<tr>';
 
                                                 echo '<td>'.$c.'</td>';
@@ -330,6 +332,70 @@
         document.addEventListener("DOMContentLoaded", () => {
             
         });
+
+        // Get the form element
+        var employee_transfer_approval_form = document.getElementById('employee_transfer_approval_form');
+
+        // Add a submit event listener to the form
+        employee_transfer_approval_form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // Get the button that triggered the submit event
+            var button = document.activeElement;
+
+            // Check the id or name of the button
+            if (button.id === 'btnDisapproveEmployeeTransfer') {
+                // Call the function for the first submit button
+                approve_employee_transfer(0);
+            } else if (button.id === 'btnApproveEmployeeTransfer') {
+                // Call the function for the first submit button
+                approve_employee_transfer(1);
+            }
+        });
+
+        const approve_employee_transfer = opt => {
+            let emp_transfer_batch_id = document.getElementById('emp_transfer_batch_id').value;
+            let approve_key = document.getElementById('approve_key').value;
+
+            $.ajax({
+                url: '../../process/hr/employee_transfer/et_p.php',
+                type: 'POST',
+                cache: false,
+                data: {
+                    method: 'approve_employee_transfer',
+                    emp_transfer_batch_id: emp_transfer_batch_id,
+                    approve_key: approve_key,
+                    opt: opt
+                }, success: function (response) {
+                    if (response == 'success') {
+                        $success_title = '';
+                        if (opt == 1) {
+                            $success_title = 'Succesfully Approved!!!';
+                        } else if (opt == 0) {
+                            $success_title = 'Succesfully Disapproved!!!';
+                        }
+                        Swal.fire({
+                            icon: 'success',
+                            title: $success_title,
+                            text: 'Success',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                        document.getElementById('emp_transfer_batch_id').value = '';
+                        document.getElementById('approve_key').value = '';
+                        window.location.href = '/emp_mgt/';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error !!!',
+                            text: 'Error',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                    }
+                }
+            });
+        }
     </script>
 
     <noscript>We are facing Script issues. Kindly enable JavaScript</noscript>
