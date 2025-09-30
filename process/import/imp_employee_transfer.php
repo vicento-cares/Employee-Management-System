@@ -114,13 +114,14 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0, 0, 0, 0);
+    $row_valid_arr = array(0, 0, 0, 0, 0, 0);
 
     $notExistsDeptArr = array();
     $notExistsSectionArr = array();
     $notExistsLineNoArr = array();
     $notValidDateEffectivityArr = array();
     $notAllowedDateEffectivityArr = array();
+    $notManpowerArr = array();
 
     $message = "";
     $check_csv_row = 0;
@@ -210,6 +211,22 @@ function check_csv($file, $conn)
             }
         }
 
+        // get current dept from and section from session of issuer
+        $dept_from = $_SESSION['dept'];
+        $section_from = $_SESSION['section'];
+
+        // Check emp_no if match on issuer dept and section
+        $query = "SELECT emp_no FROM m_employees WHERE emp_no = ? AND dept = ? AND section = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$emp_no, $dept_from, $section_from]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            $hasError = 1;
+            $row_valid_arr[5] = 1;
+            array_push($notManpowerArr, $check_csv_row);
+        }
+
         // Joining all row values for checking duplicated rows
         $whole_line = join(',', $line);
 
@@ -240,6 +257,9 @@ function check_csv($file, $conn)
         }
         if ($row_valid_arr[4] == 1) {
             $message = $message . 'Late Date Effectivity is not allowed on row/s ' . implode(", ", $notAllowedDateEffectivityArr) . '. ';
+        }
+        if ($row_valid_arr[5] == 1) {
+            $message = $message . 'Not Manpower of this department/section on row/s ' . implode(", ", $notManpowerArr) . '. ';
         }
 
         if ($hasBlankError >= 1) {

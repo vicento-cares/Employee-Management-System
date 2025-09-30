@@ -354,6 +354,7 @@ if ($method == 'approve_employee_transfer') {
     $opt = intval($_POST['emp_transfer_batch_id']);
     $emp_transfer_batch_id = $_POST['emp_transfer_batch_id'];
 	$approve_key = $_POST['approve_key'];
+    $approver_emp_no = $_POST['approver_emp_no'];
 
     $emp_transfer_type = '';
 
@@ -404,51 +405,90 @@ if ($method == 'approve_employee_transfer') {
     $stmt = $conn->prepare($query);
     $stmt->execute([$emp_transfer_batch_id, $approve_key]);
 
-    $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+    $emp_transfer_rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);
 
-    if (!$row) {
+    if (!$emp_transfer_rows) {
         echo 'not found';
         $conn = null;
         exit();
     }
 
-    do {
-        $emp_transfer_type = $row['emp_transfer_type'];
+    // get first row only
+    $row = $emp_transfer_rows[0];
 
-        $dept_from = $row['dept_from'];
-        $section_from = $row['section_from'];
-        $dept_to = $row['dept_to'];
-        $section_to = $row['section_to'];
+    $emp_transfer_type = $row['emp_transfer_type'];
 
-        $checked_by = $row['checked_by'];
-        $approved_by = $row['approved_by'];
-        $r_noted_by = $row['r_noted_by'];
-        $r_acknowledged_by = $row['r_acknowledged_by'];
-        $r_approved_by = $row['r_approved_by'];
-    } while ($row = $stmt -> fetch(PDO::FETCH_ASSOC));
+    $dept_from = $row['dept_from'];
+    $section_from = $row['section_from'];
+
+    $checked_by = $row['checked_by'];
+    $approved_by = $row['approved_by'];
+    $r_noted_by = $row['r_noted_by'];
+    $r_acknowledged_by = $row['r_acknowledged_by'];
+    $r_approved_by = $row['r_approved_by'];
+
+    $is_hr = false;
+
+    // check hr acknowledger details
+    $query = "SELECT 
+                    full_name 
+                FROM 
+                    m_hr_accounts 
+                WHERE 
+                    emp_no = ? AND role = 'HR'";
+
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$approver_emp_no]);
+
+    $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+        // check approver details
+        $query = "SELECT 
+                        full_name 
+                    FROM 
+                        m_control_area_accounts 
+                    WHERE 
+                        emp_no = ?";
+
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$approver_emp_no]);
+
+        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            echo 'approver not authorized or registered';
+            $conn = null;
+            exit();
+        }
+    } else {
+        $is_hr = true;
+    }
+
+    $approver_name = $row['full_name'];
 
     // disapprove
     if ($opt < 1) {
         $query = "INSERT INTO t_employee_transfer_history 
-                    (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                    reason, is_approved, date_effectivity) 
-                SELECT 
-                    emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, NULL AS hr_ack, NULL AS hr_ack_no, NULL AS hr_date_ack, 
-                    reason, 0 AS is_approved, date_effectivity 
-                FROM 
-                    t_employee_transfer 
-                WHERE 
-                    emp_transfer_batch_id = ? AND approve_key = ?";
+                        (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                        dept_from, section_from, line_no_from, 
+                        dept_to, section_to, line_no_to, 
+                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                        r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
+                        reason, is_approved, date_effectivity) 
+                    SELECT 
+                        emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                        dept_from, section_from, line_no_from, 
+                        dept_to, section_to, line_no_to, 
+                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                        r_approved_by, r_approved_by_no, r_date_approved_by, NULL AS hr_ack, NULL AS hr_ack_no, NULL AS hr_date_ack, 
+                        reason, 0 AS is_approved, date_effectivity 
+                    FROM 
+                        t_employee_transfer 
+                    WHERE 
+                        emp_transfer_batch_id = ? AND approve_key = ?";
 
         $stmt = $conn->prepare($query);
 
@@ -516,36 +556,36 @@ if ($method == 'approve_employee_transfer') {
             if (
                 $checked_by != null && 
                 $approved_by != null && 
-                $page == 'HR'
+                $is_hr
             ) {
                 // history
                 $query = "INSERT INTO t_employee_transfer_history 
-                    (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                    reason, is_approved, date_effectivity) 
-                SELECT 
-                    emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
-                    reason, 1 AS is_approved, date_effectivity 
-                FROM 
-                    t_employee_transfer 
-                WHERE 
-                    emp_transfer_batch_id = ? AND approve_key = ?";
+                                (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                                dept_from, section_from, line_no_from, 
+                                dept_to, section_to, line_no_to, 
+                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                                r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
+                                reason, is_approved, date_effectivity) 
+                            SELECT 
+                                emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                                dept_from, section_from, line_no_from, 
+                                dept_to, section_to, line_no_to, 
+                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                                r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
+                                reason, 1 AS is_approved, date_effectivity 
+                            FROM 
+                                t_employee_transfer 
+                            WHERE 
+                                emp_transfer_batch_id = ? AND approve_key = ?";
 
                 $stmt = $conn->prepare($query);
 
                 $params = [
-                    $hr_ack,
-                    $hr_ack_no,
-                    $hr_date_ack,
+                    $approver_name,
+                    $approver_emp_no,
+                    $server_date_time,
                     $emp_transfer_batch_id,
                     $approve_key
                 ];
@@ -609,7 +649,6 @@ if ($method == 'approve_employee_transfer') {
             } else {
                 $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-                $query = '';
                 if ($checked_by == null) {
                     $query = "UPDATE 
                                     t_employee_transfer 
@@ -624,8 +663,8 @@ if ($method == 'approve_employee_transfer') {
 
                     $params = [
                         $new_appprove_key, 
-                        $approved_by, 
-                        $approved_by_no, 
+                        $approver_name, 
+                        $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
                         $appprove_key 
@@ -685,8 +724,8 @@ if ($method == 'approve_employee_transfer') {
 
                     $params = [
                         $new_appprove_key, 
-                        $approved_by, 
-                        $approved_by_no, 
+                        $approver_name, 
+                        $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
                         $appprove_key 
@@ -742,36 +781,36 @@ if ($method == 'approve_employee_transfer') {
                 $r_noted_by != null && 
                 $r_acknowledged_by != null && 
                 $r_approved_by != null && 
-                $page == 'HR'
+                $is_hr
             ) {
                 // history
                 $query = "INSERT INTO t_employee_transfer_history 
-                    (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                    reason, is_approved, date_effectivity) 
-                SELECT 
-                    emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                    dept_from, section_from, line_no_from, 
-                    dept_to, section_to, line_no_to, 
-                    issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                    r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                    r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
-                    reason, 1 AS is_approved, date_effectivity 
-                FROM 
-                    t_employee_transfer 
-                WHERE 
-                    emp_transfer_batch_id = ? AND approve_key = ?";
+                                (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                                dept_from, section_from, line_no_from, 
+                                dept_to, section_to, line_no_to, 
+                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                                r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
+                                reason, is_approved, date_effectivity) 
+                            SELECT 
+                                emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                                dept_from, section_from, line_no_from, 
+                                dept_to, section_to, line_no_to, 
+                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                                r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
+                                reason, 1 AS is_approved, date_effectivity 
+                            FROM 
+                                t_employee_transfer 
+                            WHERE 
+                                emp_transfer_batch_id = ? AND approve_key = ?";
 
                 $stmt = $conn->prepare($query);
 
                 $params = [
-                    $hr_ack,
-                    $hr_ack_no,
-                    $hr_date_ack,
+                    $approver_name,
+                    $approver_emp_no,
+                    $server_date_time,
                     $emp_transfer_batch_id,
                     $approve_key
                 ];
@@ -833,71 +872,168 @@ if ($method == 'approve_employee_transfer') {
                 $conn = null;
                 exit();
             } else {
-                $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
-
                 if ($approved_by == null) {
-                    $query = "UPDATE 
-                                    t_employee_transfer 
-                                SET 
-                                    approve_key = ?, 
-                                    approved_by = ?, 
-                                    approved_by_no = ?, 
-                                    date_approved_by = ? 
-                                WHERE 
-                                    emp_transfer_batch_id = ? AND 
-                                    approve_key = ?";
+                    $groupedEmpTransferRows = [];
 
-                    $params = [
-                        $new_appprove_key, 
-                        $approved_by, 
-                        $approved_by_no, 
-                        $server_date_time, 
-                        $emp_transfer_batch_id, 
-                        $appprove_key 
-                    ];
-
-                    $send_to_emails = [];
-
-                    // Get Send To Emails
-                    $query = "SELECT
-                                    email 
-                                FROM 
-                                    m_control_area_accounts 
-                                WHERE 
-                                    dept = ? AND 
-                                    section = ? AND 
-                                    position IN ('Staff', 'Supervisor')";
-
-                    $stmt = $conn->prepare($query);
-                    $stmt->execute([$dept_to, $section_to]);
-
-                    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        $send_to_emails[] = $row['email'];
+                    foreach ($emp_transfer_rows as $row) {
+                        $key = $row['dept_to'] . '|' . $row['section_to']; // Create a unique key for each combination
+                        if (!isset($groupedEmpTransferRows[$key])) {
+                            $groupedEmpTransferRows[$key] = []; // Initialize an array for this key if it doesn't exist
+                        }
+                        $groupedEmpTransferRows[$key][] = $row; // Add the row to the corresponding group
                     }
-                    
-                    $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
-                    ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+                    // Now, loop through the grouped rows to execute something for duplicates
+                    foreach ($groupedEmpTransferRows as $key => $rows) {
+                        if (count($rows) > 1) { // Check if there are duplicates
+                            // Execute your code for rows with the same dept_to and section_to
+                            $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+
+                            $row = $rows[0];
+
+                            $dept_to = $row['dept_to'];
+                            $section_to = $row['section_to'];
+
+                            $query = "UPDATE 
+                                            t_employee_transfer 
+                                        SET 
+                                            approve_key = ?, 
+                                            approved_by = ?, 
+                                            approved_by_no = ?, 
+                                            date_approved_by = ? 
+                                        WHERE 
+                                            emp_transfer_batch_id = ? AND 
+                                            approve_key = ? AND 
+                                            dept_to = ? AND 
+                                            section_to = ?";
+
+                            $params = [
+                                $new_appprove_key, 
+                                $approver_name, 
+                                $approver_emp_no, 
+                                $server_date_time, 
+                                $emp_transfer_batch_id, 
+                                $appprove_key, 
+                                $dept_to, 
+                                $section_to 
+                            ];
+
+                            $send_to_emails = [];
+
+                            // Get Send To Emails
+                            $query = "SELECT
+                                            email 
+                                        FROM 
+                                            m_control_area_accounts 
+                                        WHERE 
+                                            dept = ? AND 
+                                            section = ? AND 
+                                            position IN ('Staff', 'Supervisor')";
+
+                            $stmt = $conn->prepare($query);
+                            $stmt->execute([$dept_to, $section_to]);
+
+                            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                $send_to_emails[] = $row['email'];
+                            }
+                            
+                            $sendto = implode(";", $send_to_emails);
+                            $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
+
+                            $data = [
+                                "system_name" => $email_code,
+                                "send_to" => $sendto,
+                                "cc" => "vince.dale.alcantara@furukawaelectric.com",
+                                "subject" => $email_subject . " : " . "Employee Transfer Approval",
+                                "body" => $email_body
+                            ];
+                            $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
+                                :system_name,
+                                :send_to,
+                                :cc,
+                                :subject,
+                                :body
+                            ");
+                            $stmt -> execute($data);
+                        } else {
+                            // Execute your code for rows with no duplicates
+                            $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+
+                            $row = $rows[0]; // Since there's only one row, we can access it directly
+
+                            $dept_to = $row['dept_to'];
+                            $section_to = $row['section_to'];
+
+                            $query = "UPDATE 
+                                            t_employee_transfer 
+                                        SET 
+                                            approve_key = ?, 
+                                            approved_by = ?, 
+                                            approved_by_no = ?, 
+                                            date_approved_by = ? 
+                                        WHERE 
+                                            emp_transfer_batch_id = ? AND 
+                                            approve_key = ?";
+
+                            $params = [
+                                $new_appprove_key, 
+                                $approver_name, 
+                                $approver_emp_no, 
+                                $server_date_time, 
+                                $emp_transfer_batch_id, 
+                                $appprove_key, 
+                                $dept_to, 
+                                $section_to 
+                            ];
+
+                            $send_to_emails = [];
+
+                            // Get Send To Emails
+                            $query = "SELECT
+                                            email 
+                                        FROM 
+                                            m_control_area_accounts 
+                                        WHERE 
+                                            dept = ? AND 
+                                            section = ? AND 
+                                            position IN ('Staff', 'Supervisor')";
+
+                            $stmt = $conn->prepare($query);
+                            $stmt->execute([$dept_to, $section_to]);
+
+                            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                $send_to_emails[] = $row['email'];
+                            }
+                            
+                            $sendto = implode(";", $send_to_emails);
+                            $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
+
+                            $data = [
+                                "system_name" => $email_code,
+                                "send_to" => $sendto,
+                                "cc" => "vince.dale.alcantara@furukawaelectric.com",
+                                "subject" => $email_subject . " : " . "Employee Transfer Approval",
+                                "body" => $email_body
+                            ];
+                            $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
+                                :system_name,
+                                :send_to,
+                                :cc,
+                                :subject,
+                                :body
+                            ");
+                            $stmt -> execute($data);
+                        }
+                    }
 
                     echo 'success';
                     $conn = null;
                     exit();
-                } else if ($r_noted_by == null) {
+                } 
+                
+                $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+
+                if ($r_noted_by == null) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -911,8 +1047,8 @@ if ($method == 'approve_employee_transfer') {
 
                     $params = [
                         $new_appprove_key, 
-                        $r_noted_by, 
-                        $r_noted_by_no, 
+                        $approver_name, 
+                        $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
                         $appprove_key 
@@ -973,8 +1109,8 @@ if ($method == 'approve_employee_transfer') {
 
                     $params = [
                         $new_appprove_key, 
-                        $r_acknowledged_by, 
-                        $r_acknowledged_by_no, 
+                        $approver_name, 
+                        $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
                         $appprove_key 
@@ -1034,8 +1170,8 @@ if ($method == 'approve_employee_transfer') {
 
                     $params = [
                         $new_appprove_key, 
-                        $r_approved_by, 
-                        $r_approved_by_no, 
+                        $approver_name, 
+                        $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
                         $appprove_key 

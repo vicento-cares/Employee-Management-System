@@ -5,6 +5,9 @@
         exit();
     }
 
+    $submission_id = $_GET['submission_id'];
+    $approve_key = $_GET['approve_key'];
+
     include '../../process/conn.php';
 
     // check and get all data
@@ -41,7 +44,7 @@
                     approve_key = ?";
 
     $stmt = $conn->prepare($query);
-    $stmt->execute([$_GET['submission_id'], $_GET['approve_key']]);
+    $stmt->execute([$submission_id, $approve_key]);
 
     $submission_data = $stmt -> fetchAll(PDO::FETCH_ASSOC);
 
@@ -278,9 +281,15 @@
                                         </table>
                                     </div>
                                     <form id="employee_transfer_approval_form">
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <label>Approver Employee No </label><label style="color: red;">*</label>
+                                                <input type="text" id="approver_emp_no" class="form-control" maxlength="255" autocomplete="off" required>
+                                            </div>
+                                        </div>
                                         <div class="row">
-                                            <input type="hidden" name="emp_transfer_batch_id" id="emp_transfer_batch_id" value="<?=$_GET['submission_id']?>">
-                                            <input type="hidden" name="approve_key" id="approve_key" value="<?=$_GET['approve_key']?>">
+                                            <input type="hidden" name="emp_transfer_batch_id" id="emp_transfer_batch_id" value="<?=$submission_id?>">
+                                            <input type="hidden" name="approve_key" id="approve_key" value="<?=$approve_key?>">
                                             <div class="col-sm-2">
                                                 <button type="submit" class="btn bg-danger btn-block" id="btnDisapproveEmployeeTransfer"><i class="fas fa-times"></i> Disapprove</button>
                                             </div>
@@ -356,6 +365,7 @@
         const approve_employee_transfer = opt => {
             let emp_transfer_batch_id = document.getElementById('emp_transfer_batch_id').value;
             let approve_key = document.getElementById('approve_key').value;
+            let approver_emp_no = document.getElementById('approver_emp_no').value;
 
             $.ajax({
                 url: '../../process/hr/employee_transfer/et_p.php',
@@ -365,6 +375,7 @@
                     method: 'approve_employee_transfer',
                     emp_transfer_batch_id: emp_transfer_batch_id,
                     approve_key: approve_key,
+                    approver_emp_no: approver_emp_no,
                     opt: opt
                 }, success: function (response) {
                     if (response == 'success') {
@@ -388,7 +399,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error !!!',
-                            text: 'Error',
+                            text: `Error: ${response}`,
                             showConfirmButton: false,
                             timer: 1000
                         });
