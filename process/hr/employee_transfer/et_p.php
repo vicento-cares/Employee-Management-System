@@ -9,6 +9,101 @@ include '../../lib/approve_email.php';
 
 $method = $_POST['method'];
 
+function add_emp_transfer_history($mail_arr, $conn) {
+    $approve_email_opt = intval($mail_arr['approve_email_opt']);
+
+    $params = [];
+
+    $addedQuery = "";
+
+    if ($approve_email_opt == 0) {
+        $addedQuery = " ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 1 AS is_approved";
+        $params[] = $mail_arr['hr_ack'];
+        $params[] = $mail_arr['hr_ack_no'];
+        $params[] = $mail_arr['hr_date_ack'];
+    } else if ($approve_email_opt == 1) {
+        $addedQuery = " NULL AS hr_ack, NULL AS hr_ack_no, NULL AS hr_date_ack, 0 AS is_approved";
+    }
+
+    $isTransactionActive = false;
+
+    try {
+        if (!$isTransactionActive) {
+            $conn->beginTransaction();
+            $isTransactionActive = true;
+        }
+
+        $query = "INSERT INTO t_employee_transfer_history 
+                        (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                        dept_from, section_from, line_no_from, 
+                        dept_to, section_to, line_no_to, 
+                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                        r_approved_by, r_approved_by_no, r_date_approved_by, date_effectivity, reason, 
+                        hr_ack, hr_ack_no, hr_date_ack, is_approved) 
+                    SELECT 
+                        emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
+                        dept_from, section_from, line_no_from, 
+                        dept_to, section_to, line_no_to, 
+                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
+                        r_approved_by, r_approved_by_no, r_date_approved_by, date_effectivity, reason, 
+                        $addedQuery 
+                    FROM 
+                        t_employee_transfer 
+                    WHERE 
+                        emp_transfer_batch_id = ? AND approve_key = ?";
+
+        $stmt = $conn->prepare($query);
+
+        $params[] = $mail_arr['emp_transfer_batch_id'];
+        $params[] = $mail_arr['approve_key'];
+
+        $stmt->execute($params);
+
+        $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
+
+        $stmt = $conn->prepare($query);
+
+        $stmt->execute([$mail_arr['emp_transfer_batch_id'], $mail_arr['approve_key']]);
+
+        $conn->commit();
+        $isTransactionActive = false;
+
+        return 'success';
+    } catch (Exception $e) {
+        if ($isTransactionActive) {
+            $conn->rollBack();
+            $isTransactionActive = false;
+        }
+
+        return 'Failed. Please Try Again or Call IT Personnel Immediately!: ' . $e->getMessage();
+    }
+}
+
+function get_issued_by_email($mail_arr, $conn) {
+    $sendto = '';
+
+    // Get Send To Emails
+    $query = "SELECT 
+                    email 
+                FROM 
+                    m_control_area_accounts 
+                WHERE 
+                    issued_by = ? AND 
+                    issued_by_no = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$mail_arr['issued_by'], $mail_arr['issued_by_no']]);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        $sendto = $row['email'];
+    }
+
+    return $sendto;
+}
+
 if ($method == 'get_ongoing_employee_transfer') {
 	if (!isset($_SESSION['dept'])) {
 		echo 'Session Expired. Please re-login your account.';
@@ -208,7 +303,7 @@ if ($method == 'submit_employee_transfer') {
     }
 
     $emp_transfer_batch_id = str_replace('.', '', uniqid('ET-BAT-', true));
-    $appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+    $approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
     $dept_to = '';
     $section_to = '';
@@ -228,7 +323,7 @@ if ($method == 'submit_employee_transfer') {
     $params = [
         $emp_transfer_id,
         $emp_transfer_batch_id,
-        $appprove_key,
+        $approve_key,
         $emp_no,
         $emp_transfer_type,
         $dept_from,
@@ -281,23 +376,15 @@ if ($method == 'submit_employee_transfer') {
     }
     
     $sendto = implode(";", $send_to_emails);
-    $email_body = approve_email($emp_transfer_batch_id, $appprove_key);
 
-    $data = [
-        "system_name" => $email_code,
-        "send_to" => $sendto,
-        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-        "body" => $email_body
+    $mail_arr = [
+        'approve_email_opt' => 2,
+        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+        'approve_key' => $approve_key,
+        'sendTo' => $sendto
     ];
-    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-        :system_name,
-        :send_to,
-        :cc,
-        :subject,
-        :body
-    ");
-    $stmt -> execute($data);
+
+    send_mail($mail_arr, $conn_mailer);
 
     echo 'success';
 }
@@ -427,123 +514,70 @@ if ($method == 'approve_employee_transfer') {
     $r_acknowledged_by = $row['r_acknowledged_by'];
     $r_approved_by = $row['r_approved_by'];
 
+    $approver_name = '';
     $is_hr = false;
 
-    // check hr acknowledger details
+    // check hr acknowledger & control approver details
     $query = "SELECT 
-                    full_name 
+                    h.full_name AS hr_full_name, 
+                    c.full_name AS control_full_name 
                 FROM 
-                    m_hr_accounts 
+                    m_hr_accounts h
+                FULL OUTER JOIN 
+                    m_control_area_accounts c ON h.emp_no = c.emp_no
                 WHERE 
-                    emp_no = ? AND role = 'HR'";
+                    (h.emp_no = ? AND h.role = 'HR') OR c.emp_no = ?";
 
     $stmt = $conn->prepare($query);
     $stmt->execute([$approver_emp_no]);
 
     $row = $stmt -> fetch(PDO::FETCH_ASSOC);
 
-    if (!$row) {
-        // check approver details
-        $query = "SELECT 
-                        full_name 
-                    FROM 
-                        m_control_area_accounts 
-                    WHERE 
-                        emp_no = ?";
-
-        $stmt = $conn->prepare($query);
-        $stmt->execute([$approver_emp_no]);
-
-        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
-
-        if (!$row) {
-            echo 'approver not authorized or registered';
-            $conn = null;
-            exit();
-        }
-    } else {
+    if (!empty($row['hr_full_name'])) {
         $is_hr = true;
+        $approver_name = $row['hr_full_name'];
+    } else if (!empty($row['control_full_name'])) {
+        $approver_name = $row['control_full_name'];
+    } else {
+        echo 'approver not authorized or registered';
+        $conn = null;
+        exit();
     }
-
-    $approver_name = $row['full_name'];
 
     // disapprove
     if ($opt < 1) {
-        $query = "INSERT INTO t_employee_transfer_history 
-                        (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                        dept_from, section_from, line_no_from, 
-                        dept_to, section_to, line_no_to, 
-                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                        r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                        reason, is_approved, date_effectivity) 
-                    SELECT 
-                        emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                        dept_from, section_from, line_no_from, 
-                        dept_to, section_to, line_no_to, 
-                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                        r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                        r_approved_by, r_approved_by_no, r_date_approved_by, NULL AS hr_ack, NULL AS hr_ack_no, NULL AS hr_date_ack, 
-                        reason, 0 AS is_approved, date_effectivity 
-                    FROM 
-                        t_employee_transfer 
-                    WHERE 
-                        emp_transfer_batch_id = ? AND approve_key = ?";
-
-        $stmt = $conn->prepare($query);
-
-        if (!$stmt->execute([$emp_transfer_batch_id, $approve_key])) {
-            echo 'error';
-            $conn = null;
-            exit();
-        }
-
-        $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
-
-        $stmt = $conn->prepare($query);
-
-        if (!$stmt->execute([$emp_transfer_batch_id, $approve_key])) {
-            echo 'error';
-            $conn = null;
-            exit();
-        }
-
-        $sendto = '';
-
-        // Get Send To Emails
-        $query = "SELECT 
-                        email 
-                    FROM 
-                        m_control_area_accounts 
-                    WHERE 
-                        issued_by = ? AND 
-                        issued_by_no = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->execute([$issued_by, $issued_by_no]);
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row) {
-            $sendto = $row['email'];
-        }
-
-        $email_body = complete_disapproval_email();
-
-        $data = [
-            "system_name" => $email_code,
-            "send_to" => $sendto,
-            "cc" => "vince.dale.alcantara@furukawaelectric.com",
-            "subject" => $email_subject . " : " . "Employee Transfer Approval",
-            "body" => $email_body
+        $mail_arr = [
+            'approve_email_opt' => 0,
+            'emp_transfer_batch_id' => '',
+            'approve_key' => '',
+            'hr_ack' => '', 
+            'hr_ack_no' => '', 
+            'hr_date_ack' => '', 
+            'issued_by' => $issued_by, 
+            'issued_by_no' => $issued_by_no 
         ];
-        $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-            :system_name,
-            :send_to,
-            :cc,
-            :subject,
-            :body
-        ");
-        $stmt -> execute($data);
+
+        $check_added = add_emp_transfer_history($mail_arr, $conn);
+
+        if ($check_added != 'success') {
+            echo $check_added;
+            $conn = null;
+            exit();
+        }
+
+        $sendto = get_issued_by_email($mail_arr, $conn);
+
+        if (empty($sendto)) {
+            echo 'Error finding issued by email';
+            $conn = null;
+            exit();
+        }
+
+        $mail_arr[] = [
+            'sendTo' => $sendto
+        ];
+
+        send_mail($mail_arr, $conn_mailer);
 
         echo 'success';
         $conn = null;
@@ -559,95 +593,42 @@ if ($method == 'approve_employee_transfer') {
                 $is_hr
             ) {
                 // history
-                $query = "INSERT INTO t_employee_transfer_history 
-                                (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                                dept_from, section_from, line_no_from, 
-                                dept_to, section_to, line_no_to, 
-                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                                r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                                reason, is_approved, date_effectivity) 
-                            SELECT 
-                                emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                                dept_from, section_from, line_no_from, 
-                                dept_to, section_to, line_no_to, 
-                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                                r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
-                                reason, 1 AS is_approved, date_effectivity 
-                            FROM 
-                                t_employee_transfer 
-                            WHERE 
-                                emp_transfer_batch_id = ? AND approve_key = ?";
-
-                $stmt = $conn->prepare($query);
-
-                $params = [
-                    $approver_name,
-                    $approver_emp_no,
-                    $server_date_time,
-                    $emp_transfer_batch_id,
-                    $approve_key
+                $mail_arr = [
+                    'approve_email_opt' => 1,
+                    'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                    'approve_key' => $approve_key,
+                    'hr_ack' => $approver_name, 
+                    'hr_ack_no' => $approver_emp_no, 
+                    'hr_date_ack' => $server_date_time, 
+                    'issued_by' => $issued_by,
+                    'issued_by_no' => $issued_by_no 
                 ];
 
-                if (!$stmt->execute($params)) {
-                    echo 'error';
+                $check_added = add_emp_transfer_history($mail_arr, $conn);
+
+                if ($check_added != 'success') {
+                    echo $check_added;
                     $conn = null;
                     exit();
                 }
 
-                $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
+                $sendto = get_issued_by_email($mail_arr, $conn);
 
-                $stmt = $conn->prepare($query);
-
-                if (!$stmt->execute([$emp_transfer_batch_id, $approve_key])) {
-                    echo 'error';
+                if (empty($sendto)) {
+                    echo 'Error finding issued by email';
                     $conn = null;
                     exit();
                 }
 
-                $sendto = '';
-
-                // Get Send To Emails
-                $query = "SELECT 
-                                email 
-                            FROM 
-                                m_control_area_accounts 
-                            WHERE 
-                                issued_by = ? AND 
-                                issued_by_no = ?";
-                $stmt = $conn->prepare($query);
-                $stmt->execute([$issued_by, $issued_by_no]);
-
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($row) {
-                    $sendto = $row['email'];
-                }
-
-                $email_body = complete_approval_email();
-
-                $data = [
-                    "system_name" => $email_code,
-                    "send_to" => $sendto,
-                    "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                    "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                    "body" => $email_body
+                $mail_arr[] = [
+                    'sendTo' => $sendto
                 ];
-                $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                    :system_name,
-                    :send_to,
-                    :cc,
-                    :subject,
-                    :body
-                ");
-                $stmt -> execute($data);
+
+                send_mail($mail_arr, $conn_mailer);
 
                 echo 'success';
-                $conn = null;
-                exit();
             } else {
-                $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+                $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
                 if ($checked_by == null) {
                     $query = "UPDATE 
@@ -662,12 +643,12 @@ if ($method == 'approve_employee_transfer') {
                                     approve_key = ?";
 
                     $params = [
-                        $new_appprove_key, 
+                        $new_approve_key, 
                         $approver_name, 
                         $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
-                        $appprove_key 
+                        $approve_key 
                     ];
 
                     $send_to_emails = [];
@@ -689,27 +670,17 @@ if ($method == 'approve_employee_transfer') {
                     }
                     
                     $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
+                    $mail_arr = [
+                        'approve_email_opt' => 2,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $new_approve_key,
+                        'sendTo' => $sendto
                     ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+
+                    send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 } else if ($approved_by == null) {
                     $query = "UPDATE 
                                     t_employee_transfer 
@@ -723,12 +694,12 @@ if ($method == 'approve_employee_transfer') {
                                     approve_key = ?";
 
                     $params = [
-                        $new_appprove_key, 
+                        $new_approve_key, 
                         $approver_name, 
                         $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
-                        $appprove_key 
+                        $approve_key 
                     ];
 
                     $send_to_emails = [];
@@ -750,27 +721,17 @@ if ($method == 'approve_employee_transfer') {
                     }
                     
                     $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
+                    $mail_arr = [
+                        'approve_email_opt' => 2,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $new_approve_key,
+                        'sendTo' => $sendto
                     ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+
+                    send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 }
             }
         }
@@ -784,93 +745,40 @@ if ($method == 'approve_employee_transfer') {
                 $is_hr
             ) {
                 // history
-                $query = "INSERT INTO t_employee_transfer_history 
-                                (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                                dept_from, section_from, line_no_from, 
-                                dept_to, section_to, line_no_to, 
-                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                                r_approved_by, r_approved_by_no, r_date_approved_by, hr_ack, hr_ack_no, hr_date_ack, 
-                                reason, is_approved, date_effectivity) 
-                            SELECT 
-                                emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
-                                dept_from, section_from, line_no_from, 
-                                dept_to, section_to, line_no_to, 
-                                issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
-                                r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
-                                r_approved_by, r_approved_by_no, r_date_approved_by, ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 
-                                reason, 1 AS is_approved, date_effectivity 
-                            FROM 
-                                t_employee_transfer 
-                            WHERE 
-                                emp_transfer_batch_id = ? AND approve_key = ?";
-
-                $stmt = $conn->prepare($query);
-
-                $params = [
-                    $approver_name,
-                    $approver_emp_no,
-                    $server_date_time,
-                    $emp_transfer_batch_id,
-                    $approve_key
+                $mail_arr = [
+                    'approve_email_opt' => 1,
+                    'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                    'approve_key' => $approve_key,
+                    'hr_ack' => $approver_name, 
+                    'hr_ack_no' => $approver_emp_no, 
+                    'hr_date_ack' => $server_date_time, 
+                    'issued_by' => $issued_by, 
+                    'issued_by_no' => $issued_by_no 
                 ];
 
-                if (!$stmt->execute($params)) {
-                    echo 'error';
+                $check_added = add_emp_transfer_history($mail_arr, $conn);
+
+                if ($check_added != 'success') {
+                    echo $check_added;
                     $conn = null;
                     exit();
                 }
 
-                $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
+                $sendto = get_issued_by_email($mail_arr, $conn);
 
-                $stmt = $conn->prepare($query);
-
-                if (!$stmt->execute([$emp_transfer_batch_id, $approve_key])) {
-                    echo 'error';
+                if (empty($sendto)) {
+                    echo 'Error finding issued by email';
                     $conn = null;
                     exit();
                 }
 
-                $sendto = '';
-
-                // Get Send To Emails
-                $query = "SELECT 
-                                email 
-                            FROM 
-                                m_control_area_accounts 
-                            WHERE 
-                                issued_by = ? AND 
-                                issued_by_no = ?";
-                $stmt = $conn->prepare($query);
-                $stmt->execute([$issued_by, $issued_by_no]);
-
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($row) {
-                    $sendto = $row['email'];
-                }
-
-                $email_body = complete_approval_email();
-
-                $data = [
-                    "system_name" => $email_code,
-                    "send_to" => $sendto,
-                    "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                    "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                    "body" => $email_body
+                $mail_arr[] = [
+                    'sendTo' => $sendto
                 ];
-                $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                    :system_name,
-                    :send_to,
-                    :cc,
-                    :subject,
-                    :body
-                ");
-                $stmt -> execute($data);
+
+                send_mail($mail_arr, $conn_mailer);
 
                 echo 'success';
-                $conn = null;
-                exit();
             } else {
                 if ($approved_by == null) {
                     $groupedEmpTransferRows = [];
@@ -887,7 +795,7 @@ if ($method == 'approve_employee_transfer') {
                     foreach ($groupedEmpTransferRows as $key => $rows) {
                         if (count($rows) > 1) { // Check if there are duplicates
                             // Execute your code for rows with the same dept_to and section_to
-                            $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+                            $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
                             $row = $rows[0];
 
@@ -908,12 +816,12 @@ if ($method == 'approve_employee_transfer') {
                                             section_to = ?";
 
                             $params = [
-                                $new_appprove_key, 
+                                $new_approve_key, 
                                 $approver_name, 
                                 $approver_emp_no, 
                                 $server_date_time, 
                                 $emp_transfer_batch_id, 
-                                $appprove_key, 
+                                $approve_key, 
                                 $dept_to, 
                                 $section_to 
                             ];
@@ -938,26 +846,18 @@ if ($method == 'approve_employee_transfer') {
                             }
                             
                             $sendto = implode(";", $send_to_emails);
-                            $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                            $data = [
-                                "system_name" => $email_code,
-                                "send_to" => $sendto,
-                                "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                                "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                                "body" => $email_body
+                            $mail_arr = [
+                                'approve_email_opt' => 2,
+                                'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                                'approve_key' => $new_approve_key,
+                                'sendTo' => $sendto
                             ];
-                            $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                                :system_name,
-                                :send_to,
-                                :cc,
-                                :subject,
-                                :body
-                            ");
-                            $stmt -> execute($data);
+
+                            send_mail($mail_arr, $conn_mailer);
                         } else {
                             // Execute your code for rows with no duplicates
-                            $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+                            $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
                             $row = $rows[0]; // Since there's only one row, we can access it directly
 
@@ -976,12 +876,12 @@ if ($method == 'approve_employee_transfer') {
                                             approve_key = ?";
 
                             $params = [
-                                $new_appprove_key, 
+                                $new_approve_key, 
                                 $approver_name, 
                                 $approver_emp_no, 
                                 $server_date_time, 
                                 $emp_transfer_batch_id, 
-                                $appprove_key, 
+                                $approve_key, 
                                 $dept_to, 
                                 $section_to 
                             ];
@@ -1006,7 +906,7 @@ if ($method == 'approve_employee_transfer') {
                             }
                             
                             $sendto = implode(";", $send_to_emails);
-                            $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
+                            $email_body = approve_email($emp_transfer_batch_id, $new_approve_key);
 
                             $data = [
                                 "system_name" => $email_code,
@@ -1027,11 +927,9 @@ if ($method == 'approve_employee_transfer') {
                     }
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 } 
                 
-                $new_appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+                $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
                 if ($r_noted_by == null) {
                     $query = "UPDATE 
@@ -1046,12 +944,12 @@ if ($method == 'approve_employee_transfer') {
                                     approve_key = ?";
 
                     $params = [
-                        $new_appprove_key, 
+                        $new_approve_key, 
                         $approver_name, 
                         $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
-                        $appprove_key 
+                        $approve_key 
                     ];
 
                     $send_to_emails = [];
@@ -1074,27 +972,17 @@ if ($method == 'approve_employee_transfer') {
                     }
                     
                     $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
+                    $mail_arr = [
+                        'approve_email_opt' => 2,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $new_approve_key,
+                        'sendTo' => $sendto
                     ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+
+                    send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 } else if ($r_acknowledged_by == null) {
                     $query = "UPDATE 
                                     t_employee_transfer 
@@ -1108,12 +996,12 @@ if ($method == 'approve_employee_transfer') {
                                     approve_key = ?";
 
                     $params = [
-                        $new_appprove_key, 
+                        $new_approve_key, 
                         $approver_name, 
                         $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
-                        $appprove_key 
+                        $approve_key 
                     ];
 
                     $send_to_emails = [];
@@ -1135,27 +1023,17 @@ if ($method == 'approve_employee_transfer') {
                     }
                     
                     $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
+                    $mail_arr = [
+                        'approve_email_opt' => 2,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $new_approve_key,
+                        'sendTo' => $sendto
                     ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+
+                    send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 } else if ($r_approved_by == null) {
                     $query = "UPDATE 
                                     t_employee_transfer 
@@ -1169,12 +1047,12 @@ if ($method == 'approve_employee_transfer') {
                                     approve_key = ?";
 
                     $params = [
-                        $new_appprove_key, 
+                        $new_approve_key, 
                         $approver_name, 
                         $approver_emp_no, 
                         $server_date_time, 
                         $emp_transfer_batch_id, 
-                        $appprove_key 
+                        $approve_key 
                     ];
 
                     $send_to_emails = [];
@@ -1196,27 +1074,17 @@ if ($method == 'approve_employee_transfer') {
                     }
                     
                     $sendto = implode(";", $send_to_emails);
-                    $email_body = approve_email($emp_transfer_batch_id, $new_appprove_key);
 
-                    $data = [
-                        "system_name" => $email_code,
-                        "send_to" => $sendto,
-                        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                        "body" => $email_body
+                    $mail_arr = [
+                        'approve_email_opt' => 2,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $new_approve_key,
+                        'sendTo' => $sendto
                     ];
-                    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                        :system_name,
-                        :send_to,
-                        :cc,
-                        :subject,
-                        :body
-                    ");
-                    $stmt -> execute($data);
+
+                    send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                    $conn = null;
-                    exit();
                 }
             }
         }

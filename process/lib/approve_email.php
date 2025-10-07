@@ -1,7 +1,4 @@
 <?php
-    $email_code = 'EMP-MGT-SYS';
-    $email_subject = 'Employee Management System';
-
     function approve_email($submission_id, $approve_key) {
         $system = '/emp_mgt';
         return <<<HTML
@@ -183,4 +180,43 @@
                 </div>
             </html>
         HTML;
+    }
+
+    function send_mail($mail_arr, $conn_mailer) {
+        $email_code = 'EMP-MGT-SYS';
+        $email_subject = 'Employee Management System';
+        $email_body = '';
+        $approve_email_opt = intval($mail_arr['approve_email_opt']);
+
+        switch ($approve_email_opt) {
+            case 0:
+                $email_body = complete_disapproval_email();
+                break;
+            case 1:
+                $email_body = complete_approval_email();
+                break;
+            case 2:
+                $email_body = approve_email($mail_arr['emp_transfer_batch_id'], $mail_arr['approve_key']);
+                break;
+            
+            default:
+                $email_body = approve_email($mail_arr['emp_transfer_batch_id'], $mail_arr['approve_key']);
+                break;
+        }
+
+        $data = [
+            "system_name" => $email_code,
+            "send_to" => $mail_arr['sendto'],
+            "cc" => "vince.dale.alcantara@furukawaelectric.com",
+            "subject" => $email_subject . " : " . "Employee Transfer Approval",
+            "body" => $email_body
+        ];
+        $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
+            :system_name,
+            :send_to,
+            :cc,
+            :subject,
+            :body
+        ");
+        $stmt -> execute($data);
     }

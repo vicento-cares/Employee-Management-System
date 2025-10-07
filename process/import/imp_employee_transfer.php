@@ -5,6 +5,7 @@ session_name("emp_mgt");
 session_start();
 
 require '../lib/validate.php';
+include '../lib/approve_email.php';
 
 function get_dept($conn)
 {
@@ -342,7 +343,7 @@ try {
     $placeholders = [];
 
     $emp_transfer_batch_id = str_replace('.', '', uniqid('ET-BAT-', true));
-    $appprove_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+    $approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
     while (($line = fgetcsv($csvFile)) !== false) {
         // Check if the row is blank or consists only of whitespace
@@ -385,7 +386,7 @@ try {
         $currentValues = [
             $emp_transfer_id,
             $emp_transfer_batch_id,
-            $appprove_key,
+            $approve_key,
             $emp_no,
             $emp_transfer_type,
             $dept_from,
@@ -460,23 +461,15 @@ try {
     }
     
     $sendto = implode(";", $send_to_emails);
-    $email_body = approve_email($emp_transfer_batch_id, $appprove_key);
-
-    $data = [
-        "system_name" => $email_code,
-        "send_to" => $sendto,
-        "cc" => "vince.dale.alcantara@furukawaelectric.com",
-        "subject" => $email_subject . " : " . "Employee Transfer Approval",
-        "body" => $email_body
+    
+    $mail_arr = [
+        'approve_email_opt' => 2,
+        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+        'approve_key' => $approve_key,
+        'sendTo' => $sendto
     ];
-    $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-        :system_name,
-        :send_to,
-        :cc,
-        :subject,
-        :body
-    ");
-    $stmt -> execute($data);
+
+    send_mail($mail_arr, $conn_mailer);
 
     if ($error > 0) {
         if ($isTransactionActive) {
@@ -484,6 +477,7 @@ try {
             $isTransactionActive = false;
         }
         echo 'Failed. Please Try Again or Call IT Personnel Immediately!';
+        $conn = null;
         exit();
     }
 
@@ -496,7 +490,6 @@ try {
     }
 
     echo 'Failed. Please Try Again or Call IT Personnel Immediately!: ' . $e->getMessage();
-
     $conn = null;
     exit();
 }
