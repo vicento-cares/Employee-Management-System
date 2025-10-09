@@ -10,10 +10,10 @@
                     <title>Employee Management System - Employee Transfer Approval</title>
                     <style>
                         body {
-                            font-family: Arial, sans-serif;
+                            font-family: "Helvetica Neue", Arial, sans-serif;
                             margin: 0;
                             padding: 0;
-                            background-color: #f4f4f4;
+                            background-color: #f4f6f9;
                         }
                         .container {
                             width: 100%;
@@ -24,12 +24,22 @@
                             border-radius: 5px;
                             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                         }
+                        .row {
+                        	padding: 1px;
+                        	background-color: #343a40;
+                            margin-right: -7.5px;
+                            margin-left: -7.5px;
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            align-items: center;
+                        }
                         h1 {
-                            color: #333333;
+                            color: #f8f9fa;
+                            text-align: center;
                         }
                         p {
-                            color: #555555;
-                            line-height: 1.5;
+                            color: #6c757d;
+                            line-height: 1.25;
                         }
                         .footer {
                             margin-top: 20px;
@@ -39,7 +49,9 @@
                     </style>
                 </head>
                 <div class="container">
-                    <h1>Employee Management System - Employee Transfer Approval</h1>
+                    <div class="row">
+                    	<h1>Employee Management System - <br> Employee Transfer Approval</h1>
+                    </div>
                     <p>
                         Good day, Health and Safety First!
                     </p>
@@ -52,6 +64,7 @@
                     <p>
                         <a href="http://{$_SERVER['HTTP_HOST']}{$system}/approval/employee_transfer/index.php?submission_id={$submission_id}&approve_key={$approve_key}">View Employee Transfer</a>
                     </p>
+                    <hr>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
                         <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
@@ -76,10 +89,10 @@
                     <title>Employee Management System - Employee Transfer Approval</title>
                     <style>
                         body {
-                            font-family: Arial, sans-serif;
+                            font-family: "Helvetica Neue", Arial, sans-serif;
                             margin: 0;
                             padding: 0;
-                            background-color: #f4f4f4;
+                            background-color: #f4f6f9;
                         }
                         .container {
                             width: 100%;
@@ -90,12 +103,22 @@
                             border-radius: 5px;
                             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                         }
+                        .row {
+                        	padding: 1px;
+                        	background-color: #343a40;
+                            margin-right: -7.5px;
+                            margin-left: -7.5px;
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            align-items: center;
+                        }
                         h1 {
-                            color: #333333;
+                            color: #f8f9fa;
+                            text-align: center;
                         }
                         p {
-                            color: #555555;
-                            line-height: 1.5;
+                            color: #6c757d;
+                            line-height: 1.25;
                         }
                         .footer {
                             margin-top: 20px;
@@ -105,13 +128,16 @@
                     </style>
                 </head>
                 <div class="container">
-                    <h1>Employee Management System - Employee Transfer Approval</h1>
+                    <div class="row">
+                    	<h1>Employee Management System - <br> Employee Transfer Approval</h1>
+                    </div>
                     <p>
                         Good day, Health and Safety First!
                     </p>
                     <p>
                         You are receiving this email because an employee transfer approval have completed its signatories and is successfully transferred to destinated line on Employee Management System.
                     </p>
+                    <hr>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
                         <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
@@ -134,10 +160,10 @@
                     <title>Employee Management System - Employee Transfer Approval</title>
                     <style>
                         body {
-                            font-family: Arial, sans-serif;
+                            font-family: "Helvetica Neue", Arial, sans-serif;
                             margin: 0;
                             padding: 0;
-                            background-color: #f4f4f4;
+                            background-color: #f4f6f9;
                         }
                         .container {
                             width: 100%;
@@ -148,12 +174,22 @@
                             border-radius: 5px;
                             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                         }
+                        .row {
+                        	padding: 1px;
+                        	background-color: #343a40;
+                            margin-right: -7.5px;
+                            margin-left: -7.5px;
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            align-items: center;
+                        }
                         h1 {
-                            color: #333333;
+                            color: #f8f9fa;
+                            text-align: center;
                         }
                         p {
-                            color: #555555;
-                            line-height: 1.5;
+                            color: #6c757d;
+                            line-height: 1.25;
                         }
                         .footer {
                             margin-top: 20px;
@@ -163,13 +199,16 @@
                     </style>
                 </head>
                 <div class="container">
-                    <h1>Employee Management System - Employee Transfer Approval</h1>
+                    <div class="row">
+                    	<h1>Employee Management System - <br> Employee Transfer Approval</h1>
+                    </div>
                     <p>
                         Good day, Health and Safety First!
                     </p>
                     <p>
                         You are receiving this email because an employee transfer approval have been disapproved. See more details under the Employee Management System.
                     </p>
+                    <hr>
                     <div class="footer">
                         <p>This is an auto generated email. Do not reply</p>
                         <p>Do not share this email as it contains a custom key for approving employee transfer under your email address.</p>
