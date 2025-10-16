@@ -61,6 +61,46 @@ function add_emp_transfer_history($mail_arr, $conn) {
 
         $stmt->execute($params);
 
+
+        // Collect all for transfer and update employee information by emp_no (n+1q)
+        if ($approve_email_opt == 0) {
+            $query = "SELECT 
+                            emp_no, 
+                            dept_to, section_to, line_no_to 
+                        FROM 
+                            t_employee_transfer_history 
+                        WHERE 
+                            emp_transfer_batch_id = ? AND approve_key = ?";
+
+            $stmt = $conn->prepare($query);
+
+            $params[] = $mail_arr['emp_transfer_batch_id'];
+            $params[] = $mail_arr['approve_key'];
+
+            $stmt->execute($params);
+
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $query2 = "UPDATE m_employees SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
+                $stmt2 = $conn->prepare($query2);
+                $stmt2->execute([
+                    $row['dept_to'],
+                    $row['section_to'],
+                    $row['line_no_to'],
+                    $row['emp_no']
+                ]);
+
+                $query2 = "UPDATE m_accounts SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
+                $stmt2 = $conn->prepare($query2);
+                $stmt2->execute([
+                    $row['dept_to'],
+                    $row['section_to'],
+                    $row['line_no_to'],
+                    $row['emp_no']
+                ]);
+            }
+        }
+
+
         $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
 
         $stmt = $conn->prepare($query);
@@ -305,19 +345,38 @@ if ($method == 'submit_employee_transfer') {
     $emp_transfer_batch_id = str_replace('.', '', uniqid('ET-BAT-', true));
     $approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-    $dept_to = '';
-    $section_to = '';
-    $line_no_to = '';
+    $dept_from = '';
+    $section_from = '';
+    $line_no_from = '';
 
-    $query = "SELECT dept, section, line_no FROM m_employees WHERE emp_no = ?";
+    // get current dept from and section from session of issuer
+    $dept_from_issuer = $_SESSION['dept'];
+    $section_from_issuer = $_SESSION['section'];
+
+    $query = "SELECT dept, section, line_no FROM m_employees WHERE emp_no = ? AND dept = ? AND section = ? AND resigned = 0";
     $stmt = $conn->prepare($query);
-    $stmt->execute([$emp_no]);
+    $stmt->execute([$emp_no, $dept_from_issuer, $section_from_issuer]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($row) {
         $dept_from = $row['dept'];
         $section_from = $row['section'];
         $line_no_from = $row['line_no'];
+    } else {
+        echo 'Not Manpower of this department/section';
+        $conn = null;
+        exit();
+    }
+
+    $query = "SELECT emp_no FROM t_employee_transfer WHERE emp_no = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$emp_no]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        echo 'Duplicate / Already for transfer';
+        $conn = null;
+        exit();
     }
 
     $params = [

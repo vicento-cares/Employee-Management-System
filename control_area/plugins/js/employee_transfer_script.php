@@ -407,19 +407,11 @@
                     document.getElementById('et_reason').value = '';
                     get_ongoing_employee_transfer();
                     $('#new_employee_transfer').modal('hide');
-                } else if (response == 'duplicate') {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Duplicate Data !!!',
-                        text: 'Information',
-                        showConfirmButton: false,
-                        timer: 1000
-                    });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error !!!',
-                        text: 'Error',
+                        text: `Error: ${response}`,
                         showConfirmButton: false,
                         timer: 1000
                     });

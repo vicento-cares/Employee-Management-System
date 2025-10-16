@@ -115,7 +115,7 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0, 0, 0, 0, 0);
+    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0);
 
     $notExistsDeptArr = array();
     $notExistsSectionArr = array();
@@ -123,6 +123,7 @@ function check_csv($file, $conn)
     $notValidDateEffectivityArr = array();
     $notAllowedDateEffectivityArr = array();
     $notManpowerArr = array();
+    $dupManpowerArr = array();
 
     $message = "";
     $check_csv_row = 0;
@@ -217,7 +218,7 @@ function check_csv($file, $conn)
         $section_from = $_SESSION['section'];
 
         // Check emp_no if match on issuer dept and section
-        $query = "SELECT emp_no FROM m_employees WHERE emp_no = ? AND dept = ? AND section = ?";
+        $query = "SELECT emp_no FROM m_employees WHERE emp_no = ? AND dept = ? AND section = ? AND resigned = 0";
         $stmt = $conn->prepare($query);
         $stmt->execute([$emp_no, $dept_from, $section_from]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -226,6 +227,18 @@ function check_csv($file, $conn)
             $hasError = 1;
             $row_valid_arr[5] = 1;
             array_push($notManpowerArr, $check_csv_row);
+        }
+
+        // Check emp_no if exist on t_employee_transfer
+        $query = "SELECT emp_no FROM t_employee_transfer WHERE emp_no = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$emp_no]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $hasError = 1;
+            $row_valid_arr[6] = 1;
+            array_push($dupManpowerArr, $check_csv_row);
         }
 
         // Joining all row values for checking duplicated rows
@@ -261,6 +274,9 @@ function check_csv($file, $conn)
         }
         if ($row_valid_arr[5] == 1) {
             $message = $message . 'Not Manpower of this department/section on row/s ' . implode(", ", $notManpowerArr) . '. ';
+        }
+        if ($row_valid_arr[6] == 1) {
+            $message = $message . 'Duplicate / Already for transfer on row/s ' . implode(", ", $dupManpowerArr) . '. ';
         }
 
         if ($hasBlankError >= 1) {
@@ -361,19 +377,23 @@ try {
         $issued_by = $_SESSION['full_name'];
         $issued_by_no = $_SESSION['emp_no_control_area'];
 
+        // get current dept from and section from session of issuer
+        $dept_from_issuer = $_SESSION['dept'];
+        $section_from_issuer = $_SESSION['section'];
+
         if ($emp_transfer_type == 'department') {
             $emp_transfer_id = str_replace('.', '', uniqid('HR-014-', true));
         } else if ($emp_transfer_type == 'section') {
             $emp_transfer_id = str_replace('.', '', uniqid('PRD-032-', true));
         }
 
-        $dept_to = '';
-        $section_to = '';
-        $line_no_to = '';
+        $dept_from = '';
+        $section_from = '';
+        $line_no_from = '';
 
-        $query = "SELECT dept, section, line_no FROM m_employees WHERE emp_no = ?";
+        $query = "SELECT dept, section, line_no FROM m_employees WHERE emp_no = ? AND dept = ? AND section = ? AND resigned = 0";
         $stmt = $conn->prepare($query);
-        $stmt->execute([$emp_no]);
+        $stmt->execute([$emp_no, $dept_from_issuer, $section_from_issuer]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($row) {
