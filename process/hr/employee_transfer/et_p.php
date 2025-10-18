@@ -596,7 +596,48 @@ if ($method == 'approve_employee_transfer') {
         $is_hr = true;
         $approver_name = $row['hr_full_name'];
     } else if (!empty($row['control_full_name'])) {
-        $approver_name = $row['control_full_name'];
+        // check valid control approver details
+        $query = "SELECT 
+                        full_name AS control_full_name 
+                    FROM 
+                        m_control_area_accounts 
+                    WHERE 
+                        emp_no = ?";
+
+        $params[] = $approver_emp_no;
+
+        if ($emp_transfer_type == 'department') {
+            if (empty($checked_by)) {
+                $query .= " AND position IN ('Assistant Manager', 'Section Manager')";
+            } else if (empty($approved_by)) {
+                $query .= " AND position IN ('Deputy Department Manager', 'Department Manager')";
+            }
+        } else if ($emp_transfer_type == 'section') {
+            if (empty($approved_by)) {
+                $query .= " AND position IN ('Assistant Manager', 'Section Manager')";
+            } else if (empty($r_noted_by)) {
+                $query .= " AND position IN ('Staff', 'Supervisor') AND section != ?";
+                $params[] = $section_from;
+            } else if (empty($r_acknowledged_by)) {
+                $query .= " AND position IN ('Assistant Manager', 'Section Manager') AND section != ?";
+                $params[] = $section_from;
+            } else if (empty($r_approved_by)) {
+                $query .= " AND position IN ('Deputy Department Manager', 'Department Manager')";
+            }
+        }
+
+        $stmt = $conn->prepare($query);
+        $stmt->execute($params);
+
+        $row = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+        if (!empty($row['control_full_name'])) {
+            $approver_name = $row['control_full_name'];
+        } else {
+            echo 'approver strictly not authorized';
+            $conn = null;
+            exit();
+        }
     } else {
         echo 'approver not authorized or registered';
         $conn = null;
@@ -647,8 +688,8 @@ if ($method == 'approve_employee_transfer') {
     if ($opt > 0) {
         if ($emp_transfer_type == 'department') {
             if (
-                $checked_by != null && 
-                $approved_by != null && 
+                !empty($checked_by) && 
+                !empty($approved_by) && 
                 $is_hr
             ) {
                 // history
@@ -689,7 +730,7 @@ if ($method == 'approve_employee_transfer') {
             } else {
                 $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-                if ($checked_by == null) {
+                if (!empty($checked_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -740,7 +781,7 @@ if ($method == 'approve_employee_transfer') {
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if ($approved_by == null) {
+                } else if (!empty($approved_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -797,10 +838,10 @@ if ($method == 'approve_employee_transfer') {
         
         if ($emp_transfer_type == 'section') {
             if (
-                $approved_by != null && 
-                $r_noted_by != null && 
-                $r_acknowledged_by != null && 
-                $r_approved_by != null && 
+                !empty($approved_by) && 
+                !empty($r_noted_by) && 
+                !empty($r_acknowledged_by) && 
+                !empty($r_approved_by) && 
                 $is_hr
             ) {
                 // history
@@ -839,7 +880,7 @@ if ($method == 'approve_employee_transfer') {
 
                 echo 'success';
             } else {
-                if ($approved_by == null) {
+                if (!empty($approved_by)) {
                     $groupedEmpTransferRows = [];
 
                     foreach ($emp_transfer_rows as $row) {
@@ -990,7 +1031,7 @@ if ($method == 'approve_employee_transfer') {
                 
                 $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-                if ($r_noted_by == null) {
+                if (!empty($r_noted_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -1042,7 +1083,7 @@ if ($method == 'approve_employee_transfer') {
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if ($r_acknowledged_by == null) {
+                } else if (!empty($r_acknowledged_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -1093,7 +1134,7 @@ if ($method == 'approve_employee_transfer') {
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if ($r_approved_by == null) {
+                } else if (!empty($r_approved_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
