@@ -38,7 +38,7 @@
           <div class="row mb-2">
             <div class="col-sm-6">
               <label>Section To</label><label style="color: red;">*</label>
-              <select id="et_section_update" class="form-control" required>
+              <select id="et_section_update" class="form-control" onchange="fetch_line_dropdown(2)" required>
                 <option selected disabled value="">Select Section</option>
               </select>
             </div>

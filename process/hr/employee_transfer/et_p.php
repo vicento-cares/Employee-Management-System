@@ -16,12 +16,12 @@ function add_emp_transfer_history($mail_arr, $conn) {
 
     $addedQuery = "";
 
-    if ($approve_email_opt == 0) {
+    if ($approve_email_opt == 1) {
         $addedQuery = " ? AS hr_ack, ? AS hr_ack_no, ? AS hr_date_ack, 1 AS is_approved";
         $params[] = $mail_arr['hr_ack'];
         $params[] = $mail_arr['hr_ack_no'];
         $params[] = $mail_arr['hr_date_ack'];
-    } else if ($approve_email_opt == 1) {
+    } else if ($approve_email_opt == 0) {
         $addedQuery = " NULL AS hr_ack, NULL AS hr_ack_no, NULL AS hr_date_ack, 0 AS is_approved";
     }
 
@@ -61,46 +61,6 @@ function add_emp_transfer_history($mail_arr, $conn) {
 
         $stmt->execute($params);
 
-
-        // Collect all for transfer and update employee information by emp_no (n+1q)
-        if ($approve_email_opt == 0) {
-            $query = "SELECT 
-                            emp_no, 
-                            dept_to, section_to, line_no_to 
-                        FROM 
-                            t_employee_transfer_history 
-                        WHERE 
-                            emp_transfer_batch_id = ? AND approve_key = ?";
-
-            $stmt = $conn->prepare($query);
-
-            $params[] = $mail_arr['emp_transfer_batch_id'];
-            $params[] = $mail_arr['approve_key'];
-
-            $stmt->execute($params);
-
-            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $query2 = "UPDATE m_employees SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
-                $stmt2 = $conn->prepare($query2);
-                $stmt2->execute([
-                    $row['dept_to'],
-                    $row['section_to'],
-                    $row['line_no_to'],
-                    $row['emp_no']
-                ]);
-
-                $query2 = "UPDATE m_accounts SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
-                $stmt2 = $conn->prepare($query2);
-                $stmt2->execute([
-                    $row['dept_to'],
-                    $row['section_to'],
-                    $row['line_no_to'],
-                    $row['emp_no']
-                ]);
-            }
-        }
-
-
         $query = "DELETE FROM t_employee_transfer WHERE emp_transfer_batch_id = ? AND approve_key = ?";
 
         $stmt = $conn->prepare($query);
@@ -109,8 +69,6 @@ function add_emp_transfer_history($mail_arr, $conn) {
 
         $conn->commit();
         $isTransactionActive = false;
-
-        return 'success';
     } catch (Exception $e) {
         if ($isTransactionActive) {
             $conn->rollBack();
@@ -119,6 +77,43 @@ function add_emp_transfer_history($mail_arr, $conn) {
 
         return 'Failed. Please Try Again or Call IT Personnel Immediately!: ' . $e->getMessage();
     }
+
+    // Collect all for transfer and update employee information by emp_no (n+1q)
+    if ($approve_email_opt == 1) {
+        $query = "SELECT 
+                        emp_no, 
+                        dept_to, section_to, line_no_to 
+                    FROM 
+                        t_employee_transfer_history 
+                    WHERE 
+                        emp_transfer_batch_id = ? AND approve_key = ?";
+
+        $stmt = $conn->prepare($query);
+
+        $stmt->execute([$mail_arr['emp_transfer_batch_id'], $mail_arr['approve_key']]);
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $query2 = "UPDATE m_employees SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
+            $stmt2 = $conn->prepare($query2);
+            $stmt2->execute([
+                $row['dept_to'],
+                $row['section_to'],
+                $row['line_no_to'],
+                $row['emp_no']
+            ]);
+
+            $query2 = "UPDATE m_accounts SET dept = ?, section = ?, line_no = ? WHERE emp_no = ?";
+            $stmt2 = $conn->prepare($query2);
+            $stmt2->execute([
+                $row['dept_to'],
+                $row['section_to'],
+                $row['line_no_to'],
+                $row['emp_no']
+            ]);
+        }
+    }
+
+    return 'success';
 }
 
 function get_issued_by_email($mail_arr, $conn) {
@@ -130,10 +125,9 @@ function get_issued_by_email($mail_arr, $conn) {
                 FROM 
                     m_control_area_accounts 
                 WHERE 
-                    issued_by = ? AND 
-                    issued_by_no = ?";
+                    emp_no = ?";
     $stmt = $conn->prepare($query);
-    $stmt->execute([$mail_arr['issued_by'], $mail_arr['issued_by_no']]);
+    $stmt->execute([$mail_arr['issued_by_no']]);
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -171,7 +165,9 @@ if ($method == 'get_ongoing_employee_transfer') {
 	$c = 0;
 
 	$query = "SELECT 
-					et.id, et.emp_no, et.emp_transfer_type, et.dept_to, et.section_to, et.line_no_to, 
+					et.id, et.emp_no, et.emp_transfer_type, 
+                    et.dept_from, et.section_from, et.line_no_from, 
+                    et.dept_to, et.section_to, et.line_no_to, 
                     et.issued_by, et.checked_by, et.approved_by, 
                     et.r_noted_by, et.r_acknowledged_by, et.r_approved_by, 
                     et.reason, et.date_effectivity, 
@@ -260,62 +256,54 @@ if ($method == 'get_ongoing_employee_transfer') {
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
 
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $c++;
 
-	if ($row) {
-		do {
-			$c++;
+        $row_class = '';
+        $row_edit = '';
 
-            $row_class = '';
-            $row_edit = '';
+        if (($row['emp_transfer_type'] == 'department' && $row['checked_by'] == '') || 
+            ($row['emp_transfer_type'] == 'section' && $row['approved_by'] == '')) {
+            $row_class = 'bg-secondary';
+            $row_edit = 'style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee_transfer" 
+                        data-id="'.$row['id'].'" 
+                        data-emp_no="'.htmlspecialchars($row['emp_no']).'" 
+                        data-emp_transfer_type="'.htmlspecialchars($row['emp_transfer_type']).'" 
+                        data-dept_to="'.htmlspecialchars($row['dept_to']).'" 
+                        data-section_to="'.htmlspecialchars($row['section_to']).'" 
+                        data-line_no_to="'.htmlspecialchars($row['line_no_to']).'" 
+                        data-date_effectivity="'.htmlspecialchars($row['date_effectivity']).'" 
+                        data-reason="'.htmlspecialchars($row['reason']).'" 
+                        onclick="get_employee_transfer_details(this)"';
+        } else if ($row['date_effectivity_status'] == 'overdue') {
+            $row_class = 'bg-danger';
+        }
 
-            if (($row['emp_transfer_type'] == 'department' && $row['checked_by'] == '') || 
-                ($row['emp_transfer_type'] == 'section' && $row['approved_by'] == '')) {
-                $row_class = 'bg-secondary';
-                $row_edit = 'style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee_transfer" 
-                            data-id="'.$row['id'].'" 
-                            data-emp_no="'.htmlspecialchars($row['emp_no']).'" 
-                            data-emp_transfer_type="'.htmlspecialchars($row['emp_transfer_type']).'" 
-                            data-dept_to="'.htmlspecialchars($row['dept_to']).'" 
-                            data-section_to="'.htmlspecialchars($row['section_to']).'" 
-                            data-line_no_to="'.htmlspecialchars($row['line_no_to']).'" 
-                            data-date_effectivity="'.htmlspecialchars($row['date_effectivity']).'" 
-                            data-reason="'.htmlspecialchars($row['reason']).'" 
-                            onclick="get_employee_transfer_details(this)"';
-            } else if ($row['date_effectivity_status'] == 'overdue') {
-                $row_class = 'bg-danger';
-            }
+        echo '<tr class="'.$row_class.'" '.$row_edit.'>';
 
-            echo '<tr class="'.$row_class.'" '.$row_edit.'>';
+        echo '<td>'.$c.'</td>';
+        echo '<td>'.$row['date_effectivity'].'</td>';
+        echo '<td>'.$row['emp_no'].'</td>';
+        echo '<td>'.$row['full_name'].'</td>';
+        echo '<td>'.$row['provider'].'</td>';
+        echo '<td>'.$row['position'].'</td>';
+        echo '<td>'.$row['emp_transfer_type'].'</td>';
+        echo '<td>'.$row['dept_from'].'</td>';
+        echo '<td>'.$row['section_from'].'</td>';
+        echo '<td>'.$row['line_no_from'].'</td>';
+        echo '<td>'.$row['dept_to'].'</td>';
+        echo '<td>'.$row['section_to'].'</td>';
+        echo '<td>'.$row['line_no_to'].'</td>';
+        echo '<td>'.$row['issued_by'].'</td>';
+        echo '<td>'.$row['checked_by'].'</td>';
+        echo '<td>'.$row['approved_by'].'</td>';
+        echo '<td>'.$row['r_noted_by'].'</td>';
+        echo '<td>'.$row['r_acknowledged_by'].'</td>';
+        echo '<td>'.$row['r_approved_by'].'</td>';
+        echo '<td>'.$row['reason'].'</td>';
 
-			echo '<td>'.$c.'</td>';
-			echo '<td>'.$row['date_effectivity'].'</td>';
-			echo '<td>'.$row['emp_no'].'</td>';
-			echo '<td>'.$row['full_name'].'</td>';
-			echo '<td>'.$row['provider'].'</td>';
-			echo '<td>'.$row['position'].'</td>';
-			echo '<td>'.$row['emp_transfer_type'].'</td>';
-            echo '<td>'.$row['dept_from'].'</td>';
-            echo '<td>'.$row['section_from'].'</td>';
-            echo '<td>'.$row['line_no_from'].'</td>';
-            echo '<td>'.$row['dept_to'].'</td>';
-            echo '<td>'.$row['section_to'].'</td>';
-            echo '<td>'.$row['line_no_to'].'</td>';
-            echo '<td>'.$row['issued_by'].'</td>';
-            echo '<td>'.$row['checked_by'].'</td>';
-            echo '<td>'.$row['approved_by'].'</td>';
-            echo '<td>'.$row['r_noted_by'].'</td>';
-            echo '<td>'.$row['r_acknowledged_by'].'</td>';
-            echo '<td>'.$row['r_approved_by'].'</td>';
-            echo '<td>'.$row['reason'].'</td>';
-
-			echo '</tr>';
-		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-	} else {
-		echo '<tr>';
-			echo '<td colspan="20" style="text-align:center; color:red;">No Result !!!</td>';
-		echo '</tr>';
-	}
+        echo '</tr>';
+    }
 }
 
 if ($method == 'submit_employee_transfer') {
@@ -440,7 +428,7 @@ if ($method == 'submit_employee_transfer') {
         'approve_email_opt' => 2,
         'emp_transfer_batch_id' => $emp_transfer_batch_id,
         'approve_key' => $approve_key,
-        'sendTo' => $sendto
+        'sendto' => $sendto
     ];
 
     send_mail($mail_arr, $conn_mailer);
@@ -497,7 +485,7 @@ if ($method == 'cancel_employee_transfer') {
 }
 
 if ($method == 'approve_employee_transfer') {
-    $opt = intval($_POST['emp_transfer_batch_id']);
+    $opt = intval($_POST['opt']);
     $emp_transfer_batch_id = $_POST['emp_transfer_batch_id'];
 	$approve_key = $_POST['approve_key'];
     $approver_emp_no = $_POST['approver_emp_no'];
@@ -531,6 +519,7 @@ if ($method == 'approve_employee_transfer') {
                     date_effectivity, 
                     reason, 
                     issued_by, 
+                    issued_by_no, 
                     date_issued_by, 
                     checked_by, 
                     date_checked_by, 
@@ -566,6 +555,11 @@ if ($method == 'approve_employee_transfer') {
 
     $dept_from = $row['dept_from'];
     $section_from = $row['section_from'];
+    $dept_to = $row['dept_to'];
+    $section_to = $row['section_to'];
+
+    $issued_by = $row['issued_by'];
+    $issued_by_no = $row['issued_by_no'];
 
     $checked_by = $row['checked_by'];
     $approved_by = $row['approved_by'];
@@ -588,7 +582,7 @@ if ($method == 'approve_employee_transfer') {
                     (h.emp_no = ? AND h.role = 'HR') OR c.emp_no = ?";
 
     $stmt = $conn->prepare($query);
-    $stmt->execute([$approver_emp_no]);
+    $stmt->execute([$approver_emp_no, $approver_emp_no]);
 
     $row = $stmt -> fetch(PDO::FETCH_ASSOC);
 
@@ -608,13 +602,19 @@ if ($method == 'approve_employee_transfer') {
 
         if ($emp_transfer_type == 'department') {
             if (empty($checked_by)) {
-                $query .= " AND position IN ('Assistant Manager', 'Section Manager')";
+                $query .= " AND position IN ('Assistant Manager', 'Section Manager') AND section = ?";
+                $params[] = $section_from;
             } else if (empty($approved_by)) {
                 $query .= " AND position IN ('Deputy Department Manager', 'Department Manager')";
+            } else {
+                echo 'authorized hr acknowledgement only';
+                $conn = null;
+                exit();
             }
         } else if ($emp_transfer_type == 'section') {
             if (empty($approved_by)) {
-                $query .= " AND position IN ('Assistant Manager', 'Section Manager')";
+                $query .= " AND position IN ('Assistant Manager', 'Section Manager') AND section = ?";
+                $params[] = $section_from;
             } else if (empty($r_noted_by)) {
                 $query .= " AND position IN ('Staff', 'Supervisor') AND section != ?";
                 $params[] = $section_from;
@@ -623,6 +623,10 @@ if ($method == 'approve_employee_transfer') {
                 $params[] = $section_from;
             } else if (empty($r_approved_by)) {
                 $query .= " AND position IN ('Deputy Department Manager', 'Department Manager')";
+            } else {
+                echo 'authorized hr acknowledgement only';
+                $conn = null;
+                exit();
             }
         }
 
@@ -673,9 +677,7 @@ if ($method == 'approve_employee_transfer') {
             exit();
         }
 
-        $mail_arr[] = [
-            'sendTo' => $sendto
-        ];
+        $mail_arr['sendto'] = $sendto;
 
         send_mail($mail_arr, $conn_mailer);
 
@@ -687,50 +689,53 @@ if ($method == 'approve_employee_transfer') {
     // approve
     if ($opt > 0) {
         if ($emp_transfer_type == 'department') {
-            if (
-                !empty($checked_by) && 
-                !empty($approved_by) && 
-                $is_hr
-            ) {
-                // history
-                $mail_arr = [
-                    'approve_email_opt' => 1,
-                    'emp_transfer_batch_id' => $emp_transfer_batch_id,
-                    'approve_key' => $approve_key,
-                    'hr_ack' => $approver_name, 
-                    'hr_ack_no' => $approver_emp_no, 
-                    'hr_date_ack' => $server_date_time, 
-                    'issued_by' => $issued_by,
-                    'issued_by_no' => $issued_by_no 
-                ];
+            if ($is_hr) {
+                if (
+                    !empty($checked_by) && 
+                    !empty($approved_by)
+                ) {
+                    // history
+                    $mail_arr = [
+                        'approve_email_opt' => 1,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $approve_key,
+                        'hr_ack' => $approver_name, 
+                        'hr_ack_no' => $approver_emp_no, 
+                        'hr_date_ack' => $server_date_time, 
+                        'issued_by' => $issued_by,
+                        'issued_by_no' => $issued_by_no 
+                    ];
 
-                $check_added = add_emp_transfer_history($mail_arr, $conn);
+                    $check_added = add_emp_transfer_history($mail_arr, $conn);
 
-                if ($check_added != 'success') {
-                    echo $check_added;
+                    if ($check_added != 'success') {
+                        echo $check_added;
+                        $conn = null;
+                        exit();
+                    }
+
+                    $sendto = get_issued_by_email($mail_arr, $conn);
+
+                    if (empty($sendto)) {
+                        echo 'Error finding issued by email';
+                        $conn = null;
+                        exit();
+                    }
+
+                    $mail_arr['sendto'] = $sendto;
+
+                    send_mail($mail_arr, $conn_mailer);
+
+                    echo 'success';
+                } else {
+                    echo 'hr cannot bypass approval';
                     $conn = null;
                     exit();
                 }
-
-                $sendto = get_issued_by_email($mail_arr, $conn);
-
-                if (empty($sendto)) {
-                    echo 'Error finding issued by email';
-                    $conn = null;
-                    exit();
-                }
-
-                $mail_arr[] = [
-                    'sendTo' => $sendto
-                ];
-
-                send_mail($mail_arr, $conn_mailer);
-
-                echo 'success';
             } else {
                 $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-                if (!empty($checked_by)) {
+                if (empty($checked_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -750,6 +755,9 @@ if ($method == 'approve_employee_transfer') {
                         $emp_transfer_batch_id, 
                         $approve_key 
                     ];
+
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute($params);
 
                     $send_to_emails = [];
 
@@ -775,13 +783,13 @@ if ($method == 'approve_employee_transfer') {
                         'approve_email_opt' => 2,
                         'emp_transfer_batch_id' => $emp_transfer_batch_id,
                         'approve_key' => $new_approve_key,
-                        'sendTo' => $sendto
+                        'sendto' => $sendto
                     ];
 
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if (!empty($approved_by)) {
+                } else if (empty($approved_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -801,6 +809,9 @@ if ($method == 'approve_employee_transfer') {
                         $emp_transfer_batch_id, 
                         $approve_key 
                     ];
+
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute($params);
 
                     $send_to_emails = [];
 
@@ -826,7 +837,7 @@ if ($method == 'approve_employee_transfer') {
                         'approve_email_opt' => 2,
                         'emp_transfer_batch_id' => $emp_transfer_batch_id,
                         'approve_key' => $new_approve_key,
-                        'sendTo' => $sendto
+                        'sendto' => $sendto
                     ];
 
                     send_mail($mail_arr, $conn_mailer);
@@ -837,50 +848,53 @@ if ($method == 'approve_employee_transfer') {
         }
         
         if ($emp_transfer_type == 'section') {
-            if (
-                !empty($approved_by) && 
-                !empty($r_noted_by) && 
-                !empty($r_acknowledged_by) && 
-                !empty($r_approved_by) && 
-                $is_hr
-            ) {
-                // history
-                $mail_arr = [
-                    'approve_email_opt' => 1,
-                    'emp_transfer_batch_id' => $emp_transfer_batch_id,
-                    'approve_key' => $approve_key,
-                    'hr_ack' => $approver_name, 
-                    'hr_ack_no' => $approver_emp_no, 
-                    'hr_date_ack' => $server_date_time, 
-                    'issued_by' => $issued_by, 
-                    'issued_by_no' => $issued_by_no 
-                ];
+            if ($is_hr) {
+                if (
+                    !empty($approved_by) && 
+                    !empty($r_noted_by) && 
+                    !empty($r_acknowledged_by) && 
+                    !empty($r_approved_by)
+                ) {
+                    // history
+                    $mail_arr = [
+                        'approve_email_opt' => 1,
+                        'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                        'approve_key' => $approve_key,
+                        'hr_ack' => $approver_name, 
+                        'hr_ack_no' => $approver_emp_no, 
+                        'hr_date_ack' => $server_date_time, 
+                        'issued_by' => $issued_by, 
+                        'issued_by_no' => $issued_by_no 
+                    ];
 
-                $check_added = add_emp_transfer_history($mail_arr, $conn);
+                    $check_added = add_emp_transfer_history($mail_arr, $conn);
 
-                if ($check_added != 'success') {
-                    echo $check_added;
+                    if ($check_added != 'success') {
+                        echo $check_added;
+                        $conn = null;
+                        exit();
+                    }
+
+                    $sendto = get_issued_by_email($mail_arr, $conn);
+
+                    if (empty($sendto)) {
+                        echo 'Error finding issued by email';
+                        $conn = null;
+                        exit();
+                    }
+
+                    $mail_arr['sendto'] = $sendto;
+
+                    send_mail($mail_arr, $conn_mailer);
+
+                    echo 'success';
+                } else {
+                    echo 'hr cannot bypass approval';
                     $conn = null;
                     exit();
                 }
-
-                $sendto = get_issued_by_email($mail_arr, $conn);
-
-                if (empty($sendto)) {
-                    echo 'Error finding issued by email';
-                    $conn = null;
-                    exit();
-                }
-
-                $mail_arr[] = [
-                    'sendTo' => $sendto
-                ];
-
-                send_mail($mail_arr, $conn_mailer);
-
-                echo 'success';
             } else {
-                if (!empty($approved_by)) {
+                if (empty($approved_by)) {
                     $groupedEmpTransferRows = [];
 
                     foreach ($emp_transfer_rows as $row) {
@@ -926,6 +940,9 @@ if ($method == 'approve_employee_transfer') {
                                 $section_to 
                             ];
 
+                            $stmt = $conn->prepare($query);
+                            $stmt->execute($params);
+
                             $send_to_emails = [];
 
                             // Get Send To Emails
@@ -951,7 +968,7 @@ if ($method == 'approve_employee_transfer') {
                                 'approve_email_opt' => 2,
                                 'emp_transfer_batch_id' => $emp_transfer_batch_id,
                                 'approve_key' => $new_approve_key,
-                                'sendTo' => $sendto
+                                'sendto' => $sendto
                             ];
 
                             send_mail($mail_arr, $conn_mailer);
@@ -986,6 +1003,9 @@ if ($method == 'approve_employee_transfer') {
                                 $section_to 
                             ];
 
+                            $stmt = $conn->prepare($query);
+                            $stmt->execute($params);
+
                             $send_to_emails = [];
 
                             // Get Send To Emails
@@ -1006,32 +1026,26 @@ if ($method == 'approve_employee_transfer') {
                             }
                             
                             $sendto = implode(";", $send_to_emails);
-                            $email_body = approve_email($emp_transfer_batch_id, $new_approve_key);
 
-                            $data = [
-                                "system_name" => $email_code,
-                                "send_to" => $sendto,
-                                "cc" => "vince.dale.alcantara@furukawaelectric.com",
-                                "subject" => $email_subject . " : " . "Employee Transfer Approval",
-                                "body" => $email_body
+                            $mail_arr = [
+                                'approve_email_opt' => 2,
+                                'emp_transfer_batch_id' => $emp_transfer_batch_id,
+                                'approve_key' => $new_approve_key,
+                                'sendto' => $sendto
                             ];
-                            $stmt = $conn_mailer -> prepare("EXEC mail_send_mail_basic
-                                :system_name,
-                                :send_to,
-                                :cc,
-                                :subject,
-                                :body
-                            ");
-                            $stmt -> execute($data);
+
+                            send_mail($mail_arr, $conn_mailer);
                         }
                     }
 
                     echo 'success';
-                } 
+                    $conn = null;
+                    exit();
+                }
                 
                 $new_approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
-                if (!empty($r_noted_by)) {
+                if (empty($r_noted_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -1051,6 +1065,9 @@ if ($method == 'approve_employee_transfer') {
                         $emp_transfer_batch_id, 
                         $approve_key 
                     ];
+
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute($params);
 
                     $send_to_emails = [];
 
@@ -1077,13 +1094,13 @@ if ($method == 'approve_employee_transfer') {
                         'approve_email_opt' => 2,
                         'emp_transfer_batch_id' => $emp_transfer_batch_id,
                         'approve_key' => $new_approve_key,
-                        'sendTo' => $sendto
+                        'sendto' => $sendto
                     ];
 
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if (!empty($r_acknowledged_by)) {
+                } else if (empty($r_acknowledged_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -1103,6 +1120,9 @@ if ($method == 'approve_employee_transfer') {
                         $emp_transfer_batch_id, 
                         $approve_key 
                     ];
+
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute($params);
 
                     $send_to_emails = [];
 
@@ -1128,13 +1148,13 @@ if ($method == 'approve_employee_transfer') {
                         'approve_email_opt' => 2,
                         'emp_transfer_batch_id' => $emp_transfer_batch_id,
                         'approve_key' => $new_approve_key,
-                        'sendTo' => $sendto
+                        'sendto' => $sendto
                     ];
 
                     send_mail($mail_arr, $conn_mailer);
 
                     echo 'success';
-                } else if (!empty($r_approved_by)) {
+                } else if (empty($r_approved_by)) {
                     $query = "UPDATE 
                                     t_employee_transfer 
                                 SET 
@@ -1154,6 +1174,9 @@ if ($method == 'approve_employee_transfer') {
                         $emp_transfer_batch_id, 
                         $approve_key 
                     ];
+
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute($params);
 
                     $send_to_emails = [];
 
@@ -1179,7 +1202,7 @@ if ($method == 'approve_employee_transfer') {
                         'approve_email_opt' => 2,
                         'emp_transfer_batch_id' => $emp_transfer_batch_id,
                         'approve_key' => $new_approve_key,
-                        'sendTo' => $sendto
+                        'sendto' => $sendto
                     ];
 
                     send_mail($mail_arr, $conn_mailer);

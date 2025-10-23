@@ -12,36 +12,41 @@
 
     // check and get all data
     $query = "SELECT 
-                    emp_transfer_id, 
-                    emp_transfer_batch_id, 
-                    approve_key, 
-                    emp_no, 
-                    emp_transfer_type, 
-                    dept_from, 
-                    section_from, 
-                    line_no_from, 
-                    dept_to, 
-                    section_to, 
-                    line_no_to, 
-                    date_effectivity, 
-                    reason, 
-                    issued_by, 
-                    date_issued_by, 
-                    checked_by, 
-                    date_checked_by, 
-                    approved_by, 
-                    date_approved_by, 
-                    r_noted_by, 
-                    r_date_noted_by, 
-                    r_acknowledged_by, 
-                    r_date_acknowledged_by, 
-                    r_approved_by, 
-                    r_date_approved_by 
+                    et.emp_transfer_id, 
+                    et.emp_transfer_batch_id, 
+                    et.approve_key, 
+                    et.emp_no, 
+                    emp.full_name,
+                    emp.provider,
+                    emp.position,
+                    et.emp_transfer_type, 
+                    et.dept_from, 
+                    et.section_from, 
+                    et.line_no_from, 
+                    et.dept_to, 
+                    et.section_to, 
+                    et.line_no_to, 
+                    et.date_effectivity, 
+                    et.reason, 
+                    et.issued_by, 
+                    et.date_issued_by, 
+                    et.checked_by, 
+                    et.date_checked_by, 
+                    et.approved_by, 
+                    et.date_approved_by, 
+                    et.r_noted_by, 
+                    et.r_date_noted_by, 
+                    et.r_acknowledged_by, 
+                    et.r_date_acknowledged_by, 
+                    et.r_approved_by, 
+                    et.r_date_approved_by 
                 FROM 
-                    t_employee_transfer 
+                    t_employee_transfer et 
+                LEFT JOIN m_employees emp 
+                    ON emp.emp_no = et.emp_no 
                 WHERE 
-                    emp_transfer_batch_id = ? AND 
-                    approve_key = ?";
+                    et.emp_transfer_batch_id = ? AND 
+                    et.approve_key = ?";
 
     $stmt = $conn->prepare($query);
     $stmt->execute([$submission_id, $approve_key]);

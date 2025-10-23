@@ -22,6 +22,7 @@
             success: function (response) {
                 document.getElementById('et_dept').innerHTML = response;
                 document.getElementById('et_dept_to_search').innerHTML = response;
+                document.getElementById('et_dept_update').innerHTML = response;
             }
         });
     }
@@ -37,12 +38,19 @@
             success: function (response) {
                 document.getElementById('et_section').innerHTML = response;
                 document.getElementById('et_section_to_search').innerHTML = response;
+                document.getElementById('et_section_update').innerHTML = response;
             }
         });
     }
 
-    const fetch_line_dropdown = () => {
+    const fetch_line_dropdown = opt => {
         let section = '';
+
+        if (opt == 1) {
+            section = document.getElementById('et_section').value;
+        } else if (opt == 2) {
+            section = document.getElementById('et_section_update').value;
+        }
 
         $.ajax({
             url: '../process/hr/employees/emp-masterlist_p.php',
@@ -53,9 +61,16 @@
                 section: section
             },
             success: function (response) {
-                document.getElementById('et_line_no').innerHTML = response;
-                document.getElementById('et_line_no_from_search').innerHTML = response;
-                document.getElementById('et_line_no_to_search').innerHTML = response;
+                if (opt == 1) {
+                    document.getElementById('et_line_no').innerHTML = response;
+                } else if (opt == 2) {
+                    document.getElementById('et_line_no_update').innerHTML = response;
+                } else {
+                    document.getElementById('et_line_no').innerHTML = response;
+                    document.getElementById('et_line_no_from_search').innerHTML = response;
+                    document.getElementById('et_line_no_to_search').innerHTML = response;
+                    document.getElementById('et_line_no_update').innerHTML = response;
+                }
             }
         });
     }
@@ -159,7 +174,7 @@
             },
             success: function (response) {
                 $('#et_table tbody').html(response);
-                let table_rows = parseInt(document.getElementById("et_data").childNodes.length) - 1;
+                let table_rows = parseInt(document.getElementById("et_data").childNodes.length);
 				$('#count_view').html("Total: " + table_rows);
 
                 sessionStorage.setItem('et_full_name_search', full_name);

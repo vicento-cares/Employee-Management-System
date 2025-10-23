@@ -486,7 +486,7 @@ try {
         'approve_email_opt' => 2,
         'emp_transfer_batch_id' => $emp_transfer_batch_id,
         'approve_key' => $approve_key,
-        'sendTo' => $sendto
+        'sendto' => $sendto
     ];
 
     send_mail($mail_arr, $conn_mailer);
