@@ -1214,4 +1214,163 @@ if ($method == 'approve_employee_transfer') {
     }
 }
 
+if ($method == 'get_employee_transfer_history') {
+	if (!isset($_SESSION['dept'])) {
+		echo 'Session Expired. Please re-login your account.';
+		$conn = null;
+		exit();
+	}
+
+    $emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+    $provider = $_POST['provider'];
+    $position = $_POST['position'];
+    $emp_transfer_type = $_POST['emp_transfer_type'];
+	$dept_from = $_SESSION['dept'];
+	$section_from = $_SESSION['section'];
+	$line_no_from = $_POST['line_no_from'];
+    $dept_to = $_POST['dept_to'];
+    $section_to = $_POST['section_to'];
+    $line_no_to = $_POST['line_no_to'];
+    $is_checked_by = intval($_POST['is_checked_by']);
+    $is_approved_by = intval($_POST['is_approved_by']);
+    $is_receiving_noted_by = intval($_POST['is_receiving_noted_by']);
+    $is_receiving_acknowledged_by = intval($_POST['is_receiving_acknowledged_by']);
+    $is_receiving_approved_by = intval($_POST['is_receiving_approved_by']);
+
+	$c = 0;
+
+	$query = "SELECT 
+					eth.id, eth.emp_no, eth.emp_transfer_type, 
+                    eth.dept_from, eth.section_from, eth.line_no_from, 
+                    eth.dept_to, eth.section_to, eth.line_no_to, 
+                    eth.issued_by, eth.checked_by, eth.approved_by, 
+                    eth.r_noted_by, eth.r_acknowledged_by, eth.r_approved_by, 
+                    eth.hr_ack, eth.hr_ack_no, eth.hr_date_ack, 
+                    CASE 
+                        WHEN eth.is_approved = 0 THEN 'Disapproved' 
+                        ELSE 'Approved' 
+                    END AS is_approved, 
+                    eth.reason, eth.date_effectivity, 
+                    emp.full_name, emp.provider, emp.position 
+				FROM t_employee_transfer_history eth 
+                LEFT JOIN m_employees emp ON eth.emp_no = emp.emp_no 
+				WHERE eth.dept_from = ? AND eth.section_from = ?";
+
+	$params = [
+		$dept_from, 
+		$section_from 
+	];
+
+    if (!empty($line_no_from)) {
+		$query = $query . " AND eth.line_no_from = ?";
+		$params[] = $line_no_from;
+	}
+
+	if (!empty($emp_no)) {
+		$query = $query . " AND eth.emp_no LIKE ?";
+		$emp_no_search = $emp_no . "%";
+		$params[] = $emp_no_search;
+	}
+
+    if (!empty($full_name)) {
+		$query = $query . " AND emp.full_name LIKE ?";
+        $full_name_search = $full_name . "%";
+		$params[] = $full_name_search;
+	}
+
+    if (!empty($provider)) {
+		$query = $query . " AND emp.provider = ?";
+		$params[] = $provider;
+	}
+
+    if (!empty($position)) {
+		$query = $query . " AND emp.position = ?";
+		$params[] = $position;
+	}
+
+    if (!empty($emp_transfer_type)) {
+		$query = $query . " AND eth.emp_transfer_type = ?";
+		$params[] = $emp_transfer_type;
+	}
+
+    if (!empty($emp_transfer_type)) {
+		$query = $query . " AND eth.emp_transfer_type = ?";
+		$params[] = $emp_transfer_type;
+	}
+
+    if (!empty($dept_to)) {
+		$query = $query . " AND eth.dept_to = ?";
+		$params[] = $dept_to;
+	}
+
+    if (!empty($section_to)) {
+		$query = $query . " AND eth.section_to = ?";
+		$params[] = $section_to;
+	}
+
+    if (!empty($line_no_to)) {
+		$query = $query . " AND eth.line_no_to = ?";
+		$params[] = $line_no_to;
+	}
+
+    if ($is_checked_by > 0) {
+		$query = $query . " AND eth.checked_by IS NOT NULL";
+	}
+    if ($is_approved_by > 0) {
+		$query = $query . " AND eth.approved_by IS NOT NULL";
+	}
+    if ($is_receiving_noted_by > 0) {
+		$query = $query . " AND eth.r_noted_by IS NOT NULL";
+	}
+    if ($is_receiving_acknowledged_by > 0) {
+		$query = $query . " AND eth.r_acknowledged_by IS NOT NULL";
+	}
+    if ($is_receiving_approved_by > 0) {
+		$query = $query . " AND eth.r_approved_by IS NOT NULL";
+	}
+
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $c++;
+
+        $row_class = '';
+
+        if ($row['is_approved'] == 'Approved') {
+            $row_class = 'bg-success';
+        } else if ($row['is_approved'] == 'Disapproved') {
+            $row_class = 'bg-danger';
+        }
+
+        echo '<tr class="'.$row_class.'">';
+
+        echo '<td>'.$c.'</td>';
+        echo '<td>'.$row['date_effectivity'].'</td>';
+        echo '<td>'.$row['emp_no'].'</td>';
+        echo '<td>'.$row['full_name'].'</td>';
+        echo '<td>'.$row['provider'].'</td>';
+        echo '<td>'.$row['position'].'</td>';
+        echo '<td>'.$row['emp_transfer_type'].'</td>';
+        echo '<td>'.$row['dept_from'].'</td>';
+        echo '<td>'.$row['section_from'].'</td>';
+        echo '<td>'.$row['line_no_from'].'</td>';
+        echo '<td>'.$row['dept_to'].'</td>';
+        echo '<td>'.$row['section_to'].'</td>';
+        echo '<td>'.$row['line_no_to'].'</td>';
+        echo '<td>'.$row['issued_by'].'</td>';
+        echo '<td>'.$row['checked_by'].'</td>';
+        echo '<td>'.$row['approved_by'].'</td>';
+        echo '<td>'.$row['r_noted_by'].'</td>';
+        echo '<td>'.$row['r_acknowledged_by'].'</td>';
+        echo '<td>'.$row['r_approved_by'].'</td>';
+        echo '<td>'.$row['hr_ack'].'</td>';
+        echo '<td>'.$row['is_approved'].'</td>';
+        echo '<td>'.$row['reason'].'</td>';
+
+        echo '</tr>';
+    }
+}
+
 $conn = null;
