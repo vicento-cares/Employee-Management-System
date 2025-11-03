@@ -198,11 +198,19 @@
         });
     }
 
+    document.getElementById('eth_form').addEventListener('submit', e => {
+        e.preventDefault();
+        get_employee_transfer_history();
+    });
+
     const get_employee_transfer_history = () => {
         // If an AJAX call is already in progress, return immediately
         if (get_employee_transfer_history_ajax_in_process) {
             return;
         }
+
+        var date_issued_by_from = document.getElementById('date_issued_by_from_search').value;
+        var date_issued_by_to = document.getElementById('date_issued_by_to_search').value;
 
         var full_name = document.getElementById('et_full_name_search').value;
         var emp_transfer_type = document.getElementById('et_emp_transfer_type_search').value;
@@ -247,6 +255,8 @@
             cache: false,
             data: {
                 method: 'get_employee_transfer_history',
+                date_issued_by_from: date_issued_by_from,
+                date_issued_by_to: date_issued_by_to,
                 full_name: full_name,
                 emp_transfer_type: emp_transfer_type,
                 provider: provider,

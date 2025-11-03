@@ -45,7 +45,7 @@
                       <div class="row mb-2">
                         <div class="col-sm-4">
                           <label>Full Name</label>
-                          <input type="text" class="form-control" id="et_full_name_search" placeholder="Search" autocomplete="off" maxlength="255">
+                          <input type="text" class="form-control" id="et_full_name_search" autocomplete="off" maxlength="255">
                         </div>
                         <div class="col-sm-2">
                           <label>Employee Transfer Type:</label>
@@ -71,7 +71,7 @@
                       <div class="row mb-4">
                         <div class="col-sm-2">
                           <label>Employee No:</label>
-                          <input type="text" class="form-control" id="et_emp_no_search" placeholder="Search" autocomplete="off" maxlength="255">
+                          <input type="text" class="form-control" id="et_emp_no_search" autocomplete="off" maxlength="255">
                         </div>
                         <div class="col-sm-2">
                           <label>Provider:</label>
@@ -195,109 +195,118 @@
                 </div>
                 <!-- Shuttle Allocation History -->
                 <div class="tab-pane fade" id="et-2" role="tabpanel" aria-labelledby="et-2-tab">
-                  <div class="row">
-                    <div class="col-10">
-                      <div class="row">
-                        <div class="col-sm-4">
-                          <label>Full Name</label>
-                          <input type="text" class="form-control" id="eth_full_name_search" placeholder="Search" autocomplete="off" maxlength="255">
+                  <form id="eth_form">
+                    <div class="row">
+                      <div class="col-10">
+                        <div class="row mb-2">
+                          <div class="col-sm-2">
+                            <label>Date Issued From</label>
+                            <input type="datetime-local" class="form-control" id="date_issued_by_from_search" name="date_issued_by_from" required>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Date Issued To</label>
+                            <input type="datetime-local" class="form-control" id="date_issued_by_to_search" name="date_issued_by_to" required>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Employee Transfer Type:</label>
+                            <select id="eth_emp_transfer_type_search" name='emp_transfer_type' class="form-control">
+                              <option value="">Select Provider</option>
+                              <option value="department">Department Transfer</option>
+                              <option value="section">Section Transfer</option>
+                            </select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Department To:</label>
+                            <select id="eth_dept_from_search" name='dept_from' class="form-control"></select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Section To:</label>
+                            <select id="eth_section_from_search" name='section_from' class="form-control"></select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Line No. From:</label>
+                            <select id="eth_line_no_from_search" name='line_no_from' class="form-control"></select>
+                          </div>
                         </div>
-                        <div class="col-sm-2">
-                          <label>Employee Transfer Type:</label>
-                          <select id="eth_emp_transfer_type_search" class="form-control">
-                            <option value="">Select Provider</option>
-                            <option value="department">Department Transfer</option>
-                            <option value="section">Section Transfer</option>
-                          </select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Department To:</label>
-                          <select id="eth_dept_from_search" class="form-control"></select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Section To:</label>
-                          <select id="eth_section_from_search" class="form-control"></select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Line No. From:</label>
-                          <select id="eth_line_no_from_search" class="form-control"></select>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-sm-2">
-                          <label>Employee No:</label>
-                          <input type="text" class="form-control" id="eth_emp_no_search" placeholder="Search" autocomplete="off" maxlength="255">
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Provider:</label>
-                          <select id="eth_provider_search" class="form-control">
-                            <option value="">Select Provider</option>
-                            <option value="FAS">FAS</option>
-                            <option value="PKIMT">PKIMT</option>
-                            <option value="MAXIM">MAXIM</option>
-                            <option value="ONE SOURCE">ONE SOURCE</option>
-                            <option value="MEGATREND">MEGATREND</option>
-                            <option value="ADD EVEN">ADD EVEN</option>
-                            <option value="GOLDENHAND">GOLDENHAND</option>
-                          </select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Position:</label>
-                          <select id="eth_position_search" class="form-control">
-                            <option value="">Select Position</option>
-                            <option value="Associate">Associate</option>
-                            <option value="Jr. Staff">Jr. Staff</option>
-                            <option value="Staff">Staff</option>
-                            <option value="Supervisor">Supervisor</option>
-                            <option value="Assistant Manager">Assistant Manager</option>
-                            <option value="Section Manager">Section Manager</option>
-                            <option value="Manager">Manager</option>
-                          </select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Department To:</label>
-                          <select id="eth_dept_to_search" class="form-control"></select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Section To:</label>
-                          <select id="eth_section_to_search" class="form-control"></select>
-                        </div>
-                        <div class="col-sm-2">
-                          <label>Line No. To:</label>
-                          <select id="eth_line_no_to_search" class="form-control"></select>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-2">
-                      <div class="row mb-2">
-                        <div class="col-12">
-                          <input class="ml-4" type="checkbox" name="eth_checked_by_search" id="eth_checked_by_search">
-                          <label for="eth_checked_by_search">Checked By</label>
-                          <br>
-                          <input class="ml-4" type="checkbox" name="eth_approved_by_search" id="eth_approved_by_search">
-                          <label for="eth_approved_by_search">Approved By</label>
-                          <br>
-                          <input class="ml-4" type="checkbox" name="eth_receiving_noted_by_search" id="eth_receiving_noted_by_search">
-                          <label for="eth_receiving_noted_by_search">Receiving Noted By</label>
-                          <br>
-                          <input class="ml-4" type="checkbox" name="eth_receiving_acknowledged_by_search" id="eth_receiving_acknowledged_by_search">
-                          <label for="eth_receiving_acknowledged_by_search">Receiving Acknowledged By</label>
-                          <br>
-                          <input class="ml-4" type="checkbox" name="eth_receiving_approved_by_search" id="eth_receiving_approved_by_search">
-                          <label for="eth_receiving_approved_by_search">Receiving Approved By</label>
-                          <br>
+                        <div class="row">
+                          <div class="col-sm-2">
+                            <label>Employee No:</label>
+                            <input type="text" class="form-control" id="eth_emp_no_search" name='emp_no' autocomplete="off" maxlength="255">
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Provider:</label>
+                            <select id="eth_provider_search" name='provider' class="form-control">
+                              <option value="">Select Provider</option>
+                              <option value="FAS">FAS</option>
+                              <option value="PKIMT">PKIMT</option>
+                              <option value="MAXIM">MAXIM</option>
+                              <option value="ONE SOURCE">ONE SOURCE</option>
+                              <option value="MEGATREND">MEGATREND</option>
+                              <option value="ADD EVEN">ADD EVEN</option>
+                              <option value="GOLDENHAND">GOLDENHAND</option>
+                            </select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Position:</label>
+                            <select id="eth_position_search" name='position' class="form-control">
+                              <option value="">Select Position</option>
+                              <option value="Associate">Associate</option>
+                              <option value="Jr. Staff">Jr. Staff</option>
+                              <option value="Staff">Staff</option>
+                              <option value="Supervisor">Supervisor</option>
+                              <option value="Assistant Manager">Assistant Manager</option>
+                              <option value="Section Manager">Section Manager</option>
+                              <option value="Manager">Manager</option>
+                            </select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Department To:</label>
+                            <select id="eth_dept_to_search" name='dept_to' class="form-control"></select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Section To:</label>
+                            <select id="eth_section_to_search" name='section_to' class="form-control"></select>
+                          </div>
+                          <div class="col-sm-2">
+                            <label>Line No. To:</label>
+                            <select id="eth_line_no_to_search" name="line_no_to" class="form-control"></select>
+                          </div>
                         </div>
                       </div>
+                      <div class="col-2">
+                        <div class="row mb-2">
+                          <div class="col-12">
+                            <input class="ml-4" type="checkbox" name="eth_checked_by_search" id="eth_checked_by_search">
+                            <label for="eth_checked_by_search">Checked By</label>
+                            <br>
+                            <input class="ml-4" type="checkbox" name="eth_approved_by_search" id="eth_approved_by_search">
+                            <label for="eth_approved_by_search">Approved By</label>
+                            <br>
+                            <input class="ml-4" type="checkbox" name="eth_receiving_noted_by_search" id="eth_receiving_noted_by_search">
+                            <label for="eth_receiving_noted_by_search">Receiving Noted By</label>
+                            <br>
+                            <input class="ml-4" type="checkbox" name="eth_receiving_acknowledged_by_search" id="eth_receiving_acknowledged_by_search">
+                            <label for="eth_receiving_acknowledged_by_search">Receiving Acknowledged By</label>
+                            <br>
+                            <input class="ml-4" type="checkbox" name="eth_receiving_approved_by_search" id="eth_receiving_approved_by_search">
+                            <label for="eth_receiving_approved_by_search">Receiving Approved By</label>
+                            <br>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="row mb-2">
-                    <div class="col-2 offset-8">
-                      <button class="btn btn-success btn-block" onclick="get_employee_transfer_history()"><i class="fas fa-search mr-2"></i>Search</button>
+                    <div class="row mb-4">
+                      <div class="col-sm-4">
+                        <input type="text" class="form-control" id="eth_full_name_search" name='full_name' placeholder="Full Name" autocomplete="off" maxlength="255">
+                      </div>
+                      <div class="col-2 offset-4">
+                        <button type='submit' class="btn btn-success btn-block"><i class="fas fa-search mr-2"></i>Search</button>
+                      </div>
+                      <div class="col-2">
+                        <button class="btn btn-secondary btn-block"><i class="fas fa-download mr-2"></i>Export</button>
+                      </div>
                     </div>
-                    <div class="col-2">
-                      <button class="btn btn-secondary btn-block"><i class="fas fa-download mr-2"></i>Export</button>
-                    </div>
-                  </div>
+                  </form>
                   <div class="row mb-2">
                     <div class="form-group mb-0 px-2">
                       <label><b>Employee Transfer Status Legend</b></label>

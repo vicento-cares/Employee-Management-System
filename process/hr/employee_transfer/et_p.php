@@ -1244,6 +1244,9 @@ if ($method == 'get_employee_transfer_history') {
 		exit();
     }
 
+    $date_issued_by_from = $_POST['date_issued_by_from'];
+    $date_issued_by_to = $_POST['date_issued_by_to'];
+
     $emp_no = $_POST['emp_no'];
 	$full_name = $_POST['full_name'];
     $provider = $_POST['provider'];
@@ -1279,6 +1282,14 @@ if ($method == 'get_employee_transfer_history') {
 				WHERE eth.dept_from != ''";
 
 	$params = [];
+
+    if (!empty($date_issued_by_from) && !empty($date_issued_by_to)) {
+        $date_issued_by_from = date('Y-m-d H:i:s',(strtotime($date_issued_by_from)));
+        $date_issued_by_to = date('Y-m-d H:i:s',(strtotime($date_issued_by_to)));
+        $query = $query . " AND (eth.date_issued_by >= ? AND eth.date_issued_by <= ?)";
+        $params[] = $date_issued_by_from;
+        $params[] = $date_issued_by_to;
+    }
 
     if (!empty($dept_from)) {
 		$query = $query . " AND eth.dept_from = ?";
