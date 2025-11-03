@@ -71,6 +71,18 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/employee_transfer.php") { ?>
+          <a href="employee_transfer.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="employee_transfer.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-users"></i>
+            <p>
+              Employee Transfer
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/attendances.php") { ?>
           <a href="attendances.php" class="nav-link active">
           <?php } else { ?>

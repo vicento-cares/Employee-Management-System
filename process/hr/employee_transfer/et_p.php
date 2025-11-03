@@ -139,19 +139,26 @@ function get_issued_by_email($mail_arr, $conn) {
 }
 
 if ($method == 'get_ongoing_employee_transfer') {
-	if (!isset($_SESSION['dept'])) {
-		echo 'Session Expired. Please re-login your account.';
+    $dept_from = '';
+    $section_from = '';
+
+    if (isset($_SESSION['emp_no_control_area'])) {
+        $dept_from = $_SESSION['dept'];
+	    $section_from = $_SESSION['section'];
+    } else if (isset($_SESSION['emp_no_hr'])) {
+        $dept_from = $_POST['dept_from'];
+        $section_from = $_POST['section_from'];
+    } else {
+        echo 'Session Expired. Please re-login your account.';
 		$conn = null;
 		exit();
-	}
+    }
 
     $emp_no = $_POST['emp_no'];
 	$full_name = $_POST['full_name'];
     $provider = $_POST['provider'];
     $position = $_POST['position'];
     $emp_transfer_type = $_POST['emp_transfer_type'];
-	$dept_from = $_SESSION['dept'];
-	$section_from = $_SESSION['section'];
 	$line_no_from = $_POST['line_no_from'];
     $dept_to = $_POST['dept_to'];
     $section_to = $_POST['section_to'];
@@ -178,13 +185,20 @@ if ($method == 'get_ongoing_employee_transfer') {
                     END AS date_effectivity_status 
 				FROM t_employee_transfer et 
                 LEFT JOIN m_employees emp ON et.emp_no = emp.emp_no 
-				WHERE et.dept_from = ? AND et.section_from = ?";
+				WHERE et.dept_from != ''";
 
-	$params = [
-		$dept_from, 
-		$section_from 
-	];
+	$params = [];
 
+    if (!empty($dept_from)) {
+		$query = $query . " AND et.dept_from = ?";
+		$params[] = $dept_from;
+	}
+    
+    if (!empty($section_from)) {
+		$query = $query . " AND et.section_from = ?";
+		$params[] = $section_from;
+	}
+    
     if (!empty($line_no_from)) {
 		$query = $query . " AND et.line_no_from = ?";
 		$params[] = $line_no_from;
@@ -1215,19 +1229,26 @@ if ($method == 'approve_employee_transfer') {
 }
 
 if ($method == 'get_employee_transfer_history') {
-	if (!isset($_SESSION['dept'])) {
-		echo 'Session Expired. Please re-login your account.';
+	$dept_from = '';
+    $section_from = '';
+
+    if (isset($_SESSION['emp_no_control_area'])) {
+        $dept_from = $_SESSION['dept'];
+	    $section_from = $_SESSION['section'];
+    } else if (isset($_SESSION['emp_no_hr'])) {
+        $dept_from = $_POST['dept_from'];
+        $section_from = $_POST['section_from'];
+    } else {
+        echo 'Session Expired. Please re-login your account.';
 		$conn = null;
 		exit();
-	}
+    }
 
     $emp_no = $_POST['emp_no'];
 	$full_name = $_POST['full_name'];
     $provider = $_POST['provider'];
     $position = $_POST['position'];
     $emp_transfer_type = $_POST['emp_transfer_type'];
-	$dept_from = $_SESSION['dept'];
-	$section_from = $_SESSION['section'];
 	$line_no_from = $_POST['line_no_from'];
     $dept_to = $_POST['dept_to'];
     $section_to = $_POST['section_to'];
@@ -1255,12 +1276,19 @@ if ($method == 'get_employee_transfer_history') {
                     emp.full_name, emp.provider, emp.position 
 				FROM t_employee_transfer_history eth 
                 LEFT JOIN m_employees emp ON eth.emp_no = emp.emp_no 
-				WHERE eth.dept_from = ? AND eth.section_from = ?";
+				WHERE eth.dept_from != ''";
 
-	$params = [
-		$dept_from, 
-		$section_from 
-	];
+	$params = [];
+
+    if (!empty($dept_from)) {
+		$query = $query . " AND eth.dept_from = ?";
+		$params[] = $dept_from;
+	}
+
+    if (!empty($section_from)) {
+		$query = $query . " AND eth.section_from = ?";
+		$params[] = $section_from;
+	}
 
     if (!empty($line_no_from)) {
 		$query = $query . " AND eth.line_no_from = ?";
