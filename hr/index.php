@@ -35,13 +35,21 @@ if (isset($_SESSION['emp_no_hr'])) {
 
         <form action="" method="POST" id="login_form">
           <div class="input-group mb-3">
-            <input type="password" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" autocomplete="off" required>
+            <input type="text" class="form-control" id="emp_no" name="emp_no" placeholder="ID Number" autocomplete="off" required>
+            <div class="input-group-append">
+              <div class="input-group-text">
+                <span class="fas fa-user"></span>
+              </div>
+            </div>
+          </div>
+          <div class="input-group mb-3">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" autocomplete="off" required>
             <div class="input-group-append">
               <div class="input-group-text">
                 <span class="fas fa-lock"></span>
               </div>
             </div>
-          </div>   
+          </div>
           <!-- /.col -->
           <div class="input-group mb-3">
             <button type="submit" class="btn btn-primary btn-block" name="login_btn" value="login">Sign In</button>

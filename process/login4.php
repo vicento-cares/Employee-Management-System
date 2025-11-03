@@ -7,19 +7,25 @@ include 'conn.php';
 
 if (isset($_POST['login_btn'])) {
     $emp_no = $_POST['emp_no'];
+    $password = $_POST['password'];
 
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
+    } else if (empty($password)) {
+        echo '<script>alert("Please Enter Password")</script>';
     } else {
         // MySQL
         // $check = "SELECT emp_no, full_name, dept, section, line_no, role FROM m_hr_accounts WHERE BINARY emp_no = '$emp_no' AND role = 'hr'";
         // MS SQL Server
         $check = "SELECT emp_no, full_name, dept, section, line_no, role 
                     FROM m_hr_accounts 
-                    WHERE emp_no = ? AND role = 'hr' COLLATE SQL_Latin1_General_CP1_CS_AS";
+                    WHERE 
+                        emp_no = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND 
+                        password = ? COLLATE SQL_Latin1_General_CP1_CS_AS AND 
+                        role = 'hr' ";
         
         $stmt = $conn->prepare($check);
-        $params = array($emp_no);
+        $params = array($emp_no, $password);
         $stmt->execute($params);
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
