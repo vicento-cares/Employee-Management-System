@@ -308,7 +308,7 @@ if (!isset($_SESSION['emp_no'])) {
     ?>
       <div class="card mt-2">
         <div class="card-body">
-          <p class="login-box-msg"><b>Time Out Failed. Unregistered or Resigned</b></p>
+          <p class="login-box-msg"><b>Time In Failed. Unregistered or Resigned</b></p>
         </div>
       </div>
     <?php
