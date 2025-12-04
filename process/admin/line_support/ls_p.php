@@ -268,12 +268,13 @@ if ($method == 'set_line_support_details') {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$line_no = $_SESSION['line_no'];
+	$line_no = '';
 
 	$sql = "SELECT line_no FROM m_access_locations";
 	$params = [];
 
 	if (isset($_SESSION['line_no'])) {
+		$line_no = $_SESSION['line_no'];
 		$sql .= " WHERE line_no != ?";
 		$params[] = $line_no;
 	}

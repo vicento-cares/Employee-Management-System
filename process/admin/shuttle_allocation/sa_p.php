@@ -222,7 +222,9 @@ if ($method == 'set_out') {
     	if ($row) {
 			$sa_id = $row['id'];
 
-			$sql = "UPDATE t_shuttle_allocation SET out_".$time." = 1";
+			$out_column = 'out_' . $time;
+
+			$sql = "UPDATE t_shuttle_allocation SET $out_column = 1";
 			switch ($time) {
 				case 5:
 					$sql = $sql . ", out_6 = 0, out_7 = 0, out_8 = 0";
@@ -243,9 +245,20 @@ if ($method == 'set_out') {
 			$params = array($sa_id);
 			$stmt->execute($params);
 		} else {
-			$set_by = $_SESSION['full_name'];
+			$set_by = '';
+
+			if (isset($_SESSION['full_name'])) {
+				$set_by = $_SESSION['full_name'];
+			} else {
+				$conn = NULL;
+				echo 'Session was expired. Please Re-Login your account.';
+				exit();
+			}
+
+			$out_column = 'out_' . $time;
+
 			$sql = "INSERT INTO t_shuttle_allocation 
-						(emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, out_".$time.", set_by) 
+						(emp_no, dept, section, line_no, day, shift, shift_group, shuttle_route, $out_column, set_by) 
 					VALUES 
 						(?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
 			$stmt = $conn->prepare($sql);
