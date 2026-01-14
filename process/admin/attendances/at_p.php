@@ -274,6 +274,7 @@ if ($method == 'attendance_list_last_page') {
 if ($method == 'get_attendance_list') {
 	$day = $_POST['day'];
 	$shift_group = $_POST['shift_group'];
+	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -299,6 +300,9 @@ if ($method == 'get_attendance_list') {
 		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
+		if (isset($_POST['attendance_status'])) {
+			$attendance_status = intval($_POST['attendance_status']);
+		}
 	}
 
 	$current_page = intval($_POST['current_page']);
@@ -328,6 +332,17 @@ if ($method == 'get_attendance_list') {
 		$day,
 		$shift_group
 	];
+
+	if (!empty($attendance_status)) {
+		switch ($attendance_status) {
+			case 1:
+				$sql = $sql . " AND tio.time_in IS NOT NULL";
+				break;
+			case 2:
+				$sql = $sql . " AND tio.time_in IS NULL";
+				break;
+		}
+	}
 
 	if (!empty($dept)) {
 		$sql = $sql . " AND emp.dept LIKE ?";
@@ -381,10 +396,40 @@ if ($method == 'get_attendance_list') {
 					$row_shift_group = $shift_group;
 				}
 				
-				echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
+				echo '<tr class="'.$row_class.'">';
+				// echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
 			}
 
 			echo '<td style="vertical-align: middle;">'.$c.'</td>';
+
+			if (empty($_SESSION['emp_no_hr'])) {
+				if (!empty($row['time_in'])) {
+					echo '<td style="vertical-align: middle;"></td>';
+					echo '<td style="vertical-align: middle;"></td>';
+				} else {
+					echo '<td style="vertical-align: middle;">
+							<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
+								<option disabled selected value="">Select Reason</option>
+								<option value="reason1">reason1</option>
+								<option value="reason2">reason2</option>
+								<option value="reason3">reason3</option>
+								<option value="reason4">reason4</option>
+							</select>
+						</td>';
+					echo '<td style="vertical-align: middle;">
+							<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
+								<option disabled selected value="">Select Type of Absent</option>
+							</select>
+						</td>';
+				}
+			}
+			
+			echo '<td style="vertical-align: middle;" id="abst_'.$c.'">'.$row['absent_type'].'</td>';
+			$reason = $row['reason'];
+			if (strlen($reason) > 12) {
+				$reason = substr($reason, 0, 12) . "...";
+			}
+			echo '<td style="vertical-align: middle;" id="absr_'.$c.'">'.$reason.'</td>';
 
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
 			if (!empty($row['file_url'])) {
@@ -392,6 +437,9 @@ if ($method == 'get_attendance_list') {
 			} else {
 				echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			}
+
+			echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
 
 			if (!empty($row['time_in'])) {
 				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
@@ -403,17 +451,10 @@ if ($method == 'get_attendance_list') {
 				echo '<td style="vertical-align: middle;">'.$row['absent_shift_group'].'</td>';
 			}
 			echo '<td style="vertical-align: middle;">'.$row['provider'].'</td>';
-			echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
-			echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
+			
 			echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
 			echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
 			echo '<td style="vertical-align: middle;">'.$row['line_no'].'</td>';
-			echo '<td style="vertical-align: middle;">'.$row['absent_type'].'</td>';
-			$reason = $row['reason'];
-			if (strlen($reason) > 12) {
-				$reason = substr($reason, 0, 12) . "...";
-			}
-			echo '<td style="vertical-align: middle;">'.$reason.'</td>';
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
@@ -706,6 +747,7 @@ if ($method == 'get_attendance_list2') {
 if ($method == 'get_attendance_list_counting') {
 	$day = $_POST['day'];
 	$shift_group = $_POST['shift_group'];
+	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -743,6 +785,9 @@ if ($method == 'get_attendance_list_counting') {
 		} else {
 			$line_no = '';
 		}
+		if (isset($_POST['attendance_status'])) {
+			$attendance_status = intval($_POST['attendance_status']);
+		}
 	}
 
 	$c = 0;
@@ -765,6 +810,17 @@ if ($method == 'get_attendance_list_counting') {
 	$params = [];
 
 	$params[] = $day;
+
+	if (!empty($attendance_status)) {
+		switch ($attendance_status) {
+			case 1:
+				$sql = $sql . " AND tio.time_in IS NOT NULL";
+				break;
+			case 2:
+				$sql = $sql . " AND tio.time_in IS NULL";
+				break;
+		}
+	}
 
 	if (!empty($shift_group)) {
 		$sql = $sql . " AND emp.shift_group = ?";
@@ -862,6 +918,106 @@ if ($method == 'save_absence_details') {
 			echo 'error';
 		}
 	}
+}
+
+if ($method == 'update_reason') {
+	$id = $_POST['id'];
+	$emp_no = trim($_POST['emp_no']);
+	$absent_day = trim($_POST['absent_day']);
+	$absent_shift_group = trim($_POST['absent_shift_group']);
+	$reason = trim($_POST['reason']);
+	$absent_type = '';
+
+	$insertedId = '';
+	$message = '';
+
+	if (empty($id)) {
+		$sql = "INSERT INTO t_absences (emp_no, day, shift_group, reason";
+
+		$columns = [];
+		$params = [$emp_no, $absent_day, $absent_shift_group, $reason];
+
+		if (isset($_POST['absent_type'])) {
+			$absent_type = trim($_POST['absent_type']);
+			$columns[] = 'absent_type'; // Add absent_type to columns
+			$params[] = $absent_type; // Add the value to params
+		}
+
+		// Append the additional columns to the SQL query
+		if (count($columns) > 0) {
+			$sql .= ", " . implode(", ", $columns) . ") OUTPUT INSERTED.id"; // Append column names
+		} else {
+			$sql .= ") OUTPUT INSERTED.id"; // Just close the insert columns section
+		}
+
+		// Complete the query with the VALUES part
+		$sql .= " VALUES (?, ?, ?, ?" . str_repeat(", ?", count($columns)) . ")";
+
+		$stmt = $conn->prepare($sql);
+		
+		if ($stmt->execute($params)) {
+			$insertedId = $stmt->fetchColumn();  // Fetch the inserted ID
+			$message = 'success';
+		} else {
+			$message = 'error';
+		}
+	} else {
+		$params = [$reason];
+
+		$sql = "UPDATE t_absences SET reason = ?";
+
+		if (isset($_POST['absent_type'])) {
+			$absent_type = trim($_POST['absent_type']);
+			$sql .= ", absent_type = ?";
+			$params[] = $absent_type; // Add the value to params
+		}
+
+		$sql .= " WHERE id = ?";
+		$params[] = $id;
+
+		$stmt = $conn->prepare($sql);
+
+		if ($stmt->execute($params)) {
+			$message = 'success';
+		} else {
+			$message = 'error';
+		}
+	}
+
+	if (!empty($insertedId)) {
+		$response_arr = [
+			'id' => $insertedId,
+			'message' => $message
+		];
+	} else {
+		$response_arr = [
+			'message' => $message
+		];
+	}
+
+	echo json_encode($response_arr);
+}
+
+if ($method == 'update_type_of_absent') {
+	$id = $_POST['id'];
+	$absent_type = trim($_POST['absent_type']);
+
+	$sql = "UPDATE t_absences 
+			SET absent_type = ? 
+			WHERE id = ?";
+	$stmt = $conn->prepare($sql);
+	$params = array($absent_type, $id);
+	if ($stmt->execute($params)) {
+		$message = 'success';
+	} else {
+		$message = 'error';
+	}
+
+	$response_arr = [
+		'message' => $message
+	];
+	
+	echo json_encode($response_arr);
 }
 
 // Attendance Summary Report

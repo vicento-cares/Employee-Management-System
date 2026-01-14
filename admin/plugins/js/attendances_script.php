@@ -2,6 +2,29 @@
     // AJAX IN PROGRESS GLOBAL VARS
     var get_attendance_list_ajax_in_process = false;
 
+    let absentReasonJsonData = [
+        {
+            "id": 1,
+            "reason": "reason1",
+            "absent_type": "VL"
+        },
+        {
+            "id": 2,
+            "reason": "reason1",
+            "absent_type": "SL"
+        },
+        {
+            "id": 3,
+            "reason": "reason2",
+            "absent_type": "SL"
+        },
+        {
+            "id": 4,
+            "reason": "reason3",
+            "absent_type": "LWOP"
+        }
+    ];
+
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
@@ -10,7 +33,7 @@
         sessionStorage.setItem('notif_accepted_ls', 0);
         sessionStorage.setItem('notif_rejected_ls', 0);
         load_notif_line_support();
-        realtime_load_notif_line_support = setInterval(load_notif_line_support, 5000);
+        realtime_load_notif_line_support = setInterval(load_notif_line_support, 30000);
     });
 
     // Table Responsive Scroll Event for Load More
@@ -41,6 +64,7 @@
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
         var dept = sessionStorage.getItem('dept_search');
+        var attendance_status = sessionStorage.getItem('attendance_status_search');
 
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
@@ -50,7 +74,8 @@
                 method: 'get_attendance_list_counting',
                 day: day,
                 shift_group: shift_group,
-                dept: dept
+                dept: dept,
+                attendance_status: attendance_status
             },
             beforeSend: () => {
                 var loading = `<tr id="loading_counting"><td colspan="5" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
@@ -178,19 +203,23 @@
         let day = document.getElementById('attendance_date_search').value;
         let shift_group = document.getElementById('shift_group_search').value;
         let dept = document.getElementById('dept_search').value;
+        let attendance_status = document.getElementById('attendance_status_search').value;
 
         var day1 = sessionStorage.getItem('attendance_date_search');
         var shift_group1 = sessionStorage.getItem('shift_group_search');
         var dept1 = sessionStorage.getItem('dept_search');
+        var attendance_status1 = sessionStorage.getItem('attendance_status_search');
 
         if (current_page > 1) {
             switch (true) {
                 case day !== day1:
                 case shift_group !== shift_group1:
                 case dept !== dept1:
+                case attendance_status !== attendance_status1:
                     day = day1;
                     shift_group = shift_group1;
                     dept = dept1;
+                    attendance_status = attendance_status1;
                     break;
                 default:
             }
@@ -198,6 +227,7 @@
             sessionStorage.setItem('attendance_date_search', day);
             sessionStorage.setItem('shift_group_search', shift_group);
             sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('attendance_status_search', attendance_status);
         }
 
         // Set the flag to true as we're starting an AJAX call
@@ -212,11 +242,12 @@
                 day: day,
                 shift_group: shift_group,
                 dept: dept,
+                attendance_status: attendance_status,
                 current_page: current_page
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
-                var loading = `<tr id="loading"><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr id="loading"><td colspan="15" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 if (current_page == 1) {
                     document.getElementById("attendanceData").innerHTML = loading;
                 } else {
@@ -353,6 +384,119 @@
                 }
             });
         }
+    }
+
+    const update_type_of_absent = (row, selectElement) => {
+        const id = selectElement.dataset.absent_id;
+        const absent_type = selectElement.value;
+
+        $.ajax({
+            url: '../process/admin/attendances/at_p.php',
+            type: 'POST',
+            cache: false,
+            dataType: 'json',
+            data: {
+                method: 'update_type_of_absent',
+                id: id,
+                absent_type: absent_type
+            }, 
+            success: function (response) {
+                if (response.message == 'success') {
+                    document.getElementById(`abst_${row}`).innerText = absent_type;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
+    const update_reason = (row, selectElement) => {
+        const id = selectElement.dataset.absent_id;
+        const emp_no = selectElement.dataset.emp_no;
+        const absent_day = selectElement.dataset.absent_day;
+        const absent_shift_group = selectElement.dataset.absent_shift_group;
+        let absent_type = '';
+        const reason = selectElement.value;
+        const selectedItem = absentReasonJsonData.filter(item => item.reason === reason);
+
+        let data = {};
+
+        const absentTypeDropdown = document.getElementById(`abstd_${row}`);
+        absentTypeDropdown.innerHTML = '<option disabled selected value="">Select Type of Absent</option>'; // Clear previous absent types
+
+        if (selectedItem.length > 1) {
+            const absentTypes = [...new Set(selectedItem.map(item => item.absent_type))]; // Get unique absent types
+            absentTypes.forEach(absentType => {
+                const option = document.createElement('option');
+                option.value = absentType;
+                option.textContent = absentType;
+                absentTypeDropdown.append(option);
+            });
+            document.getElementById(`abst_${row}`).innerText = '';
+
+            data = {
+                method: 'update_reason',
+                id: id,
+                emp_no: emp_no,
+                absent_day: absent_day,
+                absent_shift_group: absent_shift_group,
+                reason: reason
+            };
+        } else if (selectedItem.length === 1) {
+            // If only one item is found, select it in the dropdown
+            absent_type = selectedItem[0].absent_type; // Get the absent type
+            const option = document.createElement('option');
+            option.value = absent_type;
+            option.textContent = absent_type;
+            absentTypeDropdown.append(option);
+            absentTypeDropdown.value = absent_type; // Set the dropdown value
+            document.getElementById(`abst_${row}`).innerText = absent_type; // Update the text for the single absent type
+
+            data = {
+                method: 'update_reason',
+                id: id,
+                emp_no: emp_no,
+                absent_day: absent_day,
+                absent_shift_group: absent_shift_group,
+                absent_type: absent_type,
+                reason: reason
+            };
+        } else {
+            document.getElementById(`abst_${row}`).innerText = '';
+        }
+
+        $.ajax({
+            url: '../process/admin/attendances/at_p.php',
+            type: 'POST',
+            cache: false,
+            dataType: 'json',
+            data: data,
+            success: function (response) {
+                if (response.message == 'success') {
+                    if (response.id && id == '') {
+                        selectElement.dataset.absent_id = response.id;
+                        document.getElementById(`abstd_${row}`).dataset.absent_id = response.id;
+                    }
+
+                    absentTypeDropdown.disabled = false;
+                    document.getElementById(`absr_${row}`).innerText = reason;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
     }
 
     const export_attendances = () => {

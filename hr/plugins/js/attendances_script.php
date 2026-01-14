@@ -218,7 +218,7 @@
             },
             beforeSend: (jqXHR, settings) => {
                 document.getElementById("btnNextPage").setAttribute('disabled', true);
-                var loading = `<tr id="loading"><td colspan="12" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr id="loading"><td colspan="13" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
                 if (current_page == 1) {
                     document.getElementById("attendanceData").innerHTML = loading;
                 } else {

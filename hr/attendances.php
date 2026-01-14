@@ -113,23 +113,23 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Type of Absent</th>
+                      <th>Reason</th>
                       <th>Picture</th>
+                      <th>Employee No.</th>
+                      <th>Full Name</th>
                       <th>Day</th>
                       <th>Shift</th>
                       <th>Shift Group</th>
                       <th>Provider</th>
-                      <th>Employee No.</th>
-                      <th>Full Name</th>
                       <th>Department</th>
                       <th>Section</th>
                       <th>Line No.</th>
-                      <th>Type of Absent</th>
-                      <th>Reason</th>
                     </tr>
                   </thead>
                   <tbody id="attendanceData" style="text-align: center;">
                     <tr>
-                      <td colspan="12" style="text-align:center;">
+                      <td colspan="13" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>
