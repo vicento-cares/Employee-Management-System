@@ -49,9 +49,19 @@ if ($method == 'get_recent_time_in_out') {
 	// REMOTE IP ADDRESS
 	$ip = $_SERVER['REMOTE_ADDR'];
 
-	$section = $_SESSION['section'];
-	$line_no = $_SESSION['line_no'];
+	$section = '';
+	$line_no = '';
 	$shift_group = $_GET['shift_group'];
+
+	if (isset($_SESSION['section']) && isset($_SESSION['line_no'])) {
+		$section = $_SESSION['section'];
+		$line_no = $_SESSION['line_no'];
+	} else {
+		$conn = NULL;
+		echo 'Session was expired. Please Re-Login your account.';
+		exit();
+	}
+
 	$c = 0;
 	/*$sql = "SELECT tio.emp_no, emp.full_name, tio.time_in, tio.time_out, 
 		HOUR(TIMEDIFF(DATE_FORMAT(tio.time_in, '%Y-%m-%d %H:%i'), DATE_FORMAT(tio.time_out, '%Y-%m-%d %H:%i'))) as hr_diff,
