@@ -221,7 +221,11 @@ if ($method == 'fetch_sub_section_dropdown') {
 
 // Get Line Datalist
 if ($method == 'fetch_line_dropdown') {
-	$section = $_POST['section'];
+	$section = '';
+	
+	if (isset($_POST['section'])) {
+		$section = $_POST['section'];
+	}
 
 	$sql = "SELECT line_no FROM m_access_locations";
 	$params = [];
