@@ -35,6 +35,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/attendances.php") { ?>
+          <a href="attendances.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="attendances.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-tasks"></i>
+            <p>
+              Attendances
+            </p>
+          </a>
+        </li>
         <?php } ?>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/certification.php") { ?>

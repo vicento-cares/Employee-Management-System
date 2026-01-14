@@ -7,14 +7,27 @@
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
+        fetch_line_dropdown_search();
         get_absences_reasons();
         get_attendance_list(1);
-        sessionStorage.setItem('notif_pending_ls', 0);
-        sessionStorage.setItem('notif_accepted_ls', 0);
-        sessionStorage.setItem('notif_rejected_ls', 0);
-        load_notif_line_support();
-        realtime_load_notif_line_support = setInterval(load_notif_line_support, 30000);
     });
+
+    const fetch_line_dropdown_search = () => {
+        let section = '<?=$_SESSION['section']?>';
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#line_no_search').html(response);
+            }
+        });
+    }
 
     const get_absences_reasons = () => {
         $.ajax({
@@ -76,7 +89,7 @@
     const get_attendance_list_counting = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var attendance_status = sessionStorage.getItem('attendance_status_search');
 
         $.ajax({
@@ -87,7 +100,7 @@
                 method: 'get_attendance_list_counting',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status
             },
             beforeSend: () => {
@@ -104,7 +117,7 @@
     const count_attendance_present = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
 
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
@@ -114,7 +127,7 @@
                 method: 'count_attendance_present',
                 day: day,
                 shift_group: shift_group,
-                dept: dept
+                line_no: line_no
             },
             success: function (response) {
                 let total = parseInt(sessionStorage.getItem('count_rows'));
@@ -139,7 +152,7 @@
     const count_attendance_list = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
@@ -149,7 +162,7 @@
                 method: 'count_attendance_list',
                 day: day,
                 shift_group: shift_group,
-                dept: dept
+                line_no: line_no
             },
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -180,7 +193,7 @@
     const get_attendances_last_page = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
@@ -190,7 +203,7 @@
                 method: 'attendance_list_last_page',
                 day: day,
                 shift_group: shift_group,
-                dept: dept
+                line_no: line_no
             },
             success: function (response) {
                 sessionStorage.setItem('last_page', response);
@@ -215,23 +228,23 @@
 
         let day = document.getElementById('attendance_date_search').value;
         let shift_group = document.getElementById('shift_group_search').value;
-        let dept = document.getElementById('dept_search').value;
+        let line_no = document.getElementById('line_no_search').value;
         let attendance_status = document.getElementById('attendance_status_search').value;
 
         var day1 = sessionStorage.getItem('attendance_date_search');
         var shift_group1 = sessionStorage.getItem('shift_group_search');
-        var dept1 = sessionStorage.getItem('dept_search');
+        var line_no1 = sessionStorage.getItem('line_no_search');
         var attendance_status1 = sessionStorage.getItem('attendance_status_search');
 
         if (current_page > 1) {
             switch (true) {
                 case day !== day1:
                 case shift_group !== shift_group1:
-                case dept !== dept1:
+                case line_no !== line_no1:
                 case attendance_status !== attendance_status1:
                     day = day1;
                     shift_group = shift_group1;
-                    dept = dept1;
+                    line_no = line_no1;
                     attendance_status = attendance_status1;
                     break;
                 default:
@@ -239,7 +252,7 @@
         } else {
             sessionStorage.setItem('attendance_date_search', day);
             sessionStorage.setItem('shift_group_search', shift_group);
-            sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('line_no_search', line_no);
             sessionStorage.setItem('attendance_status_search', attendance_status);
         }
 
@@ -254,7 +267,7 @@
                 method: 'get_attendance_list',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status,
                 current_page: current_page
             },
@@ -288,17 +301,15 @@
                 let rows = doc.querySelectorAll('tr');
 
                 // Process each row
-                setTimeout(() => {
-                    rows.forEach(row => {
-                        // Extract the first <td> value
-                        let firstTd = row.querySelector('td');
-                        if (firstTd) {
-                            let rowId = firstTd.innerText.trim(); // Suppose this is the corresponding row ID
-                            populate_absences_reasons_dropdown(`absrd_${rowId}`, absentReasonJsonData);
-                        }
-                    });
-                }, 500);
-                
+                rows.forEach(row => {
+                    // Extract the first <td> value
+                    let firstTd = row.querySelector('td');
+                    if (firstTd) {
+                        let rowId = firstTd.innerText.trim(); // Suppose this is the corresponding row ID
+                        populate_absences_reasons_dropdown(`absrd_${rowId}`, absentReasonJsonData);
+                    }
+                });
+
                 count_attendance_list();
                 // Set the flag back to false as the AJAX call has completed
                 get_attendance_list_ajax_in_process = false;
@@ -536,21 +547,21 @@
     const export_attendances = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_attendances.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_attendances_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
     }
 
     const export_absences = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_absences.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_absences_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
     }
 
     const export_attendances_counting = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_attendances_counting.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_attendances_counting_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
     }
 </script>
