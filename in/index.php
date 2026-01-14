@@ -149,7 +149,7 @@ if (!isset($_SESSION['emp_no'])) {
         $wrong_scanning = true;
       } else {
         // Set Day (Revised 2024-01-10)
-        if ($server_time >= '00:00:00' && $server_time < '05:00:00') {
+        if ($server_time >= '00:00:00' && $server_time < '04:00:00') {
           $day = $server_date_only_yesterday;
         } else {
           $day = $server_date_only;
