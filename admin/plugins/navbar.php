@@ -84,6 +84,9 @@ if (!isset($_SESSION['emp_no'])) {
       <li class="nav-item d-none d-sm-inline-block">
         <a href="../out" class="nav-link">Time Out</a>
       </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="absences.php" class="nav-link">Absences</a>
+      </li>
     </ul>
 
     <!-- Right navbar links -->

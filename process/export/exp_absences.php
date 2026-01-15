@@ -21,7 +21,11 @@ switch (true) {
 
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
-$dept = $_GET['dept'];
+if (empty($_GET['dept'])) {
+	$dept = $_SESSION['dept'];
+} else {
+	$dept = $_GET['dept'];
+}
 $section = $_SESSION['section'];
 $line_no = $_SESSION['line_no'];
 

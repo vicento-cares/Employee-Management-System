@@ -1099,6 +1099,161 @@ if ($method == 'update_type_of_absent') {
 	echo json_encode($response_arr);
 }
 
+// Absences
+
+if ($method == 'get_absences_list') {
+	$day = $_POST['day'];
+	$shift_group = $_POST['shift_group'];
+
+	if (!isset($_SESSION['emp_no'])) {
+		echo 'session timeout. please relogin account';
+		$conn = null;
+		exit();
+	}
+
+	$dept = $_SESSION['dept'];
+	$section = $_SESSION['section'];
+	$line_no = $_SESSION['line_no'];
+	if (isset($_POST['attendance_status'])) {
+		$attendance_status = intval($_POST['attendance_status']);
+	}
+	
+	$c = 0;
+	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-danger');
+	$row_class = $row_class_arr[0];
+
+	$sql = "SELECT 
+				emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift, emp.shift_group, emp.resigned_date,
+				tio.time_in, tio.day AS time_in_day, tio.shift AS time_in_shift, 
+				absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason,
+				pic.file_url 
+			FROM m_employees emp
+			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
+			LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = ? 
+			LEFT JOIN m_employee_pictures pic ON pic.emp_no = emp.emp_no
+			WHERE emp.shift_group = ? AND tio.time_in IS NULL";
+			
+	$params = [
+		$day,
+		$day,
+		$shift_group
+	];
+
+	if (!empty($dept)) {
+		$sql = $sql . " AND emp.dept LIKE ?";
+		$dept_param = $dept . "%";
+		$params[] = $dept_param;
+	} else {
+		$sql = $sql . " AND emp.dept != ''";
+	}
+	if (!empty($section)) {
+		$sql = $sql . " AND emp.section LIKE ?";
+		$section_param = $section . "%";
+		$params[] = $section_param;
+	}
+	if (!empty($line_no)) {
+		$sql = $sql . " AND emp.line_no LIKE ?";
+		$line_no_param = $line_no . "%";
+		$params[] = $line_no_param;
+	}
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
+	$params[] = $day;
+	$params[] = $day;
+	$sql = $sql . " ORDER BY emp.emp_no ASC";
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		do {
+			$c++;
+
+			if (!empty($row['time_in'])) {
+				$row_class = $row_class_arr[1];
+				echo '<tr class="'.$row_class.'">';
+			} else {
+				$row_class = $row_class_arr[2];
+				$row_day = '';
+				$row_shift = '';
+				if (!empty($row['absent_day']) && !empty($row['absent_shift_group'])) {
+					$row_day = $row['absent_day'];
+					$row_shift_group = $row['absent_shift_group'];
+				} else {
+					$row_day = $day;
+					$row_shift_group = $shift_group;
+				}
+				
+				echo '<tr class="'.$row_class.'">';
+				// echo '<tr style="cursor:pointer;" class="'.$row_class.'" data-toggle="modal" data-target="#absence_details" onclick="get_absence_details(&quot;'.$row['absent_id'].'~!~'.$row['emp_no'].'~!~'.$row['full_name'].'~!~'.$row_day.'~!~'.$row_shift_group.'~!~'.$row['absent_type'].'~!~'.$row['reason'].'&quot;)">';
+			}
+
+			echo '<td style="vertical-align: middle;">'.$c.'</td>';
+
+			if (empty($_SESSION['emp_no_hr'])) {
+				if (!empty($row['time_in'])) {
+					echo '<td style="vertical-align: middle;"></td>';
+					echo '<td style="vertical-align: middle;"></td>';
+				} else {
+					echo '<td style="vertical-align: middle;">
+							<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
+								<option disabled selected value="">Select Reason</option>
+								<option value="reason1">reason1</option>
+								<option value="reason2">reason2</option>
+								<option value="reason3">reason3</option>
+								<option value="reason4">reason4</option>
+							</select>
+						</td>';
+					echo '<td style="vertical-align: middle;">
+							<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
+								<option disabled selected value="">Select Type of Absent</option>
+							</select>
+						</td>';
+				}
+			}
+			
+			echo '<td style="vertical-align: middle;" id="abst_'.$c.'">'.$row['absent_type'].'</td>';
+			$reason = $row['reason'];
+			// if (strlen($reason) > 12) {
+			// 	$reason = substr($reason, 0, 12) . "...";
+			// }
+			echo '<td style="vertical-align: middle;" id="absr_'.$c.'">'.$reason.'</td>';
+
+			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+			if (!empty($row['file_url'])) {
+				echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$row['file_url']).'" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
+			} else {
+				echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
+			}
+
+			echo '<td style="vertical-align: middle;">'.$row['emp_no'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['full_name'].'</td>';
+
+			if (!empty($row['time_in'])) {
+				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
+			} else {
+				echo '<td style="vertical-align: middle;">'.$row['absent_day'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['absent_shift_group'].'</td>';
+			}
+			echo '<td style="vertical-align: middle;">'.$row['provider'].'</td>';
+			
+			echo '<td style="vertical-align: middle;">'.$row['dept'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['section'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['line_no'].'</td>';
+
+			echo '</tr>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	}else{
+		echo '<tr>';
+			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
+	}
+}
+
 // Attendance Summary Report
 
 if ($method == 'count_attendance_summary_report') {
