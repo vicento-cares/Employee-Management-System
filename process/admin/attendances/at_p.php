@@ -310,6 +310,8 @@ if ($method == 'get_attendance_list') {
 	$shift_group = $_POST['shift_group'];
 	$attendance_status = 0;
 
+	$server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
+
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
 			$dept = $_POST['dept'];
@@ -334,9 +336,6 @@ if ($method == 'get_attendance_list') {
 		} else {
 			$line_no = '';
 		}
-		if (isset($_POST['attendance_status'])) {
-			$attendance_status = intval($_POST['attendance_status']);
-		}
 	} else {
 		if (!empty($_POST['dept'])) {
 			$dept = $_POST['dept'];
@@ -345,9 +344,10 @@ if ($method == 'get_attendance_list') {
 		}
 		$section = '';
 		$line_no = $_SESSION['line_no'];
-		if (isset($_POST['attendance_status'])) {
-			$attendance_status = intval($_POST['attendance_status']);
-		}
+	}
+
+	if (isset($_POST['attendance_status'])) {
+		$attendance_status = intval($_POST['attendance_status']);
 	}
 
 	$current_page = intval($_POST['current_page']);
@@ -447,26 +447,42 @@ if ($method == 'get_attendance_list') {
 
 			echo '<td style="vertical-align: middle;">'.$c.'</td>';
 
-			if (empty($_SESSION['emp_no_hr'])) {
-				if (!empty($row['time_in'])) {
-					echo '<td style="vertical-align: middle;"></td>';
-					echo '<td style="vertical-align: middle;"></td>';
-				} else {
-					echo '<td style="vertical-align: middle;">
-							<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
-								<option disabled selected value="">Select Reason</option>
-								<option value="reason1">reason1</option>
-								<option value="reason2">reason2</option>
-								<option value="reason3">reason3</option>
-								<option value="reason4">reason4</option>
-							</select>
-						</td>';
-					echo '<td style="vertical-align: middle;">
-							<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
-								<option disabled selected value="">Select Type of Absent</option>
-							</select>
-						</td>';
-				}
+			if (!empty($row['time_in'])) {
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
+			} else if (isset($_SESSION['emp_no_hr'])) {
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
+							<option disabled selected value="">Select Reason</option>
+							<option value="reason1">reason1</option>
+							<option value="reason2">reason2</option>
+							<option value="reason3">reason3</option>
+							<option value="reason4">reason4</option>
+						</select>
+					</td>';
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
+							<option disabled selected value="">Select Type of Absent</option>
+						</select>
+					</td>';
+			} else if (($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) || ($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
+							<option disabled selected value="">Select Reason</option>
+							<option value="reason1">reason1</option>
+							<option value="reason2">reason2</option>
+							<option value="reason3">reason3</option>
+							<option value="reason4">reason4</option>
+						</select>
+					</td>';
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
+							<option disabled selected value="">Select Type of Absent</option>
+						</select>
+					</td>';
+			} else {
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
 			}
 			
 			echo '<td style="vertical-align: middle;" id="abst_'.$c.'">'.$row['absent_type'].'</td>';
@@ -491,9 +507,9 @@ if ($method == 'get_attendance_list') {
 				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
 				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
 			} else {
-				echo '<td style="vertical-align: middle;">'.$row['absent_day'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row_day.'</td>';
 				echo '<td style="vertical-align: middle;">'.$row['shift'].'</td>';
-				echo '<td style="vertical-align: middle;">'.$row['absent_shift_group'].'</td>';
+				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
 			}
 			echo '<td style="vertical-align: middle;">'.$row['provider'].'</td>';
 			
@@ -503,9 +519,9 @@ if ($method == 'get_attendance_list') {
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-	}else{
+	} else {
 		echo '<tr>';
-			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="15" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }
@@ -972,29 +988,46 @@ if ($method == 'update_reason') {
 	$absent_shift_group = trim($_POST['absent_shift_group']);
 	$reason = trim($_POST['reason']);
 	$absent_type = '';
-	$submitted_by_no = '';
-	$updated_by_no = '';
+	$absent_category = '';
+
+	$emp_no_session = '';
 
 	if (isset($_SESSION['emp_no'])) {
-		$submitted_by_no = $_SESSION['emp_no'];
-		$updated_by_no = $_SESSION['emp_no'];
+		$emp_no_session = $_SESSION['emp_no'];
 	} else if (isset($_SESSION['emp_no_control_area'])) {
-		$submitted_by_no = $_SESSION['emp_no_control_area'];
-		$updated_by_no = $_SESSION['emp_no_control_area'];
+		$emp_no_session = $_SESSION['emp_no_control_area'];
+	} else if (isset($_SESSION['emp_no_hr'])) {
+		$emp_no_session = $_SESSION['full_name']; // Temporary Since No HR Accounts
 	} else {
 		echo json_encode(['message' => 'session timeout. please relogin account']);
 		$conn = null;
 		exit();
 	}
 
+	$submitted_by_no = $emp_no_session;
+	$updated_by_no = $emp_no_session;
+
 	$insertedId = '';
 	$message = '';
 
+	$sql = "SELECT absent_category FROM m_absences_reasons WHERE reason = ?";
+
+	$params = [$reason];
+
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	if ($row) {
+		$absent_category = $row['absent_category'];
+	}
+
 	if (empty($id)) {
-		$sql = "INSERT INTO t_absences (emp_no, day, shift_group, reason";
+		$sql = "INSERT INTO t_absences (emp_no, day, shift_group, reason, absent_category";
 
 		$columns = [];
-		$params = [$emp_no, $absent_day, $absent_shift_group, $reason];
+		$params = [$emp_no, $absent_day, $absent_shift_group, $reason, $absent_category];
 
 		if (isset($_POST['absent_type'])) {
 			$absent_type = trim($_POST['absent_type']);
@@ -1013,7 +1046,7 @@ if ($method == 'update_reason') {
 		}
 
 		// Complete the query with the VALUES part
-		$sql .= " VALUES (?, ?, ?, ?" . str_repeat(", ?", count($columns)) . ")";
+		$sql .= " VALUES (?, ?, ?, ?, ?" . str_repeat(", ?", count($columns)) . ")";
 
 		$stmt = $conn->prepare($sql);
 		
@@ -1024,9 +1057,9 @@ if ($method == 'update_reason') {
 			$message = 'error';
 		}
 	} else {
-		$params = [$reason];
+		$sql = "UPDATE t_absences SET reason = ?, absent_category = ?";
 
-		$sql = "UPDATE t_absences SET reason = ?";
+		$params = [$reason, $absent_category];
 
 		if (isset($_POST['absent_type'])) {
 			$absent_type = trim($_POST['absent_type']);
@@ -1075,6 +1108,8 @@ if ($method == 'update_type_of_absent') {
 		$updated_by_no = $_SESSION['emp_no'];
 	} else if (isset($_SESSION['emp_no_control_area'])) {
 		$updated_by_no = $_SESSION['emp_no_control_area'];
+	} else if (isset($_SESSION['emp_no_hr'])) {
+		$updated_by_no = $_SESSION['full_name']; // Temporary Since No HR Accounts
 	} else {
 		echo json_encode(['message' => 'session timeout. please relogin account']);
 		$conn = null;
@@ -1104,6 +1139,8 @@ if ($method == 'update_type_of_absent') {
 if ($method == 'get_absences_list') {
 	$day = $_POST['day'];
 	$shift_group = $_POST['shift_group'];
+	
+	$server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
 
 	if (!isset($_SESSION['emp_no'])) {
 		echo 'session timeout. please relogin account';
@@ -1191,26 +1228,27 @@ if ($method == 'get_absences_list') {
 
 			echo '<td style="vertical-align: middle;">'.$c.'</td>';
 
-			if (empty($_SESSION['emp_no_hr'])) {
-				if (!empty($row['time_in'])) {
-					echo '<td style="vertical-align: middle;"></td>';
-					echo '<td style="vertical-align: middle;"></td>';
-				} else {
-					echo '<td style="vertical-align: middle;">
-							<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
-								<option disabled selected value="">Select Reason</option>
-								<option value="reason1">reason1</option>
-								<option value="reason2">reason2</option>
-								<option value="reason3">reason3</option>
-								<option value="reason4">reason4</option>
-							</select>
-						</td>';
-					echo '<td style="vertical-align: middle;">
-							<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
-								<option disabled selected value="">Select Type of Absent</option>
-							</select>
-						</td>';
-				}
+			if (!empty($row['time_in'])) {
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
+			} if (($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) || ($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
+							<option disabled selected value="">Select Reason</option>
+							<option value="reason1">reason1</option>
+							<option value="reason2">reason2</option>
+							<option value="reason3">reason3</option>
+							<option value="reason4">reason4</option>
+						</select>
+					</td>';
+				echo '<td style="vertical-align: middle;">
+						<select class="form-control" id="abstd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_type_of_absent('.$c.', this)" disabled>
+							<option disabled selected value="">Select Type of Absent</option>
+						</select>
+					</td>';
+			} else {
+				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
 			}
 			
 			echo '<td style="vertical-align: middle;" id="abst_'.$c.'">'.$row['absent_type'].'</td>';
@@ -1247,9 +1285,9 @@ if ($method == 'get_absences_list') {
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-	}else{
+	} else {
 		echo '<tr>';
-			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="15" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }

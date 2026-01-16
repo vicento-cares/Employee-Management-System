@@ -1,3 +1,12 @@
+<?php 
+function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
+  if ($server_time >= '06:00:00' && $server_time <= '23:59:59') {
+    return $server_date_only;
+  } else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+    return $server_date_only_yesterday;
+  }
+}
+?>
 <script type="text/javascript">
     // AJAX IN PROGRESS GLOBAL VARS
     var get_attendance_list_ajax_in_process = false;
@@ -6,7 +15,7 @@
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
+        document.getElementById('attendance_date_search').value = '<?= get_day($server_time, $server_date_only, $server_date_only_yesterday) ?>';
         fetch_line_dropdown_search();
         get_absences_reasons();
         get_attendance_list(1);
@@ -324,112 +333,112 @@
         });
     }
 
-    const get_absence_details = (param) => {
-        var string = param.split('~!~');
-        var absent_id = string[0];
-        var emp_no = string[1];
-        var full_name = string[2];
-        var absent_day = string[3];
-        var absent_shift_group = string[4];
-        var absent_type = string[5];
-        var reason = string[6];
+    // const get_absence_details = (param) => {
+    //     var string = param.split('~!~');
+    //     var absent_id = string[0];
+    //     var emp_no = string[1];
+    //     var full_name = string[2];
+    //     var absent_day = string[3];
+    //     var absent_shift_group = string[4];
+    //     var absent_type = string[5];
+    //     var reason = string[6];
 
-        document.getElementById('id_absence_update').value = absent_id;
-        document.getElementById('emp_no_absence_update').innerHTML = emp_no;
-        document.getElementById('full_name_absence_update').innerHTML = full_name;
-        document.getElementById('absent_day_absence_update').innerHTML = absent_day;
-        document.getElementById('absent_shift_group_absence_update').innerHTML = absent_shift_group;
-        document.getElementById('absent_type_absence_update').value = absent_type;
-        document.getElementById('reason_absence_update').value = reason;
-    }
+    //     document.getElementById('id_absence_update').value = absent_id;
+    //     document.getElementById('emp_no_absence_update').innerHTML = emp_no;
+    //     document.getElementById('full_name_absence_update').innerHTML = full_name;
+    //     document.getElementById('absent_day_absence_update').innerHTML = absent_day;
+    //     document.getElementById('absent_shift_group_absence_update').innerHTML = absent_shift_group;
+    //     document.getElementById('absent_type_absence_update').value = absent_type;
+    //     document.getElementById('reason_absence_update').value = reason;
+    // }
 
-    $("#absence_details").on('show.bs.modal', e => {
-        load_reason_absence_update_textarea();
-    });
+    // $("#absence_details").on('show.bs.modal', e => {
+    //     load_reason_absence_update_textarea();
+    // });
 
-    const load_reason_absence_update_textarea = () => {
-        setTimeout(() => {
-            var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
-            var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
-            var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
-            document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
-        }, 100);
-    }
+    // const load_reason_absence_update_textarea = () => {
+    //     setTimeout(() => {
+    //         var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
+    //         var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
+    //         var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
+    //         document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
+    //     }, 100);
+    // }
 
-    const count_reason_absence_update_char = () => {
-        var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
-        var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
-        var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
-        document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
-    }
+    // const count_reason_absence_update_char = () => {
+    //     var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
+    //     var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
+    //     var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
+    //     document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
+    // }
 
-    const save_absence_details = () => {
-        var id = document.getElementById('id_absence_update').value;
-        var emp_no = document.getElementById('emp_no_absence_update').innerHTML;
-        var absent_day = document.getElementById('absent_day_absence_update').innerHTML;
-        var absent_shift_group = document.getElementById('absent_shift_group_absence_update').innerHTML;
-        var absent_type = document.getElementById('absent_type_absence_update').value;
-        var reason = document.getElementById('reason_absence_update').value;
+    // const save_absence_details = () => {
+    //     var id = document.getElementById('id_absence_update').value;
+    //     var emp_no = document.getElementById('emp_no_absence_update').innerHTML;
+    //     var absent_day = document.getElementById('absent_day_absence_update').innerHTML;
+    //     var absent_shift_group = document.getElementById('absent_shift_group_absence_update').innerHTML;
+    //     var absent_type = document.getElementById('absent_type_absence_update').value;
+    //     var reason = document.getElementById('reason_absence_update').value;
 
-        if (absent_type == '') {
-            Swal.fire({
-                icon: 'info',
-                title: 'Please Select Type of Absent !!!',
-                text: 'Information',
-                showConfirmButton: false,
-                timer: 1000
-            });
-        } else if (reason == '') {
-            Swal.fire({
-                icon: 'info',
-                title: 'Please Input Reason !!!',
-                text: 'Information',
-                showConfirmButton: false,
-                timer: 1000
-            });
-        } else {
-            $.ajax({
-                url: '../process/admin/attendances/at_p.php',
-                type: 'POST',
-                cache: false,
-                data: {
-                    method: 'save_absence_details',
-                    id: id,
-                    emp_no: emp_no,
-                    absent_day: absent_day,
-                    absent_shift_group: absent_shift_group,
-                    absent_type: absent_type,
-                    reason: reason
-                }, success: function (response) {
-                    if (response == 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Absence Details Saved Successfully',
-                            text: 'Success',
-                            showConfirmButton: false,
-                            timer: 1000
-                        });
-                        document.getElementById("id_absence_update").value = '';
-                        document.getElementById("emp_no_absence_update").value = '';
-                        document.getElementById("absent_day_absence_update").value = '';
-                        document.getElementById("absent_shift_group_absence_update").value = '';
-                        document.getElementById("absent_type_absence_update").value = '';
-                        document.getElementById("reason_absence_update").value = '';
-                        get_attendance_list(1);
-                        $('#absence_details').modal('hide');
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error !!!',
-                            text: 'Error',
-                            showConfirmButton: false,
-                            timer: 1000
-                        });
-                    }
-                }
-            });
-        }
-    }
+    //     if (absent_type == '') {
+    //         Swal.fire({
+    //             icon: 'info',
+    //             title: 'Please Select Type of Absent !!!',
+    //             text: 'Information',
+    //             showConfirmButton: false,
+    //             timer: 1000
+    //         });
+    //     } else if (reason == '') {
+    //         Swal.fire({
+    //             icon: 'info',
+    //             title: 'Please Input Reason !!!',
+    //             text: 'Information',
+    //             showConfirmButton: false,
+    //             timer: 1000
+    //         });
+    //     } else {
+    //         $.ajax({
+    //             url: '../process/admin/attendances/at_p.php',
+    //             type: 'POST',
+    //             cache: false,
+    //             data: {
+    //                 method: 'save_absence_details',
+    //                 id: id,
+    //                 emp_no: emp_no,
+    //                 absent_day: absent_day,
+    //                 absent_shift_group: absent_shift_group,
+    //                 absent_type: absent_type,
+    //                 reason: reason
+    //             }, success: function (response) {
+    //                 if (response == 'success') {
+    //                     Swal.fire({
+    //                         icon: 'success',
+    //                         title: 'Absence Details Saved Successfully',
+    //                         text: 'Success',
+    //                         showConfirmButton: false,
+    //                         timer: 1000
+    //                     });
+    //                     document.getElementById("id_absence_update").value = '';
+    //                     document.getElementById("emp_no_absence_update").value = '';
+    //                     document.getElementById("absent_day_absence_update").value = '';
+    //                     document.getElementById("absent_shift_group_absence_update").value = '';
+    //                     document.getElementById("absent_type_absence_update").value = '';
+    //                     document.getElementById("reason_absence_update").value = '';
+    //                     get_attendance_list(1);
+    //                     $('#absence_details').modal('hide');
+    //                 } else {
+    //                     Swal.fire({
+    //                         icon: 'error',
+    //                         title: 'Error !!!',
+    //                         text: 'Error',
+    //                         showConfirmButton: false,
+    //                         timer: 1000
+    //                     });
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
 
     const update_type_of_absent = (row, selectElement) => {
         const id = selectElement.dataset.absent_id;

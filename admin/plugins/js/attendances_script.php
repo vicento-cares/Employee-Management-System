@@ -1,3 +1,12 @@
+<?php 
+function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
+  if ($server_time >= '06:00:00' && $server_time <= '23:59:59') {
+    return $server_date_only;
+  } else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+    return $server_date_only_yesterday;
+  }
+}
+?>
 <script type="text/javascript">
     // AJAX IN PROGRESS GLOBAL VARS
     var get_attendance_list_ajax_in_process = false;
@@ -6,7 +15,7 @@
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
+        document.getElementById('attendance_date_search').value = '<?= get_day($server_time, $server_date_only, $server_date_only_yesterday) ?>';
         get_absences_reasons();
         get_attendance_list(1);
         sessionStorage.setItem('notif_pending_ls', 0);

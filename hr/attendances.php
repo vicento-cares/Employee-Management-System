@@ -73,6 +73,14 @@
               </div>
               <div class="row mb-2">
                 <div class="col-sm-2">
+                  <label>Attendance Status</label>
+                  <select id="attendance_status_search" class="form-control">
+                    <option selected value="0">All Attendances</option>
+                    <option value="1">All Present</option>
+                    <option value="2">All Absent</option>
+                  </select>
+                </div>
+                <div class="col-sm-2">
                   <label>Present MP</label><br>
                   <span id="count_view_present"></span>
                 </div>
@@ -80,7 +88,7 @@
                   <label>Absent MP</label><br>
                   <span id="count_view_absent"></span>
                 </div>
-                <div class="col-sm-4 offset-sm-2">
+                <div class="col-sm-4">
                   <label>&nbsp;</label>
                   <button type="button" class="btn bg-danger btn-block" onclick="export_absences()"><i class="fas fa-download"></i> Export Absences Report</button>
                 </div>
@@ -113,6 +121,8 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Select Reason</th>
+                      <th>Select Type of Absent</th>
                       <th>Type of Absent</th>
                       <th>Reason</th>
                       <th>Picture</th>
@@ -129,7 +139,7 @@
                   </thead>
                   <tbody id="attendanceData" style="text-align: center;">
                     <tr>
-                      <td colspan="13" style="text-align:center;">
+                      <td colspan="15" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>
