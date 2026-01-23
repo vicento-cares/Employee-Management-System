@@ -11,6 +11,8 @@ $pro = $_GET['pro'] ?? '';
 $date = $_GET['date'] ?? '';
 $date_authorized = $_GET['date_authorized'] ?? '';
 $fullname = $_GET['fullname'] ?? '';
+$employee_status = $_GET['employee_status'] ?? '';
+$expire_date_status = $_GET['expire_date_status'] ?? '';
 
 $dept = '';
 $section = '';
@@ -120,6 +122,38 @@ if (!empty($line_no)) {
     $query .= " AND emp.line_no LIKE ?";
     $line_no_search = $line_no . "%";
     $params[] = $line_no_search;
+}
+
+if (!empty($employee_status)) {
+    switch ($employee_status) {
+        case 1:
+            $query .= " AND emp.resigned = 0";
+            break;
+        case 2:
+            $query .= " AND emp.resigned = 1";
+            break;
+    }
+}
+
+if (!empty($expire_date_status)) {
+    switch ($expire_date_status) {
+        case 1:
+            // Not expired (active)
+            $query .= " AND a.expire_date > DATEADD(MONTH, 3, GETDATE())";
+            break;
+        case 2:
+            // Near expiration (within 3 month)
+            $query .= " AND a.expire_date < DATEADD(MONTH, 3, GETDATE()) AND a.expire_date >= DATEADD(MONTH, 1, GETDATE())";
+            break;
+        case 3:
+            // Near expiration (within 1 month)
+            $query .= " AND a.expire_date < DATEADD(MONTH, 1, GETDATE()) AND a.expire_date >= GETDATE()";
+            break;
+        case 4:
+            // Expired
+            $query .= " AND a.expire_date < GETDATE()";
+            break;
+    }
 }
 
 $query .= ") SELECT *
