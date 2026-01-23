@@ -115,6 +115,8 @@
         var dept = document.getElementById('dept_search').value;
         var section = document.getElementById('section_search').value;
         var line_no = document.getElementById('line_no_search').value;
+        var employee_status = document.getElementById('employee_status').value;
+        var expire_date_status = document.getElementById('expire_date_status').value;
 
         if (pro == 'Please select a process.....') {
             pro = '';
@@ -138,6 +140,8 @@
                 dept: dept,
                 section: section,
                 line_no: line_no,
+                employee_status: employee_status,
+                expire_date_status: expire_date_status,
                 current_page: current_page
 
             }, success: function (response) {
@@ -158,6 +162,8 @@
         var dept = document.getElementById('dept_search').value;
         var section = document.getElementById('section_search').value;
         var line_no = document.getElementById('line_no_search').value;
+        var employee_status = document.getElementById('employee_status').value;
+        var expire_date_status = document.getElementById('expire_date_status').value;
 
         if (pro == 'Please select a process.....') {
             pro = '';
@@ -180,7 +186,9 @@
                 fullname: fullname,
                 dept: dept,
                 section: section,
-                line_no: line_no
+                line_no: line_no,
+                employee_status: employee_status,
+                expire_date_status: expire_date_status
 
             }, success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -212,6 +220,8 @@
         var dept = document.getElementById('dept_search').value;
         var section = document.getElementById('section_search').value;
         var line_no = document.getElementById('line_no_search').value;
+        var employee_status = document.getElementById('employee_status').value;
+        var expire_date_status = document.getElementById('expire_date_status').value;
         var current_page = sessionStorage.getItem('process_details_pagination');
 
         if (pro == 'Please select a process.....') {
@@ -235,7 +245,9 @@
                 fullname: fullname,
                 dept: dept,
                 section: section,
-                line_no: line_no
+                line_no: line_no,
+                employee_status: employee_status,
+                expire_date_status: expire_date_status
             }, success: function (response) {
                 $('#process_details_paginations').html(response);
                 $('#process_details_pagination').val(current_page);
@@ -287,6 +299,8 @@
         var dept = document.getElementById('dept_search').value;
         var section = document.getElementById('section_search').value;
         var line_no = document.getElementById('line_no_search').value;
+        var employee_status = document.getElementById('employee_status').value;
+        var expire_date_status = document.getElementById('expire_date_status').value;
 
         if (category) {
             var encodedPro = encodeURIComponent(pro);
@@ -298,7 +312,9 @@
             + "&fullname=" + fullname 
             + "&dept=" + dept
             + "&section=" + section
-            + "&line_no=" + line_no, '_blank');
+            + "&line_no=" + line_no
+            + "&employee_status=" + employee_status
+            + "&expire_date_status=" + expire_date_status, '_blank');
         } else {
             alert('Please, select category.');
         }

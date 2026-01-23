@@ -97,6 +97,38 @@ function count_category($search_arr, $conn)
 		$params[] = $line_no_search;
 	}
 
+    if (!empty($search_arr['employee_status'])) {
+        switch ($search_arr['employee_status']) {
+            case 1:
+                $query .= " AND emp.resigned = 0";
+                break;
+            case 2:
+                $query .= " AND emp.resigned = 1";
+                break;
+        }
+    }
+
+    if (!empty($search_arr['expire_date_status'])) {
+        switch ($search_arr['expire_date_status']) {
+            case 1:
+                // Not expired (active)
+                $query .= " AND a.expire_date > DATEADD(MONTH, 3, GETDATE())";
+                break;
+            case 2:
+                // Near expiration (within 3 month)
+                $query .= " AND a.expire_date < DATEADD(MONTH, 3, GETDATE()) AND a.expire_date >= DATEADD(MONTH, 1, GETDATE())";
+                break;
+            case 3:
+                // Near expiration (within 1 month)
+                $query .= " AND a.expire_date < DATEADD(MONTH, 1, GETDATE()) AND a.expire_date >= GETDATE()";
+                break;
+            case 4:
+                // Expired
+                $query .= " AND a.expire_date < GETDATE()";
+                break;
+        }
+    }
+
 	$query .= ") SELECT COUNT(id) AS total
 					FROM RankedAuth
 					WHERE rn = 1";
@@ -121,6 +153,8 @@ if ($method == 'count_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+    $employee_status = $_POST['employee_status'];
+    $expire_date_status = $_POST['expire_date_status'];
 
 	$dept = '';
 	$section = '';
@@ -149,7 +183,9 @@ if ($method == 'count_category') {
 		"fullname" => $fullname,
 		"dept" => $dept,
 		"section" => $section,
-		"line_no" => $line_no
+		"line_no" => $line_no,
+        "employee_status" => $employee_status,
+        "expire_date_status" => $expire_date_status
 	);
 
 	echo count_category($search_arr, $conn);
@@ -162,6 +198,8 @@ if ($method == 'fetch_category_pagination') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+    $employee_status = $_POST['employee_status'];
+    $expire_date_status = $_POST['expire_date_status'];
 
 	$dept = '';
 	$section = '';
@@ -190,7 +228,9 @@ if ($method == 'fetch_category_pagination') {
 		"fullname" => $fullname,
 		"dept" => $dept,
 		"section" => $section,
-		"line_no" => $line_no
+		"line_no" => $line_no,
+        "employee_status" => $employee_status,
+        "expire_date_status" => $expire_date_status
 	);
 
 	$results_per_page = 100;
@@ -212,6 +252,8 @@ if ($method == 'fetch_category') {
 	$date = $_POST['date'];
 	$date_authorized = $_POST['date_authorized'];
 	$fullname = $_POST['fullname'];
+    $employee_status = $_POST['employee_status'];
+    $expire_date_status = $_POST['expire_date_status'];
 
 	$dept = '';
 	$section = '';
@@ -262,6 +304,12 @@ if ($method == 'fetch_category') {
                          a.r_of_cancellation, a.d_of_cancellation, a.remarks, a.i_status, a.r_status, 
                          b.fullname, b.agency, b.emp_id, 
 						 sl.id AS skill_level_id, sl.skill_level, 
+						 CASE 
+							WHEN a.expire_date < GETDATE() THEN 'Expired'
+                            WHEN a.expire_date < DATEADD(MONTH, 1, GETDATE()) THEN 'Near Expiration'
+                            WHEN a.expire_date < DATEADD(MONTH, 3, GETDATE()) THEN '3 Months Before Expiration'
+							ELSE 'Active'
+						 END AS status, 
 						 ROW_NUMBER() OVER (PARTITION BY a.emp_id, a.auth_no ORDER BY a.auth_year DESC) AS rn
 					FROM $table_name a 
 					LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
@@ -318,6 +366,39 @@ if ($method == 'fetch_category') {
 			$params[] = $line_no_search;
 		}
 
+        if (!empty($employee_status)) {
+            switch ($employee_status) {
+                case 1:
+                    $query .= " AND emp.resigned = 0";
+                    break;
+                case 2:
+                    $query .= " AND emp.resigned = 1";
+                    break;
+            }
+		}
+
+        if (!empty($expire_date_status)) {
+            switch ($expire_date_status) {
+                case 1:
+                    // Not expired (active)
+                    $query .= " AND a.expire_date > DATEADD(MONTH, 3, GETDATE())";
+                    break;
+                case 2:
+                    // Near expiration (within 3 month)
+                    $query .= " AND a.expire_date < DATEADD(MONTH, 3, GETDATE()) AND a.expire_date >= DATEADD(MONTH, 1, GETDATE())";
+                    break;
+                case 3:
+                    // Near expiration (within 1 month)
+                    $query .= " AND a.expire_date < DATEADD(MONTH, 1, GETDATE()) AND a.expire_date >= GETDATE()";
+                    break;
+                case 4:
+                    // Expired
+                    $query .= " AND a.expire_date < GETDATE()";
+                    break;
+            }
+        }
+
+
 		$query .= " ORDER BY a.process ASC, b.fullname ASC, a.auth_year DESC 
                     OFFSET ? ROWS 
                     FETCH NEXT ? ROWS ONLY";
@@ -346,10 +427,17 @@ if ($method == 'fetch_category') {
 			do {
 				$c++;
 
-				$row_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
+				$cell_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
+                $row_class = "";
+                if ($row['status'] == 'Near Expiration' || $row['status'] == 'Expired') {
+                    $row_class = " bg-orange";
+                } else if ($row['status'] == '3 Months Before Expiration') {
+                    $row_class = " bg-warning";
+                }
+                $cell_class2 = ($row['status'] == 'Expired') ? " bg-danger" : "";
 
 				if (isset($_SESSION['emp_no_control_area'])) {
-					echo '<tr style="cursor:pointer;" class="modal-trigger" 
+					echo '<tr style="cursor:pointer;" class="modal-trigger'.$row_class.'" 
 							data-toggle="modal" data-target="#update_skill_level" 
 							onclick="get_skill_level_details(&quot;'.
 							$row['skill_level_id'].'~!~'.
@@ -357,15 +445,15 @@ if ($method == 'fetch_category') {
 							$row['emp_id'].'~!~'.
 							$row['process'].'&quot;)">';
 				} else {
-					echo '<tr>';
+					echo '<tr class="'.$row_class.'">';
 				}
 
-				echo '<td>' . $c . '</td>';
+				echo '<td class="'.$cell_class.'">' . $c . '</td>';
 				echo '<td>' . htmlspecialchars($row['process']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['auth_no']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['auth_year']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['date_authorized']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['expire_date']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['expire_date']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['fullname']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['emp_id']) . '</td>';
 				echo '<td>' . htmlspecialchars($row['batch']) . '</td>';
