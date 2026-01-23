@@ -77,8 +77,26 @@
                 </div>
               </div>
               <br>
-              <div class="row">
-                <div class="col-sm-3 offset-sm-5">
+              <div class="row mb-2">
+                <div class="col-sm-2">
+                  <label for="">Active / Resigned</label>
+                  <select id="employee_status" class="form-control" onchange="search_data(1)">
+                    <option value="" selected>All</option>
+                    <option value="1">Active</option>
+                    <option value="2">Resigned</option>
+                  </select>
+                </div>
+                <div class="col-sm-2">
+                  <label for="">Expire Date Status</label>
+                  <select id="expire_date_status" class="form-control" onchange="search_data(1)">
+                    <option value="" selected>All</option>
+                    <option value="1">Active</option>
+                    <option value="2">3 Months Before Expiration</option>
+                    <option value="3">1 Month Before Expiration</option>
+                    <option value="4">Expired</option>
+                  </select>
+                </div>
+                <div class="col-sm-3 offset-sm-1">
                   <?php if (empty($_SESSION['line_no'])) {?>
                   <label>Line No.</label>
                   <select id="line_no_search" class="form-control" onchange="search_data(1)">
@@ -104,8 +122,18 @@
                     <i class="fas fa-download"></i>&nbsp;&nbsp;Export</a>
                 </div>
               </div>
-
-              <br>
+              <div class="row mb-2">
+                <div class="form-group mb-0 px-2">
+                <label><b>Process Certification Legend</b></label>
+                </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-sm-6 col-lg-2 p-1 border bg-danger"><center>Approved (# Table Cell Only)</center></div>
+                <div class="col-sm-6 col-lg-2 p-1 border"><center>Active</center></div>
+                <div class="col-sm-6 col-lg-2 p-1 border bg-warning"><center>3 Months Before Expiration</center></div>
+                <div class="col-sm-6 col-lg-2 p-1 border bg-orange"><center>1 Month Before Expiration</center></div>
+                <div class="col-sm-6 col-lg-4 p-1 border bg-danger"><center>Expired (Expire Date Table Cell Only)</center></div>
+              </div>
               <div class="col-12">
                 <div class="card-body table-responsive p-0" style="height: 550px;">
                   <table class="table table-head-fixed text-nowrap" id="employee_data">
