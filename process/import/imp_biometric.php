@@ -63,6 +63,30 @@ function parseDate($date_sample) {
     return "Invalid date format: " . htmlspecialchars($date_sample);
 }
 
+// parse Time
+function parseTime($time_sample) {
+    // Define an array of possible time formats
+    $formats = [
+        'H:i:s', // 24-hour format with seconds (HH:MM:SS)
+        'H:i',    // 24-hour format without seconds (HH:MM)
+        'g:i A',  // 12-hour format with AM/PM (hh:mm AM/PM)
+        'g:i:s A',// 12-hour format with seconds and AM/PM (hh:mm:ss AM/PM)
+        'H.i.s',  // 24-hour format with dots (HH.MM.SS)
+        // Add more formats as needed
+    ];
+
+    foreach ($formats as $format) {
+        $dateTime = DateTime::createFromFormat($format, $time_sample);
+        if ($dateTime) {
+            return $dateTime; // Return the DateTime object
+        }
+    }
+
+    // If no format matched, return an error or handle it as needed
+    return "Invalid time format: " . htmlspecialchars($time_sample);
+}
+
+
 function check_csv($file, $conn)
 {
     // READ FILE
@@ -77,7 +101,7 @@ function check_csv($file, $conn)
     fgets($csvFile);
 
     $shift_arr = array('DS', 'NS');
-    $day_code_arr = array('A', 'B', 'ADS');
+    $day_code_arr = array('REG', 'REST', 'SPL', 'HOL', 'COMP');
 
     $hasError = 0;
     $hasBlankError = 0;
@@ -110,15 +134,15 @@ function check_csv($file, $conn)
 
             $emp_no = custom_trim($line[0]);
             $day = custom_trim($line[1]);
-            $day_code = custom_trim($line[2]);
-            $shift = custom_trim($line[3]);
+            $day_code = strtoupper(custom_trim($line[2]));
+            $shift = strtoupper(custom_trim($line[3]));
             $time_in = custom_trim($line[4]);
             $time_out = custom_trim($line[5]);
 
             $day_valid = str_replace('/', '-', $day);
             $is_valid_day = validate_date($day_valid);
 
-            if ($emp_no == '' || $day == '' || $shift == '') {
+            if ($emp_no == '' || $day == '' || $day_code == '' || $shift == '') {
                 // IF BLANK DETECTED ERROR += 1
                 $hasBlankError++;
                 $hasError = 1;
@@ -217,7 +241,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     $isTransactionActive = true;
                 }
 
-                $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
+                $sql_insert = "INSERT INTO emp_mgt_backup.dbo.t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
                 $values = [];
                 $placeholders = [];
 
@@ -229,8 +253,8 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
 
                     $emp_no = custom_trim($line[0]);
                     $day = custom_trim($line[1]);
-                    $day_code = custom_trim($line[2]);
-                    $shift = custom_trim($line[3]);
+                    $day_code = strtoupper(custom_trim($line[2]));
+                    $shift = strtoupper(custom_trim($line[3]));
                     $time_in = custom_trim($line[4]);
                     $time_out = custom_trim($line[5]);
 
@@ -242,6 +266,57 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
                         } else {
                             echo "Parse Date Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+                            $conn = null;
+                            exit();
+                        }
+                    }
+
+                    if (!empty($time_in)) {
+                        $result = parseTime($time_in);
+
+                        // Check if the result is a DateTime object or an error message
+                        if ($result instanceof DateTime) {
+                            $time_in = $result->format('H:i:s'); // Outputs: 06:00:00
+
+                            // Determine the attendance date based on time_in
+                            $attendanceDate = new DateTime($day);
+
+                            // Check if time falls between midnight and 05:59:59
+                            if ($shift == 'NS' && $time_in < '06:00:00') {
+                                // Consider this time as belonging to the next day
+                                $attendanceDate->modify('+1 day');
+                            }
+
+                            // Generate the new DateTime object combining the date and time
+                            $time_in = new DateTime($attendanceDate->format('Y-m-d') . ' ' . $time_in);
+                            $time_in = $time_in->format('Y-m-d H:i:s');
+                        } else {
+                            echo "Parse Time In Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+                            $conn = null;
+                            exit();
+                        }
+                    }
+
+                    if (!empty($time_out)) {
+                        $result = parseTime($time_out);
+
+                        // Check if the result is a DateTime object or an error message
+                        if ($result instanceof DateTime) {
+                            $time_out = $result->format('H:i:s'); // Outputs: 18:00:00
+
+                            // Determine the attendance date based on time_in
+                            $attendanceDate = new DateTime($day);
+
+                            if ($shift == 'NS' && $time_out < '18:00:00') {
+                                // Consider this time as belonging to the next day
+                                $attendanceDate->modify('+1 day');
+                            }
+
+                            // Generate the new DateTime object combining the date and time
+                            $time_out = new DateTime($attendanceDate->format('Y-m-d') . ' ' . $time_out);
+                            $time_out = $time_out->format('Y-m-d H:i:s');
+                        } else {
+                            echo "Parse Time Out Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
                             $conn = null;
                             exit();
                         }
@@ -278,7 +353,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                         // Reset for the next chunk
                         $placeholders = [];
                         $values = [];
-                        $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
+                        $sql_insert = "INSERT INTO emp_mgt_backup.dbo.t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
                     }
                 }
 

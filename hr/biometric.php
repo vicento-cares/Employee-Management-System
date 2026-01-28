@@ -38,7 +38,7 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <div class="row">
+              <div class="row mb-4">
                 <div class="col-sm-2">
                   <a class="btn btn-dark btn-block" href="../template/biometric_template.csv?v=<?php echo time(); ?>"><i class="fas fa-download"></i> Download Template</a>
                 </div>
@@ -49,6 +49,39 @@
                     </form>
                   </button>
                 </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-sm-2">
+                  <span id="count_view"></span>
+                </div>
+              </div>
+              <div id="biometric_table_res" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
+                <table id="biometric_table" class="table table-sm table-head-fixed text-nowrap table-hover">
+                  <thead style="text-align: center;">
+                    <tr>
+                      <th>#</th>
+                      <th>Day</th>
+                      <th>Day Code</th>
+                      <th>Shift</th>
+                      <th>Employee No.</th>
+                      <th>Full Name</th>
+                      <th>Department</th>
+                      <th>Section</th>
+                      <th>Line No.</th>
+                      <th>Time In</th>
+                      <th>Time Out</th>
+                    </tr>
+                  </thead>
+                  <tbody id="biometric_data" style="text-align: center;">
+                    <tr>
+                      <td colspan="11" style="text-align:center;">
+                        <div class="spinner-border text-dark" role="status">
+                          <span class="sr-only">Loading...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
             <!-- /.card-body -->

@@ -1,8 +1,55 @@
 <script type="text/javascript">
+// AJAX IN PROGRESS GLOBAL VARS
+var biometric_data_list_ajax_in_process = false;
+
 // DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", () => {
-    
+    biometric_data_list();
 });
+
+const biometric_data_list = () => {
+    // If an AJAX call is already in progress, return immediately
+    if (biometric_data_list_ajax_in_process) {
+        return;
+    }
+
+    // Set the flag to true as we're starting an AJAX call
+    biometric_data_list_ajax_in_process = true;
+
+    $.ajax({
+        url: '../process/hr/biometric/bio_p.php',
+        type: 'POST',
+        cache: false,
+        data: {
+            method: 'biometric_data_list'
+        },
+        beforeSend: (jqXHR, settings) => {
+            var loading = `<tr id="loading"><td colspan="11" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+
+            document.getElementById("biometric_data").innerHTML = loading;
+            
+            jqXHR.url = settings.url;
+            jqXHR.type = settings.type;
+        },
+        success: function (response) {
+            $('#loading').remove();
+
+            $('#biometric_table tbody').html(response);
+            let table_rows = parseInt(document.getElementById("biometric_data").childNodes.length);
+            $('#count_view').html("Total: " + table_rows);
+
+            // Set the flag back to false as the AJAX call has completed
+            biometric_data_list_ajax_in_process = false;
+        }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+        console.log(jqXHR);
+        console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+        $('#loading').remove();
+
+        // Set the flag back to false as the AJAX call has completed
+        biometric_data_list_ajax_in_process = false;
+    });
+}
 
 const upload_csv = () => {
     var file_form = document.getElementById('file_form');
@@ -47,7 +94,6 @@ const upload_csv = () => {
                         showConfirmButton: false,
                         timer : 1000
                     });
-                    load_employees(1);
                 }
                 document.getElementById("file").value = '';
             }, 500);
