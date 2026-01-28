@@ -83,6 +83,18 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/biometric.php") { ?>
+          <a href="biometric.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="biometric.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-database"></i>
+            <p>
+              Biometric Data
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/non_compliance.php") { ?>
           <a href="non_compliance.php" class="nav-link active">
           <?php } else { ?>

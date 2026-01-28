@@ -77,7 +77,7 @@ function check_csv($file, $conn)
     fgets($csvFile);
 
     $shift_arr = array('DS', 'NS');
-    $shift_group_arr = array('A', 'B', 'ADS');
+    $day_code_arr = array('A', 'B', 'ADS');
 
     $hasError = 0;
     $hasBlankError = 0;
@@ -86,18 +86,19 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0);
+    $row_valid_arr = array(0, 0, 0);
 
     $notExistsShiftArr = array();
     $notValidDayArr = array();
+    $notExistsDayCodeArr = array();
 
     $message = "";
     $check_csv_row = 0;
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    $valid_first_line = "Employee No.,Day,Shift,Time In,Time Out";
-    $valid_first_line2 = '"Employee No.",Day,Shift,"Time In","Time Out"';
+    $valid_first_line = "Employee No.,Day,Day Code,Shift,Time In,Time Out";
+    $valid_first_line2 = '"Employee No.",Day,"Day Code",Shift,"Time In","Time Out"';
     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
         while (($line = fgetcsv($csvFile)) !== false) {
             // Check if the row is blank or consists only of whitespace
@@ -109,9 +110,10 @@ function check_csv($file, $conn)
 
             $emp_no = custom_trim($line[0]);
             $day = custom_trim($line[1]);
-            $shift = custom_trim($line[2]);
-            $time_in = custom_trim($line[3]);
-            $time_out = custom_trim($line[4]);
+            $day_code = custom_trim($line[2]);
+            $shift = custom_trim($line[3]);
+            $time_in = custom_trim($line[4]);
+            $time_out = custom_trim($line[5]);
 
             $day_valid = str_replace('/', '-', $day);
             $is_valid_day = validate_date($day_valid);
@@ -132,10 +134,18 @@ function check_csv($file, $conn)
                 }
             }
 
+            if (!empty($day_code)) {
+                if (!in_array($day_code, $day_code_arr)) {
+                    $hasError = 1;
+                    $row_valid_arr[1] = 1;
+                    array_push($notExistsDayCodeArr, $check_csv_row);
+                }
+            }
+
             if (!empty($shift)) {
                 if (!in_array($shift, $shift_arr)) {
                     $hasError = 1;
-                    $row_valid_arr[1] = 1;
+                    $row_valid_arr[2] = 1;
                     array_push($notExistsShiftArr, $check_csv_row);
                 }
             }
@@ -164,6 +174,9 @@ function check_csv($file, $conn)
             $message = $message . 'Invalid Day on row/s ' . implode(", ", $notValidDayArr) . '. ';
         }
         if ($row_valid_arr[1] == 1) {
+            $message = $message . 'Day Code doesn\'t exists on row/s ' . implode(", ", $notExistsDayCodeArr) . '. ';
+        }
+        if ($row_valid_arr[2] == 1) {
             $message = $message . 'Shift doesn\'t exists on row/s ' . implode(", ", $notExistsShiftArr) . '. ';
         }
 
@@ -204,7 +217,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     $isTransactionActive = true;
                 }
 
-                $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, shift, time_in, time_out) VALUES ";
+                $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
                 $values = [];
                 $placeholders = [];
 
@@ -216,9 +229,10 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
 
                     $emp_no = custom_trim($line[0]);
                     $day = custom_trim($line[1]);
-                    $shift = custom_trim($line[2]);
-                    $time_in = custom_trim($line[3]);
-                    $time_out = custom_trim($line[4]);
+                    $day_code = custom_trim($line[2]);
+                    $shift = custom_trim($line[3]);
+                    $time_in = custom_trim($line[4]);
+                    $time_out = custom_trim($line[5]);
 
                     if (!empty($day)) {
                         $result = parseDate($day);
@@ -237,6 +251,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                     $currentValues = [
                         $emp_no,
                         $day,
+                        $day_code,
                         $shift,
                         $time_in,
                         $time_out
@@ -263,7 +278,7 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                         // Reset for the next chunk
                         $placeholders = [];
                         $values = [];
-                        $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, shift, time_in, time_out) VALUES ";
+                        $sql_insert = "INSERT INTO t_biometric_time_in_out (emp_no, day, day_code, shift, time_in, time_out) VALUES ";
                     }
                 }
 
