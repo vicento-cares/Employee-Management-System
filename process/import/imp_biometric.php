@@ -295,6 +295,8 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $conn = null;
                             exit();
                         }
+                    } else {
+                        $time_in = null;
                     }
 
                     if (!empty($time_out)) {
@@ -320,6 +322,8 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
                             $conn = null;
                             exit();
                         }
+                    } else {
+                        $time_out = null;
                     }
 
                     // Create a temporary array for the current row
