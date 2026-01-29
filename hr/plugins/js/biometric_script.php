@@ -1,9 +1,19 @@
+<?php 
+function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
+  if ($server_time >= '06:00:00' && $server_time <= '23:59:59') {
+    return $server_date_only;
+  } else if ($server_time >= '00:00:00' && $server_time < '06:00:00') {
+    return $server_date_only_yesterday;
+  }
+}
+?>
 <script type="text/javascript">
 // AJAX IN PROGRESS GLOBAL VARS
 var biometric_data_list_ajax_in_process = false;
 
 // DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('attendance_date_search').value = '<?= get_day($server_time, $server_date_only, $server_date_only_yesterday) ?>';
     biometric_data_list();
 });
 
@@ -13,6 +23,8 @@ const biometric_data_list = () => {
         return;
     }
 
+    let day = document.getElementById('attendance_date_search').value;
+
     // Set the flag to true as we're starting an AJAX call
     biometric_data_list_ajax_in_process = true;
 
@@ -21,7 +33,8 @@ const biometric_data_list = () => {
         type: 'POST',
         cache: false,
         data: {
-            method: 'biometric_data_list'
+            method: 'biometric_data_list',
+            day: day
         },
         beforeSend: (jqXHR, settings) => {
             var loading = `<tr id="loading"><td colspan="11" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;

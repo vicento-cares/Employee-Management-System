@@ -4,6 +4,8 @@ require '../../conn.php';
 $method = $_POST['method'];
 
 if ($method == 'biometric_data_list') {
+    $day = $_POST['day'];
+
     $c = 0;
 
     $query = "SELECT 
@@ -13,10 +15,14 @@ if ($method == 'biometric_data_list') {
                     emp_mgt_backup.dbo.t_biometric_time_in_out b 
                 LEFT JOIN emp_mgt_db.dbo.m_employees emp ON emp.emp_no = b.emp_no
                 WHERE 
-                    b.emp_no IS NOT NULL";
+                    b.emp_no IS NOT NULL AND b.day = ?";
+    
+    $params = [];
+
+	$params[] = $day;
 
     $stmt = $conn->prepare($query);
-    $stmt->execute();
+    $stmt->execute($params);
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -38,10 +44,6 @@ if ($method == 'biometric_data_list') {
             echo '<td>' . $row['time_out'] . '</td>';
             echo '</tr>';
         } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-    } else {
-        echo '<tr>';
-        echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
-        echo '</tr>';
     }
 }
 

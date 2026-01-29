@@ -40,9 +40,15 @@
             <div class="card-body">
               <div class="row mb-4">
                 <div class="col-sm-2">
+                  <label>Attendance Date</label>
+                  <input type="date" class="form-control" id="attendance_date_search" onchange="biometric_data_list()">
+                </div>
+                <div class="col-sm-2">
+                  <label>&nbsp;</label>
                   <a class="btn btn-dark btn-block" href="../template/biometric_template.csv?v=<?php echo time(); ?>"><i class="fas fa-download"></i> Download Template</a>
                 </div>
                 <div class="col-sm-2">
+                  <label>&nbsp;</label>
                   <button type="button" class="btn btn-warning btn-block btn-file">
                     <form id="file_form" enctype="multipart/form-data">
                       <span class="mx-0 my-0"><i class="fas fa-upload"></i> Import Biometric Data </span><input type="file" id="file" name="file" onchange="upload_csv()" accept=".csv">
