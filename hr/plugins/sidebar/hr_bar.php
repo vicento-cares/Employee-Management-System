@@ -95,6 +95,18 @@
           </a>
         </li>
         <li class="nav-item">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/barcodevsbio.php") { ?>
+          <a href="barcodevsbio.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="barcodevsbio.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-chart-line"></i>
+            <p>
+              Barcode Vs Biometric
+            </p>
+          </a>
+        </li>
+        <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/non_compliance.php") { ?>
           <a href="non_compliance.php" class="nav-link active">
           <?php } else { ?>
