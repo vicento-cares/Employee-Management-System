@@ -243,11 +243,11 @@ if ($originalWidth > $newWidth) {
     }
 
     // Free up memory
-    imagedestroy($foo);
     imagedestroy($newImage);
 }
 
-if (isset($foo)) {
+// Destroy source image ONCE
+if (is_resource($foo) || $foo instanceof GdImage) {
     imagedestroy($foo);
 }
 
