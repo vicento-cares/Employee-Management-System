@@ -149,7 +149,7 @@ include 'plugins/navbar/viewer_navbar.php';
                                 <div class="col-sm-6 col-lg-2 p-1 border"><center>Active</center></div>
                                 <div class="col-sm-6 col-lg-2 p-1 border bg-warning"><center>3 Months Before Expiration</center></div>
                                 <div class="col-sm-6 col-lg-2 p-1 border bg-orange"><center>1 Month Before Expiration</center></div>
-                                <div class="col-sm-6 col-lg-4 p-1 border bg-danger"><center>Expired (Expire Date Table Cell Only)</center></div>
+                                <div class="col-sm-6 col-lg-4 p-1 border bg-danger"><center>Expired</center></div>
                             </div>
                             <div class="col-12">
                                 <div class="card-body table-responsive p-0" style="height: 550px;">
