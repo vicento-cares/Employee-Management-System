@@ -429,7 +429,7 @@ if ($method == 'fetch_category') {
 
 				$cell_class = ($row['r_status'] == 'Approved') ? " bg-danger" : "";
                 $row_class = "";
-                if ($row['status'] == 'Near Expiration' || $row['status'] == 'Expired') {
+                if ($row['status'] == 'Near Expiration') {
                     $row_class = " bg-orange";
                 } else if ($row['status'] == '3 Months Before Expiration') {
                     $row_class = " bg-warning";
@@ -449,29 +449,29 @@ if ($method == 'fetch_category') {
 				}
 
 				echo '<td class="'.$cell_class.'">' . $c . '</td>';
-				echo '<td>' . htmlspecialchars($row['process']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['auth_no']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['auth_year']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['date_authorized']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['process']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['auth_no']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['auth_year']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['date_authorized']) . '</td>';
 				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['expire_date']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['fullname']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['emp_id']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['batch']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['dept']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['section']) . '</td>';
-				echo '<td>' . htmlspecialchars($row['line_no']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['fullname']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['emp_id']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['batch']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['dept']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['section']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['line_no']) . '</td>';
 				if (!empty($row['skill_level'])) {
-					echo '<td>Level ' . htmlspecialchars($row['skill_level']) . '</td>';
+					echo '<td class="'.$cell_class2.'">Level ' . htmlspecialchars($row['skill_level']) . '</td>';
 				} else {
-					echo '<td>' . htmlspecialchars($row['skill_level']) . '</td>';
+					echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['skill_level']) . '</td>';
 				}
-				echo '<td>' . htmlspecialchars($row['remarks']) . '</td>';
+				echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['remarks']) . '</td>';
 				if ($row['r_status'] == 'Approved') {
-					echo '<td>' . htmlspecialchars($row['r_of_cancellation']) . '</td>';
-					echo '<td>' . htmlspecialchars($row['d_of_cancellation']) . '</td>';
+					echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['r_of_cancellation']) . '</td>';
+					echo '<td class="'.$cell_class2.'">' . htmlspecialchars($row['d_of_cancellation']) . '</td>';
 				} else {
-					echo '<td></td>';
-					echo '<td></td>';
+					echo '<td class="'.$cell_class2.'"></td>';
+					echo '<td class="'.$cell_class2.'"></td>';
 				}
 				echo '</tr>';
 			} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
