@@ -114,6 +114,26 @@ function check_employee_picture_file($employee_picture_file_info)
     return $message;
 }
 
+// Check File Information
+function check_employee_picture_info($employee_picture_file_info, $conn)
+{
+    $emp_no = $employee_picture_file_info['emp_no'];
+
+    $sql = "SELECT emp_no FROM m_employees WHERE emp_no = ?";
+
+    $stmt = $conn->prepare($sql);
+    $params = array($emp_no);
+    $stmt->execute($params);
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // Insert File Information
 function save_employee_picture_info($employee_picture_file_info, $conn)
 {
@@ -181,6 +201,14 @@ if ($chkEmployeePictureFileMsg != '') {
 // Check for supported image types
 if (!in_array($imageType, [IMAGETYPE_PNG])) {
     exit("Unsupported image type.");
+}
+
+// DB Connection
+include '../conn.php';
+
+if (!check_employee_picture_info($employee_picture_file_info, $conn)) {
+    $conn = null;
+    exit("Employee No. Not Exists on Employee Masterlist");
 }
 
 // Add Folder If Not Exists
@@ -251,6 +279,5 @@ if (is_resource($foo) || $foo instanceof GdImage) {
     imagedestroy($foo);
 }
 
-include '../conn.php';
 save_employee_picture_info($employee_picture_file_info, $conn);
 $conn = null;
