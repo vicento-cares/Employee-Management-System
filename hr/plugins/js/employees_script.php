@@ -1363,4 +1363,84 @@ const upload_employee_picture = () => {
         swal('System Error', `Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`, 'error');
     });
 }
+
+const upload_single_employee_picture = (file, emp_no) => {
+    return new Promise((resolve, reject) => {
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('emp_no', emp_no);
+
+        $.ajax({
+            url: '../process/import/imp_employee_picture.php',
+            type: 'POST',
+            dataType: 'text',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: formData,
+            success: response => {
+                if (response !== '') {
+                    reject({ emp_no, error: response });
+                } else {
+                    resolve({ emp_no, status: 'success' });
+                }
+            },
+            error: (jqXHR) => {
+                reject({
+                    emp_no,
+                    error: `HTTP ${jqXHR.status} - ${jqXHR.statusText}`
+                });
+            }
+        });
+
+    });
+};
+
+const upload_employee_pictures = async () => {
+    const input = document.getElementById('picture_files');
+    const files = [...input.files];
+
+    if (files.length === 0) return;
+
+    Swal.fire({
+        icon: 'info',
+        title: 'Uploading...',
+        html: '0 / ' + files.length,
+        showConfirmButton: false,
+        allowOutsideClick: false
+    });
+
+    const uploads = files.map(file => {
+        const emp_no = file.name.replace(/\.[^/.]+$/, '');
+        return upload_single_employee_picture(file, emp_no);
+    });
+
+    const results = await Promise.allSettled(uploads);
+
+    // Analyze results
+    const success = results.filter(r => r.status === 'fulfilled');
+    const failed  = results.filter(r => r.status === 'rejected');
+
+    Swal.close();
+
+    if (failed.length > 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Upload Completed with Errors',
+            html: `
+                Success: ${success.length}<br>
+                Failed: ${failed.length}
+            `
+        });
+        console.table(failed.map(f => f.reason));
+    } else {
+        Swal.fire({
+            icon: 'success',
+            title: 'All Pictures Uploaded Successfully',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+};
 </script>
