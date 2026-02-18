@@ -40,6 +40,13 @@
         <div class="col-sm-2">
           <a class="btn btn-secondary btn-block" onclick="export_employees()"><i class="fas fa-download"></i> Export Employees</a>
         </div>
+        <div class="col-sm-2">
+          <button type="button" class="btn btn-warning btn-block btn-file">
+            <form id="picture_file_form" enctype="multipart/form-data">
+              <span class="mx-0 my-0"><i class="fas fa-images"></i> Upload Employee Pictures </span><input type="file" id="picture_files" multiple name="file" onchange="upload_employee_pictures()" accept="image/png">
+            </form>
+          </button>
+        </div>
         <!-- <div class="col-sm-2">
           <button type="button" class="btn btn-dark btn-block" data-toggle="modal" data-target="#import_employees"><i class="fas fa-upload"></i> Import Employees</button>
         </div> -->
