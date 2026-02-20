@@ -23,7 +23,8 @@
             cache: false,
             dataType: 'json',
             data: {
-                method: 'get_absences_reasons'
+                method: 'get_absences_reasons',
+                page: 'admin'
             }, 
             success: function (response) {
                 absentReasonJsonData = response;

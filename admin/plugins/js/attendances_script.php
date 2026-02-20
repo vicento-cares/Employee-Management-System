@@ -32,7 +32,8 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
             cache: false,
             dataType: 'json',
             data: {
-                method: 'get_absences_reasons'
+                method: 'get_absences_reasons',
+                page: 'admin'
             }, 
             success: function (response) {
                 absentReasonJsonData = response;

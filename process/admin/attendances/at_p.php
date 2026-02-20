@@ -142,7 +142,14 @@ function count_emp_tio($search_arr, $conn) {
 }
 
 if ($method == 'get_absences_reasons') {
-	$sql = "SELECT id, reason, absent_type FROM m_absences_reasons ORDER BY reason ASC";
+	$sql = "SELECT id, reason, absent_type FROM m_absences_reasons";
+
+	if (isset($_POST['page']) && $_POST['page'] == 'admin') {
+		$sql .= " WHERE absent_type != 'NW'";
+	}
+
+	$sql .= " ORDER BY reason ASC";
+
 	$stmt = $conn->prepare($sql);
 	$stmt->execute();
 
