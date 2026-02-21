@@ -10,30 +10,44 @@ $method = $_POST['method'];
 // Attendances
 
 function count_attendance_list($search_arr, $conn) {
-	$sql = "SELECT count(emp_no) AS total 
-		FROM m_employees
-		WHERE shift_group = ?";
-	$params = [];
-	$params[] = $search_arr['shift_group'];
+	$sql = "SELECT count(emp.emp_no) AS total 
+		FROM m_employees emp 
+		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
+		WHERE emp.shift_group = ?";
+	$params = [
+		$search_arr['day'],
+		$search_arr['shift_group']
+	];
+
+	if (!empty($search_arr['attendance_status'])) {
+		switch ($search_arr['attendance_status']) {
+			case 1:
+				$sql = $sql . " AND tio.time_in IS NOT NULL";
+				break;
+			case 2:
+				$sql = $sql . " AND tio.time_in IS NULL";
+				break;
+		}
+	}
 
 	if (!empty($search_arr['dept'])) {
-		$sql = $sql . " AND dept LIKE ?";
+		$sql = $sql . " AND emp.dept LIKE ?";
 		$dept_param = $search_arr['dept'] . "%";
 		$params[] = $dept_param;
 	} else {
-		$sql = $sql . " AND dept != ''";
+		$sql = $sql . " AND emp.dept != ''";
 	}
 	if (!empty($search_arr['section'])) {
-		$sql = $sql . " AND section LIKE ?";
+		$sql = $sql . " AND emp.section LIKE ?";
 		$section_param = $search_arr['section'] . "%";
 		$params[] = $section_param;
 	}
 	if (!empty($search_arr['line_no'])) {
-		$sql = $sql . " AND line_no LIKE ?";
+		$sql = $sql . " AND emp.line_no LIKE ?";
 		$line_no_param = $search_arr['line_no'] . "%";
 		$params[] = $line_no_param;
 	}
-	$sql = $sql . " AND (date_hired <= ?) AND (resigned_date IS NULL OR resigned_date >= ?)";
+	$sql = $sql . " AND (emp.date_hired <= ?) AND (emp.resigned_date IS NULL OR emp.resigned_date >= ?)";
 	$params[] = $search_arr['day'];
 	$params[] = $search_arr['day'];
 	
@@ -210,6 +224,7 @@ if ($method == 'count_attendance_present') {
 if ($method == 'count_attendance_list') {
 	$day = $_POST['day'];
 	$shift_group = $_POST['shift_group'];
+	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -244,13 +259,18 @@ if ($method == 'count_attendance_list') {
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
+
+	if (isset($_POST['attendance_status'])) {
+		$attendance_status = intval($_POST['attendance_status']);
+	}
 	
 	$search_arr = array(
 		"day" => $day,
 		"shift_group" => $shift_group,
 		"dept" => $dept,
 		"section" => $section,
-		"line_no" => $line_no
+		"line_no" => $line_no,
+		"attendance_status" => $attendance_status
 	);
 
 	echo count_attendance_list($search_arr, $conn);
@@ -259,6 +279,7 @@ if ($method == 'count_attendance_list') {
 if ($method == 'attendance_list_last_page') {
 	$day = $_POST['day'];
 	$shift_group = $_POST['shift_group'];
+	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
 		if (!empty($_POST['dept'])) {
@@ -293,13 +314,18 @@ if ($method == 'attendance_list_last_page') {
 		$section = '';
 		$line_no = $_SESSION['line_no'];
 	}
+
+	if (isset($_POST['attendance_status'])) {
+		$attendance_status = intval($_POST['attendance_status']);
+	}
 	
 	$search_arr = array(
 		"day" => $day,
 		"shift_group" => $shift_group,
 		"dept" => $dept,
 		"section" => $section,
-		"line_no" => $line_no
+		"line_no" => $line_no,
+		"attendance_status" => $attendance_status
 	);
 
 	$results_per_page = 20;

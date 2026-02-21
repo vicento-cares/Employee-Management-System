@@ -106,6 +106,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         var dept = sessionStorage.getItem('dept_search');
         var section = sessionStorage.getItem('section_search');
         var line_no = sessionStorage.getItem('line_no_search');
+        var attendance_status = parseInt(sessionStorage.getItem('attendance_status_search'));
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
             type: 'POST',
@@ -121,7 +122,12 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
             success: function (response) {
                 let total = parseInt(sessionStorage.getItem('count_rows'));
 
-                let present = parseInt(response);
+                let present = 0;
+
+                if (attendance_status != 2) {
+                    present = parseInt(response);
+                }
+
                 let absent = total - present;
                 $('#count_view_present').html(present);
                 $('#count_view_absent').html(absent);
@@ -140,6 +146,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         var dept = sessionStorage.getItem('dept_search');
         var section = sessionStorage.getItem('section_search');
         var line_no = sessionStorage.getItem('line_no_search');
+        var attendance_status = sessionStorage.getItem('attendance_status_search');
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
             type: 'POST',
@@ -150,7 +157,8 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 shift_group: shift_group,
                 dept: dept,
                 section: section,
-                line_no: line_no
+                line_no: line_no,
+                attendance_status: attendance_status
             },
             success: function (response) {
                 sessionStorage.setItem('count_rows', response);
@@ -174,6 +182,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         var dept = sessionStorage.getItem('dept_search');
         var section = sessionStorage.getItem('section_search');
         var line_no = sessionStorage.getItem('line_no_search');
+        var attendance_status = sessionStorage.getItem('attendance_status_search');
         var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
@@ -185,7 +194,8 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 shift_group: shift_group,
                 dept: dept,
                 section: section,
-                line_no: line_no
+                line_no: line_no,
+                attendance_status: attendance_status
             },
             success: function (response) {
                 sessionStorage.setItem('last_page', response);
