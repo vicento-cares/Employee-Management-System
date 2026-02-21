@@ -23,6 +23,18 @@
   <!-- Main content -->
   <section class="content">
     <div class="container-fluid">
+      <div class="row mb-4">
+        <div class="col-sm-3">
+          <a class="btn btn-dark btn-block" href="../template/absences_template.csv?v=<?php echo time(); ?>"><i class="fas fa-download"></i> Download Absences Report Data Template</a>
+        </div>
+        <div class="col-sm-3">
+          <button type="button" class="btn btn-warning btn-block btn-file">
+            <form id="file_form" enctype="multipart/form-data">
+              <span class="mx-0 my-0"><i class="fas fa-upload"></i> Import Absences Report Data</span><input type="file" id="file" name="file" onchange="upload_csv()" accept=".csv">
+            </form>
+          </button>
+        </div>
+      </div>
       <div class="row">
         <div class="col-sm-12">
           <div class="card card-gray-dark card-outline">

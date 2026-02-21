@@ -121,7 +121,7 @@ function check_csv($file, $conn)
     // SKIP SECOND LINE (EXAMPLE ROW)
     fgets($csvFile);
 
-    $shift_group_arr = array('DS', 'NS');
+    $shift_group_arr = array('A', 'B', 'ADS', '#N/A');
 
     $absences_matrix = process_absences_data($conn);
     
@@ -166,8 +166,8 @@ function check_csv($file, $conn)
             $day = custom_trim($line[1]);
             $shift_group = custom_trim($line[2]);
             $absent_category = custom_trim($line[3]);
-            $absent_reason = custom_trim($line[4]);
-            $absent_type = custom_trim($line[5]);
+            $absent_type = custom_trim($line[4]);
+            $absent_reason = custom_trim($line[5]);
 
             /*if ($emp_no == '' || $full_name == '' || $dept == '' || $position == '' || $provider == '' || $date_hired == '') {
                 // IF BLANK DETECTED ERROR += 1
@@ -307,7 +307,7 @@ if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
     exit("File upload failed. Error code: " . $_FILES['file']['error']);
 }
 
-if (is_uploaded_file($_FILES['file']['tmp_name'])) {
+if (!is_uploaded_file($_FILES['file']['tmp_name'])) {
     exit("CSV FILE NOT UPLOADED!");
 }
 
@@ -362,8 +362,8 @@ try {
         $day = custom_trim($line[1]);
         $shift_group = custom_trim($line[2]);
         $absent_category = custom_trim($line[3]);
-        $absent_reason = custom_trim($line[4]);
-        $absent_type = custom_trim($line[5]);
+        $absent_type = custom_trim($line[4]);
+        $absent_reason = custom_trim($line[5]);
 
         if (!empty($day)) {
             $result = parseDate($day);
@@ -389,7 +389,7 @@ try {
                     INSERT (emp_no, day, shift_group, absent_category, absent_type, reason, submitted_by_no) 
                     VALUES (source.emp_no, source.day, source.shift_group, source.absent_category, source.absent_type, source.reason, source.submitted_by_no);";
         $stmt = $conn->prepare($sql);
-        $params = array($emp_no, $day, $shift_group, $absent_category, $absent_type, $reason, $submitted_by_no, $server_date_time);
+        $params = array($emp_no, $day, $shift_group, $absent_category, $absent_type, $absent_reason, $submitted_by_no, $server_date_time);
         $stmt->execute($params);
     }
 
