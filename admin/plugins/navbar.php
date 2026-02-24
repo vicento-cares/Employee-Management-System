@@ -61,6 +61,12 @@ if (!isset($_SESSION['emp_no'])) {
       object-fit: contain; /* Ensure the whole image is visible */
       object-position: center; /* Center the image within the container */
     }
+
+    /* Hover effect for rows that have the bg-danger class */
+    .table-hover tbody tr.bg-danger:hover {
+        color: #000 !important;
+        background-color: rgba(240, 143, 151, 1.0) !important;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">

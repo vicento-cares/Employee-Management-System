@@ -77,6 +77,16 @@ if (!isset($_SESSION['emp_no_hr'])) {
       object-fit: contain; /* Ensure the whole image is visible */
       object-position: center; /* Center the image within the container */
     }
+
+    .bg-lightpink {
+      background-color: pink; /* You can also use hex code #FFB6C1 */
+    }
+
+    /* Hover effect for rows that have the bg-lightpink class */
+    .table-hover tbody tr.bg-lightpink:hover {
+      color: #fff !important;
+      background-color: rgba(255, 128, 147, 1.0) !important;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">

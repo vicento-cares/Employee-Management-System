@@ -122,7 +122,7 @@
                     <div class="card-body">
                       <div class="row">
                         <div class="col-sm-6 col-lg-6 p-1 bg-success"><center>Present</center></div>
-                        <div class="col-sm-6 col-lg-6 p-1 bg-danger"><center>Absent</center></div>
+                        <div class="col-sm-6 col-lg-6 p-1 bg-lightpink"><center>Absent</center></div>
                       </div>
                     </div>
                   </div>

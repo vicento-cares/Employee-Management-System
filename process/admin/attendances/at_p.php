@@ -385,7 +385,7 @@ if ($method == 'get_attendance_list') {
 
 	$current_page = intval($_POST['current_page']);
 	$c = 0;
-	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-danger');
+	$row_class_arr = array('modal-trigger', 'modal-trigger bg-success', 'modal-trigger bg-danger', 'modal-trigger bg-lightpink');
 	$row_class = $row_class_arr[0];
 
 	$results_per_page = 20;
@@ -464,6 +464,11 @@ if ($method == 'get_attendance_list') {
 				echo '<tr class="'.$row_class.'">';
 			} else {
 				$row_class = $row_class_arr[2];
+
+				if (isset($_SESSION['emp_no_hr'])) {
+					$row_class = $row_class_arr[3];
+				}
+				
 				$row_day = '';
 				$row_shift = '';
 				if (!empty($row['absent_day']) && !empty($row['absent_shift_group'])) {
