@@ -3,20 +3,57 @@ require '../../conn.php';
 
 $method = $_GET['method'];
 
+$time_in_color_map = array(
+    'Late' => '#ffc107', // Warning
+    'Time In OK' => '#28a745', // Success
+    'No Entries Both' => '#6c757d', // Gray
+    'Absent' => '#f8bbd0', // Light Pink
+    'No Barcode In' => '#fd7e14', // orange
+    'No Bio In' => '#dc3545', // Danger
+    'Early Barcode' => '#007bff', // Blue / Primary
+    'Late Barcode' => '#8a2be2', // violet
+);
+
+$time_out_color_map = array(
+    'Late Bio' => '#ffc107', // Warning
+    'Time Out OK' => '#28a745', // Success
+    'No Entries Both' => '#6c757d', // Gray
+    'Absent' => '#f8bbd0', // Light Pink
+    'No Barcode Out' => '#fd7e14', // orange
+    'No Bio Out' => '#dc3545', // Danger
+    'Early Bio' => '#8a2be2', // violet
+);
+
+$compliance_color_map = array(
+    'Compliance' => '#28a745', // Success
+    'Non-Compliance' => '#dc3545', // Danger
+);
+
+$section_color_map = array(
+    'FAP1 Suzuki' => '#f8bbd0', // Light Pink
+    'FAP1 Mazda' => '#ffc107', // Warning
+    'FAP2' => '#28a745', // Success
+    'Gemba Compliance' => '#fd7e14', // orange
+    'FAP4' => '#dc3545', // Danger
+    'FAP3' => '#e83e8c', // Dark Pink
+    'First Process' => '#007bff', // Blue
+    'Secondary 1 Process' => '#6c757d', // Gray
+    'Secondary 2 Process' => '#20c997', // Teal
+    'Section 1' => '#f8bbd0', // Light Pink
+    'Section 2' => '#28a745', // Success
+    'Section 3' => '#ffc107', // Warning
+    'Section 4' => '#e83e8c', // Dark Pink
+    'Section 5' => '#fd7e14', // orange
+    'Section 6' => '#007bff', // Blue / Primary
+    'Section 7' => '#dc3545', // Danger
+    'Section 8' => '#8a2be2', // violet
+);
+
+// Time In Analysis
+
 if ($method == 'get_month_bio_vs_barcode_time_in_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
-
-    $color_map = array(
-        'Late' => '#ffc107', // Warning
-        'Time In OK' => '#28a745', // Success
-        'No Entries Both' => '#6c757d', // Gray
-        'Absent' => '#f8bbd0', // Light Pink
-        'No Barcode In' => '#fd7e14', // orange
-        'No Bio In' => '#dc3545', // Danger
-        'Early Barcode' => '#007bff', // Blue / Primary
-        'Late Barcode' => '#8a2be2', // violet
-    );
 
     $data = [];
     $categories = [];
@@ -161,22 +198,848 @@ if ($method == 'get_month_bio_vs_barcode_time_in_chart') {
     }
 
     // Encode the categories and data as JSON
-    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $color_map]);
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $time_in_color_map]);
 }
+
+if ($method == 'get_month_section_late_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'Late' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_no_bio_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'No Bio In' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_no_barcode_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'No Barcode In' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_no_entries_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'No Entries Both' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_early_barcode_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'Early Barcode' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_late_barcode_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = 'Late Barcode' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+// Time Out Analysis
 
 if ($method == 'get_month_bio_vs_barcode_time_out_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
-
-    $color_map = array(
-        'Late Bio' => '#ffc107', // Warning
-        'Time Out OK' => '#28a745', // Success
-        'No Entries Both' => '#6c757d', // Gray
-        'Absent' => '#f8bbd0', // Light Pink
-        'No Barcode Out' => '#fd7e14', // orange
-        'No Bio Out' => '#dc3545', // Danger
-        'Early Bio' => '#8a2be2', // violet
-    );
 
     $data = [];
     $categories = [];
@@ -321,8 +1184,705 @@ if ($method == 'get_month_bio_vs_barcode_time_out_chart') {
     }
 
     // Encode the categories and data as JSON
-    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $color_map]);
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $time_out_color_map]);
 }
+
+if ($method == 'get_month_section_no_bio_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = 'No Bio Out' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_no_barcode_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = 'No Barcode Out' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_no_entries_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = 'No Entries Both' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_early_bio_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = 'Early Bio' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_late_bio_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH DateRange AS (
+                SELECT 
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
+                FROM 
+                    master.dbo.spt_values
+                WHERE 
+                    type = 'P' AND 
+                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
+                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
+            ),
+            AttendanceRemarks AS (
+                SELECT 
+                    emp.provider, 
+                    emp.emp_no, 
+                    emp.full_name, 
+                    emp.dept, 
+                    emp.section, 
+                    emp.process, 
+                    emp.line_no, 
+                    emp.shift_group, 
+                    tio.date_updated AS time_in, 
+                    tio.time_out, 
+                    d.report_date AS day,  
+                    b.shift, 
+                    b.time_in AS b_time_in, 
+                    b.time_out AS b_time_out, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
+                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
+                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
+                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
+                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
+                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
+                        ELSE 'Time In OK' 
+                    END AS time_in_remarks, 
+                    CASE 
+                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
+                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
+                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
+                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
+                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
+                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
+                        ELSE 'Time Out OK' 
+                    END AS time_out_remarks 
+                FROM 
+                    emp_mgt_db.dbo.m_employees emp 
+                CROSS JOIN DateRange d
+                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
+                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
+                WHERE 
+                    (emp.date_hired <= d.report_date) AND 
+                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
+                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
+            )
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = 'Late Bio' 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                AttendanceRemarks 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [];
+
+    $params[] = $year;
+    $params[] = $month;
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+// Compliance Analysis
 
 if ($method == 'get_month_compliance_time_in_chart') {
     $year = $_GET['year'];
@@ -497,17 +2057,12 @@ if ($method == 'get_month_compliance_time_in_chart') {
     }
 
     // Encode the categories and data as JSON
-    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $color_map]);
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $compliance_color_map]);
 }
 
 if ($method == 'get_month_compliance_time_out_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
-
-    $color_map = array(
-        'Compliance' => '#28a745', // Success
-        'Non-Compliance' => '#dc3545', // Danger
-    );
 
     $data = [];
     $categories = [];
@@ -673,8 +2228,10 @@ if ($method == 'get_month_compliance_time_out_chart') {
     }
 
     // Encode the categories and data as JSON
-    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $color_map]);
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $compliance_color_map]);
 }
+
+// Biometric Vs Barcode Data
 
 if ($method == 'get_bio_vs_barcode_data') {
     $c = 0;

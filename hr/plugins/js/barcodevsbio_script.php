@@ -4,14 +4,25 @@
 
     // Charts
     let month_bio_vs_barcode_time_in_chart;
+	let month_section_late_time_in_chart;
+	let month_section_no_bio_time_in_chart;
+	let month_section_no_barcode_time_in_chart;
+	let month_section_no_entries_time_in_chart;
+	let month_section_early_barcode_time_in_chart;
+	let month_section_late_barcode_time_in_chart;
 	let month_bio_vs_barcode_time_out_chart;
+	let month_section_no_bio_time_out_chart;
+	let month_section_no_barcode_time_out_chart;
+	let month_section_no_entries_time_out_chart;
+	let month_section_early_bio_time_out_chart;
+	let month_section_late_bio_time_out_chart;
 	let month_compliance_time_in_chart;
 	let month_compliance_time_out_chart;
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
-        sessionStorage.setItem('nc_year_recent', '<?=date('Y')?>');
-        sessionStorage.setItem('nc_month_recent', '<?=date('n')?>');
+        sessionStorage.setItem('bvb_year_recent', '<?=date('Y')?>');
+        sessionStorage.setItem('bvb_month_recent', '<?=date('n')?>');
 
         get_non_compliance_year_dropdown_search();
     });
@@ -25,15 +36,17 @@
                 method: 'get_non_compliance_year_dropdown_search'
             },
             success: function (response) {
-                document.getElementById("nc_year_search").innerHTML = response;
+                document.getElementById("bvb_year_search").innerHTML = response;
             }
         });
     }
 
+	// Time In Analysis
+
 	const get_month_bio_vs_barcode_time_in_chart = () => {
 		return new Promise((resolve, reject) => {
-			let year = document.getElementById('nc_year_search').value;
-			let month = document.getElementById('nc_month_search').value;
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
 
 			$.ajax({
 				url: '../process/hr/biometric/biod_p.php',
@@ -125,15 +138,16 @@
 						}
 					};
 
-					// Destroy previous chart before rendering new one
+					// Update previous chart before rendering new one
 					if (month_bio_vs_barcode_time_in_chart) {
-						month_bio_vs_barcode_time_in_chart.destroy();
-					}
-
-					month_bio_vs_barcode_time_in_chart =
-						new ApexCharts(ctx, options);
-
-					month_bio_vs_barcode_time_in_chart.render();
+						month_bio_vs_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_bio_vs_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_bio_vs_barcode_time_in_chart.render();
+                    }
 
 					resolve({ status: 'success' });
 				}
@@ -141,10 +155,684 @@
 		});
 	};
 
+	const get_month_section_late_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_late_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_late_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Late Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_late_time_in_chart) {
+						month_section_late_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_late_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_late_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_no_bio_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_bio_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_bio_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Bio Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_bio_time_in_chart) {
+						month_section_no_bio_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_bio_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_no_bio_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_no_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_barcode_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Barcode Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_barcode_time_in_chart) {
+						month_section_no_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_no_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_no_entries_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_entries_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_entries_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Entries Both Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_entries_time_in_chart) {
+						month_section_no_entries_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_entries_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_no_entries_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_early_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_early_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_early_barcode_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Early Barcode Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_early_barcode_time_in_chart) {
+						month_section_early_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_early_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_early_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_late_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_late_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_late_barcode_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Late Barcode Time In Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_late_barcode_time_in_chart) {
+						month_section_late_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_late_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_late_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	// Time Out Analysis
+
     const get_month_bio_vs_barcode_time_out_chart = () => {
 		return new Promise((resolve, reject) => {
-			let year = document.getElementById('nc_year_search').value;
-			let month = document.getElementById('nc_month_search').value;
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
 
 			$.ajax({
 				url: '../process/hr/biometric/biod_p.php',
@@ -236,15 +924,16 @@
 						}
 					};
 
-					// Destroy previous chart before rendering new one
+					// Update previous chart before rendering new one
 					if (month_bio_vs_barcode_time_out_chart) {
-						month_bio_vs_barcode_time_out_chart.destroy();
-					}
-
-					month_bio_vs_barcode_time_out_chart =
-						new ApexCharts(ctx, options);
-
-					month_bio_vs_barcode_time_out_chart.render();
+						month_bio_vs_barcode_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_bio_vs_barcode_time_out_chart = new ApexCharts(ctx, options);
+                        month_bio_vs_barcode_time_out_chart.render();
+                    }
 
 					resolve({ status: 'success' });
 				}
@@ -252,10 +941,572 @@
 		});
 	};
 
+	const get_month_section_no_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_bio_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Bio Time Out Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_bio_time_out_chart) {
+						month_section_no_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_no_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_no_barcode_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_barcode_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_barcode_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Barcode Time Out Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_barcode_time_out_chart) {
+						month_section_no_barcode_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_barcode_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_no_barcode_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_no_entries_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_no_entries_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_no_entries_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'No Entries Both Time Out Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_no_entries_time_out_chart) {
+						month_section_no_entries_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_no_entries_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_no_entries_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_early_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_early_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_early_bio_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Early Bio Time Out Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_early_bio_time_out_chart) {
+						month_section_early_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_early_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_early_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_late_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_late_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_late_bio_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Late Bio Time Out Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_late_bio_time_out_chart) {
+						month_section_late_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_late_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_late_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	// Compliance Analysis
+
 	const get_month_compliance_time_in_chart = () => {
 		return new Promise((resolve, reject) => {
-			let year = document.getElementById('nc_year_search').value;
-			let month = document.getElementById('nc_month_search').value;
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
 
 			$.ajax({
 				url: '../process/hr/biometric/biod_p.php',
@@ -347,15 +1598,16 @@
 						}
 					};
 
-					// Destroy previous chart before rendering new one
+					// Update previous chart before rendering new one
 					if (month_compliance_time_in_chart) {
-						month_compliance_time_in_chart.destroy();
-					}
-
-					month_compliance_time_in_chart =
-						new ApexCharts(ctx, options);
-
-					month_compliance_time_in_chart.render();
+						month_compliance_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_compliance_time_in_chart = new ApexCharts(ctx, options);
+                        month_compliance_time_in_chart.render();
+                    }
 
 					resolve({ status: 'success' });
 				}
@@ -365,8 +1617,8 @@
 
 	const get_month_compliance_time_out_chart = () => {
 		return new Promise((resolve, reject) => {
-			let year = document.getElementById('nc_year_search').value;
-			let month = document.getElementById('nc_month_search').value;
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
 
 			$.ajax({
 				url: '../process/hr/biometric/biod_p.php',
@@ -458,21 +1710,24 @@
 						}
 					};
 
-					// Destroy previous chart before rendering new one
+					// Update previous chart before rendering new one
 					if (month_compliance_time_out_chart) {
-						month_compliance_time_out_chart.destroy();
-					}
-
-					month_compliance_time_out_chart =
-						new ApexCharts(ctx, options);
-
-					month_compliance_time_out_chart.render();
+						month_compliance_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_compliance_time_out_chart = new ApexCharts(ctx, options);
+                        month_compliance_time_out_chart.render();
+                    }
 
 					resolve({ status: 'success' });
 				}
 			});
 		});
 	};
+
+	// Biometric Vs Barcode Table Data
 
 	const get_bio_vs_barcode_data = () => {
 		return new Promise((resolve, reject) => {
@@ -481,8 +1736,8 @@
 				return;
 			}
 
-			// let year = document.getElementById('nc_year_search').value;
-			// let month = document.getElementById('nc_month_search').value;
+			// let year = document.getElementById('bvb_year_search').value;
+			// let month = document.getElementById('bvb_month_search').value;
 
 			// Set the flag to true as we're starting an AJAX call
 			bio_vs_barcode_data_ajax_in_process = true;
@@ -509,8 +1764,8 @@
 					let table_rows = parseInt(document.getElementById("bioVsBarcodeData").childNodes.length);
 					$('#count_view').html("Total: " + table_rows);
 
-					// sessionStorage.setItem('nc_year_search', year);
-					// sessionStorage.setItem('nc_month_search', month);
+					// sessionStorage.setItem('bvb_year_search', year);
+					// sessionStorage.setItem('bvb_month_search', month);
 
 					// setTimeout(() => {
 					//     get_month_bio_vs_barcode_time_in_chart();
@@ -536,9 +1791,21 @@
 		});
     }
 
+	// All Function Names List
 	const get_requests = [
 		get_month_bio_vs_barcode_time_in_chart,
+		get_month_section_late_time_in_chart,
+		get_month_section_no_bio_time_in_chart,
+		get_month_section_no_barcode_time_in_chart,
+		get_month_section_no_entries_time_in_chart,
+		get_month_section_early_barcode_time_in_chart,
+		get_month_section_late_barcode_time_in_chart,
 		get_month_bio_vs_barcode_time_out_chart,
+		get_month_section_no_bio_time_out_chart,
+		get_month_section_no_barcode_time_out_chart,
+		get_month_section_no_entries_time_out_chart,
+		get_month_section_early_bio_time_out_chart,
+		get_month_section_late_bio_time_out_chart,
 		get_month_compliance_time_in_chart,
 		get_month_compliance_time_out_chart,
 		get_bio_vs_barcode_data
@@ -607,11 +1874,11 @@
     });
 
     const export_bio_vs_barcode_data = (table_id, separator = ',') => {
-        // let year = sessionStorage.getItem('nc_year_search');
-        // let month = sessionStorage.getItem('nc_month_search');
+        // let year = sessionStorage.getItem('bvb_year_search');
+        // let month = sessionStorage.getItem('bvb_month_search');
 
-		let year = document.getElementById('nc_year_search').value;
-		let month = document.getElementById('nc_month_search').value;
+		let year = document.getElementById('bvb_year_search').value;
+		let month = document.getElementById('bvb_month_search').value;
 
         // Select rows from table_id
         var rows = document.querySelectorAll('table#' + table_id + ' tr');

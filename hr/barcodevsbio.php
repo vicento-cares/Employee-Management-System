@@ -29,13 +29,13 @@
             <div class="row mb-4">
               <div class="col-sm-2">
                   <label>Year</label>
-                  <select id="nc_year_search" class="form-control" required>
+                  <select id="bvb_year_search" class="form-control" required>
                       <option selected value="">Select Year</option>
                   </select>
               </div>
               <div class="col-sm-2">
                   <label>Month</label>
-                  <select id="nc_month_search" class="form-control" required>
+                  <select id="bvb_month_search" class="form-control" required>
                       <option selected value="">Select Month</option>
                       <option value="1">January</option>
                       <option value="2">February</option>
@@ -87,11 +87,44 @@
                   <div class="row">
                     <div class="col-12" id="month_bio_vs_barcode_time_in_chart"></div>
                   </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_late_time_in_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_bio_time_in_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_barcode_time_in_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_entries_time_in_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_early_barcode_time_in_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_late_barcode_time_in_chart"></div>
+                  </div>
                 </div>
                 <!-- Time Out Analysis -->
                 <div class="tab-pane fade" id="bvb-2" role="tabpanel" aria-labelledby="bvb-2-tab">
                   <div class="row">
                     <div class="col-12" id="month_bio_vs_barcode_time_out_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_bio_time_out_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_barcode_time_out_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_no_entries_time_out_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_early_bio_time_out_chart"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12" id="month_section_late_bio_time_out_chart"></div>
                   </div>
                 </div>
                 <!-- Compliance Analysis -->
