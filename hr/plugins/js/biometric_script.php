@@ -117,4 +117,64 @@ const upload_csv = () => {
         swal('System Error', `Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`, 'error');
     });
 }
+
+const generate_bvb_data = () => {
+    let day = document.getElementById('bvb_day').value;
+
+    $.ajax({
+        url: '../process/hr/biometric/bio_p.php',
+        type: 'POST',
+        cache: false,
+        dataType: 'text',
+        data: {
+            method: 'generate_bvb_data',
+            day: day
+        },
+        beforeSend: (jqXHR, settings) => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Generating Data Please Wait...',
+                text: 'Info',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false
+            });
+            jqXHR.url = settings.url;
+            jqXHR.type = settings.type;
+        },
+        success: response => {
+            setTimeout(() => {
+                swal.close();
+                if (response != '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Generate Data Error',
+                        text: `Error: ${response}`,
+                        showConfirmButton: false,
+                        timer : 2000
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Generate Data',
+                        text: 'Biometric Vs Barcode Data Generated Successfully',
+                        showConfirmButton: false,
+                        timer : 1000
+                    });
+                }
+                document.getElementById("bvb_day").value = '';
+            }, 500);
+        }
+    }).fail((jqXHR, textStatus, errorThrown) => {
+        console.log(jqXHR);
+        console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+        $('#loading').remove();
+    });
+}
+
+document.getElementById('bvb_gen_form').addEventListener('submit', e => {
+    e.preventDefault();
+    generate_bvb_data();
+});
 </script>

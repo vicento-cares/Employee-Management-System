@@ -62,68 +62,15 @@ if ($method == 'get_month_bio_vs_barcode_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept = 'PD1' AND emp.section = 'Section 1' AND emp.line_no = '5101'
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
                 time_in_remarks AS remarks,
                 COUNT(*) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, time_in_remarks
 
@@ -139,7 +86,9 @@ if ($method == 'get_month_bio_vs_barcode_time_in_chart') {
                     END
                 ) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
             ORDER BY 
@@ -212,61 +161,6 @@ if ($method == 'get_month_section_late_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -278,7 +172,9 @@ if ($method == 'get_month_section_late_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -351,61 +247,6 @@ if ($method == 'get_month_section_no_bio_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -417,7 +258,9 @@ if ($method == 'get_month_section_no_bio_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -490,61 +333,6 @@ if ($method == 'get_month_section_no_barcode_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -556,7 +344,9 @@ if ($method == 'get_month_section_no_barcode_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -629,61 +419,6 @@ if ($method == 'get_month_section_no_entries_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -695,7 +430,9 @@ if ($method == 'get_month_section_no_entries_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -768,61 +505,6 @@ if ($method == 'get_month_section_early_barcode_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -834,7 +516,9 @@ if ($method == 'get_month_section_early_barcode_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -907,61 +591,6 @@ if ($method == 'get_month_section_late_barcode_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -973,7 +602,9 @@ if ($method == 'get_month_section_late_barcode_time_in_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1048,68 +679,15 @@ if ($method == 'get_month_bio_vs_barcode_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept = 'PD1' AND emp.section = 'Section 1' AND emp.line_no = '5101'
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
                 time_out_remarks AS remarks,
                 COUNT(*) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month  
             GROUP BY 
                 day, time_out_remarks
 
@@ -1125,7 +703,9 @@ if ($method == 'get_month_bio_vs_barcode_time_out_chart') {
                     END
                 ) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
             ORDER BY 
@@ -1198,61 +778,6 @@ if ($method == 'get_month_section_no_bio_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1264,7 +789,9 @@ if ($method == 'get_month_section_no_bio_time_out_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1337,61 +864,6 @@ if ($method == 'get_month_section_no_barcode_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1403,7 +875,9 @@ if ($method == 'get_month_section_no_barcode_time_out_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1476,61 +950,6 @@ if ($method == 'get_month_section_no_entries_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1542,7 +961,9 @@ if ($method == 'get_month_section_no_entries_time_out_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1615,61 +1036,6 @@ if ($method == 'get_month_section_early_bio_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1681,7 +1047,9 @@ if ($method == 'get_month_section_early_bio_time_out_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1754,61 +1122,6 @@ if ($method == 'get_month_section_late_bio_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept IN ('PD1', 'PD2', 'PD3', 'QA') 
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1820,7 +1133,9 @@ if ($method == 'get_month_section_late_bio_time_out_chart') {
 					END
 				) AS total_count 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day, section
             ORDER BY 
@@ -1900,61 +1215,6 @@ if ($method == 'get_month_compliance_time_in_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept = 'PD1' AND emp.section = 'Section 1' AND emp.line_no = '5101'
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -1977,7 +1237,9 @@ if ($method == 'get_month_compliance_time_in_chart') {
                     AS DECIMAL(10, 2))
                 END AS total_percentage 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
 
@@ -1998,7 +1260,9 @@ if ($method == 'get_month_compliance_time_in_chart') {
                     AS DECIMAL(10, 2))
                 END AS total_percentage 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
             ORDER BY 
@@ -2071,61 +1335,6 @@ if ($method == 'get_month_compliance_time_out_chart') {
             DECLARE @Year INT = ?;  
             DECLARE @Month INT = ?; 
 
-            WITH DateRange AS (
-                SELECT 
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                FROM 
-                    master.dbo.spt_values
-                WHERE 
-                    type = 'P' AND 
-                    number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                    DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  
-            ),
-            AttendanceRemarks AS (
-                SELECT 
-                    emp.provider, 
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.process, 
-                    emp.line_no, 
-                    emp.shift_group, 
-                    tio.date_updated AS time_in, 
-                    tio.time_out, 
-                    d.report_date AS day,  
-                    b.shift, 
-                    b.time_in AS b_time_in, 
-                    b.time_out AS b_time_out, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
-                FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  
-                WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) AND 
-                    emp.dept = 'PD1' AND emp.section = 'Section 1' AND emp.line_no = '5101'
-            )
             -- Final select to get counts based on time_out_remarks and report_date
             SELECT 
                 day AS report_date,
@@ -2148,7 +1357,9 @@ if ($method == 'get_month_compliance_time_out_chart') {
                     AS DECIMAL(10, 2))
                 END AS total_percentage 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
 
@@ -2169,7 +1380,9 @@ if ($method == 'get_month_compliance_time_out_chart') {
                     AS DECIMAL(10, 2))
                 END AS total_percentage 
             FROM 
-                AttendanceRemarks 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
             GROUP BY 
                 day
             ORDER BY 
@@ -2252,45 +1465,12 @@ if ($method == 'get_bio_vs_barcode_data') {
                 )
 
                 SELECT 
-                    d.report_date AS day,  -- Updated to use report_date
-                    emp.emp_no, 
-                    emp.full_name, 
-                    emp.dept, 
-                    emp.section, 
-                    emp.line_no, 
-                    emp.process, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NULL THEN 'No Entries Both'
-                        WHEN b.time_in IS NOT NULL AND tio.date_updated IS NULL THEN 'No Barcode In'
-                        WHEN b.time_in IS NULL AND tio.date_updated IS NOT NULL THEN 'No Bio In'
-                        WHEN b.time_in > tio.date_updated THEN 'Early Barcode'
-                        WHEN (b.shift = 'DS' AND CAST(b.time_in AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(b.time_in AS TIME) > '18:00:00') THEN 'Late'
-                        WHEN (b.shift = 'DS' AND CAST(tio.date_updated AS TIME) > '06:00:00') OR (b.shift = 'NS' AND CAST(tio.date_updated AS TIME) > '18:00:00') THEN 'Late Barcode'
-                        ELSE 'Time In OK' 
-                    END AS time_in_remarks, 
-                    CASE 
-                        WHEN (b.time_in IS NULL AND tio.date_updated IS NULL) AND (b.time_out IS NULL AND tio.time_out IS NULL) THEN 'Absent' 
-                        WHEN b.time_out IS NULL AND tio.time_out IS NULL THEN 'No Entries Both'
-                        WHEN b.time_out IS NOT NULL AND tio.time_out IS NULL THEN 'No Barcode Out'
-                        WHEN b.time_out IS NULL AND tio.time_out IS NOT NULL THEN 'No Bio Out'
-                        WHEN b.time_out < tio.time_out THEN 'Early Bio'
-                        WHEN b.time_out > tio.time_out AND DATEDIFF(MINUTE, tio.time_out, b.time_out) >= 60 THEN 'Late Bio'
-                        ELSE 'Time Out OK' 
-                    END AS time_out_remarks 
+                    day, emp_no, full_name, dept, section, line_no, process, time_in_remarks, time_out_remarks 
                 FROM 
-                    emp_mgt_db.dbo.m_employees emp 
-                CROSS JOIN DateRange d
-                LEFT JOIN emp_mgt_db.dbo.t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = d.report_date  -- Updated to use report_date
-                LEFT JOIN emp_mgt_backup.dbo.t_biometric_time_in_out b ON b.emp_no = emp.emp_no AND b.day = d.report_date  -- Updated to use report_date
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
                 WHERE 
-                    (emp.date_hired <= d.report_date) AND 
-                    (emp.resigned_date IS NULL OR emp.resigned_date >= d.report_date) 
-                    AND emp.dept = 'PD1' 
-                    AND emp.section = 'Section 1' 
-                    AND emp.line_no = '5101' 
-                ORDER BY 
-                    d.report_date ASC
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month AND 
+                    dept = 'PD1' AND section = 'Section 1' AND line_no = '5101' 
 
                 OPTION (MAXRECURSION 0);";
     
