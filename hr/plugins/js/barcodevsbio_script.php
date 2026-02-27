@@ -10,14 +10,35 @@
 	let month_section_no_entries_time_in_chart;
 	let month_section_early_barcode_time_in_chart;
 	let month_section_late_barcode_time_in_chart;
+	let month_section_top_late_time_in_chart;
+	let month_section_top_no_bio_time_in_chart;
+	let month_section_top_no_barcode_time_in_chart;
+	let month_section_top_no_entries_time_in_chart;
+	let month_section_top_early_barcode_time_in_chart;
+	let month_section_top_late_barcode_time_in_chart;
+
 	let month_bio_vs_barcode_time_out_chart;
 	let month_section_no_bio_time_out_chart;
 	let month_section_no_barcode_time_out_chart;
 	let month_section_no_entries_time_out_chart;
 	let month_section_early_bio_time_out_chart;
 	let month_section_late_bio_time_out_chart;
+	let month_section_top_no_bio_time_out_chart;
+	let month_section_top_no_barcode_time_out_chart;
+	let month_section_top_no_entries_time_out_chart;
+	let month_section_top_early_bio_time_out_chart;
+	let month_section_top_late_bio_time_out_chart;
+
 	let month_compliance_time_in_chart;
+	let month_section_compliance_time_in_chart;
+	let month_section_non_compliance_time_in_chart;
+	let month_section_top_compliance_time_in_chart;
+	let month_section_top_non_compliance_time_in_chart;
 	let month_compliance_time_out_chart;
+	let month_section_compliance_time_out_chart;
+	let month_section_non_compliance_time_out_chart;
+	let month_section_top_compliance_time_out_chart;
+	let month_section_top_non_compliance_time_out_chart;
 
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
@@ -827,6 +848,462 @@
 		});
 	};
 
+	const get_month_section_top_late_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_late_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_late_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with Late Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_late_time_in_chart) {
+						month_section_top_late_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_late_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_late_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_no_bio_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_bio_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_bio_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Bio Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_bio_time_in_chart) {
+						month_section_top_no_bio_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_bio_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_bio_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_no_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_barcode_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Barcode Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_barcode_time_in_chart) {
+						month_section_top_no_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_no_entries_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_entries_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_entries_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Entries Both Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_entries_time_in_chart) {
+						month_section_top_no_entries_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_entries_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_entries_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_early_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_early_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_early_barcode_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with Early Barcode Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_early_barcode_time_in_chart) {
+						month_section_top_early_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_early_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_early_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_late_barcode_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_late_barcode_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_late_barcode_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with Late Barcode Time In Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_late_barcode_time_in_chart) {
+						month_section_top_late_barcode_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_late_barcode_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_late_barcode_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
 	// Time Out Analysis
 
     const get_month_bio_vs_barcode_time_out_chart = () => {
@@ -1501,6 +1978,386 @@
 		});
 	};
 
+	const get_month_section_top_no_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_bio_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Bio Time Out Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_bio_time_out_chart) {
+						month_section_top_no_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_no_barcode_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_barcode_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_barcode_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Barcode Time Out Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_barcode_time_out_chart) {
+						month_section_top_no_barcode_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_barcode_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_barcode_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_no_entries_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_no_entries_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_no_entries_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with No Entries Both Time Out Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_no_entries_time_out_chart) {
+						month_section_top_no_entries_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_no_entries_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_no_entries_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_early_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_early_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_early_bio_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with Early Bio Time Out Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_early_bio_time_out_chart) {
+						month_section_top_early_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_early_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_early_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_late_bio_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_late_bio_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_late_bio_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section with Late Bio Time Out Employee Count`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_late_bio_time_out_chart) {
+						month_section_top_late_bio_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_late_bio_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_late_bio_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
 	// Compliance Analysis
 
 	const get_month_compliance_time_in_chart = () => {
@@ -1607,6 +2464,382 @@
 					} else {
                         month_compliance_time_in_chart = new ApexCharts(ctx, options);
                         month_compliance_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_compliance_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_compliance_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_compliance_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Compliance Percentage Time In Per Section Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_compliance_time_in_chart) {
+						month_section_compliance_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_compliance_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_compliance_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_non_compliance_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_non_compliance_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_non_compliance_time_in_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Non-Compliance Percentage Time In Per Section Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_non_compliance_time_in_chart) {
+						month_section_non_compliance_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_non_compliance_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_non_compliance_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_compliance_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_compliance_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_compliance_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section for Compliance Time In Percatage`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_compliance_time_in_chart) {
+						month_section_top_compliance_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_compliance_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_compliance_time_in_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_non_compliance_time_in_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_non_compliance_time_in_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_non_compliance_time_in_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section for Non-Compliance Time In Percatage`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_non_compliance_time_in_chart) {
+						month_section_top_non_compliance_time_in_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_non_compliance_time_in_chart = new ApexCharts(ctx, options);
+                        month_section_top_non_compliance_time_in_chart.render();
                     }
 
 					resolve({ status: 'success' });
@@ -1727,6 +2960,382 @@
 		});
 	};
 
+	const get_month_section_compliance_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_compliance_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_compliance_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Compliance Percentage Time In Per Section Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_compliance_time_out_chart) {
+						month_section_compliance_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_compliance_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_compliance_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_non_compliance_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_non_compliance_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					const seriesColorMap = response.colorMap;
+
+					const seriesData = response.data.map(item => ({
+						name: item.name,
+						data: Object.values(item.data)
+					}));
+
+					const colors = seriesData.map(
+						item => seriesColorMap[item.name] || '#343a40'
+					);
+
+					let ctx = document.querySelector("#month_section_non_compliance_time_out_chart");
+
+					let activeSeriesIndex = null;
+					let activeSeriesName = null;
+					let originalSeries = [];
+
+					var options = {
+						chart: {
+							type: 'line',
+							height: 300,
+							events: {
+								mounted(chartContext) {
+									// Save immutable copy of the original series
+									originalSeries = JSON.parse(
+										JSON.stringify(chartContext.w.config.series)
+									);
+								},
+								legendClick(chartContext, seriesIndex) {
+									const seriesName = chartContext.w.globals.seriesNames[seriesIndex];
+
+									if (activeSeriesName !== seriesName) {
+										// Hide all except clicked
+										chartContext.w.globals.seriesNames.forEach(name => {
+											if (name !== seriesName) {
+												chartContext.hideSeries(name);
+											}
+										});
+										chartContext.showSeries(seriesName);
+										activeSeriesName = seriesName;
+									} else {
+										// Show all
+										chartContext.w.globals.seriesNames.forEach(name => {
+											chartContext.showSeries(name);
+										});
+										activeSeriesName = null;
+									}
+
+									return false; // prevent default Apex behavior
+								}
+							}
+						},
+						series: seriesData,
+						colors: colors,
+						xaxis: {
+							categories: response.categories
+						},
+						title: {
+							text: 'Non-Compliance Percentage Time In Per Section Trend',
+							align: 'left'
+						},
+						stroke: {
+							curve: 'smooth'
+						},
+						markers: {
+							size: 5
+						},
+						tooltip: {
+							shared: true,
+							intersect: false
+						},
+						legend: {
+							onItemClick: {
+								toggleDataSeries: false // disable default toggle
+							}
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_non_compliance_time_out_chart) {
+						month_section_non_compliance_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_non_compliance_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_non_compliance_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_compliance_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_compliance_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_compliance_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section for Compliance Time Out Percatage`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_compliance_time_out_chart) {
+						month_section_top_compliance_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_compliance_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_compliance_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
+	const get_month_section_top_non_compliance_time_out_chart = () => {
+		return new Promise((resolve, reject) => {
+			let year = document.getElementById('bvb_year_search').value;
+			let month = document.getElementById('bvb_month_search').value;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: 'json',
+				data: {
+					method: 'get_month_section_top_non_compliance_time_out_chart',
+					year: year,
+					month: month
+				},
+				success: response => {
+
+					// Define Bootstrap 4 colors
+					const bootstrapColors = ['#dc3545']; // Added a color for the line chart
+
+					// Convert the data object to an array
+					const seriesData = response.data.map(item => {
+						return {
+							name: item.name,
+							data: Object.values(item.data)
+						};
+					});
+
+					let ctx = document.querySelector("#month_section_top_non_compliance_time_out_chart");
+
+					var options = {
+						chart: {
+							type: 'bar',
+							height: 300
+						},
+						plotOptions: {
+							bar: {
+								horizontal: false, // Set this to true for horizontal bars
+								columnWidth: '50%',
+								endingShape: 'flat',
+							},
+						},
+						dataLabels: {
+							enabled: false
+						},
+						series: seriesData,
+						colors: bootstrapColors,
+						xaxis: {
+							categories: response.categories,
+							labels: {
+								rotate: -60 // Adjust the rotation angle as needed
+							}
+						},
+						title: {
+							text: `Top 10 Section for Non-Compliance Time Out Percatage`,
+							align: 'left'
+						}
+					};
+
+					// Update previous chart before rendering new one
+					if (month_section_top_non_compliance_time_out_chart) {
+						month_section_top_non_compliance_time_out_chart.updateOptions({
+                            series: options.series,
+                            xaxis: options.xaxis
+                        });
+					} else {
+                        month_section_top_non_compliance_time_out_chart = new ApexCharts(ctx, options);
+                        month_section_top_non_compliance_time_out_chart.render();
+                    }
+
+					resolve({ status: 'success' });
+				}
+			});
+		});
+	};
+
 	// Biometric Vs Barcode Table Data
 
 	const get_bio_vs_barcode_data = () => {
@@ -1800,14 +3409,33 @@
 		get_month_section_no_entries_time_in_chart,
 		get_month_section_early_barcode_time_in_chart,
 		get_month_section_late_barcode_time_in_chart,
+		get_month_section_top_late_time_in_chart,
+		get_month_section_top_no_bio_time_in_chart,
+		get_month_section_top_no_barcode_time_in_chart,
+		get_month_section_top_no_entries_time_in_chart,
+		get_month_section_top_early_barcode_time_in_chart,
+		get_month_section_top_late_barcode_time_in_chart,
 		get_month_bio_vs_barcode_time_out_chart,
 		get_month_section_no_bio_time_out_chart,
 		get_month_section_no_barcode_time_out_chart,
 		get_month_section_no_entries_time_out_chart,
 		get_month_section_early_bio_time_out_chart,
 		get_month_section_late_bio_time_out_chart,
+		get_month_section_top_no_bio_time_out_chart,
+		get_month_section_top_no_barcode_time_out_chart,
+		get_month_section_top_no_entries_time_out_chart,
+		get_month_section_top_early_bio_time_out_chart,
+		get_month_section_top_late_bio_time_out_chart,
 		get_month_compliance_time_in_chart,
+		get_month_section_compliance_time_in_chart,
+		get_month_section_non_compliance_time_in_chart,
+		get_month_section_top_compliance_time_in_chart,
+		get_month_section_top_non_compliance_time_in_chart,
 		get_month_compliance_time_out_chart,
+		get_month_section_compliance_time_out_chart,
+		get_month_section_non_compliance_time_out_chart,
+		get_month_section_top_compliance_time_out_chart,
+		get_month_section_top_non_compliance_time_out_chart,
 		get_bio_vs_barcode_data
 	];
 

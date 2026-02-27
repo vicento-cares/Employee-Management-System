@@ -90,6 +90,18 @@
         <div class="col-12" id="month_section_late_barcode_time_in_chart"></div>
       </div>
       <div class="row">
+        <div class="col-6" id="month_section_top_late_time_in_chart"></div>
+        <div class="col-6" id="month_section_top_no_bio_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_no_barcode_time_in_chart"></div>
+        <div class="col-6" id="month_section_top_no_entries_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_early_barcode_time_in_chart"></div>
+        <div class="col-6" id="month_section_top_late_barcode_time_in_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-sm-12">
           <div class="form-group mb-0">
             <label>Time Out Analysis Charts</label>
@@ -115,6 +127,17 @@
         <div class="col-12" id="month_section_late_bio_time_out_chart"></div>
       </div>
       <div class="row">
+        <div class="col-6" id="month_section_top_no_bio_time_out_chart"></div>
+        <div class="col-6" id="month_section_top_no_barcode_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_no_entries_time_out_chart"></div>
+        <div class="col-6" id="month_section_top_early_bio_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_late_bio_time_out_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-sm-12">
           <div class="form-group mb-0">
             <label>Compliance Analysis Charts</label>
@@ -125,7 +148,27 @@
         <div class="col-12" id="month_compliance_time_in_chart"></div>
       </div>
       <div class="row">
+        <div class="col-12" id="month_section_compliance_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_non_compliance_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_compliance_time_in_chart"></div>
+        <div class="col-6" id="month_section_top_non_compliance_time_in_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-12" id="month_compliance_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_compliance_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_non_compliance_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-6" id="month_section_top_compliance_time_out_chart"></div>
+        <div class="col-6" id="month_section_top_non_compliance_time_out_chart"></div>
       </div>
       <div class="row">
         <div class="col-sm-9">
