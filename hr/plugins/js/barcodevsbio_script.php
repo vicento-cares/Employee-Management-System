@@ -3336,70 +3336,6 @@
 		});
 	};
 
-	// Biometric Vs Barcode Table Data
-
-	const get_bio_vs_barcode_data = () => {
-		return new Promise((resolve, reject) => {
-			// If an AJAX call is already in progress, return immediately
-			if (bio_vs_barcode_data_ajax_in_process) {
-				return;
-			}
-
-			// let year = document.getElementById('bvb_year_search').value;
-			// let month = document.getElementById('bvb_month_search').value;
-
-			// Set the flag to true as we're starting an AJAX call
-			bio_vs_barcode_data_ajax_in_process = true;
-
-			$.ajax({
-				url: '../process/hr/biometric/biod_p.php',
-				type: 'GET',
-				cache: false,
-				data: {
-					method: 'get_bio_vs_barcode_data'
-				},
-				beforeSend: (jqXHR, settings) => {
-					var loading = `<tr id="loading"><td colspan="10" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
-
-					document.getElementById("bioVsBarcodeData").innerHTML = loading;
-					
-					jqXHR.url = settings.url;
-					jqXHR.type = settings.type;
-				},
-				success: function (response) {
-					$('#loading').remove();
-
-					$('#bioVsBarcodeTable tbody').html(response);
-					let table_rows = parseInt(document.getElementById("bioVsBarcodeData").childNodes.length);
-					$('#count_view').html("Total: " + table_rows);
-
-					// sessionStorage.setItem('bvb_year_search', year);
-					// sessionStorage.setItem('bvb_month_search', month);
-
-					// setTimeout(() => {
-					//     get_month_bio_vs_barcode_time_in_chart();
-					// }, 250);
-
-					// Set the flag back to false as the AJAX call has completed
-					bio_vs_barcode_data_ajax_in_process = false;
-
-					resolve({ status: 'success' });
-				}
-			}).fail((jqXHR, textStatus, errorThrown) => {
-				console.log(jqXHR);
-				console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
-				$('#loading').remove();
-
-				reject({
-					error: `HTTP ${jqXHR.status} - ${jqXHR.statusText}`
-				});
-
-				// Set the flag back to false as the AJAX call has completed
-				bio_vs_barcode_data_ajax_in_process = false;
-			});
-		});
-    }
-
 	// All Function Names List
 	const get_requests = [
 		get_month_bio_vs_barcode_time_in_chart,
@@ -3435,15 +3371,14 @@
 		get_month_section_compliance_time_out_chart,
 		get_month_section_non_compliance_time_out_chart,
 		get_month_section_top_compliance_time_out_chart,
-		get_month_section_top_non_compliance_time_out_chart,
-		get_bio_vs_barcode_data
+		get_month_section_top_non_compliance_time_out_chart
 	];
 
 	const load_bvb_dashboard = async () => {
 		Swal.fire({
 			icon: 'info',
-			title: 'Fetching Data...',
-			html: `0 / ${get_requests.length}`,
+			title: 'Fetching Chart Data...',
+			html: `0 Chart/s / ${get_requests.length} Chart/s`,
 			showConfirmButton: false,
 			allowOutsideClick: false
 		});
@@ -3455,14 +3390,14 @@
 				.then(result => {
 					completed++;
 					Swal.update({
-						html: `${completed} / ${get_requests.length}`
+						html: `${completed} Chart/s / ${get_requests.length} Chart/s`
 					});
 					return result;
 				})
 				.catch(error => {
 					completed++;
 					Swal.update({
-						html: `${completed} / ${get_requests.length}`
+						html: `${completed} Chart/s / ${get_requests.length} Chart/s`
 					});
 					throw error;
 				})
@@ -3499,6 +3434,94 @@
     document.getElementById('bvb_form').addEventListener('submit', e => {
         e.preventDefault();
         load_bvb_dashboard();
+    });
+
+	// Biometric Vs Barcode Table Data
+
+	const get_bio_vs_barcode_data = () => {
+
+			// If an AJAX call is already in progress, return immediately
+			if (bio_vs_barcode_data_ajax_in_process) {
+				return;
+			}
+
+			let day = document.getElementById('bvb_day_search').value;
+			let time_in_remarks = document.getElementById('bvb_time_in_remarks_search').value;
+			let time_out_remarks = document.getElementById('bvb_time_out_remarks_search').value;
+
+			// Set the flag to true as we're starting an AJAX call
+			bio_vs_barcode_data_ajax_in_process = true;
+
+			$.ajax({
+				url: '../process/hr/biometric/biod_p.php',
+				type: 'GET',
+				cache: false,
+				dataType: "json",
+				data: {
+					method: 'get_bio_vs_barcode_data',
+					day: day,
+					time_in_remarks: time_in_remarks,
+					time_out_remarks: time_out_remarks
+				},
+				beforeSend: (jqXHR, settings) => {
+					var loading = `<tr id="loading"><td colspan="10" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+
+					document.getElementById("bioVsBarcodeData").innerHTML = loading;
+					
+					jqXHR.url = settings.url;
+					jqXHR.type = settings.type;
+				},
+				success: function (response) {
+					$('#loading').remove();
+
+					if (response.status === 'success') {
+						const rows = response.message || [];
+
+						rows.forEach((row, index) => {
+							const tr = `
+									<tr>
+										<td>${index + 1}</td>
+										<td>${row.day}</td>
+										<td>${row.emp_no}</td>
+										<td>${row.full_name}</td>
+										<td>${row.dept}</td>
+										<td>${row.section}</td>
+										<td>${row.line_no}</td>
+										<td>${row.process}</td>
+										<td>${row.time_in_remarks}</td>
+										<td>${row.time_out_remarks}</td>
+									</tr>
+								`;
+							document.getElementById('bioVsBarcodeData').insertAdjacentHTML('beforeend', tr);
+						});
+
+						$('#count_view').html("Total: " + rows.length);
+					}
+
+					// sessionStorage.setItem('bvb_year_search', year);
+					// sessionStorage.setItem('bvb_month_search', month);
+
+					// setTimeout(() => {
+					//     get_month_bio_vs_barcode_time_in_chart();
+					// }, 250);
+
+					// Set the flag back to false as the AJAX call has completed
+					bio_vs_barcode_data_ajax_in_process = false;
+				}
+			}).fail((jqXHR, textStatus, errorThrown) => {
+				console.log(jqXHR);
+				console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+				$('#loading').remove();
+
+				// Set the flag back to false as the AJAX call has completed
+				bio_vs_barcode_data_ajax_in_process = false;
+			});
+
+    }
+
+	document.getElementById('bvb_table_form').addEventListener('submit', e => {
+        e.preventDefault();
+        get_bio_vs_barcode_data();
     });
 
     const export_bio_vs_barcode_data = (table_id, separator = ',') => {

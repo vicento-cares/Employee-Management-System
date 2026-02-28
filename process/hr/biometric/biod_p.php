@@ -3167,60 +3167,40 @@ if ($method == 'get_month_section_top_non_compliance_time_out_chart') {
 // Biometric Vs Barcode Data
 
 if ($method == 'get_bio_vs_barcode_data') {
-    $c = 0;
+    $day = $_GET['day'];
+    $time_in_remarks = !empty($_GET['time_in_remarks']) ? $_GET['time_in_remarks'] : null;
+    $time_out_remarks = !empty($_GET['time_out_remarks']) ? $_GET['time_out_remarks'] : null;
 
     $query = "
-                DECLARE @Year INT = 2026;  -- Get the current year
-                DECLARE @Month INT = 1; 
-
-                WITH DateRange AS (
-                    SELECT 
-                        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) AS report_date
-                    FROM 
-                        master.dbo.spt_values
-                    WHERE 
-                        type = 'P' AND 
-                        number < DAY(EOMONTH(DATEFROMPARTS(@Year, @Month, 1))) AND
-                        DATEADD(DAY, number, DATEFROMPARTS(@Year, @Month, 1)) <= CAST(GETDATE() AS DATE)  -- Ensure dates are before today
-                )
+                DECLARE @day Date = ?;  
+                DECLARE @time_in_remarks NVARCHAR(255) = ?; 
+                DECLARE @time_out_remarks NVARCHAR(255) = ?; 
 
                 SELECT 
                     day, emp_no, full_name, dept, section, line_no, process, time_in_remarks, time_out_remarks 
                 FROM 
                     emp_mgt_backup.dbo.t_biometric_vs_barcode 
                 WHERE 
-                    YEAR([day]) = @Year AND MONTH([day]) = @Month AND 
-                    dept = 'PD1' AND section = 'Section 1' AND line_no = '5101' 
-
-                OPTION (MAXRECURSION 0);";
+                    day = @day AND 
+                    dept IN ('PD1', 'PD2', 'PD3', 'QA') AND 
+                    (@time_in_remarks IS NULL OR time_in_remarks = @time_in_remarks) AND 
+                    (@time_out_remarks IS NULL OR time_out_remarks = @time_out_remarks)";
     
-    $params = [];
-
-	// $params[] = $day;
+    $params = [
+        $day,
+        $time_in_remarks,
+        $time_out_remarks
+    ];
 
     $stmt = $conn->prepare($query);
     $stmt->execute($params);
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($row) {
-        do {
-            $c++;
-
-            echo '<tr>';
-            echo '<td>' . $c . '</td>';
-            echo '<td>' . $row['day'] . '</td>';
-            echo '<td>' . $row['emp_no'] . '</td>';
-            echo '<td>' . $row['full_name'] . '</td>';
-            echo '<td>' . $row['dept'] . '</td>';
-            echo '<td>' . $row['section'] . '</td>';
-            echo '<td>' . $row['line_no'] . '</td>';
-            echo '<td>' . $row['process'] . '</td>';
-            echo '<td>' . $row['time_in_remarks'] . '</td>';
-            echo '<td>' . $row['time_out_remarks'] . '</td>';
-            echo '</tr>';
-        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-    }
+    echo json_encode([
+        'status' => 'success',
+        'message' => $data
+    ]);
 }
 
 $conn = NULL;

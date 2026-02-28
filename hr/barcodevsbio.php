@@ -53,7 +53,7 @@
               </div>
               <div class="col-sm-3 offset-sm-5">
                 <label>&nbsp;</label>
-                <button type="submit" class="btn bg-gray-dark btn-block"><i class="fas fa-search"></i> Search</button>
+                <button type="submit" class="btn bg-success btn-block"><i class="fas fa-sync"></i> Generate Charts</button>
               </div>
             </div>
           </form>
@@ -171,20 +171,60 @@
         <div class="col-6" id="month_section_top_non_compliance_time_out_chart"></div>
       </div>
       <div class="row">
-        <div class="col-sm-9">
+        <div class="col-sm-6">
           <div class="form-group mb-0">
             <label>No Time Out Barcode Vs Biometric Table</label>
           </div>
         </div>
-        <div class="col-sm-3">
-          <button type="button" class="btn bg-success btn-block" onclick="export_bio_vs_barcode_data('bioVsBarcodeTable')"><i class="fas fa-download"></i> Export Barcode Vs Biometric List</button>
-        </div>
       </div>
+      <form id="bvb_table_form">
+        <div class="row mb-2">
+          <div class="col-sm-2">
+            <label>Biometric Vs Barcode Day</label>
+            <input type="date" class="form-control" id="bvb_day_search" required>
+          </div>
+          <div class="col-sm-2">
+            <label>Time In Remarks</label>
+            <select id="bvb_time_in_remarks_search" class="form-control">
+              <option selected value="">All</option>
+              <option value="Time In OK">Time In OK</option>
+              <option value="Absent">Absent</option>
+              <option value="No Entries Both">No Entries Both</option>
+              <option value="No Bio">No Bio</option>
+              <option value="No Barcode">No Barcode</option>
+              <option value="Early Barcode">Early Barcode</option>
+              <option value="Late Barcode">Late Barcode</option>
+              <option value="Late">Late</option>
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label>Time Out Remarks</label>
+            <select id="bvb_time_out_remarks_search" class="form-control">
+              <option selected value="">All</option>
+              <option value="Time Out OK">Time Out OK</option>
+              <option value="Absent">Absent</option>
+              <option value="No Entries Both">No Entries Both</option>
+              <option value="No Bio">No Bio</option>
+              <option value="No Barcode">No Barcode</option>
+              <option value="Early Bio">Early Bio</option>
+              <option value="Late Bio">Late Bio</option>
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn bg-gray-dark btn-block" onclick=""><i class="fas fa-search"></i> Search</button>
+          </div>
+          <div class="col-sm-3">
+            <label>&nbsp;</label>
+            <button type="button" class="btn bg-success btn-block" onclick="export_bio_vs_barcode_data('bioVsBarcodeTable')"><i class="fas fa-download"></i> Export Barcode Vs Biometric List</button>
+          </div>
+        </div>
+      </form>
       <div class="row mb-2">
-        <div class="col-sm-2">
-          <span id="count_view"></span>
+          <div class="col-sm-2">
+            <span id="count_view"></span>
+          </div>
         </div>
-      </div>
       <div id="bioVsBarcodeTableRes" class="table-responsive" style="max-height: 500px; overflow: auto; display:inline-block;">
         <table id="bioVsBarcodeTable" class="table table-sm table-head-fixed table-foot-fixed text-nowrap table-hover">
           <thead style="text-align: center;">
