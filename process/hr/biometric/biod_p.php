@@ -150,6 +150,90 @@ if ($method == 'get_month_bio_vs_barcode_time_in_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $time_in_color_map]);
 }
 
+if ($method == 'get_month_section_remarks_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $time_in_remarks = $_GET['time_in_remarks'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_in_remarks = ? 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [$year, $month, $time_in_remarks];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
 if ($method == 'get_month_section_late_time_in_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
@@ -664,6 +748,95 @@ if ($method == 'get_month_section_late_barcode_time_in_chart') {
 
     // Encode the categories and data as JSON
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_top_remarks_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $time_in_remarks = $_GET['time_in_remarks'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH BvbTopRemarks AS (
+                SELECT 
+                    emp_no,
+                    section,
+                    COUNT(
+                        CASE 
+                            WHEN time_in_remarks = ? 
+                            THEN 1 
+                        END
+                    ) AS BvbTopCount 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                GROUP BY
+                    emp_no, section
+            )
+
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT TOP 10 
+                section,
+                COUNT(CASE 
+                    WHEN BvbTopCount > 2 THEN 1 
+                END) AS AuditCount,
+                COUNT(CASE 
+                    WHEN BvbTopCount <= 2 AND BvbTopCount > 0 THEN 1 
+                END) AS WarningCount,
+                COUNT(CASE 
+                    WHEN BvbTopCount > 0 THEN 1 
+                END) AS AllCount 
+            FROM 
+                BvbTopRemarks
+            WHERE 
+                BvbTopCount > 0  -- Filter to show only employees with null time records (0 to see warning)
+            GROUP BY 
+                section
+            ORDER BY 
+                AllCount DESC, section ASC;
+            ";
+
+    $params = [$year, $month, $time_in_remarks];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        do {
+            // Add unique section to categories
+            if (!in_array($row['section'], $categories)) {
+                $categories[] = $row['section'];
+            }
+
+            $data['AllCount'][] = (int)$row['AllCount'];
+        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+    } else {
+        $data['AllCount'] = [];
+    }
+
+    // Create the final data structure
+    $finalData = [
+        'categories' => $categories,
+        'data' => [
+            [
+                'name' => 'Employee Count',
+                'data' => $data['AllCount']
+            ]
+        ]
+    ];
+
+    // Encode the categories and data as JSON
+    echo json_encode($finalData);
 }
 
 if ($method == 'get_month_section_top_late_time_in_chart') {
@@ -1313,6 +1486,90 @@ if ($method == 'get_month_bio_vs_barcode_time_out_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $time_out_color_map]);
 }
 
+if ($method == 'get_month_section_remarks_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $time_out_remarks = $_GET['time_out_remarks'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT 
+                day AS report_date,
+                section,
+                COUNT(
+					CASE 
+						WHEN time_out_remarks = ? 
+						THEN 1 
+					END
+				) AS total_count 
+            FROM 
+                emp_mgt_backup.dbo.t_biometric_vs_barcode 
+            WHERE 
+                YEAR([day]) = @Year AND MONTH([day]) = @Month 
+            GROUP BY 
+                day, section
+            ORDER BY 
+                report_date ASC;  -- Order results by report_date in ascending order
+            ";
+
+    $params = [$year, $month, $time_out_remarks];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += intval($row['total_count']); // Use total_count for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
 if ($method == 'get_month_section_no_bio_time_out_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
@@ -1741,6 +1998,95 @@ if ($method == 'get_month_section_late_bio_time_out_chart') {
 
     // Encode the categories and data as JSON
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
+if ($method == 'get_month_section_top_remarks_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $time_out_remarks = $_GET['time_out_remarks'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "
+            DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH BvbTopRemarks AS (
+                SELECT 
+                    emp_no,
+                    section,
+                    COUNT(
+                        CASE 
+                            WHEN time_out_remarks = ? 
+                            THEN 1 
+                        END
+                    ) AS BvbTopCount 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                GROUP BY
+                    emp_no, section
+            )
+
+            -- Final select to get counts based on time_out_remarks and report_date
+            SELECT TOP 10 
+                section,
+                COUNT(CASE 
+                    WHEN BvbTopCount > 2 THEN 1 
+                END) AS AuditCount,
+                COUNT(CASE 
+                    WHEN BvbTopCount <= 2 AND BvbTopCount > 0 THEN 1 
+                END) AS WarningCount,
+                COUNT(CASE 
+                    WHEN BvbTopCount > 0 THEN 1 
+                END) AS AllCount 
+            FROM 
+                BvbTopRemarks
+            WHERE 
+                BvbTopCount > 0  -- Filter to show only employees with null time records (0 to see warning)
+            GROUP BY 
+                section
+            ORDER BY 
+                AllCount DESC, section ASC;
+            ";
+
+    $params = [$year, $month, $time_out_remarks];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        do {
+            // Add unique section to categories
+            if (!in_array($row['section'], $categories)) {
+                $categories[] = $row['section'];
+            }
+
+            $data['AllCount'][] = (int)$row['AllCount'];
+        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+    } else {
+        $data['AllCount'] = [];
+    }
+
+    // Create the final data structure
+    $finalData = [
+        'categories' => $categories,
+        'data' => [
+            [
+                'name' => 'Employee Count',
+                'data' => $data['AllCount']
+            ]
+        ]
+    ];
+
+    // Encode the categories and data as JSON
+    echo json_encode($finalData);
 }
 
 if ($method == 'get_month_section_top_no_bio_time_out_chart') {
@@ -2320,6 +2666,135 @@ if ($method == 'get_month_compliance_time_in_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $compliance_color_map]);
 }
 
+if ($method == 'get_month_section_compliance_percent_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $percent_type = $_GET['percent_type'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH CompliancePercentage AS (
+                SELECT 
+                    day AS report_date,
+                    section,
+                    'Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode', 'Time In OK') 
+                                THEN 1 
+                            END) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_in_remarks = 'Time In OK' 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode', 'Time In OK') 
+                                THEN 1 
+                            END)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    day, section 
+
+                UNION ALL 
+
+                SELECT 
+                    day AS report_date,
+                    section,
+                    'Non-Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(*) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode') 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(*)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    day, section
+            )
+
+            SELECT
+                report_date,
+                section,
+                total_percentage
+            FROM
+                CompliancePercentage
+            WHERE
+                remarks = ? 
+            ORDER BY
+                report_date ASC; -- Order results by report_date in ascending order
+            ";
+
+    $params = [$year, $month, $percent_type];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += floatval($row['total_percentage']); // Use total_percentage for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
+}
+
 if ($method == 'get_month_section_compliance_time_in_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
@@ -2508,6 +2983,119 @@ if ($method == 'get_month_section_non_compliance_time_in_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
 }
 
+if ($method == 'get_month_section_top_compliance_percent_time_in_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $percent_type = $_GET['percent_type'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH BvbTopCompliance AS (
+                SELECT 
+                    section, 
+                    'Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode', 'Time In OK') 
+                                THEN 1 
+                            END) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_in_remarks = 'Time In OK' 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode', 'Time In OK') 
+                                THEN 1 
+                            END)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    section
+
+                UNION ALL
+
+                SELECT 
+                    section, 
+                    'Non-Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(*) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_in_remarks IN ('No Barcode In', 'No Bio In', 'Early Barcode', 'Late', 'Late Barcode') 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(*)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    section
+            )
+
+            SELECT TOP 10
+                section, 
+                total_percentage
+            FROM 
+                BvbTopCompliance 
+            WHERE 
+                remarks = ?
+            ORDER BY
+                total_percentage DESC, section ASC;
+            ";
+
+    $params = [$year, $month, $percent_type];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        do {
+            // Add unique section to categories
+            if (!in_array($row['section'], $categories)) {
+                $categories[] = $row['section'];
+            }
+
+            $data['total_percentage'][] = (float)$row['total_percentage'];
+        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+    } else {
+        $data['total_percentage'] = [];
+    }
+
+    // Create the final data structure
+    $finalData = [
+        'categories' => $categories,
+        'data' => [
+            [
+                'name' => 'Percentage',
+                'data' => $data['total_percentage']
+            ]
+        ]
+    ];
+
+    // Encode the categories and data as JSON
+    echo json_encode($finalData);
+}
+
 if ($method == 'get_month_section_top_compliance_time_in_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
@@ -2577,7 +3165,7 @@ if ($method == 'get_month_section_top_compliance_time_in_chart') {
                 $categories[] = $row['section'];
             }
 
-            $data['total_percentage'][] = (int)$row['total_percentage'];
+            $data['total_percentage'][] = (float)$row['total_percentage'];
         } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
     } else {
         $data['total_percentage'] = [];
@@ -2661,7 +3249,7 @@ if ($method == 'get_month_section_top_non_compliance_time_in_chart') {
                 $categories[] = $row['section'];
             }
 
-            $data['total_percentage'][] = (int)$row['total_percentage'];
+            $data['total_percentage'][] = (float)$row['total_percentage'];
         } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
     } else {
         $data['total_percentage'] = [];
@@ -2800,6 +3388,135 @@ if ($method == 'get_month_compliance_time_out_chart') {
 
     // Encode the categories and data as JSON
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $compliance_color_map]);
+}
+
+if ($method == 'get_month_section_compliance_percent_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $percent_type = $_GET['percent_type'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH CompliancePercentage AS (
+                SELECT 
+                    day AS report_date,
+                    section,
+                    'Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio', 'Time Out OK') 
+                                THEN 1 
+                            END) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_out_remarks = 'Time Out OK' 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio', 'Time Out OK') 
+                                THEN 1 
+                            END)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    day, section 
+
+                UNION ALL 
+
+                SELECT 
+                    day AS report_date,
+                    section,
+                    'Non-Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(*) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio') 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(*)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    day, section
+            )
+
+            SELECT
+                report_date,
+                section,
+                total_percentage
+            FROM
+                CompliancePercentage
+            WHERE
+                remarks = ?
+            ORDER BY
+                report_date ASC; -- Order results by report_date in ascending order
+            ";
+
+    $params = [$year, $month, $percent_type];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add unique report_date to categories
+        if (!in_array($row['report_date'], $categories)) {
+            $categories[] = $row['report_date'];
+        }
+
+        if (!empty($row['section'])) {
+            // Create a unique key for section
+            $section = $row['section'];
+
+            // Extract month and year from report_date
+            $reportDate = new DateTime($row['report_date']);
+            $month = (int)$reportDate->format('m');
+            $year = (int)$reportDate->format('Y');
+
+            // Get the number of days in the specified month and year
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+            // Initialize the statusCounts for this section if it doesn't exist
+            if (!isset($statusCounts[$section])) {
+                $statusCounts[$section] = array_fill(0, $daysInMonth, 0);
+            }
+
+            // Update the count for the specified status
+            $dateIndex = array_search($row['report_date'], $categories);
+            if ($dateIndex !== false) {
+                $statusCounts[$section][$dateIndex] += floatval($row['total_percentage']); // Use total_percentage for counts
+            }
+        }
+    }
+
+    // Create the final data structure
+    foreach ($statusCounts as $section => $counts) {
+        $data[] = [
+            'name' => $section,
+            'data' => $counts
+        ];
+    }
+
+    // Encode the categories and data as JSON
+    echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
 }
 
 if ($method == 'get_month_section_compliance_time_out_chart') {
@@ -2990,6 +3707,119 @@ if ($method == 'get_month_section_non_compliance_time_out_chart') {
     echo json_encode(['categories' => $categories, 'data' => $data, 'colorMap' => $section_color_map]);
 }
 
+if ($method == 'get_month_section_top_compliance_percent_time_out_chart') {
+    $year = $_GET['year'];
+    $month = $_GET['month'];
+    $percent_type = $_GET['percent_type'];
+
+    $data = [];
+    $categories = [];
+
+    $sql = "DECLARE @Year INT = ?;  
+            DECLARE @Month INT = ?; 
+
+            WITH BvbTopCompliance AS (
+                SELECT 
+                    section, 
+                    'Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio', 'Time Out OK') 
+                                THEN 1 
+                            END) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_out_remarks = 'Time Out OK' 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio', 'Time Out OK') 
+                                THEN 1 
+                            END)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    section
+
+                UNION ALL
+
+                SELECT 
+                    section, 
+                    'Non-Compliance' AS remarks, 
+                    CASE 
+                        WHEN COUNT(*) = 0 THEN 0 
+                        ELSE 
+                        CAST(
+                            (COUNT(CASE 
+                                WHEN time_out_remarks IN ('No Barcode Out', 'No Bio Out', 'Early Bio', 'Late Bio') 
+                                THEN 1 
+                            END) * 1.0 / 
+                            COUNT(*)) * 100.0 
+                        AS DECIMAL(10, 2))
+                    END AS total_percentage 
+                FROM 
+                    emp_mgt_backup.dbo.t_biometric_vs_barcode 
+                WHERE 
+                    YEAR([day]) = @Year AND MONTH([day]) = @Month 
+                GROUP BY 
+                    section
+            )
+
+            SELECT TOP 10
+                section, 
+                total_percentage
+            FROM 
+                BvbTopCompliance 
+            WHERE 
+                remarks = ?
+            ORDER BY
+                total_percentage DESC, section ASC;
+            ";
+
+    $params = [$year, $month, $percent_type];
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    // Initialize an array to hold the counts for each section
+    $statusCounts = [];
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        do {
+            // Add unique section to categories
+            if (!in_array($row['section'], $categories)) {
+                $categories[] = $row['section'];
+            }
+
+            $data['total_percentage'][] = (float)$row['total_percentage'];
+        } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+    } else {
+        $data['total_percentage'] = [];
+    }
+
+    // Create the final data structure
+    $finalData = [
+        'categories' => $categories,
+        'data' => [
+            [
+                'name' => 'Percentage',
+                'data' => $data['total_percentage']
+            ]
+        ]
+    ];
+
+    // Encode the categories and data as JSON
+    echo json_encode($finalData);
+}
+
 if ($method == 'get_month_section_top_compliance_time_out_chart') {
     $year = $_GET['year'];
     $month = $_GET['month'];
@@ -3059,7 +3889,7 @@ if ($method == 'get_month_section_top_compliance_time_out_chart') {
                 $categories[] = $row['section'];
             }
 
-            $data['total_percentage'][] = (int)$row['total_percentage'];
+            $data['total_percentage'][] = (float)$row['total_percentage'];
         } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
     } else {
         $data['total_percentage'] = [];
@@ -3143,7 +3973,7 @@ if ($method == 'get_month_section_top_non_compliance_time_out_chart') {
                 $categories[] = $row['section'];
             }
 
-            $data['total_percentage'][] = (int)$row['total_percentage'];
+            $data['total_percentage'][] = (float)$row['total_percentage'];
         } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
     } else {
         $data['total_percentage'] = [];

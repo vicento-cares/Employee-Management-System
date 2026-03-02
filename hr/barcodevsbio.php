@@ -28,13 +28,13 @@
           <form id="bvb_form">
             <div class="row mb-4">
               <div class="col-sm-2">
-                  <label>Year</label>
+                  <label>Year</label><label style="color: red;">*</label>
                   <select id="bvb_year_search" class="form-control" required>
                       <option selected value="">Select Year</option>
                   </select>
               </div>
               <div class="col-sm-2">
-                  <label>Month</label>
+                  <label>Month</label><label style="color: red;">*</label>
                   <select id="bvb_month_search" class="form-control" required>
                       <option selected value="">Select Month</option>
                       <option value="1">January</option>
@@ -51,7 +51,39 @@
                       <option value="12">December</option>
                   </select>
               </div>
-              <div class="col-sm-3 offset-sm-5">
+              <div class="col-sm-2">
+                <label>Time In Remarks</label>
+                <select id="bvb_time_in_remarks_ctx_search" class="form-control">
+                  <option selected value="Time In OK">Time In OK</option>
+                  <option value="Absent">Absent</option>
+                  <option value="No Entries Both">No Entries Both</option>
+                  <option value="No Bio">No Bio</option>
+                  <option value="No Barcode">No Barcode</option>
+                  <option value="Early Barcode">Early Barcode</option>
+                  <option value="Late Barcode">Late Barcode</option>
+                  <option value="Late">Late</option>
+                </select>
+              </div>
+              <div class="col-sm-2">
+                <label>Time Out Remarks</label>
+                <select id="bvb_time_out_remarks_ctx_search" class="form-control">
+                  <option selected value="Time Out OK">Time Out OK</option>
+                  <option value="Absent">Absent</option>
+                  <option value="No Entries Both">No Entries Both</option>
+                  <option value="No Bio">No Bio</option>
+                  <option value="No Barcode">No Barcode</option>
+                  <option value="Early Bio">Early Bio</option>
+                  <option value="Late Bio">Late Bio</option>
+                </select>
+              </div>
+              <div class="col-sm-2">
+                <label>Percentage Type</label>
+                <select id="bvb_percent_type_ctx_search" class="form-control">
+                  <option selected value="Compliance">Compliance</option>
+                  <option value="Non-Compliance">Non-Compliance</option>
+                </select>
+              </div>
+              <div class="col-sm-2">
                 <label>&nbsp;</label>
                 <button type="submit" class="btn bg-success btn-block"><i class="fas fa-sync"></i> Generate Charts</button>
               </div>
@@ -72,6 +104,9 @@
         <div class="col-12" id="month_bio_vs_barcode_time_in_chart"></div>
       </div>
       <div class="row">
+        <div class="col-12" id="month_section_remarks_time_in_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-12" id="month_section_late_time_in_chart"></div>
       </div>
       <div class="row">
@@ -88,6 +123,9 @@
       </div>
       <div class="row">
         <div class="col-12" id="month_section_late_barcode_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_top_remarks_time_in_chart"></div>
       </div>
       <div class="row">
         <div class="col-6" id="month_section_top_late_time_in_chart"></div>
@@ -112,6 +150,9 @@
         <div class="col-12" id="month_bio_vs_barcode_time_out_chart"></div>
       </div>
       <div class="row">
+        <div class="col-12" id="month_section_remarks_time_out_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-12" id="month_section_no_bio_time_out_chart"></div>
       </div>
       <div class="row">
@@ -125,6 +166,9 @@
       </div>
       <div class="row">
         <div class="col-12" id="month_section_late_bio_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_top_remarks_time_out_chart"></div>
       </div>
       <div class="row">
         <div class="col-6" id="month_section_top_no_bio_time_out_chart"></div>
@@ -148,10 +192,16 @@
         <div class="col-12" id="month_compliance_time_in_chart"></div>
       </div>
       <div class="row">
+        <div class="col-12" id="month_section_compliance_percent_time_in_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-12" id="month_section_compliance_time_in_chart"></div>
       </div>
       <div class="row">
         <div class="col-12" id="month_section_non_compliance_time_in_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_top_compliance_percent_time_in_chart"></div>
       </div>
       <div class="row">
         <div class="col-6" id="month_section_top_compliance_time_in_chart"></div>
@@ -161,10 +211,16 @@
         <div class="col-12" id="month_compliance_time_out_chart"></div>
       </div>
       <div class="row">
+        <div class="col-12" id="month_section_compliance_percent_time_out_chart"></div>
+      </div>
+      <div class="row">
         <div class="col-12" id="month_section_compliance_time_out_chart"></div>
       </div>
       <div class="row">
         <div class="col-12" id="month_section_non_compliance_time_out_chart"></div>
+      </div>
+      <div class="row">
+        <div class="col-12" id="month_section_top_compliance_percent_time_out_chart"></div>
       </div>
       <div class="row">
         <div class="col-6" id="month_section_top_compliance_time_out_chart"></div>
@@ -180,7 +236,7 @@
       <form id="bvb_table_form">
         <div class="row mb-2">
           <div class="col-sm-2">
-            <label>Biometric Vs Barcode Day</label>
+            <label>Biometric Vs Barcode Day</label><label style="color: red;">*</label>
             <input type="date" class="form-control" id="bvb_day_search" required>
           </div>
           <div class="col-sm-2">
