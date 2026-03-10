@@ -252,8 +252,35 @@
                                             </thead>
                                             <tbody id="lineSupportData" style="text-align: center;">
                                             <?php 
+                                            $emp_transfer_type = '';
+                                            $checked_by = '';
+                                            $approved_by = '';
+                                            $r_noted_by = '';
+                                            $r_acknowledged_by = '';
+                                            $r_approved_by = '';
+
                                             $c = 0;
+                                            
                                             foreach ($submission_data as &$row) {
+                                                if (empty($emp_transfer_type)) {
+                                                    $emp_transfer_type = $row['emp_transfer_type'];
+                                                }
+                                                if (empty($checked_by)) {
+                                                    $checked_by = $row['checked_by'];
+                                                }
+                                                if (empty($approved_by)) {
+                                                    $approved_by = $row['approved_by'];
+                                                }
+                                                if (empty($r_noted_by)) {
+                                                    $r_noted_by = $row['r_noted_by'];
+                                                }
+                                                if (empty($r_acknowledged_by)) {
+                                                    $r_acknowledged_by = $row['r_acknowledged_by'];
+                                                }
+                                                if (empty($r_approved_by)) {
+                                                    $r_approved_by = $row['r_approved_by'];
+                                                }
+                                            
                                                 $c++;
 
                                                 echo '<tr>';
@@ -281,6 +308,30 @@
 
                                                 echo '</tr>';
                                             }
+
+                                            $approver_label = '';
+
+                                            if ($emp_transfer_type == 'department') {
+                                                if (empty($checked_by)) {
+                                                    $approver_label = 'Checked By';
+                                                } else if (empty($approved_by)) {
+                                                    $approver_label = 'Approved By';
+                                                } else {
+                                                    $approver_label = 'HR Acknowledged By';
+                                                }
+                                            } else if ($emp_transfer_type == 'section') {
+                                                if (empty($approved_by)) {
+                                                    $approver_label = 'Approved By';
+                                                } else if (empty($r_noted_by)) {
+                                                    $approver_label = 'Receiving Noted By';
+                                                } else if (empty($r_acknowledged_by)) {
+                                                    $approver_label = 'Receiving Acknowledged By';
+                                                } else if (empty($r_approved_by)) {
+                                                    $approver_label = 'Receiving Approved By';
+                                                } else {
+                                                    $approver_label = 'HR Acknowledged By';
+                                                }
+                                            }
                                             ?>
                                             </tbody>
                                         </table>
@@ -288,7 +339,7 @@
                                     <form id="employee_transfer_approval_form">
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <label>Approver Employee No </label><label style="color: red;">*</label>
+                                                <label><?=$approver_label?> Employee No </label><label style="color: red;">*</label>
                                                 <input type="text" id="approver_emp_no" class="form-control" maxlength="255" autocomplete="off" required>
                                             </div>
                                         </div>

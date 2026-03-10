@@ -130,9 +130,9 @@ function check_csv($file, $conn)
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    $valid_first_line = "Employee No.,Employee Transfer Type,Department To,Section To,Line No. To,Date Effectivity,Reason";
+    $valid_first_line = 'Employee No.,Employee Transfer Type,Department To,Section To,Line No. To,Date Effectivity,Reason';
     $valid_first_line2 = '"Employee No.","Employee Transfer Type","Department To","Section To","Line No. To","Date Effectivity",Reason';
-    if ($first_line != $valid_first_line || $first_line != $valid_first_line2) {
+    if ($first_line != $valid_first_line && $first_line != $valid_first_line2) {
         $message = $message . 'Invalid CSV Table Header. Maybe an incorrect CSV file or incorrect CSV header ';
         return $message;
     }
@@ -358,8 +358,18 @@ try {
     $values = [];
     $placeholders = [];
 
-    $emp_transfer_batch_id = str_replace('.', '', uniqid('ET-BAT-', true));
-    $approve_key = str_replace('.', '', uniqid('emp_mgt_key_', true));
+    $emp_transfer_batch_id = '';
+    $approve_key = '';
+
+    // Department Employee Transfer Batch
+    $has_emp_transfer_type_dept = false;
+    $emp_transfer_batch_id_dept = str_replace('.', '', uniqid('ET-BAT-', true));
+    $approve_key_dept = str_replace('.', '', uniqid('emp_mgt_key_', true));
+
+    // Section Employee Transfer Batch
+    $has_emp_transfer_type_section = false;
+    $emp_transfer_batch_id_section = str_replace('.', '', uniqid('ET-BAT-', true));
+    $approve_key_section = str_replace('.', '', uniqid('emp_mgt_key_', true));
 
     while (($line = fgetcsv($csvFile)) !== false) {
         // Check if the row is blank or consists only of whitespace
@@ -383,8 +393,14 @@ try {
 
         if ($emp_transfer_type == 'department') {
             $emp_transfer_id = str_replace('.', '', uniqid('HR-014-', true));
+            $emp_transfer_batch_id = $emp_transfer_batch_id_dept;
+            $approve_key = $approve_key_dept;
+            $has_emp_transfer_type_dept = true;
         } else if ($emp_transfer_type == 'section') {
             $emp_transfer_id = str_replace('.', '', uniqid('PRD-032-', true));
+            $emp_transfer_batch_id = $emp_transfer_batch_id_section;
+            $approve_key = $approve_key_section;
+            $has_emp_transfer_type_section = true;
         }
 
         $dept_from = '';
@@ -481,15 +497,30 @@ try {
     }
     
     $sendto = implode(";", $send_to_emails);
-    
-    $mail_arr = [
+
+    $mail_arr_dept = [
         'approve_email_opt' => 2,
-        'emp_transfer_batch_id' => $emp_transfer_batch_id,
-        'approve_key' => $approve_key,
+        'emp_transfer_batch_id' => $emp_transfer_batch_id_dept,
+        'approve_key' => $approve_key_dept,
         'sendto' => $sendto
     ];
 
-    send_mail($mail_arr, $conn_mailer);
+    $mail_arr = [
+        'approve_email_opt' => 2,
+        'emp_transfer_batch_id' => $emp_transfer_batch_id_section,
+        'approve_key' => $approve_key_section,
+        'sendto' => $sendto
+    ];
+
+    require '../conn_mailer.php';
+
+    if ($has_emp_transfer_type_dept) {
+        send_mail($mail_arr_dept, $conn_mailer);
+    }
+
+    if ($has_emp_transfer_type_section) {
+        send_mail($mail_arr, $conn_mailer);
+    }
 
     if ($error > 0) {
         if ($isTransactionActive) {

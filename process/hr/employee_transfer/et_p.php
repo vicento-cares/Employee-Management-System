@@ -180,7 +180,7 @@ if ($method == 'get_ongoing_employee_transfer') {
                     et.reason, et.date_effectivity, 
                     emp.full_name, emp.provider, emp.position, 
                     CASE 
-                        WHEN et.date_effectivity > GETDATE() THEN 'overdue' 
+                        WHEN et.date_effectivity < GETDATE() THEN 'overdue' 
                         ELSE 'ongoing' 
                     END AS date_effectivity_status 
 				FROM t_employee_transfer et 
