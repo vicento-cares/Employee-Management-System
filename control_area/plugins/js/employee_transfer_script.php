@@ -362,6 +362,19 @@
         });
     }
 
+    const toggle_dept_dropdown = () => {
+        const transferType = document.getElementById('et_emp_transfer_type').value;
+        const deptDropdown = document.getElementById('et_dept');
+
+        // Disable if 'section', enable if 'department'
+        deptDropdown.disabled = (transferType === 'section');
+        
+        // Optional: Reset the department selection when disabled
+        if (deptDropdown.disabled) {
+            deptDropdown.value = "";
+        }
+    }
+
     $("#new_employee_transfer").on('show.bs.modal', e => {
         load_et_reason_textarea();
     });
@@ -471,9 +484,11 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Upload CSV Error',
-                            text: `Error: ${response}`,
+                            html: `Error: ${response}`, // Use 'html' to allow for longer text
                             showConfirmButton: false,
-                            timer: 2000
+                            customClass: {
+                                popup: 'my-custom-error-swal' // Apply your custom class here
+                            }
                         });
                     } else {
                         Swal.fire({

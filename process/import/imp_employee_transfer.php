@@ -115,7 +115,7 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0);
+    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0, 0);
 
     $notExistsDeptArr = array();
     $notExistsSectionArr = array();
@@ -123,6 +123,7 @@ function check_csv($file, $conn)
     $notValidDateEffectivityArr = array();
     $notAllowedDateEffectivityArr = array();
     $notManpowerArr = array();
+    $wrongDeptSecCombineArr = array();
     $dupManpowerArr = array();
 
     $message = "";
@@ -241,6 +242,17 @@ function check_csv($file, $conn)
             array_push($dupManpowerArr, $check_csv_row);
         }
 
+        $query = "SELECT TOP 1 id FROM m_access_locations WHERE dept = ? AND section = ? -- AND line_no = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->execute([$dept_to, $section_to]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            $hasError = 1;
+            $row_valid_arr[7] = 1;
+            array_push($wrongDeptSecCombineArr, $check_csv_row);
+        }
+
         // Joining all row values for checking duplicated rows
         $whole_line = join(',', $line);
 
@@ -258,34 +270,38 @@ function check_csv($file, $conn)
 
     if ($hasError == 1) {
         if ($row_valid_arr[0] == 1) {
-            $message = $message . 'Department doesn\'t exists on row/s ' . implode(", ", $notExistsDeptArr) . '. ';
+            $message = $message . 'Department doesn\'t exists on row/s ' . implode(", ", $notExistsDeptArr) . '. <br>';
         }
         if ($row_valid_arr[1] == 1) {
-            $message = $message . 'Section doesn\'t exists on row/s ' . implode(", ", $notExistsSectionArr) . '. ';
+            $message = $message . 'Section doesn\'t exists on row/s ' . implode(", ", $notExistsSectionArr) . '. <br>';
         }
         if ($row_valid_arr[2] == 1) {
-            $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. ';
+            $message = $message . 'Line No. doesn\'t exists row/s ' . implode(", ", $notExistsLineNoArr) . '. <br>';
         }
         if ($row_valid_arr[3] == 1) {
-            $message = $message . 'Invalid Date Effectivity on row/s ' . implode(", ", $notValidDateEffectivityArr) . '. ';
+            $message = $message . 'Invalid Date Effectivity on row/s ' . implode(", ", $notValidDateEffectivityArr) . '. <br>';
         }
         if ($row_valid_arr[4] == 1) {
-            $message = $message . 'Late Date Effectivity is not allowed on row/s ' . implode(", ", $notAllowedDateEffectivityArr) . '. ';
+            $message = $message . 'Late Date Effectivity is not allowed on row/s ' . implode(", ", $notAllowedDateEffectivityArr) . '. <br>';
         }
         if ($row_valid_arr[5] == 1) {
-            $message = $message . 'Not Manpower of this department/section on row/s ' . implode(", ", $notManpowerArr) . '. ';
+            $message = $message . 'Not Manpower of this department/section on row/s ' . implode(", ", $notManpowerArr) . '. <br>';
         }
         if ($row_valid_arr[6] == 1) {
-            $message = $message . 'Duplicate / Already for transfer on row/s ' . implode(", ", $dupManpowerArr) . '. ';
+            $message = $message . 'Duplicate / Already for transfer on row/s ' . implode(", ", $dupManpowerArr) . '. <br>';
+        }
+        if ($row_valid_arr[7] == 1) {
+            $message = $message . 'Wrong Department / Section combination on row/s ' . implode(", ", $wrongDeptSecCombineArr) . '. <br>';
         }
 
         if ($hasBlankError >= 1) {
-            $message = $message . 'Blank Cell Exists on row/s ' . implode(", ", $hasBlankErrorArr) . '. ';
+            $message = $message . 'Blank Cell Exists on row/s ' . implode(", ", $hasBlankErrorArr) . '. <br>';
         }
         if ($isDuplicateOnCsv == 1) {
-            $message = $message . 'Duplicated Record/s on row/s ' . implode(", ", $isDuplicateOnCsvArr) . '. ';
+            $message = $message . 'Duplicated Record/s on row/s ' . implode(", ", $isDuplicateOnCsvArr) . '. <br>';
         }
     }
+    
     return $message;
 }
 

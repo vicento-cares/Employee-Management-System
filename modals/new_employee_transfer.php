@@ -21,7 +21,7 @@
           <div class="row mb-2">
             <div class="col-sm-6">
               <label>Employee Transfer Type</label><label style="color: red;">*</label>
-              <select id="et_emp_transfer_type" class="form-control" required>
+              <select id="et_emp_transfer_type" class="form-control" onchange="toggle_dept_dropdown()" required>
                 <option selected disabled value="">Select Type</option>
                 <option value="department">Department Transfer</option>
                 <option value="section">Section Transfer</option>

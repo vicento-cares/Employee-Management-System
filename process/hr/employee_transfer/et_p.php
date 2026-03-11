@@ -37,7 +37,7 @@ function add_emp_transfer_history($mail_arr, $conn) {
                         (emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
                         dept_from, section_from, line_no_from, 
                         dept_to, section_to, line_no_to, 
-                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        issued_by, issued_by_no, date_issued_by, checked_by, checked_by_no, date_checked_by, approved_by, approved_by_no, date_approved_by, 
                         r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
                         r_approved_by, r_approved_by_no, r_date_approved_by, date_effectivity, reason, 
                         hr_ack, hr_ack_no, hr_date_ack, is_approved) 
@@ -45,7 +45,7 @@ function add_emp_transfer_history($mail_arr, $conn) {
                         emp_transfer_id, emp_transfer_batch_id, approve_key, emp_no, emp_transfer_type, 
                         dept_from, section_from, line_no_from, 
                         dept_to, section_to, line_no_to, 
-                        issued_by, issued_by_no, date_issued_by, approved_by, approved_by_no, date_approved_by, 
+                        issued_by, issued_by_no, date_issued_by, checked_by, checked_by_no, date_checked_by, approved_by, approved_by_no, date_approved_by, 
                         r_noted_by, r_noted_by_no, r_date_noted_by, r_acknowledged_by, r_acknowledged_by_no, r_date_acknowledged_by, 
                         r_approved_by, r_approved_by_no, r_date_approved_by, date_effectivity, reason, 
                         $addedQuery 
@@ -133,6 +133,59 @@ function get_issued_by_email($mail_arr, $conn) {
 
     if ($row) {
         $sendto = $row['email'];
+    }
+
+    return $sendto;
+}
+
+function get_receiving_mp_email($mail_arr, $conn) {
+    $sendto = [];
+
+    // First query to get dept_to and section_to
+    $query = "SELECT 
+                    dept_to, section_to 
+              FROM 
+                    t_employee_transfer_history 
+              WHERE 
+                    emp_transfer_batch_id = ? AND approve_key = ?
+              GROUP BY
+                    dept_to, section_to";
+
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$mail_arr['emp_transfer_batch_id'], $mail_arr['approve_key']]);
+
+    $departments = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Store dept_to and section_to in an array
+        $departments[] = ['dept' => $row['dept_to'], 'section' => $row['section_to']];
+    }
+
+    // Prepare arrays for the next query's parameters
+    $depts = [];
+    $sections = [];
+    foreach ($departments as $dept_section) {
+        $depts[] = $dept_section['dept'];
+        $sections[] = $dept_section['section'];
+    }
+
+    // Placeholders for the IN clause
+    $deptPlaceholders = implode(',', array_fill(0, count($depts), '?'));
+    $sectionPlaceholders = implode(',', array_fill(0, count($sections), '?'));
+
+    // Second query to get emails
+    $query = "SELECT 
+                    email 
+              FROM 
+                    m_control_area_accounts 
+              WHERE 
+                    dept IN ($deptPlaceholders) AND section IN ($sectionPlaceholders)";
+
+    $stmt = $conn->prepare($query);
+    $stmt->execute(array_merge($depts, $sections));
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Append emails to the $sendto array
+        $sendto[] = $row['email'];
     }
 
     return $sendto;
@@ -364,8 +417,23 @@ if ($method == 'submit_employee_transfer') {
         $dept_from = $row['dept'];
         $section_from = $row['section'];
         $line_no_from = $row['line_no'];
+
+        if ($emp_transfer_type == 'section') {
+            $dept_to = $dept_from;
+        }
     } else {
         echo 'Not Manpower of this department/section';
+        $conn = null;
+        exit();
+    }
+
+    $query = "SELECT TOP 1 id FROM m_access_locations WHERE dept = ? AND section = ? -- AND line_no = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$dept_to, $section_to]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row) {
+        echo 'Wrong department/section combination';
         $conn = null;
         exit();
     }
@@ -740,6 +808,16 @@ if ($method == 'approve_employee_transfer') {
 
                     send_mail($mail_arr, $conn_mailer);
 
+                    // Receiving MP Email
+                    $mail_arr['approve_email_opt'] = 3;
+
+                    $sendto = get_receiving_mp_email($mail_arr, $conn);
+
+                    if (!empty($sendto)) {
+                        $mail_arr['sendto'] = is_array($sendto) ? implode(';', $sendto) : $sendto;
+                        send_mail($mail_arr, $conn_mailer);
+                    }
+
                     echo 'success';
                 } else {
                     echo 'hr cannot bypass approval';
@@ -900,6 +978,16 @@ if ($method == 'approve_employee_transfer') {
                     $mail_arr['sendto'] = $sendto;
 
                     send_mail($mail_arr, $conn_mailer);
+
+                    // Receiving MP Email
+                    $mail_arr['approve_email_opt'] = 3;
+
+                    $sendto = get_receiving_mp_email($mail_arr, $conn);
+
+                    if (!empty($sendto)) {
+                        $mail_arr['sendto'] = is_array($sendto) ? implode(';', $sendto) : $sendto;
+                        send_mail($mail_arr, $conn_mailer);
+                    }
 
                     echo 'success';
                 } else {
