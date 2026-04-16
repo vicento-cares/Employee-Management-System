@@ -80,7 +80,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Day', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Shift', 'Time In 1', 'Time In 2', 'Time Out', 'IP', 'Status'); 
+$fields = array('#', 'Day', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -94,7 +94,7 @@ fputcsv($f, $fields, $delimiter);
 	WHERE";*/
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
-	tio.day, tio.shift, FORMAT(tio.date_updated, 'HH:mm:ss') as time_in_1, FORMAT(tio.time_in, 'HH:mm:ss') as time_in_2, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
+	tio.day, tio.shift, FORMAT(tio.time_in, 'HH:mm:ss') as time_in, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE emp.shift_group = ?";
@@ -152,7 +152,7 @@ while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
 		$row_status = 'Absent';
 	}
 
-	$lineData = array($c, $day, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row['shift'], $row['time_in_1'], $row['time_in_2'], $row['time_out'], $row['ip'], $row_status); 
+	$lineData = array($c, $day, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
 	fputcsv($f, $lineData, $delimiter); 
 }
 
