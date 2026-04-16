@@ -3,7 +3,7 @@ session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
-if (!isset($_SESSION['emp_no'])) {
+if (!isset($_SESSION['emp_no_control_area'])) {
   header('location:/emp_mgt/admin');
   exit;
 }
@@ -13,7 +13,7 @@ require('../conn.php');
 switch (true) {
     case !isset($_GET['day']):
     case !isset($_GET['shift_group']):
-	case !isset($_GET['dept']):
+	case !isset($_GET['line_no']):
         echo 'Query Parameters Not Set';
         exit;
         break;
@@ -21,13 +21,13 @@ switch (true) {
 
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
-if (empty($_GET['dept'])) {
-	$dept = $_SESSION['dept'];
-} else {
-	$dept = $_GET['dept'];
-}
+$dept = $_SESSION['dept'];
 $section = $_SESSION['section'];
-$line_no = $_SESSION['line_no'];
+if (isset($_GET['line_no'])) {
+	$line_no = $_GET['line_no'];
+} else {
+	$line_no = '';
+}
 
 $c = 0;
 

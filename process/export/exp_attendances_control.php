@@ -3,33 +3,17 @@ session_set_cookie_params(0, "/emp_mgt");
 session_name("emp_mgt");
 session_start();
 
-require('../conn.php');
-
-switch (true) {
-  case !isset($_SESSION['emp_no_hr']):
-    header('location:/emp_mgt/hr');
-    exit;
-    break;
-  case isset($_SESSION['emp_no']):
-    header('location:/emp_mgt/admin');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_user']):
-    header('location:/emp_mgt/user');
-    exit;
-    break;
-  case isset($_SESSION['emp_no_clinic']):
-    header('location:/emp_mgt/clinic');
-    exit;
-    break;
+if (!isset($_SESSION['emp_no_control_area'])) {
+  header('location:/emp_mgt/admin');
+  exit;
 }
+
+require('../conn.php');
 
 switch (true) {
     case !isset($_GET['day']):
     case !isset($_GET['shift_group']):
-    case !isset($_GET['dept']):
-    case !isset($_GET['section']):
-    case !isset($_GET['line_no']):
+	case !isset($_GET['line_no']):
         echo 'Query Parameters Not Set';
         exit;
         break;
@@ -37,22 +21,10 @@ switch (true) {
 
 $day = $_GET['day'];
 $shift_group = $_GET['shift_group'];
-
-if (!empty($_GET['dept'])) {
-	$dept_label = $_GET['dept'];
-	$dept = $dept_label;
-} else {
-	$dept = '';
-}
-if (!empty($_GET['section'])) {
-	$section_label = $_GET['section'];
-	$section = $section_label;
-} else {
-	$section = '';
-}
-if (!empty($_GET['line_no'])) {
-	$line_no_label = $_GET['line_no'];
-	$line_no = $line_no_label;
+$dept = $_SESSION['dept'];
+$section = $_SESSION['section'];
+if (isset($_GET['line_no'])) {
+	$line_no = $_GET['line_no'];
 } else {
 	$line_no = '';
 }
@@ -63,13 +35,13 @@ $delimiter = ",";
 
 $filename = "EmpMgtSys_AttendanceList_";
 if (!empty($dept)) {
-	$filename = $filename . $dept_label . "-";
+	$filename = $filename . $dept . "-";
 }
 if (!empty($section)) {
-	$filename = $filename . $section_label . "-";
+	$filename = $filename . $section . "-";
 }
 if (!empty($line_no)) {
-	$filename = $filename . $line_no_label . "-";
+	$filename = $filename . $line_no . "-";
 }
 $filename = $filename . $day."-".$shift_group.".csv";
  
@@ -80,7 +52,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Day', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'IP', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Shift Group', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -91,10 +63,10 @@ fputcsv($f, $fields, $delimiter);
 		ON emp.emp_no = tio.emp_no 
 		AND tio.day = '$day' 
 		AND tio.shift = '$shift'
-	WHERE";*/
+	WHERE emp.dept = '$dept'";*/
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.shift_group, emp.resigned_date, 
-	tio.day, tio.shift, FORMAT(tio.time_in, 'HH:mm:ss') as time_in, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
+	FORMAT(tio.time_in, 'HH:mm:ss') as time_in
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE emp.shift_group = ?";
@@ -103,17 +75,12 @@ $params[] = $day;
 $params[] = $shift_group;
 
 if (!empty($dept)) {
-	$sql = $sql . " AND emp.dept = ?";
+	$sql = $sql . " AND emp.dept LIKE ?";
 	$dept_param = $dept . "%";
 	$params[] = $dept_param;
 } else {
 	$sql = $sql . " AND emp.dept != ''";
 }
-/*if (!empty($dept)) {
-	$sql = $sql . " emp.dept = '$dept'";
-} else {
-	$sql = $sql . " emp.dept != ''";
-}*/
 if (!empty($section)) {
 	$sql = $sql . " AND emp.section = ?";
 	$params[] = $section;
@@ -129,7 +96,7 @@ $sql = $sql . " ORDER BY emp.emp_no ASC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
-     
+
 // Output each row of the data, format line as csv and write to file pointer 
 while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
 	$c++;
@@ -152,9 +119,9 @@ while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
 		$row_status = 'Absent';
 	}
 
-	$lineData = array($c, $day, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $row['ip'], $row_status); 
-	fputcsv($f, $lineData, $delimiter); 
-}
+	$lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['shift_group'], $row_status); 
+	fputcsv($f, $lineData, $delimiter);
+} 
 
 // Move back to beginning of file 
 fseek($f, 0); 
@@ -167,3 +134,5 @@ header('Content-Disposition: attachment; filename="' . $filename . '";');
 fpassthru($f); 
 
 $conn = null;
+
+?>

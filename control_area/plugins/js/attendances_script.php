@@ -16,14 +16,27 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     // DOMContentLoaded function
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('attendance_date_search').value = '<?= get_day($server_time, $server_date_only, $server_date_only_yesterday) ?>';
+        fetch_line_dropdown_search();
         get_absences_reasons();
         get_attendance_list(1);
-        sessionStorage.setItem('notif_pending_ls', 0);
-        sessionStorage.setItem('notif_accepted_ls', 0);
-        sessionStorage.setItem('notif_rejected_ls', 0);
-        load_notif_line_support();
-        realtime_load_notif_line_support = setInterval(load_notif_line_support, 30000);
     });
+
+    const fetch_line_dropdown_search = () => {
+        let section = '<?=$_SESSION['section']?>';
+
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown',
+                section: section
+            },
+            success: function (response) {
+                $('#line_no_search').html(response);
+            }
+        });
+    }
 
     const get_absences_reasons = () => {
         $.ajax({
@@ -32,8 +45,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
             cache: false,
             dataType: 'json',
             data: {
-                method: 'get_absences_reasons',
-                page: 'admin'
+                method: 'get_absences_reasons'
             }, 
             success: function (response) {
                 absentReasonJsonData = response;
@@ -86,7 +98,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     const get_attendance_list_counting = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var attendance_status = sessionStorage.getItem('attendance_status_search');
 
         $.ajax({
@@ -97,7 +109,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 method: 'get_attendance_list_counting',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status
             },
             beforeSend: () => {
@@ -114,7 +126,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     const count_attendance_present = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var attendance_status = parseInt(sessionStorage.getItem('attendance_status_search'));
 
         $.ajax({
@@ -125,7 +137,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 method: 'count_attendance_present',
                 day: day,
                 shift_group: shift_group,
-                dept: dept
+                line_no: line_no
             },
             success: function (response) {
                 let total = parseInt(sessionStorage.getItem('count_rows'));
@@ -155,9 +167,9 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     const count_attendance_list = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
-        var attendance_status = sessionStorage.getItem('attendance_status_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
+        var attendance_status = sessionStorage.getItem('attendance_status_search');
         $.ajax({
             url: '../process/admin/attendances/at_p.php',
             type: 'POST',
@@ -166,7 +178,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 method: 'count_attendance_list',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status
             },
             success: function (response) {
@@ -198,7 +210,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     const get_attendances_last_page = () => {
         var day = sessionStorage.getItem('attendance_date_search');
         var shift_group = sessionStorage.getItem('shift_group_search');
-        var dept = sessionStorage.getItem('dept_search');
+        var line_no = sessionStorage.getItem('line_no_search');
         var attendance_status = sessionStorage.getItem('attendance_status_search');
         var current_page = parseInt(sessionStorage.getItem('attendanceTablePagination'));
         $.ajax({
@@ -209,7 +221,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 method: 'attendance_list_last_page',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status
             },
             success: function (response) {
@@ -235,23 +247,23 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
         let day = document.getElementById('attendance_date_search').value;
         let shift_group = document.getElementById('shift_group_search').value;
-        let dept = document.getElementById('dept_search').value;
+        let line_no = document.getElementById('line_no_search').value;
         let attendance_status = document.getElementById('attendance_status_search').value;
 
         var day1 = sessionStorage.getItem('attendance_date_search');
         var shift_group1 = sessionStorage.getItem('shift_group_search');
-        var dept1 = sessionStorage.getItem('dept_search');
+        var line_no1 = sessionStorage.getItem('line_no_search');
         var attendance_status1 = sessionStorage.getItem('attendance_status_search');
 
         if (current_page > 1) {
             switch (true) {
                 case day !== day1:
                 case shift_group !== shift_group1:
-                case dept !== dept1:
+                case line_no !== line_no1:
                 case attendance_status !== attendance_status1:
                     day = day1;
                     shift_group = shift_group1;
-                    dept = dept1;
+                    line_no = line_no1;
                     attendance_status = attendance_status1;
                     break;
                 default:
@@ -259,7 +271,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         } else {
             sessionStorage.setItem('attendance_date_search', day);
             sessionStorage.setItem('shift_group_search', shift_group);
-            sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('line_no_search', line_no);
             sessionStorage.setItem('attendance_status_search', attendance_status);
         }
 
@@ -274,7 +286,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 method: 'get_attendance_list',
                 day: day,
                 shift_group: shift_group,
-                dept: dept,
+                line_no: line_no,
                 attendance_status: attendance_status,
                 current_page: current_page
             },
@@ -308,17 +320,15 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 let rows = doc.querySelectorAll('tr');
 
                 // Process each row
-                setTimeout(() => {
-                    rows.forEach(row => {
-                        // Extract the first <td> value
-                        let firstTd = row.querySelector('td');
-                        if (firstTd) {
-                            let rowId = firstTd.innerText.trim(); // Suppose this is the corresponding row ID
-                            populate_absences_reasons_dropdown(`absrd_${rowId}`, absentReasonJsonData);
-                        }
-                    });
-                }, 500);
-                
+                rows.forEach(row => {
+                    // Extract the first <td> value
+                    let firstTd = row.querySelector('td');
+                    if (firstTd) {
+                        let rowId = firstTd.innerText.trim(); // Suppose this is the corresponding row ID
+                        populate_absences_reasons_dropdown(`absrd_${rowId}`, absentReasonJsonData);
+                    }
+                });
+
                 count_attendance_list();
                 // Set the flag back to false as the AJAX call has completed
                 get_attendance_list_ajax_in_process = false;
@@ -333,112 +343,112 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         });
     }
 
-    const get_absence_details = (param) => {
-        var string = param.split('~!~');
-        var absent_id = string[0];
-        var emp_no = string[1];
-        var full_name = string[2];
-        var absent_day = string[3];
-        var absent_shift_group = string[4];
-        var absent_type = string[5];
-        var reason = string[6];
+    // const get_absence_details = (param) => {
+    //     var string = param.split('~!~');
+    //     var absent_id = string[0];
+    //     var emp_no = string[1];
+    //     var full_name = string[2];
+    //     var absent_day = string[3];
+    //     var absent_shift_group = string[4];
+    //     var absent_type = string[5];
+    //     var reason = string[6];
 
-        document.getElementById('id_absence_update').value = absent_id;
-        document.getElementById('emp_no_absence_update').innerHTML = emp_no;
-        document.getElementById('full_name_absence_update').innerHTML = full_name;
-        document.getElementById('absent_day_absence_update').innerHTML = absent_day;
-        document.getElementById('absent_shift_group_absence_update').innerHTML = absent_shift_group;
-        document.getElementById('absent_type_absence_update').value = absent_type;
-        document.getElementById('reason_absence_update').value = reason;
-    }
+    //     document.getElementById('id_absence_update').value = absent_id;
+    //     document.getElementById('emp_no_absence_update').innerHTML = emp_no;
+    //     document.getElementById('full_name_absence_update').innerHTML = full_name;
+    //     document.getElementById('absent_day_absence_update').innerHTML = absent_day;
+    //     document.getElementById('absent_shift_group_absence_update').innerHTML = absent_shift_group;
+    //     document.getElementById('absent_type_absence_update').value = absent_type;
+    //     document.getElementById('reason_absence_update').value = reason;
+    // }
 
-    $("#absence_details").on('show.bs.modal', e => {
-        load_reason_absence_update_textarea();
-    });
+    // $("#absence_details").on('show.bs.modal', e => {
+    //     load_reason_absence_update_textarea();
+    // });
 
-    const load_reason_absence_update_textarea = () => {
-        setTimeout(() => {
-            var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
-            var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
-            var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
-            document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
-        }, 100);
-    }
+    // const load_reason_absence_update_textarea = () => {
+    //     setTimeout(() => {
+    //         var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
+    //         var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
+    //         var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
+    //         document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
+    //     }, 100);
+    // }
 
-    const count_reason_absence_update_char = () => {
-        var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
-        var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
-        var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
-        document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
-    }
+    // const count_reason_absence_update_char = () => {
+    //     var max_length = document.getElementById("reason_absence_update").getAttribute("maxlength");
+    //     var reason_absence_update_length = document.getElementById("reason_absence_update").value.length;
+    //     var reason_absence_update_count = `${reason_absence_update_length} / ${max_length}`;
+    //     document.getElementById("reason_absence_update_count").innerHTML = reason_absence_update_count;
+    // }
 
-    const save_absence_details = () => {
-        var id = document.getElementById('id_absence_update').value;
-        var emp_no = document.getElementById('emp_no_absence_update').innerHTML;
-        var absent_day = document.getElementById('absent_day_absence_update').innerHTML;
-        var absent_shift_group = document.getElementById('absent_shift_group_absence_update').innerHTML;
-        var absent_type = document.getElementById('absent_type_absence_update').value;
-        var reason = document.getElementById('reason_absence_update').value;
+    // const save_absence_details = () => {
+    //     var id = document.getElementById('id_absence_update').value;
+    //     var emp_no = document.getElementById('emp_no_absence_update').innerHTML;
+    //     var absent_day = document.getElementById('absent_day_absence_update').innerHTML;
+    //     var absent_shift_group = document.getElementById('absent_shift_group_absence_update').innerHTML;
+    //     var absent_type = document.getElementById('absent_type_absence_update').value;
+    //     var reason = document.getElementById('reason_absence_update').value;
 
-        if (absent_type == '') {
-            Swal.fire({
-                icon: 'info',
-                title: 'Please Select Type of Absent !!!',
-                text: 'Information',
-                showConfirmButton: false,
-                timer: 1000
-            });
-        } else if (reason == '') {
-            Swal.fire({
-                icon: 'info',
-                title: 'Please Input Reason !!!',
-                text: 'Information',
-                showConfirmButton: false,
-                timer: 1000
-            });
-        } else {
-            $.ajax({
-                url: '../process/admin/attendances/at_p.php',
-                type: 'POST',
-                cache: false,
-                data: {
-                    method: 'save_absence_details',
-                    id: id,
-                    emp_no: emp_no,
-                    absent_day: absent_day,
-                    absent_shift_group: absent_shift_group,
-                    absent_type: absent_type,
-                    reason: reason
-                }, success: function (response) {
-                    if (response == 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Absence Details Saved Successfully',
-                            text: 'Success',
-                            showConfirmButton: false,
-                            timer: 1000
-                        });
-                        document.getElementById("id_absence_update").value = '';
-                        document.getElementById("emp_no_absence_update").value = '';
-                        document.getElementById("absent_day_absence_update").value = '';
-                        document.getElementById("absent_shift_group_absence_update").value = '';
-                        document.getElementById("absent_type_absence_update").value = '';
-                        document.getElementById("reason_absence_update").value = '';
-                        get_attendance_list(1);
-                        $('#absence_details').modal('hide');
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error !!!',
-                            text: 'Error',
-                            showConfirmButton: false,
-                            timer: 1000
-                        });
-                    }
-                }
-            });
-        }
-    }
+    //     if (absent_type == '') {
+    //         Swal.fire({
+    //             icon: 'info',
+    //             title: 'Please Select Type of Absent !!!',
+    //             text: 'Information',
+    //             showConfirmButton: false,
+    //             timer: 1000
+    //         });
+    //     } else if (reason == '') {
+    //         Swal.fire({
+    //             icon: 'info',
+    //             title: 'Please Input Reason !!!',
+    //             text: 'Information',
+    //             showConfirmButton: false,
+    //             timer: 1000
+    //         });
+    //     } else {
+    //         $.ajax({
+    //             url: '../process/admin/attendances/at_p.php',
+    //             type: 'POST',
+    //             cache: false,
+    //             data: {
+    //                 method: 'save_absence_details',
+    //                 id: id,
+    //                 emp_no: emp_no,
+    //                 absent_day: absent_day,
+    //                 absent_shift_group: absent_shift_group,
+    //                 absent_type: absent_type,
+    //                 reason: reason
+    //             }, success: function (response) {
+    //                 if (response == 'success') {
+    //                     Swal.fire({
+    //                         icon: 'success',
+    //                         title: 'Absence Details Saved Successfully',
+    //                         text: 'Success',
+    //                         showConfirmButton: false,
+    //                         timer: 1000
+    //                     });
+    //                     document.getElementById("id_absence_update").value = '';
+    //                     document.getElementById("emp_no_absence_update").value = '';
+    //                     document.getElementById("absent_day_absence_update").value = '';
+    //                     document.getElementById("absent_shift_group_absence_update").value = '';
+    //                     document.getElementById("absent_type_absence_update").value = '';
+    //                     document.getElementById("reason_absence_update").value = '';
+    //                     get_attendance_list(1);
+    //                     $('#absence_details').modal('hide');
+    //                 } else {
+    //                     Swal.fire({
+    //                         icon: 'error',
+    //                         title: 'Error !!!',
+    //                         text: 'Error',
+    //                         showConfirmButton: false,
+    //                         timer: 1000
+    //                     });
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
 
     const update_type_of_absent = (row, selectElement) => {
         const id = selectElement.dataset.absent_id;
@@ -556,21 +566,76 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     const export_attendances = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_attendances.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_attendances_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
     }
 
     const export_absences = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_absences.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_absences_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
     }
 
     const export_attendances_counting = () => {
         let day = sessionStorage.getItem('attendance_date_search');
         let shift_group = sessionStorage.getItem('shift_group_search');
-        let dept = sessionStorage.getItem('dept_search');
-        window.open('../process/export/exp_attendances_counting.php?day=' + day + "&shift_group=" + shift_group + "&dept=" + dept, '_blank');
+        let line_no = sessionStorage.getItem('line_no_search');
+        window.open('../process/export/exp_attendances_counting_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
+    }
+
+    const upload_csv = () => {
+        var file_form = document.getElementById('file_form');
+        var form_data = new FormData(file_form);
+        $.ajax({
+            url: '../process/import/imp_absences_report.php',
+            type: 'POST',
+            dataType: 'text',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,
+            beforeSend: (jqXHR, settings) => {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Uploading Please Wait...',
+                    text: 'Info',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false
+                });
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            }, 
+            success: response => {
+                setTimeout(() => {
+                    swal.close();
+                    if (response != '') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload CSV Error',
+                            text: `Error: ${response}`,
+                            showConfirmButton: false,
+                            timer : 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Upload CSV',
+                            text: 'Uploaded and updated successfully',
+                            showConfirmButton: false,
+                            timer : 1000
+                        });
+                        get_attendance_list(1);
+                    }
+                    document.getElementById("file").value = '';
+                }, 500);
+            }
+        })
+        .fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            swal('System Error', `Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`, 'error');
+        });
     }
 </script>

@@ -20,7 +20,7 @@ if ($method == 'individual_attendance_list') {
     }
 
     $c = 0;
-    $row_class_arr = array('', 'bg-success', 'bg-danger');
+    $row_class_arr = array('', 'bg-success', 'bg-danger', 'bg-lightpink');
 	$row_class = $row_class_arr[0];
 
     $query = "
@@ -76,7 +76,11 @@ if ($method == 'individual_attendance_list') {
             if (!empty($row['date_updated'])) {
 				$row_class = $row_class_arr[1];
 			} else {
-				$row_class = $row_class_arr[2];
+                $row_class = $row_class_arr[2];
+
+                if (isset($_SESSION['emp_no_hr'])) {
+					$row_class = $row_class_arr[3];
+				}
 			}
 
             echo '<tr class="'.$row_class.'">';

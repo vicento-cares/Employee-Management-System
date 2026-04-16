@@ -110,7 +110,14 @@
                 </table>
               </div>
               <div class="row mb-2">
-                <div class="col-sm-2 offset-sm-6">
+                <div class="col-sm-2">
+                  <select id="attendance_status_search" class="form-control" onchange="get_attendance_list(1)">
+                    <option selected value="0">All Attendances</option>
+                    <option value="1">All Present</option>
+                    <option value="2">All Absent</option>
+                  </select>
+                </div>
+                <div class="col-sm-2 offset-sm-4">
                   <button type="button" class="btn bg-gray btn-block" onclick="export_attendances_counting()"><i class="fas fa-download"></i> Attendance Count</button>
                 </div>
                 <div class="col-sm-2">
@@ -144,23 +151,25 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Select Reason</th>
+                      <th>Select Type of Absent</th>
+                      <th>Type of Absent</th>
+                      <th>Reason</th>
                       <th>Picture</th>
+                      <th>Employee No.</th>
+                      <th>Full Name</th>
                       <th>Day</th>
                       <th>Shift</th>
                       <th>Shift Group</th>
                       <th>Provider</th>
-                      <th>Employee No.</th>
-                      <th>Full Name</th>
                       <th>Department</th>
                       <th>Section</th>
                       <th>Line No.</th>
-                      <th>Type of Absent</th>
-                      <th>Reason</th>
                     </tr>
                   </thead>
                   <tbody id="attendanceData" style="text-align: center;">
                     <tr>
-                      <td colspan="12" style="text-align:center;">
+                      <td colspan="15" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

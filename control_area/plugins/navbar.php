@@ -38,10 +38,35 @@ if (!isset($_SESSION['emp_no_control_area'])) {
       animation: spin 2s linear infinite;
     }
 
+    .btn-file {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-file input[type=file] {
+      position: absolute;
+      top: 0;
+      right: 0;
+      min-width: 100%;
+      min-height: 100%;
+      font-size: 100px;
+      text-align: right;
+      filter: alpha(opacity=0);
+      opacity: 0;
+      outline: none;   
+      cursor: inherit;
+      display: block;
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(1080deg); }
     } 
+
+    /* Hover effect for rows that have the bg-danger class */
+    .table-hover tbody tr.bg-danger:hover {
+        color: #000 !important;
+        background-color: rgba(240, 143, 151, 1.0) !important;
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">

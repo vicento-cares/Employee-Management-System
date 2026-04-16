@@ -80,7 +80,7 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'No. of days', 'Absent Type', 'Reason'); 
+$fields = array('#', 'Day', 'Category', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'No. of days', 'Absent Type', 'Reason'); 
 fputcsv($f, $fields, $delimiter); 
 
 /*$sql = "SELECT 
@@ -92,7 +92,7 @@ fputcsv($f, $fields, $delimiter);
 	WHERE";*/
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.line_no, emp.resigned_date, 
-	absences.absent_type, absences.reason 
+	absences.day, absences.absent_category, absences.absent_type, absences.reason 
 	FROM m_employees emp
 	LEFT JOIN 
 	t_absences absences ON absences.emp_no = emp.emp_no
@@ -150,7 +150,7 @@ if ($row) {
 			$row_line_no = 'N/A';
 		}
 
-        $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row_no_of_absent, $row['absent_type'], $row['reason']); 
+        $lineData = array($c, $row['day'], $row['absent_category'], $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row_no_of_absent, $row['absent_type'], $row['reason']); 
         fputcsv($f, $lineData, $delimiter);
     } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 
