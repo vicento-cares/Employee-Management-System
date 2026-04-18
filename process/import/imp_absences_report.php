@@ -157,8 +157,8 @@ function check_csv($file, $conn)
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    $valid_first_line = "Employee No.,Day,Shift Group,Absent Category,Absent Type,Reason";
-    $valid_first_line2 = '"Employee No.",Day,"Shift Group","Absent Category","Absent Type",Reason';
+    $valid_first_line = "Employee No.,Full Name,Line No.,Day,Shift Group,Absent Category,Absent Type,Reason";
+    $valid_first_line2 = '"Employee No.","Full Name","Line No.",Day,"Shift Group","Absent Category","Absent Type",Reason';
     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
         while (($line = fgetcsv($csvFile)) !== false) {
             // Check if the row is blank or consists only of whitespace
@@ -169,11 +169,11 @@ function check_csv($file, $conn)
             $check_csv_row++;
 
             $emp_no = custom_trim($line[0]);
-            $day = custom_trim($line[1]);
-            $shift_group = custom_trim($line[2]);
-            $absent_category = custom_trim($line[3]);
-            $absent_type = custom_trim($line[4]);
-            $absent_reason = custom_trim($line[5]);
+            $day = custom_trim($line[3]);
+            $shift_group = custom_trim($line[4]);
+            $absent_category = custom_trim($line[5]);
+            $absent_type = custom_trim($line[6]);
+            $absent_reason = custom_trim($line[7]);
 
             /*if ($emp_no == '' || $full_name == '' || $dept == '' || $position == '' || $provider == '' || $date_hired == '') {
                 // IF BLANK DETECTED ERROR += 1
@@ -390,11 +390,11 @@ try {
         }
 
         $emp_no = custom_trim($line[0]);
-        $day = custom_trim($line[1]);
-        $shift_group = custom_trim($line[2]);
-        $absent_category = custom_trim($line[3]);
-        $absent_type = custom_trim($line[4]);
-        $absent_reason = custom_trim($line[5]);
+        $day = custom_trim($line[3]);
+        $shift_group = custom_trim($line[4]);
+        $absent_category = custom_trim($line[5]);
+        $absent_type = custom_trim($line[6]);
+        $absent_reason = custom_trim($line[7]);
 
         if (!empty($day)) {
             $result = parseDate($day);

@@ -64,15 +64,15 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
-$fields = array('Employee No.', 'Day', 'Shift Group', 'Absent Category', 'Absent Type', 'Reason'); 
+$fields = array('Employee No.', 'Full Name', 'Line No.', 'Day', 'Shift Group', 'Absent Category', 'Absent Type', 'Reason'); 
 fputcsv($f, $fields, $delimiter);
 
 // Set column headers 
-$fields = array('Ex: 23-12345', '2024-12-01', 'A or B or ADS', 'Absent or No Work', 'VL', 'reason'); 
+$fields = array('Ex: 23-12345', 'Dela Cruz, Juan M.', '5101', '2024-12-01', 'A or B or ADS', 'Absent or No Work', 'VL', 'reason','Note: Please do not modify header, this row and whole Full Name, Line No., and Shift Group Columns. Delete those row below that are not needed to submit or overwrite absences report filing'); 
 fputcsv($f, $fields, $delimiter);
 
 $sql = "SELECT 
-			emp.emp_no, emp.shift_group, 
+			emp.emp_no, emp.full_name, emp.line_no, emp.shift_group, 
 			absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_category, absences.absent_type, absences.reason 
 		FROM m_employees emp
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
@@ -132,7 +132,7 @@ if ($row) {
 
     // Output each row of the data, format line as csv and write to file pointer 
     do {
-        $lineData = array($row['emp_no'], $day, $row['shift_group'], $row['absent_category'], $row['absent_type'], $row['reason']);
+        $lineData = array($row['emp_no'], $row['full_name'], $row['line_no'], $day, $row['shift_group'], $row['absent_category'], $row['absent_type'], $row['reason']);
         fputcsv($f, $lineData, $delimiter);
     } while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 
