@@ -124,7 +124,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
                 let present = 0;
 
-                if (attendance_status != 2) {
+                if (attendance_status < 2) {
                     present = parseInt(response);
                 }
 
@@ -653,9 +653,11 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Upload CSV Error',
-                            text: `Error: ${response}`,
-                            showConfirmButton: false,
-                            timer : 2000
+                            html: `Error: ${response}`, // Use 'html' to allow for longer text
+                            showConfirmButton: true,
+                            customClass: {
+                                popup: 'my-custom-error-swal' // Apply your custom class here
+                            }
                         });
                     } else {
                         Swal.fire({

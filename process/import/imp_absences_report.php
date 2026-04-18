@@ -121,6 +121,10 @@ function check_csv($file, $conn)
     // SKIP SECOND LINE (EXAMPLE ROW)
     fgets($csvFile);
 
+    // For date checking
+    require '../server_date_time.php';
+    $server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
+
     $shift_group_arr = array('A', 'B', 'ADS', '#N/A');
 
     $absences_matrix = process_absences_data($conn);
@@ -138,12 +142,14 @@ function check_csv($file, $conn)
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
 
-    $row_valid_arr = array(0, 0, 0, 0, 0);
+    $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0);
 
     $notExistsShiftGroupArr = array();
     $notExistsAbsentCategoryArr = array();
     $notExistsAbsentReasonArr = array();
     $notExistsAbsentTypeArr = array();
+    $parseErrDateArr = array();
+    $restrictedDateArr = array();
     $unmatchedAbsencesReasonsDataArr = array();
 
     $message = "";
@@ -213,6 +219,25 @@ function check_csv($file, $conn)
                 }
             }
 
+            if (!empty($day)) {
+                $result = parseDate($day);
+
+                // Check if the result is a DateTime object or an error message
+                if ($result instanceof DateTime) {
+                    $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
+                } else {
+                    $hasError = 1;
+                    $row_valid_arr[4] = 1;
+                    array_push($parseErrDateArr, $check_csv_row);
+                }
+            }
+
+            if (!($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) && !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+                $hasError = 1;
+                $row_valid_arr[5] = 1;
+                array_push($restrictedDateArr, $check_csv_row);
+            }
+
             // Adjust keys based on your CSV structure
             // Create a csvRow only with the required columns
             $csvRow = [
@@ -235,7 +260,7 @@ function check_csv($file, $conn)
 
             if (!$matched) {
                 $hasError = 1;
-                $row_valid_arr[4] = 1;
+                $row_valid_arr[6] = 1;
                 array_push($unmatchedAbsencesReasonsDataArr, $check_csv_row);
             }
 
@@ -272,6 +297,12 @@ function check_csv($file, $conn)
             $message = $message . 'Absent Type doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentTypeArr) . '. ';
         }
         if ($row_valid_arr[4] == 1) {
+            $message = $message . 'Absent Day parse error due to improper date format on row/s ' . implode(", ", $parseErrDateArr) . '. ';
+        }
+        if ($row_valid_arr[5] == 1) {
+            $message = $message . 'Absent Day 2 days ago and above was restricted on row/s ' . implode(", ", $restrictedDateArr) . '. ';
+        }
+        if ($row_valid_arr[6] == 1) {
             $message = $message . 'Unmatched Absences Reasons Data on row/s ' . implode(", ", $unmatchedAbsencesReasonsDataArr) . '. ';
         }
 
@@ -373,6 +404,13 @@ try {
                 $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
             } else {
                 echo "Parse Date Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+
+                if ($isTransactionActive) {
+                    $conn->rollBack();
+                    $isTransactionActive = false;
+                }
+
+                $conn = null;
                 exit();
             }
         }

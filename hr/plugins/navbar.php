@@ -87,6 +87,15 @@ if (!isset($_SESSION['emp_no_hr'])) {
       color: #fff !important;
       background-color: rgba(255, 128, 147, 1.0) !important;
     }
+
+    .my-custom-error-swal {
+      width: 1000px; /* Adjust width as needed */
+      max-width: 90%; /* Ensures responsiveness */
+    }
+    .my-custom-error-swal .swal2-html-container {
+      max-height: 400px; /* Control height to manage overflow */
+      overflow-y: auto; /* Enable vertical scrolling if needed */
+    }
   </style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
