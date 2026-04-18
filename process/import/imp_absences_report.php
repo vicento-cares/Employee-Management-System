@@ -147,7 +147,7 @@ function check_csv($file, $conn)
     $unmatchedAbsencesReasonsDataArr = array();
 
     $message = "";
-    $check_csv_row = 0;
+    $check_csv_row = 2;
 
     // CHECK CSV BASED ON HEADER
     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);

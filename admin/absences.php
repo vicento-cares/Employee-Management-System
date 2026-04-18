@@ -70,6 +70,7 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Delete</th>
                       <th>Select Reason</th>
                       <th>Select Type of Absent</th>
                       <th>Type of Absent</th>
@@ -88,7 +89,7 @@
                   </thead>
                   <tbody id="absencesData" style="text-align: center;">
                     <tr>
-                      <td colspan="15" style="text-align:center;">
+                      <td colspan="16" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

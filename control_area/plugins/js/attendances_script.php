@@ -450,6 +450,42 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
     //     }
     // }
 
+    const delete_single_absences_report = (row, selectElement) => {
+        const id = selectElement.dataset.absent_id;
+
+        const absentReasonDropdown = document.getElementById(`absrd_${row}`);
+        const absentTypeDropdown = document.getElementById(`abstd_${row}`);
+
+        $.ajax({
+            url: '../process/admin/attendances/at_p.php',
+            type: 'POST',
+            cache: false,
+            dataType: 'json',
+            data: {
+                method: 'delete_single_absences_report',
+                id: id
+            }, 
+            success: function (response) {
+                if (response.message == 'success') {
+                    document.getElementById(`abst_${row}`).innerText = '';
+                    document.getElementById(`absr_${row}`).innerText = '';
+                    absentReasonDropdown.value = '';
+                    absentTypeDropdown.value = '';
+                    selectElement.disabled = true;
+                    absentTypeDropdown.disabled = true;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
     const update_type_of_absent = (row, selectElement) => {
         const id = selectElement.dataset.absent_id;
         const absent_type = selectElement.value;
@@ -490,6 +526,8 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         const selectedItem = absentReasonJsonData.filter(item => item.reason === reason);
 
         let data = {};
+        
+        const absentDelBtn = document.getElementById(`absdelbtn_${row}`);
 
         const absentTypeDropdown = document.getElementById(`abstd_${row}`);
         absentTypeDropdown.innerHTML = '<option disabled selected value="">Select Type of Absent</option>'; // Clear previous absent types
@@ -545,10 +583,12 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 if (response.message == 'success') {
                     if (response.id && id == '') {
                         selectElement.dataset.absent_id = response.id;
+                        absentDelBtn.dataset.absent_id = response.id;
                         document.getElementById(`abstd_${row}`).dataset.absent_id = response.id;
                     }
 
                     absentTypeDropdown.disabled = false;
+                    absentDelBtn.disabled = false;
                     document.getElementById(`absr_${row}`).innerText = reason;
                 } else {
                     Swal.fire({
@@ -582,6 +622,18 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         let shift_group = sessionStorage.getItem('shift_group_search');
         let line_no = sessionStorage.getItem('line_no_search');
         window.open('../process/export/exp_attendances_counting_control.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no, '_blank');
+    }
+
+    const export_absences_template = () => {
+        let day = sessionStorage.getItem('attendance_date_search');
+        let shift_group = sessionStorage.getItem('shift_group_search');
+        let line_no = sessionStorage.getItem('line_no_search');
+        let attendance_status = sessionStorage.getItem('attendance_status_search');
+        window.open('../process/export/exp_absences_template.php?day=' + day + "&shift_group=" + shift_group + "&line_no=" + line_no + "&attendance_status=" + attendance_status, '_blank');
+    }
+
+    const export_absences_reasons = () => {
+        window.open('../process/export/exp_absences_reasons.php', '_blank');
     }
 
     const upload_csv = () => {

@@ -122,6 +122,42 @@
         });
     }
 
+    const delete_single_absences_report = (row, selectElement) => {
+        const id = selectElement.dataset.absent_id;
+
+        const absentReasonDropdown = document.getElementById(`absrd_${row}`);
+        const absentTypeDropdown = document.getElementById(`abstd_${row}`);
+
+        $.ajax({
+            url: '../process/admin/attendances/at_p.php',
+            type: 'POST',
+            cache: false,
+            dataType: 'json',
+            data: {
+                method: 'delete_single_absences_report',
+                id: id
+            }, 
+            success: function (response) {
+                if (response.message == 'success') {
+                    document.getElementById(`abst_${row}`).innerText = '';
+                    document.getElementById(`absr_${row}`).innerText = '';
+                    absentReasonDropdown.value = '';
+                    absentTypeDropdown.value = '';
+                    selectElement.disabled = true;
+                    absentTypeDropdown.disabled = true;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            }
+        });
+    }
+
     const update_type_of_absent = (row, selectElement) => {
         const id = selectElement.dataset.absent_id;
         const absent_type = selectElement.value;
@@ -162,6 +198,8 @@
         const selectedItem = absentReasonJsonData.filter(item => item.reason === reason);
 
         let data = {};
+
+        const absentDelBtn = document.getElementById(`absdelbtn_${row}`);
 
         const absentTypeDropdown = document.getElementById(`abstd_${row}`);
         absentTypeDropdown.innerHTML = '<option disabled selected value="">Select Type of Absent</option>'; // Clear previous absent types
@@ -217,10 +255,12 @@
                 if (response.message == 'success') {
                     if (response.id && id == '') {
                         selectElement.dataset.absent_id = response.id;
+                        absentDelBtn.dataset.absent_id = response.id;
                         document.getElementById(`abstd_${row}`).dataset.absent_id = response.id;
                     }
 
                     absentTypeDropdown.disabled = false;
+                    absentDelBtn.disabled = false;
                     document.getElementById(`absr_${row}`).innerText = reason;
                 } else {
                     Swal.fire({

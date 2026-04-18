@@ -25,7 +25,7 @@
     <div class="container-fluid">
       <div class="row mb-4">
         <div class="col-sm-3">
-          <a class="btn btn-dark btn-block" href="../template/absences_template.csv?v=<?php echo time(); ?>"><i class="fas fa-download"></i> Download Absences Report Data Template</a>
+          <a class="btn btn-dark btn-block" onclick="export_absences_template()"><i class="fas fa-download"></i> Download Absences Report Data Template</a>
         </div>
         <div class="col-sm-3">
           <button type="button" class="btn btn-warning btn-block btn-file">
@@ -33,6 +33,9 @@
               <span class="mx-0 my-0"><i class="fas fa-upload"></i> Import Absences Report Data</span><input type="file" id="file" name="file" onchange="upload_csv()" accept=".csv">
             </form>
           </button>
+        </div>
+        <div class="col-sm-3">
+          <a class="btn btn-dark btn-block" onclick="export_absences_reasons()"><i class="fas fa-download"></i> Download Absences Reasons List</a>
         </div>
       </div>
       <div class="row">
@@ -84,19 +87,21 @@
                 </div>
               </div>
               <div class="row mb-2">
-                <div class="col-sm-2">
+                <div class="col-sm-3">
                   <label>Attendance Status</label>
                   <select id="attendance_status_search" class="form-control">
                     <option selected value="0">All Attendances</option>
                     <option value="1">All Present</option>
                     <option value="2">All Absent</option>
+                    <option value="3">All Absent with Absences Report</option>
+                    <option value="4">All Absent without Absences Report</option>
                   </select>
                 </div>
                 <div class="col-sm-2">
                   <label>Present MP</label><br>
                   <span id="count_view_present"></span>
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                   <label>Absent MP</label><br>
                   <span id="count_view_absent"></span>
                 </div>
@@ -133,6 +138,7 @@
                   <thead style="text-align: center;">
                     <tr>
                       <th>#</th>
+                      <th>Delete</th>
                       <th>Select Reason</th>
                       <th>Select Type of Absent</th>
                       <th>Type of Absent</th>
@@ -151,7 +157,7 @@
                   </thead>
                   <tbody id="attendanceData" style="text-align: center;">
                     <tr>
-                      <td colspan="15" style="text-align:center;">
+                      <td colspan="16" style="text-align:center;">
                         <div class="spinner-border text-dark" role="status">
                           <span class="sr-only">Loading...</span>
                         </div>

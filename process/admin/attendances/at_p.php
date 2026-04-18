@@ -13,8 +13,10 @@ function count_attendance_list($search_arr, $conn) {
 	$sql = "SELECT count(emp.emp_no) AS total 
 		FROM m_employees emp 
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
+		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = ? 
 		WHERE emp.shift_group = ?";
 	$params = [
+		$search_arr['day'],
 		$search_arr['day'],
 		$search_arr['shift_group']
 	];
@@ -26,6 +28,12 @@ function count_attendance_list($search_arr, $conn) {
 				break;
 			case 2:
 				$sql = $sql . " AND tio.time_in IS NULL";
+				break;
+			case 3:
+				$sql = $sql . " AND tio.time_in IS NULL AND absences.day IS NOT NULL";
+				break;
+			case 4:
+				$sql = $sql . " AND tio.time_in IS NULL AND absences.day IS NULL";
 				break;
 		}
 	}
@@ -419,6 +427,12 @@ if ($method == 'get_attendance_list') {
 			case 2:
 				$sql = $sql . " AND tio.time_in IS NULL";
 				break;
+			case 3:
+				$sql = $sql . " AND tio.time_in IS NULL AND absences.day IS NOT NULL";
+				break;
+			case 4:
+				$sql = $sql . " AND tio.time_in IS NULL AND absences.day IS NULL";
+				break;
 		}
 	}
 
@@ -488,7 +502,15 @@ if ($method == 'get_attendance_list') {
 			if (!empty($row['time_in'])) {
 				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
 			} else if (isset($_SESSION['emp_no_hr'])) {
+				$disable_del_btn = "";
+				if (!$row['absent_id']) {
+					$disable_del_btn = "disabled";
+				}
+				echo '<td style="vertical-align: middle;">
+						<button class="btn btn-danger btn-sm" id="absdelbtn_'.$c.'" data-absent_id="'.$row['absent_id'].'" onclick="delete_single_absences_report('.$c.',this)" '.$disable_del_btn.'><span class="fa fa-trash"></span></button>
+					</td>';
 				echo '<td style="vertical-align: middle;">
 						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
 							<option disabled selected value="">Select Reason</option>
@@ -504,6 +526,13 @@ if ($method == 'get_attendance_list') {
 						</select>
 					</td>';
 			} else if (($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) || ($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+				$disable_del_btn = "";
+				if (!$row['absent_id']) {
+					$disable_del_btn = "disabled";
+				}
+				echo '<td style="vertical-align: middle;">
+						<button class="btn btn-secondary btn-sm" id="absdelbtn_'.$c.'" data-absent_id="'.$row['absent_id'].'" onclick="delete_single_absences_report('.$c.',this)" '.$disable_del_btn.'><span class="fa fa-trash"></span></button>
+					</td>';
 				echo '<td style="vertical-align: middle;">
 						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
 							<option disabled selected value="">Select Reason</option>
@@ -519,6 +548,7 @@ if ($method == 'get_attendance_list') {
 						</select>
 					</td>';
 			} else {
+				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
 			}
@@ -1172,6 +1202,25 @@ if ($method == 'update_type_of_absent') {
 	echo json_encode($response_arr);
 }
 
+if ($method == 'delete_single_absences_report') {
+	$id = $_POST['id'];
+
+	$sql = "DELETE FROM t_absences WHERE id = ?";
+	$stmt = $conn->prepare($sql);
+	$params = array($id);
+	if ($stmt->execute($params)) {
+		$message = 'success';
+	} else {
+		$message = 'error';
+	}
+
+	$response_arr = [
+		'message' => $message
+	];
+	
+	echo json_encode($response_arr);
+}
+
 // Absences
 
 if ($method == 'get_absences_list') {
@@ -1269,7 +1318,15 @@ if ($method == 'get_absences_list') {
 			if (!empty($row['time_in'])) {
 				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
+				echo '<td style="vertical-align: middle;"></td>';
 			} if (($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) || ($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+				$disable_del_btn = "";
+				if (!$row['absent_id']) {
+					$disable_del_btn = "disabled";
+				}
+				echo '<td style="vertical-align: middle;">
+						<button class="btn btn-secondary btn-sm" id="absdelbtn_'.$c.'" data-absent_id="'.$row['absent_id'].'" onclick="delete_single_absences_report('.$c.',this)" '.$disable_del_btn.'><span class="fa fa-trash"></span></button>
+					</td>';
 				echo '<td style="vertical-align: middle;">
 						<select class="form-control" id="absrd_'.$c.'" data-absent_id="'.$row['absent_id'].'" data-emp_no="'.$row['emp_no'].'" data-full_name="'.$row['full_name'].'" data-absent_day="'.$row_day.'" data-absent_shift_group="'.$row_shift_group.'" data-absent_type="'.$row['absent_type'].'" data-absent_reason="'.$row['reason'].'" onchange="update_reason('.$c.', this)">
 							<option disabled selected value="">Select Reason</option>
@@ -1285,6 +1342,7 @@ if ($method == 'get_absences_list') {
 						</select>
 					</td>';
 			} else {
+				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
 				echo '<td style="vertical-align: middle;"></td>';
 			}
