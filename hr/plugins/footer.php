@@ -8,6 +8,8 @@
 <?php
 //MODALS
 include '../modals/logout_modal.php';
+include '../modals/new_control_area_account.php';
+include '../modals/update_control_area_account.php';
 include '../modals/new_account.php';
 include '../modals/update_account.php';
 include '../modals/absence_details.php';

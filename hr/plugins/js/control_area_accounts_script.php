@@ -1,0 +1,765 @@
+<script type="text/javascript">
+    // AJAX IN PROGRESS GLOBAL VARS
+    var load_accounts_ajax_in_process = false;
+
+    // DOMContentLoaded function
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch_dept_dropdown();
+        fetch_section_dropdown();
+        fetch_line_dropdown();
+        load_accounts(1);
+    });
+
+    const fetch_dept_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_dept_dropdown'
+            },
+            success: function (response) {
+                document.getElementById("dept_ca").innerHTML = response;
+                document.getElementById("dept_search").innerHTML = response;
+                document.getElementById("dept_ca_update").innerHTML = response;
+            }
+        });
+    }
+
+    const fetch_section_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_section_dropdown'
+            },
+            success: function (response) {
+                document.getElementById("section_ca").innerHTML = response;
+                document.getElementById("section_ca_update").innerHTML = response;
+            }
+        });
+    }
+
+    const fetch_line_dropdown = () => {
+        $.ajax({
+            url: '../process/hr/employees/emp-masterlist_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'fetch_line_dropdown'
+            },
+            success: function (response) {
+                document.getElementById("line_no_ca").innerHTML = response;
+                document.getElementById("line_no_ca_update").innerHTML = response;
+            }
+        });
+    }
+
+    var typingTimerEmpNoSearch; // Timer identifier EmpNo Search
+    var typingTimerFullNameSearch; // Timer identifier FullName Search
+    var typingTimerSectionSearch; // Timer identifier Section Search
+    var typingTimerLineNoSearch; // Timer identifier LineNo Search
+    var doneTypingInterval = 250; // Time in ms
+
+    // On keyup, start the countdown
+    document.getElementById("emp_no_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerEmpNoSearch);
+        typingTimerEmpNoSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("emp_no_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerEmpNoSearch);
+    });
+
+    // On keyup, start the countdown
+    document.getElementById("full_name_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerFullNameSearch);
+        typingTimerFullNameSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("full_name_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerFullNameSearch);
+    });
+
+    // On keyup, start the countdown
+    document.getElementById("section_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerSectionSearch);
+        typingTimerSectionSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("section_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerSectionSearch);
+    });
+
+    // On keyup, start the countdown
+    document.getElementById("line_no_search").addEventListener('keyup', e => {
+        clearTimeout(typingTimerLineNoSearch);
+        typingTimerLineNoSearch = setTimeout(doneTypingLoadAccounts, doneTypingInterval);
+    });
+
+    // On keydown, clear the countdown
+    document.getElementById("line_no_search").addEventListener('keydown', e => {
+        clearTimeout(typingTimerLineNoSearch);
+    });
+
+    // User is "finished typing," do something
+    const doneTypingLoadAccounts = () => {
+        load_accounts(1);
+    }
+
+    document.getElementById("dept_search").addEventListener('change', e => {
+        load_accounts(1);
+    });
+
+    document.getElementById("role_search").addEventListener('change', e => {
+        load_accounts(1);
+    });
+
+    // Table Responsive Scroll Event for Load More
+    document.getElementById("list_of_accounts_res").addEventListener("scroll", () => {
+        var scrollTop = document.getElementById("list_of_accounts_res").scrollTop;
+        var scrollHeight = document.getElementById("list_of_accounts_res").scrollHeight;
+        var offsetHeight = document.getElementById("list_of_accounts_res").offsetHeight;
+
+        if (load_accounts_ajax_in_process == false) {
+            //check if the scroll reached the bottom
+            if ((offsetHeight + scrollTop + 1) >= scrollHeight) {
+                get_next_page();
+            }
+        }
+    });
+
+    const get_next_page = () => {
+        var current_page = parseInt(sessionStorage.getItem('list_of_accounts_table_pagination'));
+        let total = sessionStorage.getItem('count_rows');
+        var last_page = parseInt(sessionStorage.getItem('last_page'));
+        var next_page = current_page + 1;
+        if (next_page <= last_page && total > 0) {
+            load_accounts(next_page);
+        }
+    }
+
+    const count_account_list = () => {
+        var emp_no = sessionStorage.getItem('emp_no_search');
+        var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
+        var role = sessionStorage.getItem('role_search');
+        $.ajax({
+            url: '../process/admin/accounts/acct-management_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'count_control_area_account_list',
+                emp_no: emp_no,
+                full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
+                role: role
+            },
+            success: function (response) {
+                sessionStorage.setItem('count_rows', response);
+                var count = `Total: ${response}`;
+                document.getElementById("list_of_accounts_info").innerHTML = count;
+
+                if (response > 0) {
+                    load_accounts_last_page();
+                } else {
+                    document.getElementById("btnNextPage").style.display = "none";
+                    document.getElementById("btnNextPage").setAttribute('disabled', true);
+                }
+            }
+        });
+    }
+
+    const load_accounts_last_page = () => {
+        var emp_no = sessionStorage.getItem('emp_no_search');
+        var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
+        var role = sessionStorage.getItem('role_search');
+        var current_page = parseInt(sessionStorage.getItem('list_of_accounts_table_pagination'));
+        $.ajax({
+            url: '../process/admin/accounts/acct-management_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'control_area_account_list_last_page',
+                emp_no: emp_no,
+                full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
+                role: role
+            },
+            success: function (response) {
+                sessionStorage.setItem('last_page', response);
+                let total = sessionStorage.getItem('count_rows');
+                var next_page = current_page + 1;
+                if (next_page > response || total < 1) {
+                    document.getElementById("btnNextPage").style.display = "none";
+                    document.getElementById("btnNextPage").setAttribute('disabled', true);
+                } else {
+                    document.getElementById("btnNextPage").style.display = "block";
+                    document.getElementById("btnNextPage").removeAttribute('disabled');
+                }
+            }
+        });
+    }
+
+    const load_accounts = current_page => {
+        // If an AJAX call is already in progress, return immediately
+        if (load_accounts_ajax_in_process) {
+            return;
+        }
+
+        var emp_no = document.getElementById('emp_no_search').value;
+        var full_name = document.getElementById('full_name_search').value;
+        var dept = document.getElementById('dept_search').value;
+        var section = document.getElementById('section_search').value;
+        var line_no = document.getElementById('line_no_search').value;
+        var role = document.getElementById('role_search').value;
+
+        var emp_no1 = sessionStorage.getItem('emp_no_search');
+        var full_name1 = sessionStorage.getItem('full_name_search');
+        var dept1 = sessionStorage.getItem('dept_search');
+        var section1 = sessionStorage.getItem('section_search');
+        var line_no1 = sessionStorage.getItem('line_no_search');
+        var role1 = sessionStorage.getItem('role_search');
+
+        if (current_page > 1) {
+            switch (true) {
+                case emp_no !== emp_no1:
+                case full_name !== full_name1:
+                case dept !== dept1:
+                case section !== section1:
+                case line_no !== line_no1:
+                case role !== role1:
+                    emp_no = emp_no1;
+                    full_name = full_name1;
+                    dept = dept1;
+                    section = section1;
+                    line_no = line_no1;
+                    role = role1;
+                    break;
+                default:
+            }
+        } else {
+            sessionStorage.setItem('emp_no_search', emp_no);
+            sessionStorage.setItem('full_name_search', full_name);
+            sessionStorage.setItem('dept_search', dept);
+            sessionStorage.setItem('section_search', section);
+            sessionStorage.setItem('line_no_search', line_no);
+            sessionStorage.setItem('role_search', role);
+        }
+
+        // Set the flag to true as we're starting an AJAX call
+        load_accounts_ajax_in_process = true;
+
+        $.ajax({
+            url: '../process/admin/accounts/acct-management_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'control_area_account_list',
+                emp_no: emp_no,
+                full_name: full_name,
+                dept: dept,
+                section: section,
+                line_no: line_no,
+                role: role,
+                current_page: current_page
+            },
+            beforeSend: (jqXHR, settings) => {
+                document.getElementById("btnNextPage").setAttribute('disabled', true);
+                var loading = `<tr id="loading"><td colspan="9" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                if (current_page == 1) {
+                    document.getElementById("list_of_accounts").innerHTML = loading;
+                } else {
+                    $('#list_of_accounts_table tbody').append(loading);
+                }
+                jqXHR.url = settings.url;
+                jqXHR.type = settings.type;
+            },
+            success: function (response) {
+                $('#loading').remove();
+                document.getElementById("btnNextPage").removeAttribute('disabled');
+                if (current_page == 1) {
+                    $('#list_of_accounts_table tbody').html(response);
+                } else {
+                    $('#list_of_accounts_table tbody').append(response);
+                }
+                sessionStorage.setItem('list_of_accounts_table_pagination', current_page);
+                count_account_list();
+                // Set the flag back to false as the AJAX call has completed
+                load_accounts_ajax_in_process = false;
+            }
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.log(jqXHR);
+            console.log(`System Error : Call IT Personnel Immediately!!! They will fix it right away. Error: url: ${jqXHR.url}, method: ${jqXHR.type} ( HTTP ${jqXHR.status} - ${jqXHR.statusText} ) Press F12 to see Console Log for more info.`);
+            $('#loading').remove();
+            document.getElementById("btnNextPage").removeAttribute('disabled');
+            // Set the flag back to false as the AJAX call has completed
+            load_accounts_ajax_in_process = false;
+        });
+    }
+
+    document.getElementById("emp_no_ca").addEventListener("keyup", e => {
+        if (e.which === 13) {
+            e.preventDefault();
+            get_employee_data('insert');
+        }
+    });
+
+    document.getElementById("emp_no_ca_update").addEventListener("keyup", e => {
+        if (e.which === 13) {
+            e.preventDefault();
+            get_employee_data('update');
+        }
+    });
+
+    const get_employee_data = opt => {
+        var emp_no = '';
+
+        if (opt == 'insert') {
+            var emp_no = document.getElementById('emp_no_ca').value;
+        } else if (opt == 'update') {
+            var emp_no = document.getElementById('emp_no_ca_update').value;
+        }
+
+        if (emp_no != '') {
+            $.ajax({
+                url: '../process/hr/employees/emp-masterlist_p.php',
+                type: 'POST',
+                cache: false,
+                data: {
+                    method: 'get_employee_data',
+                    emp_no: emp_no
+                },
+                success: function (response) {
+                    try {
+                        let response_array = JSON.parse(response);
+                        if (response_array.message == 'success') {
+                            if (opt == 'insert') {
+                                document.getElementById('full_name_ca').value = response_array.full_name;
+                                document.getElementById('dept_ca').value = response_array.dept;
+                                document.getElementById('section_ca').value = response_array.section;
+                                document.getElementById('line_no_ca').value = '';
+                                document.getElementById('shift_group_ca').value = response_array.shift_group;
+                                document.getElementById('role_ca').value = 'admin';
+                                document.getElementById('position_ca').value = response_array.position;
+                            } else if (opt == 'update') {
+                                document.getElementById('full_name_ca_update').value = response_array.full_name;
+                                document.getElementById('dept_ca_update').value = response_array.dept;
+                                document.getElementById('section_ca_update').value = response_array.section;
+                                document.getElementById('line_no_ca_update').value = '';
+                                document.getElementById('shift_group_ca_update').value = response_array.shift_group;
+                                document.getElementById('role_ca_update').value = 'admin';
+                                document.getElementById('position_ca_update').value = response_array.position;
+                            }
+                        } else if (response_array.message == 'Not Found') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error !!!',
+                                text: "Error: Employee Unregistered or Resigned",
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    } catch (e) {
+                        console.log(response);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error !!!',
+                            text: `Error: ${response}`,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'Information !!!',
+                text: "Please type Employee No. Before Pressing Enter Key",
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    }
+
+    const register_accounts = () => {
+        var emp_no = document.getElementById('emp_no_ca').value;
+        var full_name = document.getElementById('full_name_ca').value;
+        var dept = document.getElementById('dept_ca').value;
+        var section = document.getElementById('section_ca').value;
+        var line_no = document.getElementById('line_no_ca').value;
+        var shift_group = document.getElementById('shift_group_ca').value;
+        var role = document.getElementById('role_ca').value;
+        var position = document.getElementById('position_ca').value;
+        var email = document.getElementById('email_ca').value;
+
+        if (emp_no == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Employee No !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (full_name == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Full Name !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (dept == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Set Department !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (role == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Select User Type !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (position == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Select Position !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+            $.ajax({
+                url: '../process/admin/accounts/acct-management_p.php',
+                type: 'POST',
+                cache: false,
+                data: {
+                    method: 'register_control_area_account',
+                    emp_no: emp_no,
+                    full_name: full_name,
+                    dept: dept,
+                    section: section,
+                    line_no: line_no,
+                    shift_group: shift_group,
+                    role: role,
+                    position: position,
+                    email: email
+                }, success: function (response) {
+                    if (response == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succesfully Recorded!!!',
+                            text: 'Success',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                        document.getElementById("emp_no_ca").value = '';
+                        document.getElementById("full_name_ca").value = '';
+                        document.getElementById("dept_ca").value = '';
+                        document.getElementById("section_ca").value = '';
+                        document.getElementById("line_no_ca").value = '';
+                        document.getElementById("shift_group_ca").value = '';
+                        document.getElementById("role_ca").value = '';
+                        document.getElementById("position_ca").value = '';
+                        document.getElementById("email_ca").value = '';
+                        load_accounts(1);
+                        $('#new_control_area_account').modal('hide');
+                    } else if (response == 'Already Exist') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Duplicate Data !!!',
+                            text: 'Information',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error !!!',
+                            text: 'Error',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    const get_accounts_details = (param) => {
+        var string = param.split('~!~');
+        var id = string[0];
+        var emp_no = string[1];
+        var full_name = string[2];
+        var dept = string[3];
+        var section = string[4];
+        var line_no = string[5];
+        var role = string[6];
+        var shift_group = string[7];
+        var position = string[8];
+        var email = string[9];
+
+        document.getElementById('id_account_ca_update').value = id;
+        document.getElementById('emp_no_ca_update').value = emp_no;
+        document.getElementById('full_name_ca_update').value = full_name;
+        document.getElementById('dept_ca_update').value = dept;
+        document.getElementById('section_ca_update').value = section;
+        document.getElementById('line_no_ca_update').value = line_no;
+        document.getElementById('shift_group_ca_update').value = shift_group;
+        document.getElementById('role_ca_update').value = role;
+        document.getElementById('position_ca_update').value = position;
+        document.getElementById('email_ca_update').value = email;
+    }
+
+    const update_account = () => {
+        var id = document.getElementById('id_account_ca_update').value;
+        var emp_no = document.getElementById('emp_no_ca_update').value;
+        var full_name = document.getElementById('full_name_ca_update').value;
+        var dept = document.getElementById('dept_ca_update').value;
+        var section = document.getElementById('section_ca_update').value;
+        var line_no = document.getElementById('line_no_ca_update').value;
+        var shift_group = document.getElementById('shift_group_ca_update').value;
+        var role = document.getElementById('role_ca_update').value;
+        var position = document.getElementById('position_ca_update').value;
+        var email = document.getElementById('email_ca_update').value;
+
+        if (emp_no == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Employee No !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (full_name == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Input Full Name !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (dept == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Set Department !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (role == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Select User Type !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else if (position == '') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Please Select Position !!!',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        } else {
+            $.ajax({
+                url: '../process/admin/accounts/acct-management_p.php',
+                type: 'POST',
+                cache: false,
+                data: {
+                    method: 'update_control_area_account',
+                    id: id,
+                    emp_no: emp_no,
+                    full_name: full_name,
+                    dept: dept,
+                    section: section,
+                    line_no: line_no,
+                    shift_group: shift_group,
+                    role: role,
+                    position: position,
+                    email: email
+                }, success: function (response) {
+                    if (response == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succesfully Recorded!!!',
+                            text: 'Success',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                        document.getElementById('id_account_ca_update').value = '';
+                        document.getElementById('emp_no_ca_update').value = '';
+                        document.getElementById('full_name_ca_update').value = '';
+                        document.getElementById('dept_ca_update').value = '';
+                        document.getElementById('section_ca_update').value = '';
+                        document.getElementById('line_no_ca_update').value = '';
+                        document.getElementById('shift_group_ca_update').value = '';
+                        document.getElementById('role_ca_update').value = '';
+                        document.getElementById('position_ca_update').value = '';
+                        document.getElementById('email_ca_update').value = '';
+                        load_accounts(1);
+                        $('#update_control_area_account').modal('hide');
+                    } else if (response == 'duplicate') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Duplicate Data !!!',
+                            text: 'Information',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error !!!',
+                            text: 'Error',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    const delete_account = () => {
+        var id = document.getElementById('id_account_update').value;
+        $.ajax({
+            url: '../process/admin/accounts/acct-management_p.php',
+            type: 'POST',
+            cache: false,
+            data: {
+                method: 'delete_control_area_account',
+                id: id
+            }, success: function (response) {
+                if (response == 'success') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Succesfully Deleted !!!',
+                        text: 'Information',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                    document.getElementById('id_account_ca_update').value = '';
+                    document.getElementById('emp_no_ca_update').value = '';
+                    document.getElementById('full_name_ca_update').value = '';
+                    document.getElementById('dept_ca_update').value = '';
+                    document.getElementById('section_ca_update').value = '';
+                    document.getElementById('line_no_ca_update').value = '';
+                    document.getElementById('shift_group_ca_update').value = '';
+                    document.getElementById('role_ca_update').value = '';
+                    document.getElementById('position_ca_update').value = '';
+                    document.getElementById('email_ca_update').value = '';
+                    load_accounts(1);
+                    $('#update_control_area_account').modal('hide');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error !!!',
+                        text: 'Error',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+            }
+        });
+    }
+
+    // uncheck all
+    const uncheck_all = () => {
+        var select_all = document.getElementById('check_all');
+        select_all.checked = false;
+        document.querySelectorAll(".singleCheck").forEach((el, i) => {
+            el.checked = false;
+        });
+        get_checked_length();
+    }
+    // check all
+    const select_all_func = () => {
+        var select_all = document.getElementById('check_all');
+        if (select_all.checked == true) {
+            console.log('check');
+            document.querySelectorAll(".singleCheck").forEach((el, i) => {
+                el.checked = true;
+            });
+        } else {
+            console.log('uncheck');
+            document.querySelectorAll(".singleCheck").forEach((el, i) => {
+                el.checked = false;
+            });
+        }
+        get_checked_length();
+    }
+    // GET THE LENGTH OF CHECKED CHECKBOXES
+    const get_checked_length = () => {
+        var arr = [];
+        document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
+            arr.push(el.value);
+        });
+        console.log(arr);
+        var numberOfChecked = arr.length;
+        console.log(numberOfChecked);
+        if (numberOfChecked > 0) {
+            document.getElementById("btnPrintSelectedQr").removeAttribute('disabled');
+        } else {
+            document.getElementById("btnPrintSelectedQr").setAttribute('disabled', true);
+        }
+    }
+
+    const print_accounts_selected_qr = () => {
+        var arr = [];
+        document.querySelectorAll("input.singleCheck[type='checkbox']:checked").forEach((el, i) => {
+            arr.push(el.value);
+        });
+        console.log(arr);
+        var numberOfChecked = arr.length;
+        if (numberOfChecked > 0) {
+            id_arr = Object.values(arr);
+            window.open('../process/print/print_control_area_accounts_selected_qr.php?id_arr=' + id_arr, '_blank');
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Row Selected',
+                text: 'Information',
+                showConfirmButton: false,
+                timer: 1000
+            });
+        }
+    }
+
+    const print_accounts_qr_all = () => {
+        var emp_no = sessionStorage.getItem('emp_no_search');
+        var full_name = sessionStorage.getItem('full_name_search');
+        var dept = sessionStorage.getItem('dept_search');
+        var section = sessionStorage.getItem('section_search');
+        var line_no = sessionStorage.getItem('line_no_search');
+        var role = sessionStorage.getItem('role_search');
+
+        window.open('../process/print/print_control_area_accounts_qr_all.php?emp_no=' + emp_no 
+                    + "&full_name=" + full_name 
+                    + "&dept=" + dept 
+                    + "&section=" + section 
+                    + "&line_no=" + line_no 
+                    + '&role=' + role, '_blank');
+    }
+</script>
