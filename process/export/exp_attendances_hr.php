@@ -36,7 +36,11 @@ switch (true) {
 }
 
 $day = $_GET['day'];
-$shift_group = $_GET['shift_group'];
+$shift_group = null;
+
+if (!empty($_GET['shift_group'])) {
+	$shift_group = $_GET['shift_group'];
+}
 
 if (!empty($_GET['dept'])) {
 	$dept_label = $_GET['dept'];
@@ -97,9 +101,10 @@ $sql = "SELECT
 	tio.day, tio.shift, FORMAT(tio.date_updated, 'HH:mm:ss') as time_in_1, FORMAT(tio.time_in, 'HH:mm:ss') as time_in_2, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
-	WHERE emp.shift_group = ?";
+	WHERE (? IS NULL OR emp.shift_group = ?)";
 $params = [];
 $params[] = $day;
+$params[] = $shift_group;
 $params[] = $shift_group;
 
 if (!empty($dept)) {

@@ -62,7 +62,8 @@
                 <div class="col-sm-2">
                   <label>Shift Group</label>
                   <select class="form-control" id="shift_group_search" style="width: 100%;" required>
-                    <option selected value="A">Shift A</option>
+                    <option selected value="">All Shift Groups</option>
+                    <option value="A">Shift A</option>
                     <option value="B">Shift B</option>
                     <option value="ADS">Shift ADS</option>
                   </select>

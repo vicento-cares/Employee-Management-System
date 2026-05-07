@@ -14,10 +14,11 @@ function count_attendance_list($search_arr, $conn) {
 		FROM m_employees emp 
 		LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
 		LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = ? 
-		WHERE emp.shift_group = ?";
+		WHERE (? IS NULL OR emp.shift_group = ?)";
 	$params = [
 		$search_arr['day'],
 		$search_arr['day'],
+		$search_arr['shift_group'],
 		$search_arr['shift_group']
 	];
 
@@ -231,7 +232,12 @@ if ($method == 'count_attendance_present') {
 
 if ($method == 'count_attendance_list') {
 	$day = $_POST['day'];
-	$shift_group = $_POST['shift_group'];
+	$shift_group = null;
+	
+	if (!empty($_POST['shift_group'])) {
+		$shift_group = $_POST['shift_group'];
+	}
+
 	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
@@ -286,7 +292,12 @@ if ($method == 'count_attendance_list') {
 
 if ($method == 'attendance_list_last_page') {
 	$day = $_POST['day'];
-	$shift_group = $_POST['shift_group'];
+	$shift_group = null;
+	
+	if (!empty($_POST['shift_group'])) {
+		$shift_group = $_POST['shift_group'];
+	}
+
 	$attendance_status = 0;
 
 	if (!empty($_SESSION['emp_no_hr'])) {
@@ -348,7 +359,12 @@ if ($method == 'attendance_list_last_page') {
 
 if ($method == 'get_attendance_list') {
 	$day = $_POST['day'];
-	$shift_group = $_POST['shift_group'];
+	$shift_group = null;
+
+	if (!empty($_POST['shift_group'])) {
+		$shift_group = $_POST['shift_group'];
+	}
+	
 	$attendance_status = 0;
 
 	$server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
@@ -412,10 +428,11 @@ if ($method == 'get_attendance_list') {
 			LEFT JOIN t_time_in_out tio ON tio.emp_no = emp.emp_no AND tio.day = ? 
 			LEFT JOIN t_absences absences ON absences.emp_no = emp.emp_no AND absences.day = ? 
 			LEFT JOIN m_employee_pictures pic ON pic.emp_no = emp.emp_no
-			WHERE emp.shift_group = ?";
+			WHERE (? IS NULL OR emp.shift_group = ?)";
 	$params = [
 		$day,
 		$day,
+		$shift_group,
 		$shift_group
 	];
 
