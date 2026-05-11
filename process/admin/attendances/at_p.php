@@ -271,6 +271,11 @@ if ($method == 'count_attendance_list') {
 			$dept = '';
 		}
 		$section = '';
+		if (!isset($_SESSION['line_no'])) {
+			echo 'session timeout. please relogin account';
+			$conn = null;
+			exit();
+		}
 		$line_no = $_SESSION['line_no'];
 	}
 
@@ -400,6 +405,11 @@ if ($method == 'get_attendance_list') {
 			$dept = '';
 		}
 		$section = '';
+		if (!isset($_SESSION['line_no'])) {
+			echo 'session timeout. please relogin account';
+			$conn = null;
+			exit();
+		}
 		$line_no = $_SESSION['line_no'];
 	}
 

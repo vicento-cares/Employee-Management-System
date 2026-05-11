@@ -129,9 +129,7 @@ function count_category($search_arr, $conn)
         }
     }
 
-	$query .= ") SELECT COUNT(id) AS total
-					FROM RankedAuth
-					WHERE rn = 1";
+	$query .= ") SELECT COUNT(id) AS total FROM RankedAuth WHERE rn = 1";
 
 	$stmt = $conn->prepare($query);
 	$stmt->execute($params);
