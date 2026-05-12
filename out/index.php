@@ -152,7 +152,7 @@ if (!isset($_SESSION['emp_no'])) {
   exit;
 } else if (isset($_POST['emp_no'])) {
   // Time Out Process
-  $emp_no = $_POST['emp_no'];
+  $emp_no = str_replace("=", "_", $_POST['emp_no']); // replace '=' symbol into '_' due to barcode scanner config issues
   $full_name = '';
   $provider = '';
   $dept = '';
