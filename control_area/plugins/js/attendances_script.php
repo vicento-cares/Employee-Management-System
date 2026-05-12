@@ -18,7 +18,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
         document.getElementById('attendance_date_search').value = '<?= get_day($server_time, $server_date_only, $server_date_only_yesterday) ?>';
         fetch_line_dropdown_search();
         get_absences_reasons();
-        get_attendance_list(1);
+        setTimeout(() => {get_attendance_list(1);}, 1000);
     });
 
     const fetch_line_dropdown_search = () => {

@@ -168,6 +168,11 @@ if (!isset($_SESSION['emp_no'])) {
           $stmt = $conn -> prepare($sql);
           $params = array($emp_no, $day, $shift, $ip);
           $stmt -> execute($params);
+          // Delete advanced absences report filing
+          $sql = "DELETE FROM t_absences WHERE emp_no = ? AND day = ?)";
+          $stmt = $conn -> prepare($sql);
+          $params = array($emp_no, $day);
+          $stmt -> execute($params);
         } else {
           // Time In 2
           $sql = "UPDATE t_time_in_out 
