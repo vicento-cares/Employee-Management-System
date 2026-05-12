@@ -170,6 +170,7 @@ if (!isset($_SESSION['emp_no'])) {
           $stmt -> execute($params);
           // Delete advanced absences report filing
           $sql = "DELETE FROM t_absences WHERE emp_no = ? AND day = ?)";
+          $sql = "DELETE FROM t_absences WHERE emp_no = ? AND day = ?";
           $stmt = $conn -> prepare($sql);
           $params = array($emp_no, $day);
           $stmt -> execute($params);

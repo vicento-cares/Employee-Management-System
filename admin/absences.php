@@ -87,15 +87,7 @@
                       <th>Line No.</th>
                     </tr>
                   </thead>
-                  <tbody id="absencesData" style="text-align: center;">
-                    <tr>
-                      <td colspan="16" style="text-align:center;">
-                        <div class="spinner-border text-dark" role="status">
-                          <span class="sr-only">Loading...</span>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
+                  <tbody id="absencesData" style="text-align: center;"></tbody>
                 </table>
               </div>
             </div>

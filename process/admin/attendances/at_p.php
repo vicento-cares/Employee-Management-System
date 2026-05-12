@@ -1408,10 +1408,6 @@ if ($method == 'get_absences_list') {
 
 			echo '</tr>';
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
-	} else {
-		echo '<tr>';
-			echo '<td colspan="15" style="text-align:center; color:red;">No Result !!!</td>';
-		echo '</tr>';
 	}
 }
 

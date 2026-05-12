@@ -8,7 +8,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('attendance_date_search').value = '<?= $server_date_only ?>';
         get_absences_reasons();
-        get_absences_list();
+        setTimeout(get_absences_list, 1000);
         sessionStorage.setItem('notif_pending_ls', 0);
         sessionStorage.setItem('notif_accepted_ls', 0);
         sessionStorage.setItem('notif_rejected_ls', 0);
@@ -72,7 +72,7 @@
                 shift_group: shift_group
             },
             beforeSend: (jqXHR, settings) => {
-                var loading = `<tr id="loading"><td colspan="15" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
+                var loading = `<tr id="loading"><td colspan="16" style="text-align:center;"><div class="spinner-border text-dark" role="status"><span class="sr-only">Loading...</span></div></td></tr>`;
 
                 document.getElementById("absencesData").innerHTML = loading;
 
