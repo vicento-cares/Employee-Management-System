@@ -36,7 +36,11 @@ switch (true) {
 }
 
 $day = $_GET['day'];
-$shift_group = $_GET['shift_group'];
+$shift_group = null;
+
+if (!empty($_GET['shift_group'])) {
+	$shift_group = $_GET['shift_group'];
+}
 
 if (!empty($_GET['dept'])) {
 	$dept_label = $_GET['dept'];
@@ -96,9 +100,10 @@ $sql = "SELECT
 	FROM m_employees emp
 	LEFT JOIN 
 	t_absences absences ON absences.emp_no = emp.emp_no
-	WHERE absences.day = ? AND absences.shift_group = ? AND absences.absent_type != '' AND absences.reason != ''";
+	WHERE absences.day = ? AND (? IS NULL OR absences.shift_group = ?) AND absences.absent_type != '' AND absences.reason != ''";
 $params = [];
 $params[] = $day;
+$params[] = $shift_group;
 $params[] = $shift_group;
 
 if (!empty($dept)) {
