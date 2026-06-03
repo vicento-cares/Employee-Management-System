@@ -130,6 +130,18 @@
             </p>
           </a>
         </li>
+        <li class="nav-item d-none">
+          <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/emp_mgt_backup.php") { ?>
+          <a href="emp_mgt_backup.php" class="nav-link active">
+          <?php } else { ?>
+          <a href="emp_mgt_backup.php" class="nav-link">
+          <?php } ?>
+            <i class="nav-icon fas fa-database"></i>
+            <p>
+              EmpMgtSys Backup
+            </p>
+          </a>
+        </li>
 
         <!-- revisions: jay. quick export button of osh voting -->
         <li class="nav-item">
