@@ -1128,10 +1128,20 @@ if ($method == 'update_reason') {
 			$absent_type = trim($_POST['absent_type']);
 			$columns[] = 'absent_type'; // Add absent_type to columns
 			$params[] = $absent_type; // Add the value to params
+
+			if (empty($absent_type)) {
+				$response_arr = [
+					'message' => 'error'
+				];
+
+				echo json_encode($response_arr);
+				$conn = NULL;
+				exit();
+			}
 		}
 
-		$columns[] = 'submitted_by_no'; // Add absent_type to columns
-		$params[] = $submitted_by_no; // Add the value to params
+		$columns[] = 'submitted_by_no';
+		$params[] = $submitted_by_no;
 
 		// Append the additional columns to the SQL query
 		if (count($columns) > 0) {

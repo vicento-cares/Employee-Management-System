@@ -39,9 +39,9 @@ function count_category($search_arr, $conn)
 	}
 
 	$query = "WITH LatestAuth AS (
-					SELECT emp_id, auth_no, MAX(auth_year) AS latest_auth_year
-					FROM $table_name
-					WHERE i_status = 'Approved'
+					SELECT emp_id, auth_no, MAX(auth_year) AS latest_auth_year 
+					FROM $table_name 
+					WHERE i_status = 'Approved' 
 					GROUP BY emp_id, auth_no
 				),
 				
@@ -52,7 +52,7 @@ function count_category($search_arr, $conn)
 				LEFT JOIN [qualif].[dbo].[t_employee_m] b ON a.emp_id = b.emp_id AND a.batch = b.batch 
 				LEFT JOIN m_employees emp ON a.emp_id=emp.emp_no 
 				JOIN LatestAuth la ON a.emp_id = la.emp_id AND a.auth_no = la.auth_no AND a.auth_year = la.latest_auth_year 
-				WHERE a.i_status = 'Approved' ";
+				WHERE a.i_status = 'Approved'";
 
 	$params = [];
 
