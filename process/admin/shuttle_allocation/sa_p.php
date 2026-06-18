@@ -179,6 +179,13 @@ if ($method == 'get_shuttle_allocation_total') {
 if ($method == 'set_out') {
 	$arr = [];
 	$arr = $_POST['arr'];
+
+	$time = '';
+
+	if (!isset($_POST['time']) || empty($_POST['time'])) {
+		exit('Outgoing Time Was Required');
+	}
+
 	$time = $_POST['time'];
 
 	$count = count($arr);

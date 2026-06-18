@@ -1107,16 +1107,16 @@ if ($method == 'update_reason') {
 
 	$sql = "SELECT absent_category FROM m_absences_reasons WHERE reason = ?";
 
-	$params = [$reason];
-
 	$stmt = $conn->prepare($sql);
-	$stmt->execute($params);
+	$stmt->execute([$reason]);
 
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	if ($row) {
 		$absent_category = $row['absent_category'];
 	}
+
+	$params = [];
 
 	if (empty($id)) {
 		$sql = "INSERT INTO t_absences (emp_no, day, shift_group, reason, absent_category";
@@ -1126,9 +1126,7 @@ if ($method == 'update_reason') {
 
 		if (isset($_POST['absent_type'])) {
 			$absent_type = trim($_POST['absent_type']);
-			$columns[] = 'absent_type'; // Add absent_type to columns
-			$params[] = $absent_type; // Add the value to params
-
+			
 			if (empty($absent_type)) {
 				$response_arr = [
 					'message' => 'error'
@@ -1138,6 +1136,9 @@ if ($method == 'update_reason') {
 				$conn = NULL;
 				exit();
 			}
+
+			$columns[] = 'absent_type'; // Add absent_type to columns
+			$params[] = $absent_type; // Add the value to params
 		}
 
 		$columns[] = 'submitted_by_no';
