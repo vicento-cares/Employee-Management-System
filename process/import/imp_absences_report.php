@@ -63,7 +63,7 @@ function process_absences_data($conn)
             $absent_category_arr[] = $row['absent_category'];
         }
     }
-    
+
     return [
         'absences_reasons_data' => $absences_reasons_data,
         'absent_reason_arr' => $absent_reason_arr,
@@ -83,7 +83,8 @@ function removeBomUtf8($s)
 }
 
 // parse Date
-function parseDate($date_sample) {
+function parseDate($date_sample)
+{
     // Define an array of possible date formats
     $formats = [
         'm/d/Y', // MM/DD/YYYY
@@ -110,25 +111,75 @@ function parseDate($date_sample) {
 
 function check_csv($file, $conn)
 {
-    // READ FILE
+    // OPEN FILE
     $csvFile = fopen($file, 'r');
 
-    // SKIP FIRST LINE (HEADER)
-    $first_line = fgets($csvFile);
-    // Remove UTF-8 BOM from First Line
-    $first_line = removeBomUtf8($first_line);
+    if (!$csvFile) {
+        return "Unable to open CSV file.";
+    }
 
-    // SKIP SECOND LINE (EXAMPLE ROW)
-    fgets($csvFile);
+    // READ HEADER
+    $header = fgetcsv($csvFile);
 
-    // For date checking
+    if (!$header) {
+        return "CSV file is empty or invalid.";
+    }
+
+    // REMOVE BOM (all columns)
+    $header = array_map(function ($h) {
+        return preg_replace('/^\xEF\xBB\xBF/', '', $h);
+    }, $header);
+
+    // FIX ENCODING (VERY IMPORTANT for different PCs)
+    $header = array_map(function ($h) {
+        return mb_convert_encoding($h, 'UTF-8', 'auto');
+    }, $header);
+
+    // REMOVE EMPTY COLUMNS
+    $header = array_filter($header, function ($h) {
+        return trim($h) !== '';
+    });
+
+    // REINDEX
+    $header = array_values($header);
+
+    // NORMALIZE
+    $header = array_map(function ($h) {
+        $h = preg_replace('/\s+/u', ' ', $h);
+        return strtolower(trim($h));
+    }, $header);
+
+    // EXPECTED HEADER
+    $expected = [
+        'employee no.',
+        'full name',
+        'line no.',
+        'day',
+        'shift group',
+        'absent category',
+        'absent type',
+        'reason'
+    ];
+
+    $expected = array_map('strtolower', array_map('trim', $expected));
+
+    // FINAL CHECK
+    if ($header !== $expected) {
+        fclose($csvFile);
+        return "Invalid CSV Header. Got: " . implode(" | ", $header);
+    }
+
+    // SKIP SAMPLE ROW
+    fgetcsv($csvFile);
+    
+    // DATE SETUP
     require '../server_date_time.php';
-    $server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
+    $server_date_only_2days_ago = date('Y-m-d', strtotime('-1 day', strtotime($server_date_only_yesterday)));
 
     $shift_group_arr = array('A', 'B', 'ADS', '#N/A');
 
     $absences_matrix = process_absences_data($conn);
-    
+
     $absent_reason_arr = $absences_matrix['absent_reason_arr'];
     $absent_type_arr = $absences_matrix['absent_type_arr'];
     $absent_category_arr = $absences_matrix['absent_category_arr'];
@@ -138,6 +189,7 @@ function check_csv($file, $conn)
     $hasError = 0;
     $hasBlankError = 0;
     $isDuplicateOnCsv = 0;
+
     $hasBlankErrorArr = array();
     $isDuplicateOnCsvArr = array();
     $dup_temp_arr = array();
@@ -155,180 +207,368 @@ function check_csv($file, $conn)
     $message = "";
     $check_csv_row = 2;
 
-    // CHECK CSV BASED ON HEADER
-    $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
-    $valid_first_line = "Employee No.,Full Name,Line No.,Day,Shift Group,Absent Category,Absent Type,Reason";
-    $valid_first_line2 = '"Employee No.","Full Name","Line No.",Day,"Shift Group","Absent Category","Absent Type",Reason';
-    if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
-        while (($line = fgetcsv($csvFile)) !== false) {
-            // Check if the row is blank or consists only of whitespace
-            if (empty(implode('', $line))) {
-                continue; // Skip blank lines
-            }
+    // LOOP CSV
+    while (($line = fgetcsv($csvFile)) !== false) {
 
-            $check_csv_row++;
+        // Skip blank lines
+        if (empty(array_filter($line))) {
+            continue;
+        }
 
-            $emp_no = custom_trim($line[0]);
-            $day = custom_trim($line[3]);
-            $shift_group = custom_trim($line[4]);
-            $absent_category = custom_trim($line[5]);
-            $absent_type = custom_trim($line[6]);
-            $absent_reason = custom_trim($line[7]);
+        $check_csv_row++;
 
-            /*if ($emp_no == '' || $full_name == '' || $dept == '' || $position == '' || $provider == '' || $date_hired == '') {
-                // IF BLANK DETECTED ERROR += 1
-                $hasBlankError++;
-                $hasError = 1;
-                array_push($hasBlankErrorArr, $check_csv_row);
-            }*/
+        // SAFE ACCESS
+        $emp_no = custom_trim($line[0] ?? '');
+        $day = custom_trim($line[3] ?? '');
+        $shift_group = custom_trim($line[4] ?? '');
+        $absent_category = custom_trim($line[5] ?? '');
+        $absent_type = custom_trim($line[6] ?? '');
+        $absent_reason = custom_trim($line[7] ?? '');
 
-            if ($emp_no == '' || $day == '' || $shift_group == '' || $absent_category == '' || $absent_reason == '' || $absent_type == '') {
-                // IF BLANK DETECTED ERROR += 1
-                $hasBlankError++;
-                $hasError = 1;
-                array_push($hasBlankErrorArr, $check_csv_row);
-            }
+        // BLANK CHECK
+        if ($emp_no == '' || $day == '' || $shift_group == '' || $absent_category == '' || $absent_reason == '' || $absent_type == '') {
+            $hasBlankError++;
+            $hasError = 1;
+            $hasBlankErrorArr[] = $check_csv_row;
+        }
 
-            // CHECK ROW VALIDATION
-            if (!empty($shift_group)) {
-                if (!in_array($shift_group, $shift_group_arr)) {
-                    $hasError = 1;
-                    $row_valid_arr[0] = 1;
-                    array_push($notExistsShiftGroupArr, $check_csv_row);
-                }
-            }
-            if (!empty($absent_category)) {
-                if (!in_array($absent_category, $absent_category_arr)) {
-                    $hasError = 1;
-                    $row_valid_arr[1] = 1;
-                    array_push($notExistsAbsentCategoryArr, $check_csv_row);
-                }
-            }
-            if (!empty($absent_reason)) {
-                if (!in_array($absent_reason, $absent_reason_arr)) {
-                    $hasError = 1;
-                    $row_valid_arr[2] = 1;
-                    array_push($notExistsAbsentReasonArr, $check_csv_row);
-                }
-            }
-            if (!empty($absent_type)) {
-                if (!in_array($absent_type, $absent_type_arr)) {
-                    $hasError = 1;
-                    $row_valid_arr[3] = 1;
-                    array_push($notExistsAbsentTypeArr, $check_csv_row);
-                }
-            }
+        // VALIDATIONS
+        if (!empty($shift_group) && !in_array($shift_group, $shift_group_arr)) {
+            $hasError = 1;
+            $row_valid_arr[0] = 1;
+            $notExistsShiftGroupArr[] = $check_csv_row;
+        }
 
-            if (!empty($day)) {
-                $result = parseDate($day);
+        if (!empty($absent_category) && !in_array($absent_category, $absent_category_arr)) {
+            $hasError = 1;
+            $row_valid_arr[1] = 1;
+            $notExistsAbsentCategoryArr[] = $check_csv_row;
+        }
 
-                // Check if the result is a DateTime object or an error message
-                if ($result instanceof DateTime) {
-                    $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
-                } else {
-                    $hasError = 1;
-                    $row_valid_arr[4] = 1;
-                    array_push($parseErrDateArr, $check_csv_row);
-                }
-            }
+        if (!empty($absent_reason) && !in_array($absent_reason, $absent_reason_arr)) {
+            $hasError = 1;
+            $row_valid_arr[2] = 1;
+            $notExistsAbsentReasonArr[] = $check_csv_row;
+        }
 
-            if (!($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) && !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
-                $hasError = 1;
-                $row_valid_arr[5] = 1;
-                array_push($restrictedDateArr, $check_csv_row);
-            }
+        if (!empty($absent_type) && !in_array($absent_type, $absent_type_arr)) {
+            $hasError = 1;
+            $row_valid_arr[3] = 1;
+            $notExistsAbsentTypeArr[] = $check_csv_row;
+        }
 
-            // Adjust keys based on your CSV structure
-            // Create a csvRow only with the required columns
-            $csvRow = [
-                'reason' => $absent_reason,
-                'absent_type' => $absent_type,
-                'absent_category' => $absent_category,
-                // Include other necessary fields as needed
-            ];
+        // DATE PARSE
+        if (!empty($day)) {
+            $result = parseDate($day);
 
-            $matched = false;
-
-            foreach ($absences_reasons_data as $dbRow) {
-                if ($csvRow['reason'] == $dbRow['reason'] && 
-                    $csvRow['absent_type'] == $dbRow['absent_type'] && 
-                    $csvRow['absent_category'] == $dbRow['absent_category']) { // Change to match your criteria
-                    $matched = true;
-                    break;
-                }
-            }
-
-            if (!$matched) {
-                $hasError = 1;
-                $row_valid_arr[6] = 1;
-                array_push($unmatchedAbsencesReasonsDataArr, $check_csv_row);
-            }
-
-            // Joining all row values for checking duplicated rows
-            $whole_line = join(',', $line);
-
-            // CHECK ROWS IF IT HAS DUPLICATE ON CSV
-            if (isset($dup_temp_arr[$whole_line])) {
-                $isDuplicateOnCsv = 1;
-                $hasError = 1;
-                array_push($isDuplicateOnCsvArr, $check_csv_row);
+            if ($result instanceof DateTime) {
+                $day = $result->format('Y-m-d');
             } else {
-                $dup_temp_arr[$whole_line] = 1;
+                $hasError = 1;
+                $row_valid_arr[4] = 1;
+                $parseErrDateArr[] = $check_csv_row;
             }
         }
-    } else {
-        //$message = $first_line;
-        $message = $message . 'Invalid CSV Table Header. Maybe an incorrect CSV file or incorrect CSV header ';
+
+        // DATE RESTRICTION
+        if (
+            !($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) &&
+            !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)
+        ) {
+            $hasError = 1;
+            $row_valid_arr[5] = 1;
+            $restrictedDateArr[] = $check_csv_row;
+        }
+
+        // MATCH DATABASE DATA
+        $matched = false;
+
+        foreach ($absences_reasons_data as $dbRow) {
+            if (
+                $absent_reason == $dbRow['reason'] &&
+                $absent_type == $dbRow['absent_type'] &&
+                $absent_category == $dbRow['absent_category']
+            ) {
+                $matched = true;
+                break;
+            }
+        }
+
+        if (!$matched) {
+            $hasError = 1;
+            $row_valid_arr[6] = 1;
+            $unmatchedAbsencesReasonsDataArr[] = $check_csv_row;
+        }
+
+        // DUPLICATE CHECK
+        $whole_line = implode(',', $line);
+
+        if (isset($dup_temp_arr[$whole_line])) {
+            $isDuplicateOnCsv = 1;
+            $hasError = 1;
+            $isDuplicateOnCsvArr[] = $check_csv_row;
+        } else {
+            $dup_temp_arr[$whole_line] = 1;
+        }
     }
 
     fclose($csvFile);
 
+    // ERROR MESSAGES
     if ($hasError == 1) {
-        if ($row_valid_arr[0] == 1) {
-            $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
+        if ($row_valid_arr[0]) {
+            $message .= "Shift Group doesn't exist on row/s " . implode(", ", $notExistsShiftGroupArr) . ". ";
         }
-        if ($row_valid_arr[1] == 1) {
-            $message = $message . 'Absent Category doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentCategoryArr) . '. ';
+        if ($row_valid_arr[1]) {
+            $message .= "Absent Category doesn't exist on row/s " . implode(", ", $notExistsAbsentCategoryArr) . ". ";
         }
-        if ($row_valid_arr[2] == 1) {
-            $message = $message . 'Absent Reason doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentReasonArr) . '. ';
+        if ($row_valid_arr[2]) {
+            $message .= "Absent Reason doesn't exist on row/s " . implode(", ", $notExistsAbsentReasonArr) . ". ";
         }
-        if ($row_valid_arr[3] == 1) {
-            $message = $message . 'Absent Type doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentTypeArr) . '. ';
+        if ($row_valid_arr[3]) {
+            $message .= "Absent Type doesn't exist on row/s " . implode(", ", $notExistsAbsentTypeArr) . ". ";
         }
-        if ($row_valid_arr[4] == 1) {
-            $message = $message . 'Absent Day parse error due to improper date format on row/s ' . implode(", ", $parseErrDateArr) . '. ';
+        if ($row_valid_arr[4]) {
+            $message .= "Absent Day parse error on row/s " . implode(", ", $parseErrDateArr) . ". ";
         }
-        if ($row_valid_arr[5] == 1) {
-            $message = $message . 'Absent Day 2 days ago and above was restricted on row/s ' . implode(", ", $restrictedDateArr) . '. ';
+        if ($row_valid_arr[5]) {
+            $message .= "Restricted date on row/s " . implode(", ", $restrictedDateArr) . ". ";
         }
-        if ($row_valid_arr[6] == 1) {
-            $message = $message . 'Unmatched Absences Reasons Data on row/s ' . implode(", ", $unmatchedAbsencesReasonsDataArr) . '. ';
+        if ($row_valid_arr[6]) {
+            $message .= "Unmatched Absences Reasons Data on row/s " . implode(", ", $unmatchedAbsencesReasonsDataArr) . ". ";
         }
-
-        if ($hasBlankError >= 1) {
-            $message = $message . 'Blank Cell Exists on row/s ' . implode(", ", $hasBlankErrorArr) . '. ';
+        if ($hasBlankError) {
+            $message .= "Blank cell on row/s " . implode(", ", $hasBlankErrorArr) . ". ";
         }
-        if ($isDuplicateOnCsv == 1) {
-            $message = $message . 'Duplicated Record/s on row/s ' . implode(", ", $isDuplicateOnCsvArr) . '. ';
+        if ($isDuplicateOnCsv) {
+            $message .= "Duplicate record on row/s " . implode(", ", $isDuplicateOnCsvArr) . ". ";
         }
     }
+
     return $message;
 }
 
+// function check_csv($file, $conn)
+// {
+//     // READ FILE
+//     $csvFile = fopen($file, 'r');
+
+//     // SKIP FIRST LINE (HEADER)
+//     $first_line = fgets($csvFile);
+//     // Remove UTF-8 BOM from First Line
+//     $first_line = removeBomUtf8($first_line);
+
+//     // SKIP SECOND LINE (EXAMPLE ROW)
+//     fgets($csvFile);
+
+//     // For date checking
+//     require '../server_date_time.php';
+//     $server_date_only_2days_ago = date('Y-m-d',(strtotime('-1 day',strtotime($server_date_only_yesterday))));
+
+//     $shift_group_arr = array('A', 'B', 'ADS', '#N/A');
+
+//     $absences_matrix = process_absences_data($conn);
+
+//     $absent_reason_arr = $absences_matrix['absent_reason_arr'];
+//     $absent_type_arr = $absences_matrix['absent_type_arr'];
+//     $absent_category_arr = $absences_matrix['absent_category_arr'];
+
+//     $absences_reasons_data = $absences_matrix['absences_reasons_data'];
+
+//     $hasError = 0;
+//     $hasBlankError = 0;
+//     $isDuplicateOnCsv = 0;
+//     $hasBlankErrorArr = array();
+//     $isDuplicateOnCsvArr = array();
+//     $dup_temp_arr = array();
+
+//     $row_valid_arr = array(0, 0, 0, 0, 0, 0, 0);
+
+//     $notExistsShiftGroupArr = array();
+//     $notExistsAbsentCategoryArr = array();
+//     $notExistsAbsentReasonArr = array();
+//     $notExistsAbsentTypeArr = array();
+//     $parseErrDateArr = array();
+//     $restrictedDateArr = array();
+//     $unmatchedAbsencesReasonsDataArr = array();
+
+//     $message = "";
+//     $check_csv_row = 2;
+
+//     // CHECK CSV BASED ON HEADER
+//     $first_line = preg_replace('/[\t\n\r]+/', '', $first_line);
+//     $valid_first_line = "Employee No.,Full Name,Line No.,Day,Shift Group,Absent Category,Absent Type,Reason";
+//     $valid_first_line2 = '"Employee No.","Full Name","Line No.",Day,"Shift Group","Absent Category","Absent Type",Reason';
+//     if ($first_line == $valid_first_line || $first_line == $valid_first_line2) {
+//         while (($line = fgetcsv($csvFile)) !== false) {
+//             // Check if the row is blank or consists only of whitespace
+//             if (empty(implode('', $line))) {
+//                 continue; // Skip blank lines
+//             }
+
+//             $check_csv_row++;
+
+//             $emp_no = custom_trim($line[0]);
+//             $day = custom_trim($line[3]);
+//             $shift_group = custom_trim($line[4]);
+//             $absent_category = custom_trim($line[5]);
+//             $absent_type = custom_trim($line[6]);
+//             $absent_reason = custom_trim($line[7]);
+
+//             /*if ($emp_no == '' || $full_name == '' || $dept == '' || $position == '' || $provider == '' || $date_hired == '') {
+//                 // IF BLANK DETECTED ERROR += 1
+//                 $hasBlankError++;
+//                 $hasError = 1;
+//                 array_push($hasBlankErrorArr, $check_csv_row);
+//             }*/
+
+//             if ($emp_no == '' || $day == '' || $shift_group == '' || $absent_category == '' || $absent_reason == '' || $absent_type == '') {
+//                 // IF BLANK DETECTED ERROR += 1
+//                 $hasBlankError++;
+//                 $hasError = 1;
+//                 array_push($hasBlankErrorArr, $check_csv_row);
+//             }
+
+//             // CHECK ROW VALIDATION
+//             if (!empty($shift_group)) {
+//                 if (!in_array($shift_group, $shift_group_arr)) {
+//                     $hasError = 1;
+//                     $row_valid_arr[0] = 1;
+//                     array_push($notExistsShiftGroupArr, $check_csv_row);
+//                 }
+//             }
+//             if (!empty($absent_category)) {
+//                 if (!in_array($absent_category, $absent_category_arr)) {
+//                     $hasError = 1;
+//                     $row_valid_arr[1] = 1;
+//                     array_push($notExistsAbsentCategoryArr, $check_csv_row);
+//                 }
+//             }
+//             if (!empty($absent_reason)) {
+//                 if (!in_array($absent_reason, $absent_reason_arr)) {
+//                     $hasError = 1;
+//                     $row_valid_arr[2] = 1;
+//                     array_push($notExistsAbsentReasonArr, $check_csv_row);
+//                 }
+//             }
+//             if (!empty($absent_type)) {
+//                 if (!in_array($absent_type, $absent_type_arr)) {
+//                     $hasError = 1;
+//                     $row_valid_arr[3] = 1;
+//                     array_push($notExistsAbsentTypeArr, $check_csv_row);
+//                 }
+//             }
+
+//             if (!empty($day)) {
+//                 $result = parseDate($day);
+
+//                 // Check if the result is a DateTime object or an error message
+//                 if ($result instanceof DateTime) {
+//                     $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
+//                 } else {
+//                     $hasError = 1;
+//                     $row_valid_arr[4] = 1;
+//                     array_push($parseErrDateArr, $check_csv_row);
+//                 }
+//             }
+
+//             if (!($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) && !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)) {
+//                 $hasError = 1;
+//                 $row_valid_arr[5] = 1;
+//                 array_push($restrictedDateArr, $check_csv_row);
+//             }
+
+//             // Adjust keys based on your CSV structure
+//             // Create a csvRow only with the required columns
+//             $csvRow = [
+//                 'reason' => $absent_reason,
+//                 'absent_type' => $absent_type,
+//                 'absent_category' => $absent_category,
+//                 // Include other necessary fields as needed
+//             ];
+
+//             $matched = false;
+
+//             foreach ($absences_reasons_data as $dbRow) {
+//                 if ($csvRow['reason'] == $dbRow['reason'] && 
+//                     $csvRow['absent_type'] == $dbRow['absent_type'] && 
+//                     $csvRow['absent_category'] == $dbRow['absent_category']) { // Change to match your criteria
+//                     $matched = true;
+//                     break;
+//                 }
+//             }
+
+//             if (!$matched) {
+//                 $hasError = 1;
+//                 $row_valid_arr[6] = 1;
+//                 array_push($unmatchedAbsencesReasonsDataArr, $check_csv_row);
+//             }
+
+//             // Joining all row values for checking duplicated rows
+//             $whole_line = join(',', $line);
+
+//             // CHECK ROWS IF IT HAS DUPLICATE ON CSV
+//             if (isset($dup_temp_arr[$whole_line])) {
+//                 $isDuplicateOnCsv = 1;
+//                 $hasError = 1;
+//                 array_push($isDuplicateOnCsvArr, $check_csv_row);
+//             } else {
+//                 $dup_temp_arr[$whole_line] = 1;
+//             }
+//         }
+//     } else {
+//         //$message = $first_line;
+//         $message = $message . 'Invalid CSV Table Header. Maybe an incorrect CSV file or incorrect CSV header ';
+//     }
+
+//     fclose($csvFile);
+
+//     if ($hasError == 1) {
+//         if ($row_valid_arr[0] == 1) {
+//             $message = $message . 'Shift Group doesn\'t exists on row/s ' . implode(", ", $notExistsShiftGroupArr) . '. ';
+//         }
+//         if ($row_valid_arr[1] == 1) {
+//             $message = $message . 'Absent Category doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentCategoryArr) . '. ';
+//         }
+//         if ($row_valid_arr[2] == 1) {
+//             $message = $message . 'Absent Reason doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentReasonArr) . '. ';
+//         }
+//         if ($row_valid_arr[3] == 1) {
+//             $message = $message . 'Absent Type doesn\'t exists on row/s ' . implode(", ", $notExistsAbsentTypeArr) . '. ';
+//         }
+//         if ($row_valid_arr[4] == 1) {
+//             $message = $message . 'Absent Day parse error due to improper date format on row/s ' . implode(", ", $parseErrDateArr) . '. ';
+//         }
+//         if ($row_valid_arr[5] == 1) {
+//             $message = $message . 'Absent Day 2 days ago and above was restricted on row/s ' . implode(", ", $restrictedDateArr) . '. ';
+//         }
+//         if ($row_valid_arr[6] == 1) {
+//             $message = $message . 'Unmatched Absences Reasons Data on row/s ' . implode(", ", $unmatchedAbsencesReasonsDataArr) . '. ';
+//         }
+
+//         if ($hasBlankError >= 1) {
+//             $message = $message . 'Blank Cell Exists on row/s ' . implode(", ", $hasBlankErrorArr) . '. ';
+//         }
+//         if ($isDuplicateOnCsv == 1) {
+//             $message = $message . 'Duplicated Record/s on row/s ' . implode(", ", $isDuplicateOnCsvArr) . '. ';
+//         }
+//     }
+//     return $message;
+// }
+
 $csvMimes = [
-                'text/x-comma-separated-values', 
-                'text/comma-separated-values', 
-                'application/octet-stream', 
-                'application/vnd.ms-excel', 
-                'application/x-csv', 
-                'text/x-csv', 
-                'text/csv', 
-                'application/csv', 
-                'application/excel', 
-                'application/vnd.msexcel', 
-                'text/plain'
-            ];
+    'text/x-comma-separated-values',
+    'text/comma-separated-values',
+    'application/octet-stream',
+    'application/vnd.ms-excel',
+    'application/x-csv',
+    'text/x-csv',
+    'text/csv',
+    'application/csv',
+    'application/excel',
+    'application/vnd.msexcel',
+    'text/plain'
+];
 
 if (empty($_FILES['file']['name'])) {
     exit("Please upload csv file");
@@ -403,7 +643,7 @@ try {
             if ($result instanceof DateTime) {
                 $day = $result->format('Y-m-d'); // Outputs: 2025-05-28
             } else {
-                echo "Parse Date Error on Emp No. (".$emp_no.")" . $result; // Outputs the error message
+                echo "Parse Date Error on Emp No. (" . $emp_no . ")" . $result; // Outputs the error message
 
                 if ($isTransactionActive) {
                     $conn->rollBack();

@@ -11,7 +11,7 @@ $filename = "absences_reasons_list.csv";
 $f = fopen('php://memory', 'w'); 
 
 // UTF-8 BOM for special character compatibility
-fputs($f, "\xEF\xBB\xBF");
+// fputs($f, "\xEF\xBB\xBF");
 
 // Set column headers 
 $fields = array('#', 'Absent Category', 'Absent Type', 'Reason'); 
