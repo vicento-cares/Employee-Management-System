@@ -953,6 +953,356 @@ if ($method == 'employee_list') {
 	}
 }
 
+function trigram($name) {
+    $name = strtolower($name);
+    $name = str_replace(',', '', str_replace(' ', '', $name));
+
+    $grams = [];
+
+    for ($i = 0; $i <= strlen($name) - 3; $i++) {
+        $grams[] = substr($name, $i, 3);
+    }
+
+    return $grams;
+}
+
+if ($method == 'employee_list_trigram') {
+	$emp_no = $_POST['emp_no'];
+	$full_name = $_POST['full_name'];
+	$provider = $_POST['provider'];
+
+	$date_updated_from = '';
+	if (isset($_POST['date_updated_from'])) {
+		$date_updated_from = $_POST['date_updated_from'];
+	}
+	if (!empty($date_updated_from)) {
+		$date_updated_from = date_create($date_updated_from);
+		$date_updated_from = date_format($date_updated_from,"Y-m-d H:i:s");
+	}
+
+	$date_updated_to = '';
+	if (isset($_POST['date_updated_to'])) {
+		$date_updated_to = $_POST['date_updated_to'];
+	}
+	if (!empty($date_updated_to)) {
+		$date_updated_to = date_create($date_updated_to);
+		$date_updated_to = date_format($date_updated_to,"Y-m-d H:i:s");
+	}
+	
+	if (!isset($_POST['dept'])) {
+		$dept = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$dept = $_SESSION['dept'];
+		}
+	} else {
+		$dept = $_POST['dept'];
+	}
+
+	if (!isset($_POST['section'])) {
+		$section = '';
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$section = $_SESSION['section'];
+		}
+	} else {
+		$section = $_POST['section'];
+	}
+
+	if (!isset($_POST['line_no'])) {
+		$line_no = '';
+	} else {
+		$line_no = $_POST['line_no'];
+	}
+
+	// Control Area Search
+
+	if (!isset($_POST['shift'])) {
+		$shift = '';
+	} else {
+		$shift = $_POST['shift'];
+	}
+	if (!isset($_POST['shift_group'])) {
+		$shift_group = '';
+	} else {
+		$shift_group = $_POST['shift_group'];
+	}
+	if (!isset($_POST['process'])) {
+		$process = '';
+	} else {
+		$process = $_POST['process'];
+	}
+	if (!isset($_POST['sub_section'])) {
+		$sub_section = '';
+	} else {
+		$sub_section = $_POST['sub_section'];
+	}
+
+	if (!isset($_POST['resigned'])) {
+		$resigned = '';
+	} else {
+		$resigned = $_POST['resigned'];
+	}
+
+	$search_multiple_employee_arr = [];
+	if (isset($_POST['search_multiple_employee_arr'])) {
+		$search_multiple_employee_arr = $_POST['search_multiple_employee_arr'];
+	}
+
+	$current_page = intval($_POST['current_page']);
+	$c = 0;
+
+	$results_per_page = 20;
+
+	//determine the sql LIMIT starting number for the results on the displaying page
+	$page_first_result = ($current_page-1) * $results_per_page;
+
+	$c = $page_first_result;
+
+	$query = "SELECT 
+				id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, 
+				position, provider, gender, shift, shift_group, date_hired, address, contact_no, emp_status, 
+				shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date, '1' as best_fit 
+			FROM m_employees WHERE";
+	
+	$params = [];
+
+	if (!empty($search_multiple_employee_arr)) {
+		// Create a placeholder string for the IDs
+		$placeholders = implode(',', array_fill(0, count($search_multiple_employee_arr), '?'));
+		$query = $query . " emp_no IN ($placeholders)";
+		$params = array_merge($params, $search_multiple_employee_arr); // Flatten the array
+	} else {
+		if (!empty($emp_no)) {
+			$query = $query . " emp_no LIKE ?";
+			$emp_no_search = $emp_no . "%";
+			$params[] = $emp_no_search;
+		} else {
+			$query = $query . " emp_no != ''";
+		}
+		if (!empty($full_name)) {
+			// $query = $query . " AND full_name LIKE ?";
+			// $full_name_search = $full_name . "%";
+			// $params[] = $full_name_search;
+			$trigram_arr = trigram($full_name);
+			$trigram_sum = [];
+			foreach($trigram_arr as $tri) {
+    			$trigram_sum[] = "CASE WHEN LOWER(REPLACE(REPLACE(full_name, ',', ''), ' ', '')) LIKE '%{$tri}%' THEN 1 ELSE 0 END ";
+			}
+			// jackpot
+			$trigram_sum[] = "CASE WHEN LOWER(REPLACE(REPLACE(full_name, ',', ''), ' ', '')) LIKE '%{$full_name}%' THEN 999 ELSE 0 END";
+			$trigram_str = implode(" + ", $trigram_sum);
+
+			$query = "SELECT 
+				id, emp_no, full_name, dept, section, sub_section, line_no, process, skill_level, 
+				position, provider, gender, shift, shift_group, date_hired, address, contact_no, emp_status, 
+				shuttle_route, emp_js_s_no, emp_sv_no, emp_approver_no, resigned, resigned_date, 
+				({$trigram_str}) AS best_fit
+			FROM m_employees WHERE";
+			// reduplicate
+			if (!empty($emp_no)) {
+				$query = $query . " emp_no LIKE ?";
+				$emp_no_search = $emp_no . "%";
+				$params[] = $emp_no_search;
+			} else {
+				$query = $query . " emp_no != ''";
+			}
+		}
+		if (!empty($provider)) {
+			$query = $query . " AND provider = ?";
+			$params[] = $provider;
+		}
+		if (isset($_SESSION['emp_no'])) {
+			/*if (isset($_SESSION['dept']) && !empty($_SESSION['dept'])) {
+				$query = $query . " AND dept = '".$_SESSION['dept']."'";
+			} else {
+				$query = $query . " AND dept IS NULL";
+			}
+			if (isset($_SESSION['section']) && !empty($_SESSION['section'])) {
+				$query = $query . " AND section = '".$_SESSION['section']."'";
+			} else {
+				$query = $query . " AND section IS NULL";
+			}
+			if (isset($_SESSION['line_no']) && !empty($_SESSION['line_no'])) {
+				$query = $query . " AND line_no = '".$_SESSION['line_no']."'";
+			} else {
+				$query = $query . " AND line_no IS NULL";
+			}*/
+	
+			if (!empty($dept)) {
+				$query = $query . " AND dept = ?";
+				$params[] = $dept;
+			}
+			if (!empty($section)) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $section . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($line_no)) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $line_no . "%";
+				$params[] = $line_no_search;
+			}
+	
+			/*$query = $query . " AND dept = '".$_SESSION['dept']."' AND section = '".$_SESSION['section']."' AND line_no = '".$_SESSION['line_no']."'";*/
+		} else {
+			if (!empty($dept)) {
+				$query = $query . " AND dept = ?";
+				$params[] = $dept;
+			}
+			if (!empty($section)) {
+				$query = $query . " AND section LIKE ?";
+				$section_search = $section . "%";
+				$params[] = $section_search;
+			}
+			if (!empty($line_no)) {
+				$query = $query . " AND line_no LIKE ?";
+				$line_no_search = $line_no . "%";
+				$params[] = $line_no_search;
+			}
+		}
+
+		// Control Area Search
+		if (!empty($shift)) {
+			if ($shift == 'No Shift') {
+				$shift = '';
+			}
+			$query = $query . " AND shift = ?";
+			$params[] = $shift;
+		}
+		if (!empty($shift_group)) {
+			if ($shift == 'No Shift Group') {
+				$shift_group = '';
+			}
+			$query = $query . " AND shift_group = ?";
+			$params[] = $shift_group;
+		}
+		if (!empty($process)) {
+			$query = $query . " AND process = ?";
+			$params[] = $process;
+		}
+		if (!empty($sub_section)) {
+			$query = $query . " AND sub_section = ?";
+			$params[] = $sub_section;
+		}
+	
+		if (!empty($date_updated_from) && !empty($date_updated_to)) {
+			$query = $query . " AND date_updated BETWEEN ? AND ?";
+			$params[] = $date_updated_from;
+			$params[] = $date_updated_to;
+		}
+	
+		if ($resigned != '') {
+			$query = $query . " AND resigned = ?";
+			$params[] = $resigned;
+		}
+
+		// Control Area Only Active Employees
+		if (isset($_SESSION['emp_no_control_area'])) {
+			$query = $query . " AND resigned = 0";
+		}
+	}
+
+	// MySQL Query
+	// $query = $query . " LIMIT ".$page_first_result.", ".$results_per_page;
+
+	// MS SQL Server Query
+	$query = $query . " ORDER BY best_fit DESC";
+	$query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
+	
+	// echo $query;
+	// exit();
+	$stmt = $conn->prepare($query);
+	$stmt->execute($params);
+
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+		do {
+			$c++;
+			
+			if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area']) || isset($_SESSION['emp_no_tc'])) {
+				echo '<tr style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" 
+						onclick="get_employees_details(&quot;'.
+						$row['id'].'~!~'.
+						$row['emp_no'].'~!~'.
+						$row['full_name'].'~!~'.
+						$row['dept'].'~!~'.
+						$row['section'].'~!~'.
+						$row['line_no'].'~!~'.
+						$row['position'].'~!~'.
+						$row['provider'].'~!~'.
+						$row['date_hired'].'~!~'.
+						$row['address'].'~!~'.
+						$row['contact_no'].'~!~'.
+						$row['emp_status'].'~!~'.
+						$row['shuttle_route'].'~!~'.
+						$row['emp_js_s_no'].'~!~'.
+						$row['emp_sv_no'].'~!~'.
+						$row['emp_approver_no'].'~!~'.
+						$row['resigned'].'~!~'.
+						$row['resigned_date'].'~!~'.
+						$row['gender'].'~!~'.
+						$row['shift_group'].'~!~'.
+						$row['process'].'~!~'.
+						$row['section'].'~!~'.
+						$row['sub_section'].'~!~'.
+						$row['skill_level'].'~!~'.
+						$row['shift'].'&quot;)">';
+
+				echo '<td >'.$c.'</td>';
+			} else {
+				echo '<tr>';
+
+				echo '<td><p class="mb-0"><label class="mb-0"><input type="checkbox" class="singleCheck" 
+							value="'.$row['id'].'" onclick="get_checked_length()" /><span></span></label></p></td>';
+
+				echo '<td style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee" 
+						onclick="get_employees_details(&quot;'.
+						$row['id'].'~!~'.
+						$row['emp_no'].'~!~'.
+						$row['full_name'].'~!~'.
+						$row['dept'].'~!~'.
+						$row['section'].'~!~'.
+						$row['line_no'].'~!~'.
+						$row['position'].'~!~'.
+						$row['provider'].'~!~'.
+						$row['date_hired'].'~!~'.
+						$row['address'].'~!~'.
+						$row['contact_no'].'~!~'.
+						$row['emp_status'].'~!~'.
+						$row['shuttle_route'].'~!~'.
+						$row['emp_js_s_no'].'~!~'.
+						$row['emp_sv_no'].'~!~'.
+						$row['emp_approver_no'].'~!~'.
+						$row['resigned'].'~!~'.
+						$row['resigned_date'].'~!~'.
+						$row['gender'].'~!~'.
+						$row['shift_group'].'~!~'.
+						$row['process'].'~!~'.
+						$row['section'].'~!~'.
+						$row['sub_section'].'&quot;)">'.$c.'</td>';
+			}
+
+				echo '<td>'.$row['emp_no'].'</td>';
+				echo '<td>'.$row['full_name'].'</td>';
+				echo '<td>'.$row['dept'].'</td>';
+				echo '<td>'.$row['section'].'</td>';
+				echo '<td>'.$row['line_no'].'</td>';
+				echo '<td>'.$row['provider'].'</td>';
+				echo '<td>'.$row['shuttle_route'].'</td>';
+			echo '</tr>';
+		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
+	} else {
+		$colspan = 0;
+		if (isset($_SESSION['emp_no']) || isset($_SESSION['emp_no_control_area'])) {
+			$colspan = 8;
+		} else {
+			$colspan = 9;
+		} 
+		echo '<tr>';
+			echo '<td colspan="'.$colspan.'" style="text-align:center; color:red;">No Result !!!</td>';
+		echo '</tr>';
+	}
+}
 if ($method == 'get_employee_data') {
 	$emp_no = $_POST['emp_no'];
 	$response_arr = array();

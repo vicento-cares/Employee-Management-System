@@ -477,7 +477,7 @@ const load_employees = current_page => {
             type:'POST',
             cache:false,
             data:{
-                method:'employee_list',
+                method:'employee_list_trigram',
                 emp_no:emp_no,
                 full_name:full_name,
                 provider:provider,
