@@ -1127,7 +1127,10 @@ if ($method == 'update_reason') {
 		if (isset($_POST['absent_type'])) {
 			$absent_type = trim($_POST['absent_type']);
 			
-			if (empty($absent_type)) {
+			if (!empty($absent_type)) {
+				$columns[] = 'absent_type'; // Add absent_type to columns
+				$params[] = $absent_type; // Add the value to params
+			} else {
 				$response_arr = [
 					'message' => 'error'
 				];
@@ -1136,9 +1139,6 @@ if ($method == 'update_reason') {
 				$conn = NULL;
 				exit();
 			}
-
-			$columns[] = 'absent_type'; // Add absent_type to columns
-			$params[] = $absent_type; // Add the value to params
 		}
 
 		$columns[] = 'submitted_by_no';
