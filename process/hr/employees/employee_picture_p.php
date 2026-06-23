@@ -38,10 +38,10 @@ if ($method == 'reload_employee_picture') {
 		if (!empty($results)) {
 		    foreach ($results as $result) {
 		        $employee_picture_url .= rawurlencode(basename($employee_picture_filename));
-		        echo htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT'].$employee_picture_url);
+		        echo htmlspecialchars('http://172.25.114.160'.$employee_picture_url);
 		    }
 		} else {
-			echo htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png';
+			echo htmlspecialchars('http://172.25.114.160') . '/emp_mgt/dist/img/user.png';
 		}
 	} else {
 	    echo 'No Employee No Detected. Please re-open Modal';
