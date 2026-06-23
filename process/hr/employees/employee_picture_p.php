@@ -30,19 +30,24 @@ if ($method == 'reload_employee_picture') {
 		$employee_picture_filename = $_POST['emp_no'] . ".png"; // Change this to the filename you want to find
 
 		$employee_picture_url = "/uploads/emp_mgt/employee_picture/";
-		// $target_dir = "D:\\uploads\\emp_mgt\\employee_picture\\"; // Your target directory
-		$target_dir = "/mnt/synology/uploads/emp_mgt/employee_picture/"; // Your target directory
+		$employee_picture_url .= rawurlencode(basename($employee_picture_filename));
+		echo htmlspecialchars('http://172.25.114.160'.$employee_picture_url);
+		exit();
 
-		$results = findFile($employee_picture_filename, $target_dir);
-
-		if (!empty($results)) {
-		    foreach ($results as $result) {
-		        $employee_picture_url .= rawurlencode(basename($employee_picture_filename));
-		        echo htmlspecialchars('http://172.25.114.160'.$employee_picture_url);
-		    }
-		} else {
-			echo htmlspecialchars('http://172.25.114.160') . '/emp_mgt/dist/img/user.png';
-		}
+//		$employee_picture_url = "/uploads/emp_mgt/employee_picture/";
+//		// $target_dir = "D:\\uploads\\emp_mgt\\employee_picture\\"; // Your target directory
+//		$target_dir = "/mnt/synology/uploads/emp_mgt/employee_picture/"; // Your target directory
+//
+//		$results = findFile($employee_picture_filename, $target_dir);
+//
+//		if (!empty($results)) {
+//		    foreach ($results as $result) {
+//		        $employee_picture_url .= rawurlencode(basename($employee_picture_filename));
+//		        echo htmlspecialchars('http://172.25.114.160'.$employee_picture_url);
+//		    }
+//		} else {
+//			echo htmlspecialchars('http://172.25.114.160') . '/emp_mgt/dist/img/user.png';
+//		}
 	} else {
 	    echo 'No Employee No Detected. Please re-open Modal';
 	}
