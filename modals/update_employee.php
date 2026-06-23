@@ -21,7 +21,10 @@ if (empty($disabled) && empty($disabled_tc)) {
       <div class="modal-body">
         <div class="row mb-2">
           <div class="col-sm-4">
-            <img class="update_employee_picture_img_tag" id="employee_picture_img_tag" src="" alt="Employee Picture" height="100" width="100">
+	    <img class="update_employee_picture_img_tag"
+		id="employee_picture_img_tag" src="" 
+		onerror="this.onerror=null;this.src='/emp_mgt/dist/img/user.png';"
+		alt="Employee Picture" height="100" width="100">
           </div>
           <?php if (isset($_SESSION['emp_no_hr'])) {?>
           <div class="col-sm-4 offset-sm-4">
