@@ -30,7 +30,7 @@ if ($method == 'reload_employee_picture') {
 		$employee_picture_filename = $_POST['emp_no'] . ".png"; // Change this to the filename you want to find
 		$employee_picture_url = "/uploads/emp_mgt/employee_picture/";
 
-		if (file_exists('mnt/synology/web-apps' . $employee_picture_url . $employee_picture_filename)) {
+		if (file_exists('mnt/synology' . $employee_picture_url . $employee_picture_filename)) {
 			$employee_picture_url .= rawurlencode(basename($employee_picture_filename));
 			echo htmlspecialchars('http://172.25.114.160'.$employee_picture_url);
 			exit();
