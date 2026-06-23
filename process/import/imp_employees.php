@@ -774,77 +774,79 @@ if (!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMim
 
                         $stmt = $conn->prepare($sql);
 
-                        if ($stmt->execute($params)) {
-                            // $query = "UPDATE m_control_area_accounts SET";
-                            // $params = [];
+                        $stmt->execute($params);
 
-                            // if (!empty($dept)) {
-                            //     $query = $query . " dept = ?";
-                            //     $params[] = $dept;
-                            // } else {
-                            //     $query = $query . " dept = ''";
-                            // }
-                            // if (!empty($section)) {
-                            //     $query = $query . ", section = ?";
-                            //     $params[] = $section;
-                            // } else {
-                            //     $query = $query . ", section = NULL";
-                            // }
-                            // if (!empty($line_no)) {
-                            //     $query = $query . ", line_no = ?";
-                            //     $params[] = $line_no;
-                            // } else {
-                            //     $query = $query . ", line_no = NULL";
-                            // }
-                            // if (!empty($shift_group)) {
-                            //     $query = $query . ", shift_group = ?";
-                            //     $params[] = $shift_group;
-                            // } else {
-                            //     $query = $query . ", shift_group = 'ADS'";
-                            // }
+                        // if ($stmt->execute($params)) {
+                        //     $query = "UPDATE m_control_area_accounts SET";
+                        //     $params = [];
 
-                            // $query = $query . " WHERE emp_no = ?";
-                            // $params[] = $emp_no;
+                        //     if (!empty($dept)) {
+                        //         $query = $query . " dept = ?";
+                        //         $params[] = $dept;
+                        //     } else {
+                        //         $query = $query . " dept = ''";
+                        //     }
+                        //     if (!empty($section)) {
+                        //         $query = $query . ", section = ?";
+                        //         $params[] = $section;
+                        //     } else {
+                        //         $query = $query . ", section = NULL";
+                        //     }
+                        //     if (!empty($line_no)) {
+                        //         $query = $query . ", line_no = ?";
+                        //         $params[] = $line_no;
+                        //     } else {
+                        //         $query = $query . ", line_no = NULL";
+                        //     }
+                        //     if (!empty($shift_group)) {
+                        //         $query = $query . ", shift_group = ?";
+                        //         $params[] = $shift_group;
+                        //     } else {
+                        //         $query = $query . ", shift_group = 'ADS'";
+                        //     }
 
-                            // $stmt = $conn->prepare($query);
+                        //     $query = $query . " WHERE emp_no = ?";
+                        //     $params[] = $emp_no;
 
-                            // if ($stmt->execute($params)) {
-                            //     $query = "UPDATE m_accounts SET";
-                            //     $params = [];
+                        //     $stmt = $conn->prepare($query);
 
-                            //     if (!empty($dept)) {
-                            //         $query = $query . " dept = ?";
-                            //         $params[] = $dept;
-                            //     } else {
-                            //         $query = $query . " dept = ''";
-                            //     }
-                            //     if (!empty($section)) {
-                            //         $query = $query . ", section = ?";
-                            //         $params[] = $section;
-                            //     } else {
-                            //         $query = $query . ", section = NULL";
-                            //     }
-                            //     if (!empty($line_no)) {
-                            //         $query = $query . ", line_no = ?";
-                            //         $params[] = $line_no;
-                            //     } else {
-                            //         $query = $query . ", line_no = NULL";
-                            //     }
-                            //     if (!empty($shift_group)) {
-                            //         $query = $query . ", shift_group = ?";
-                            //         $params[] = $shift_group;
-                            //     } else {
-                            //         $query = $query . ", shift_group = 'ADS'";
-                            //     }
+                        //     if ($stmt->execute($params)) {
+                        //         $query = "UPDATE m_accounts SET";
+                        //         $params = [];
 
-                            //     $query = $query . " WHERE emp_no = ?";
-                            //     $params[] = $emp_no;
+                        //         if (!empty($dept)) {
+                        //             $query = $query . " dept = ?";
+                        //             $params[] = $dept;
+                        //         } else {
+                        //             $query = $query . " dept = ''";
+                        //         }
+                        //         if (!empty($section)) {
+                        //             $query = $query . ", section = ?";
+                        //             $params[] = $section;
+                        //         } else {
+                        //             $query = $query . ", section = NULL";
+                        //         }
+                        //         if (!empty($line_no)) {
+                        //             $query = $query . ", line_no = ?";
+                        //             $params[] = $line_no;
+                        //         } else {
+                        //             $query = $query . ", line_no = NULL";
+                        //         }
+                        //         if (!empty($shift_group)) {
+                        //             $query = $query . ", shift_group = ?";
+                        //             $params[] = $shift_group;
+                        //         } else {
+                        //             $query = $query . ", shift_group = 'ADS'";
+                        //         }
 
-                            //     $stmt = $conn->prepare($query);
+                        //         $query = $query . " WHERE emp_no = ?";
+                        //         $params[] = $emp_no;
 
-                            //     $stmt->execute($params);
-                            // }
-                        }
+                        //         $stmt = $conn->prepare($query);
+
+                        //         $stmt->execute($params);
+                        //     }
+                        // }
                     } else {
                         $sql = "INSERT INTO m_employees
                                 (emp_no, full_name, dept, section, sub_section, line_no, process, shift_group, 

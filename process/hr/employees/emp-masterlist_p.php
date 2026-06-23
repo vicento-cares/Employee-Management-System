@@ -1579,8 +1579,12 @@ if ($method == 'update_employee') {
 			$params[] = $section;
 		}
 		if (!empty($line_no)) {
-			$query = $query . ", line_no = ?";
-			$params[] = $line_no;
+			if ($line_no == 'Undefined') {
+				$query = $query . ", line_no = NULL";
+			} else {
+				$query = $query . ", line_no = ?";
+				$params[] = $line_no;
+			}
 		} else {
 			$query = $query . ", line_no = NULL";
 		}
@@ -1602,8 +1606,12 @@ if ($method == 'update_employee') {
 				$params[] = $section;
 			}
 			if (!empty($line_no)) {
-				$query = $query . ", line_no = ?";
-				$params[] = $line_no;
+				if ($line_no == 'Undefined') {
+					$query = $query . ", line_no = NULL";
+				} else {
+					$query = $query . ", line_no = ?";
+					$params[] = $line_no;
+				}
 			}
 
 			$query = $query . " WHERE emp_no = ?";
