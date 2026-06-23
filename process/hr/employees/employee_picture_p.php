@@ -31,7 +31,7 @@ if ($method == 'reload_employee_picture') {
 
 		$employee_picture_url = "/uploads/emp_mgt/employee_picture/";
 		// $target_dir = "D:\\uploads\\emp_mgt\\employee_picture\\"; // Your target directory
-		$target_dir = "/mnt/synology/uploads/employee_picture/"; // Your target directory
+		$target_dir = "/mnt/synology/uploads/emp_mgt/employee_picture/"; // Your target directory
 
 		$results = findFile($employee_picture_filename, $target_dir);
 
