@@ -9,6 +9,21 @@ $method = $_POST['method'];
 
 // Employee Masterlist
 
+function get_positions($conn)
+{
+    $data = array();
+
+    $sql = "SELECT position FROM m_positions WHERE [rank] > 2 ORDER BY position ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        array_push($data, $row['position']);
+    }
+
+    return $data;
+}
+
 function count_employee_list($search_arr, $conn) {
 	$query = "SELECT COUNT(id) AS total FROM m_employees WHERE";
 	$params = [];
@@ -1504,6 +1519,8 @@ if ($method == 'update_employee') {
 	$resigned = intval($_POST['resigned']);
 	$resigned_date = trim($_POST['resigned_date']);
 
+	$position_arr = get_positions($conn);
+
 	$query = "UPDATE m_employees SET emp_no = ?, full_name = ?";
 
 	$params1 = [
@@ -1581,6 +1598,10 @@ if ($method == 'update_employee') {
 		if (!empty($line_no)) {
 			if ($line_no == 'Undefined') {
 				$query = $query . ", line_no = NULL";
+			} else if (in_array($position, $position_arr)) {
+                $query = $query . ", line_no = NULL";
+			} else if (strtolower($process) == 'clerk' || strtolower($process) == 'encoder' || strtolower($line_no) == 'clerk') {
+                $query = $query . ", line_no = NULL";
 			} else {
 				$query = $query . ", line_no = ?";
 				$params[] = $line_no;
@@ -1607,6 +1628,14 @@ if ($method == 'update_employee') {
 			}
 			if (!empty($line_no)) {
 				if ($line_no == 'Undefined') {
+					$query = $query . ", line_no = NULL";
+				} else {
+					$query = $query . ", line_no = ?";
+					$params[] = $line_no;
+				}
+				if ($line_no == 'Undefined') {
+					$query = $query . ", line_no = NULL";
+				} else if (in_array($position, $position_arr)) {
 					$query = $query . ", line_no = NULL";
 				} else {
 					$query = $query . ", line_no = ?";
@@ -1755,7 +1784,13 @@ if ($method == 'update_employee_advanced') {
 			$query = $query . ", section = ?";
 			$params[] = $section;
 		}
-		if (!empty($line_no)) {
+		if ($line_no == 'Undefined') {
+			$query = $query . ", line_no = NULL";
+		} else if (in_array($position, $position_arr)) {
+			$query = $query . ", line_no = NULL";
+		} else if (strtolower($process) == 'clerk' || strtolower($process) == 'encoder' || strtolower($line_no) == 'clerk') {
+			$query = $query . ", line_no = NULL";
+		} else if (!empty($line_no)) {
 			$query = $query . ", line_no = ?";
 			$params[] = $line_no;
 		} else {
@@ -1782,7 +1817,11 @@ if ($method == 'update_employee_advanced') {
 				$query = $query . ", section = ?";
 				$params[] = $section;
 			}
-			if (!empty($line_no)) {
+			if ($line_no == 'Undefined') {
+				$query = $query . ", line_no = NULL";
+			} else if (in_array($position, $position_arr)) {
+				$query = $query . ", line_no = NULL";
+			} else if (!empty($line_no)) {
 				$query = $query . ", line_no = ?";
 				$params[] = $line_no;
 			}
