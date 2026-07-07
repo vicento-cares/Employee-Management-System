@@ -1688,6 +1688,8 @@ if ($method == 'update_employee_advanced') {
 	// $resigned = intval($_POST['resigned']);
 	// $resigned_date = trim($_POST['resigned_date']);
 
+	$position_arr = get_positions($conn);
+
 	// Shift Update
 	$shift = '';
 	if (isset($_POST['shift'])) {
