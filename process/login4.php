@@ -8,9 +8,12 @@ include 'conn.php';
 if (isset($_POST['login_btn'])) {
     $emp_no = $_POST['emp_no'];
     $password = $_POST['password'];
+    $password = $_POST['password'];
 
     if (empty($emp_no)) {
         echo '<script>alert("Please Scan QR Code or Enter ID Number")</script>';
+    } else if (empty($password)) {
+        echo '<script>alert("Please Enter Password")</script>';
     } else if (empty($password)) {
         echo '<script>alert("Please Enter Password")</script>';
     } else {
@@ -25,8 +28,19 @@ if (isset($_POST['login_btn'])) {
                         role = 'hr' ";
         
         $stmt = $conn->prepare($check);
-        $params = array($emp_no, $password);
-        $stmt->execute($params);
+
+        if (empty($emp_no)) {
+            $stmt->bindValue(':emp_no', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':emp_no', trim($emp_no), PDO::PARAM_STR);
+        }
+        if (empty($password)) {
+            $stmt->bindValue(':password', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':password', trim($password), PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

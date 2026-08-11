@@ -31,7 +31,7 @@ if (isset($_SESSION['emp_no_hr'])) {
     <!-- /.login-logo -->
     <div class="card">
       <div class="card-body login-card-body">
-        <p class="login-box-msg"><b>Scan QR Code or Type your ID Number</b></p>
+        <p class="login-box-msg"><b>Sign in to start your session</b></p>
 
         <form action="" method="POST" id="login_form">
           <div class="input-group mb-3">
