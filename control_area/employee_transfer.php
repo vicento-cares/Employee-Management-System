@@ -217,7 +217,7 @@
                           <div class="col-sm-2">
                             <label>Employee Transfer Type:</label>
                             <select id="eth_emp_transfer_type_search" name='emp_transfer_type' class="form-control">
-                              <option value="">Select Provider</option>
+                              <option value="">Select Transfer Type</option>
                               <option value="department">Department Transfer</option>
                               <option value="section">Section Transfer</option>
                             </select>
