@@ -332,7 +332,8 @@ if ($method == 'get_ongoing_employee_transfer') {
         if (($row['emp_transfer_type'] == 'department' && $row['checked_by'] == '') || 
             ($row['emp_transfer_type'] == 'section' && $row['approved_by'] == '')) {
             $row_class = 'bg-secondary';
-            $row_edit = 'style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee_transfer" 
+            if (isset($_SESSION['emp_no_control_area'])) {
+                $row_edit = 'style="cursor:pointer;" class="modal-trigger" data-toggle="modal" data-target="#update_employee_transfer" 
                         data-id="'.$row['id'].'" 
                         data-emp_no="'.htmlspecialchars($row['emp_no']).'" 
                         data-emp_transfer_type="'.htmlspecialchars($row['emp_transfer_type']).'" 
@@ -342,6 +343,7 @@ if ($method == 'get_ongoing_employee_transfer') {
                         data-date_effectivity="'.htmlspecialchars($row['date_effectivity']).'" 
                         data-reason="'.htmlspecialchars($row['reason']).'" 
                         onclick="get_employee_transfer_details(this)"';
+            }
         } else if ($row['date_effectivity_status'] == 'overdue') {
             $row_class = 'bg-danger';
         }

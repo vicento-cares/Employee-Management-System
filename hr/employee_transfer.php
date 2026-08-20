@@ -216,11 +216,11 @@
                             </select>
                           </div>
                           <div class="col-sm-2">
-                            <label>Department To:</label>
+                            <label>Department From:</label>
                             <select id="eth_dept_from_search" name='dept_from' class="form-control"></select>
                           </div>
                           <div class="col-sm-2">
-                            <label>Section To:</label>
+                            <label>Section From:</label>
                             <select id="eth_section_from_search" name='section_from' class="form-control"></select>
                           </div>
                           <div class="col-sm-2">
