@@ -1629,12 +1629,6 @@ if ($method == 'update_employee') {
 			if (!empty($line_no)) {
 				if ($line_no == 'Undefined') {
 					$query = $query . ", line_no = NULL";
-				} else {
-					$query = $query . ", line_no = ?";
-					$params[] = $line_no;
-				}
-				if ($line_no == 'Undefined') {
-					$query = $query . ", line_no = NULL";
 				} else if (in_array($position, $position_arr)) {
 					$query = $query . ", line_no = NULL";
 				} else {
