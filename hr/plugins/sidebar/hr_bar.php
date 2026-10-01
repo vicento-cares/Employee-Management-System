@@ -24,135 +24,135 @@
              with font-awesome or any other icon font library -->
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/home.php") { ?>
-          <a href="home.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="home.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-home"></i>
-            <p>
-              Home
-            </p>
-          </a>
+            <a href="home.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="home.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-home"></i>
+              <p>
+                Home
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/dashboard.php") { ?>
-          <a href="dashboard.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="dashboard.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-tachometer-alt"></i>
-            <p>
-              Dashboard
-            </p>
-          </a>
+            <a href="dashboard.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="dashboard.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/control_area_accounts.php") { ?>
-          <a href="control_area_accounts.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="control_area_accounts.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-user-cog"></i>
-            <p>
-              Control Area Account Management
-            </p>
-          </a>
+            <a href="control_area_accounts.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="control_area_accounts.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-user-cog"></i>
+              <p>
+                Control Area Account Management
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/accounts.php") { ?>
-          <a href="accounts.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="accounts.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-user-cog"></i>
-            <p>
-              Account Management
-            </p>
-          </a>
+            <a href="accounts.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="accounts.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-user-cog"></i>
+              <p>
+                Account Management
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/employees.php") { ?>
-          <a href="employees.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="employees.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-user"></i>
-            <p>
-              Employee Masterlist
-            </p>
-          </a>
+            <a href="employees.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="employees.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-user"></i>
+              <p>
+                Employee Masterlist
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/employee_transfer.php") { ?>
-          <a href="employee_transfer.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="employee_transfer.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-users"></i>
-            <p>
-              Employee Transfer
-            </p>
-          </a>
+            <a href="employee_transfer.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="employee_transfer.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Employee Transfer
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/attendances.php") { ?>
-          <a href="attendances.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="attendances.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>
-              Attendances
-            </p>
-          </a>
+            <a href="attendances.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="attendances.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-tasks"></i>
+              <p>
+                Attendances
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/non_compliance.php") { ?>
-          <a href="non_compliance.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="non_compliance.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>
-              Non-Compliance
-            </p>
-          </a>
+            <a href="non_compliance.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="non_compliance.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-tasks"></i>
+              <p>
+                Non-Compliance
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/individual_attendances.php") { ?>
-          <a href="individual_attendances.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="individual_attendances.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-tasks"></i>
-            <p>
-              Individual Attendances
-            </p>
-          </a>
+            <a href="individual_attendances.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="individual_attendances.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-tasks"></i>
+              <p>
+                Individual Attendances
+              </p>
+              </a>
         </li>
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/access_locations.php") { ?>
-          <a href="access_locations.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="access_locations.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-user-shield"></i>
-            <p>
-              Access Locations
-            </p>
-          </a>
+            <a href="access_locations.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="access_locations.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-user-shield"></i>
+              <p>
+                Access Locations
+              </p>
+              </a>
         </li>
         <li class="nav-item d-none">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/hr/emp_mgt_backup.php") { ?>
-          <a href="emp_mgt_backup.php" class="nav-link active">
-          <?php } else { ?>
-          <a href="emp_mgt_backup.php" class="nav-link">
-          <?php } ?>
-            <i class="nav-icon fas fa-database"></i>
-            <p>
-              EmpMgtSys Backup
-            </p>
-          </a>
+            <a href="emp_mgt_backup.php" class="nav-link active">
+            <?php } else { ?>
+              <a href="emp_mgt_backup.php" class="nav-link">
+              <?php } ?>
+              <i class="nav-icon fas fa-database"></i>
+              <p>
+                EmpMgtSys Backup
+              </p>
+              </a>
         </li>
 
         <!-- revisions: jay. quick export button of osh voting -->
@@ -164,6 +164,18 @@
             </p>
           </a>
         </li>
+
+        <li class="nav-item">
+          <a href="http://172.25.116.188:3000/qms_dashboard/pages/announcement_emp-portal/"
+            class="nav-link"
+            target="_blank">
+            <i class="fas fa-download"></i>
+            <p>
+              Employee Portal Announcement
+            </p>
+          </a>
+        </li>
+
 
         <?php include 'logout.php'; ?>
       </ul>
