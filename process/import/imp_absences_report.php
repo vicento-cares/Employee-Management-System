@@ -171,7 +171,7 @@ function check_csv($file, $conn)
 
     // SKIP SAMPLE ROW
     fgetcsv($csvFile);
-    
+
     // DATE SETUP
     require '../server_date_time.php';
     $server_date_only_2days_ago = date('Y-m-d', strtotime('-1 day', strtotime($server_date_only_yesterday)));
@@ -271,14 +271,28 @@ function check_csv($file, $conn)
         }
 
         // DATE RESTRICTION
-        if (
-            !($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) &&
-            !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)
-        ) {
-            $hasError = 1;
-            $row_valid_arr[5] = 1;
-            $restrictedDateArr[] = $check_csv_row;
+        $today = date('Y-m-d');
+        $two_days_ago = date('Y-m-d', strtotime('-2 days'));
+
+        // Non-HR Users will be restricted based on date placed for report
+        if (!isset($_SESSION['emp_no_hr'])) {
+            if ($day < $today) {
+                if ($day < $two_days_ago) {
+                    $hasError = 1;
+                    $row_valid_arr[5] = 1;
+                    $restrictedDateArr[] = $check_csv_row;
+                }
+            }
         }
+    
+        // if (
+        //     !($server_time < '06:00:00' && $day >= $server_date_only_2days_ago) &&
+        //     !($server_time >= '06:00:00' && $day >= $server_date_only_yesterday)
+        // ) {
+        //     $hasError = 1;
+        //     $row_valid_arr[5] = 1;
+        //     $restrictedDateArr[] = $check_csv_row;
+        // }
 
         // MATCH DATABASE DATA
         $matched = false;
@@ -332,7 +346,7 @@ function check_csv($file, $conn)
             $message .= "Absent Day parse error on row/s " . implode(", ", $parseErrDateArr) . ". ";
         }
         if ($row_valid_arr[5]) {
-            $message .= "Restricted date on row/s " . implode(", ", $restrictedDateArr) . ". ";
+            $message .= "Late Uploading (Day Column Data that was 2 days ago and beyond) so it was restricted on row/s " . implode(", ", $restrictedDateArr) . ". ";
         }
         if ($row_valid_arr[6]) {
             $message .= "Unmatched Absences Reasons Data on row/s " . implode(", ", $unmatchedAbsencesReasonsDataArr) . ". ";
