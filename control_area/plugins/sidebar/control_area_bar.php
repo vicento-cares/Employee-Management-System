@@ -60,7 +60,7 @@
             </p>
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/line_shifting.php") { ?>
           <a href="line_shifting.php" class="nav-link active">
           <?php } else { ?>
@@ -71,7 +71,7 @@
               Line Shifting Schedule
             </p>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <?php if ($_SERVER['REQUEST_URI'] == "/emp_mgt/control_area/employee_transfer.php") { ?>
           <a href="employee_transfer.php" class="nav-link active">

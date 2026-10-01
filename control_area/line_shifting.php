@@ -1,3 +1,7 @@
+<?php 
+header('location: certification.php');
+exit();
+?>
 <?php include 'plugins/navbar.php';?>
 <?php include 'plugins/sidebar/control_area_bar.php';?>
 
