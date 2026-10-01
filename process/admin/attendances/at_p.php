@@ -778,7 +778,7 @@ if ($method == 'get_attendance_list2') {
 
 	$sql = "SELECT 
 				emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.skill_level, emp.line_no, emp.shift_group, emp.resigned_date,
-				tio.time_in, tio.time_out, tio.day AS time_in_day, tio.shift AS time_in_shift, 
+				tio.date_updated AS time_in_1, tio.time_in AS time_in_2, tio.time_out, tio.day AS time_in_day, tio.shift AS time_in_shift, 
 				absences.id AS absent_id, absences.day AS absent_day, absences.shift_group AS absent_shift_group, absences.absent_type, absences.reason, 
 				pic.file_url 
 			FROM m_employees emp
@@ -834,7 +834,7 @@ if ($method == 'get_attendance_list2') {
 		do {
 			$c++;
 
-			if (!empty($row['time_in'])) {
+			if (!empty($row['time_in_1']) || !empty($row['time_in_2'])) {
 				$row_class = $row_class_arr[1];
 				echo '<tr class="'.$row_class.'">';
 			} else {
@@ -861,7 +861,7 @@ if ($method == 'get_attendance_list2') {
 				echo '<td style="vertical-align: middle;"><img class="attendances_employee_picture_img_tag" src="'.htmlspecialchars($protocol.$_SERVER['SERVER_ADDR'].":".$_SERVER['SERVER_PORT']).'/emp_mgt/dist/img/user.png" alt="'.htmlspecialchars($row['emp_no']).'" height="75" width="75"></td>';
 			}
 
-			if (!empty($row['time_in'])) {
+			if (!empty($row['time_in_1']) || !empty($row['time_in_2'])) {
 				echo '<td style="vertical-align: middle;">'.$row['time_in_day'].'</td>';
 				echo '<td style="vertical-align: middle;">'.$row['time_in_shift'].'</td>';
 				echo '<td style="vertical-align: middle;">'.$row['shift_group'].'</td>';
@@ -882,7 +882,8 @@ if ($method == 'get_attendance_list2') {
 			} else {
 				echo '<td style="vertical-align: middle;">'.$row['skill_level'].'</td>';
 			}
-			echo '<td style="vertical-align: middle;">'.$row['time_in'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['time_in_1'].'</td>';
+			echo '<td style="vertical-align: middle;">'.$row['time_in_2'].'</td>';
 			echo '<td style="vertical-align: middle;">'.$row['time_out'].'</td>';
 			echo '<td style="vertical-align: middle;">'.$row['absent_type'].'</td>';
 			$reason = $row['reason'];
@@ -895,7 +896,7 @@ if ($method == 'get_attendance_list2') {
 		} while ($row = $stmt->fetch(PDO::FETCH_ASSOC));
 	}else{
 		echo '<tr>';
-			echo '<td colspan="11" style="text-align:center; color:red;">No Result !!!</td>';
+			echo '<td colspan="13" style="text-align:center; color:red;">No Result !!!</td>';
 		echo '</tr>';
 	}
 }

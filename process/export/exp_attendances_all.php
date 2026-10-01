@@ -22,12 +22,12 @@ $f = fopen('php://memory', 'w');
 fputs($f, "\xEF\xBB\xBF");
  
 // Set column headers 
-$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Shift Group', 'Shift', 'Time In', 'Time Out', 'OT', 'IP', 'Status'); 
+$fields = array('#', 'Provider', 'ID No.', 'Name', 'Department', 'Section', 'Line No.', 'Process', 'Shift Group', 'Shift', 'Time In 1', 'Time In 2', 'Time Out', 'OT', 'IP', 'Status'); 
 fputcsv($f, $fields, $delimiter); 
 
 $sql = "SELECT 
 	emp.provider, emp.emp_no, emp.full_name, emp.dept, emp.section, emp.process, emp.line_no, emp.shift_group, emp.resigned_date, 
-	tio.shift, FORMAT(tio.time_in, 'HH:mm:ss') as time_in, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
+	tio.shift, FORMAT(tio.date_updated, 'HH:mm:ss') as time_in_1, FORMAT(tio.time_in, 'HH:mm:ss') as time_in_2, FORMAT(tio.time_out, 'HH:mm:ss') as time_out, tio.ip
 	FROM m_employees emp
 	LEFT JOIN t_time_in_out AS tio ON emp.emp_no = tio.emp_no AND tio.day = ? 
 	WHERE";
@@ -60,11 +60,11 @@ while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
     } else {
         $row_line_no = 'N/A';
     }
-    if (!empty($row['time_in'])) {
-        $row_status = 'Present';
-    } else {
-        $row_status = 'Absent';
-    }
+    if (!empty($row['time_in_1']) || !empty($row['time_in_2'])) {
+		$row_status = 'Present';
+	} else {
+		$row_status = 'Absent';
+	}
 
     // Count Number of OT Hours
     if (!empty($row['time_out'])) {
@@ -88,7 +88,7 @@ while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
         }
     }
 
-    $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in'], $row['time_out'], $ot, $row['ip'], $row_status); 
+    $lineData = array($c, $row['provider'], $row['emp_no'], $row['full_name'], $row['dept'], $row_section, $row_line_no, $row['process'], $row['shift_group'], $row['shift'], $row['time_in_1'], $row['time_in_2'], $row['time_out'], $ot, $row['ip'], $row_status); 
     fputcsv($f, $lineData, $delimiter);
 }
 

@@ -155,7 +155,8 @@
                                 <th>Line No.</th>
                                 <th>Process</th>
                                 <th>Skill Level</th>
-                                <th>Time In</th>
+                                <th>Time In 1</th>
+                                <th>Time In 2</th>
                                 <th>Time Out</th>
                                 <th>Type of Absent</th>
                                 <th>Reason</th>
@@ -163,7 +164,7 @@
                         </thead>
                         <tbody id="attendanceData" style="text-align: center;">
                             <tr>
-                                <td colspan="12" style="text-align:center;">
+                                <td colspan="13" style="text-align:center;">
                                     <div class="spinner-border text-dark" role="status">
                                         <span class="sr-only">Loading...</span>
                                     </div>
