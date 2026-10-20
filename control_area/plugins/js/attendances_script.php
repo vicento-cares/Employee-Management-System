@@ -534,13 +534,14 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
 
         if (selectedItem.length > 1) {
             const absentTypes = [...new Set(selectedItem.map(item => item.absent_type))]; // Get unique absent types
+            absent_type = selectedItem[0].absent_type; // Get the absent type
             absentTypes.forEach(absentType => {
                 const option = document.createElement('option');
                 option.value = absentType;
                 option.textContent = absentType;
                 absentTypeDropdown.append(option);
             });
-            document.getElementById(`abst_${row}`).innerText = '';
+            document.getElementById(`abst_${row}`).innerText = absent_type;
 
             data = {
                 method: 'update_reason',
@@ -548,6 +549,7 @@ function get_day($server_time, $server_date_only, $server_date_only_yesterday) {
                 emp_no: emp_no,
                 absent_day: absent_day,
                 absent_shift_group: absent_shift_group,
+                absent_type: absent_type,
                 reason: reason
             };
         } else if (selectedItem.length === 1) {
