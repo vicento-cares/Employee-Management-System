@@ -34,8 +34,8 @@ function get_sections($conn)
         array_push($data, $row['section']);
     }
 
-    //QA QC section
-    array_push($data, "QC");
+    //QA QCE section
+    array_push($data, "QCE");
 
     return $data;
 }

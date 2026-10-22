@@ -246,7 +246,7 @@ if ($method == 'fetch_line_dropdown') {
 	$params = [];
 
 	if (!empty($section)) {
-		if ($section != 'QC') {
+		if ($section != 'QCE') {
 			$sql = $sql . " WHERE section = ? OR line_no = 'Undefined'";
 			$params[] = $section;
 		}
@@ -1518,6 +1518,8 @@ if ($method == 'update_employee') {
 	$emp_approver = trim($_POST['emp_approver']);
 	$resigned = intval($_POST['resigned']);
 	$resigned_date = trim($_POST['resigned_date']);
+
+	$process = '';
 
 	$position_arr = get_positions($conn);
 
